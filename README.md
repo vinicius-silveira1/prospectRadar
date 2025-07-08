@@ -14,6 +14,7 @@ ProspectRadar é uma aplicação web moderna e interativa para acompanhar prospe
 Este projeto nasceu da **paixão pelo basquete** e do desejo de contribuir para a **comunidade brasileira de basquete**. Como fã dedicado que acompanha desde prospects do ensino médio americano até as estatísticas da NBA, percebi a necessidade de uma plataforma centralizada e moderna para tracking de prospects.
 
 #### **🇧🇷 Basquete no Brasil**
+
 - **Comunidade crescente** de fãs brasileiros engajados
 - **Interesse crescente** no processo de draft e recrutamento
 - **Necessidade** de conteúdo e ferramentas em português
@@ -174,7 +175,8 @@ npm run lint     # Análise de código
 
 O basquete brasileiro vive um momento especial. Temos cada vez mais fãs engajados, canais de conteúdo de qualidade, e uma comunidade apaixonada que merece ferramentas à altura da nossa paixão.
 
-### ** Juntos somos mais fortes**
+### **Juntos somos mais fortes**
+
 - **Compartilhe** este projeto com outros fãs
 - **Contribua** com ideias e feedback
 - **Use** para suas análises e discussões

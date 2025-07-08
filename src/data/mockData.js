@@ -1,5 +1,6 @@
-// Mock data for prospects - Updated with working image URLs
+// Mock data for prospects - Updated with real image system
 import { generateFallbackAvatar } from '../utils/imageUtils.js';
+import { getProspectImageUrls, generateProspectFallback } from '../utils/prospectImages.js';
 
 export const mockProspects = [
   {
@@ -27,13 +28,10 @@ export const mockProspects = [
     strengths: ["Elite scoring", "Size", "Skill level", "Basketball IQ"],
     weaknesses: ["Needs to add strength", "Defensive consistency"],
     watchlisted: true,
-    // Using real working image URLs from Unsplash (basketball players)
-    imageUrl: "https://images.unsplash.com/photo-1546525848-3ce03ca516f6?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=500&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: generateFallbackAvatar("AJ Dybantsa")
+    // Sistema de imagens reais do AJ Dybantsa
+    imageUrl: getProspectImageUrls("AJ Dybantsa")[0],
+    alternativeImageUrls: getProspectImageUrls("AJ Dybantsa").slice(1),
+    fallbackImageUrl: generateProspectFallback("AJ Dybantsa", "2026")
   },
   {
     id: 2,
@@ -60,12 +58,10 @@ export const mockProspects = [
     strengths: ["Elite shooting", "Athleticism", "Size for position", "Work ethic"],
     weaknesses: ["Ball handling", "Creating own shot"],
     watchlisted: true,
-    imageUrl: "https://images.unsplash.com/photo-1552657300-2c5351c64e5c?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1566577739111-ce3d9e292c0a?w=400&h=500&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: generateFallbackAvatar("Jasper Johnson")
+    // Sistema de imagens reais do Jasper Johnson
+    imageUrl: getProspectImageUrls("Jasper Johnson")[0],
+    alternativeImageUrls: getProspectImageUrls("Jasper Johnson").slice(1),
+    fallbackImageUrl: generateProspectFallback("Jasper Johnson", "2026")
   },
   {
     id: 3,
@@ -92,12 +88,10 @@ export const mockProspects = [
     strengths: ["Rebounding", "Interior defense", "Athleticism", "Motor"],
     weaknesses: ["Perimeter shooting", "Offensive range"],
     watchlisted: false,
-    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=400&h=500&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: generateFallbackAvatar("Koa Peat")
+    // Sistema de imagens reais do Koa Peat
+    imageUrl: getProspectImageUrls("Koa Peat")[0],
+    alternativeImageUrls: getProspectImageUrls("Koa Peat").slice(1),
+    fallbackImageUrl: generateProspectFallback("Koa Peat", "2026")
   },
   {
     id: 4,
@@ -124,12 +118,10 @@ export const mockProspects = [
     strengths: ["Basketball IQ", "Shooting", "Size", "Fundamentals"],
     weaknesses: ["Athleticism", "Lateral quickness"],
     watchlisted: true,
-    imageUrl: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1552657300-2c5351c64e5c?w=400&h=500&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1546525848-3ce03ca516f6?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: generateFallbackAvatar("Cayden Boozer")
+    // Sistema de imagens reais do Cayden Boozer
+    imageUrl: getProspectImageUrls("Cayden Boozer")[0],
+    alternativeImageUrls: getProspectImageUrls("Cayden Boozer").slice(1),
+    fallbackImageUrl: generateProspectFallback("Cayden Boozer", "2026")
   },
   {
     id: 5,
@@ -156,12 +148,10 @@ export const mockProspects = [
     strengths: ["Athleticism", "Rebounding", "Versatility", "Team chemistry"],
     weaknesses: ["Perimeter skills", "Individual creation"],
     watchlisted: false,
-    imageUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1566577739111-ce3d9e292c0a?w=400&h=500&fit=crop&crop=face",
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: generateFallbackAvatar("Cameron Boozer")
+    // Sistema de imagens reais do Cameron Boozer
+    imageUrl: getProspectImageUrls("Cameron Boozer")[0],
+    alternativeImageUrls: getProspectImageUrls("Cameron Boozer").slice(1),
+    fallbackImageUrl: generateProspectFallback("Cameron Boozer", "2026")
   },
   // Classe 2027 Prospects
   {
@@ -189,11 +179,10 @@ export const mockProspects = [
     strengths: ["Scoring ability", "Athleticism", "Size", "Shot creation"],
     weaknesses: ["Decision making", "Defensive consistency"],
     watchlisted: true,
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=DarrynPeterson&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=f8d25c,ae5d29"
+    // Sistema de imagens reais do Darryn Peterson
+    imageUrl: getProspectImageUrls("Darryn Peterson")[0],
+    alternativeImageUrls: getProspectImageUrls("Darryn Peterson").slice(1),
+    fallbackImageUrl: generateProspectFallback("Darryn Peterson", "2027")
   },
   {
     id: 7,

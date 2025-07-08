@@ -116,12 +116,7 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
             onError={handleImageError}
             onLoad={handleImageLoad}
           />
-          {/* Source indicator */}
-          {!allImagesFailed && !imageLoading && (
-            <div className="absolute bottom-0 right-0 bg-green-500 text-white text-xs px-1 py-0.5 rounded-tl">
-              Real
-            </div>
-          )}
+          {/* Quality indicator - removed "Real" since we're using high-quality stock photos */}
         </div>
       </div>
 
