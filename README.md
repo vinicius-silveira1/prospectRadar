@@ -1,14 +1,15 @@
-# 🏀 ProspectRadar
+# 🏀 prospectRadar
 
-> **Track the next generation of NBA stars. From high school to the draft.**
+> **Acompanhe a próxima geração de estrelas da NBA. Do high school até o draft.**
 
-⚠️ **PROJETO EM DESENVOLVIMENTO** - Esta aplicação está atualmente em fase de desenvolvimento ativo. Funciona**🔄 Este é um trabalho em progresso - Contribuições e feedback são bem-vindos!** incompletas ou sujeitas a mudanças.
+
+⚠️ **PROJETO EM DESENVOLVIMENTO** - Esta aplicação está atualmente em fase de desenvolvimento ativo. Este é um trabalho em progresso - Contribuições e feedback são bem-vindos!** incompletas ou sujeitas a mudanças.
 
 ProspectRadar é uma aplicação web moderna e interativa para acompanhar prospects de basquete, desde o ensino médio até o draft da NBA. Desenvolvido com React, Vite e Tailwind CSS para oferecer uma experiência fluida e responsiva.
 
 ## 🏀 **Sobre o Projeto & Comunidade**
 
-### **👨‍💻 Por Trás do ProspectRadar**
+### **👨‍💻 Por Trás do prospectRadar**
 
 Este projeto nasceu da **paixão pelo basquete** e do desejo de contribuir para a **comunidade brasileira de basquete**. Como fã dedicado que acompanha desde prospects do ensino médio americano até as estatísticas da NBA, percebi a necessidade de uma plataforma centralizada e moderna para tracking de prospects.
 
@@ -164,25 +165,16 @@ npm run lint     # Análise de código
 
 ### **🇧🇷 Criado por um Fã Brasileiro**
 - **Desenvolvedor Principal** - Vinícius | Desenvolvedor Full-Stack & Fã de Basquete
-- **Especialidade** - React, Node.js, Design de Produtos
+- **Especialidade** - React, Node.js
 - **Paixão** - NBA, Draft, Prospects, Basquete Universitário Americano
 - **Missão** - Elevar o nível de ferramentas disponíveis para a comunidade brasileira de basquete
 
-### **🏀 Contribuições da Comunidade**
-Buscamos colaboradores que compartilhem da paixão pelo basquete:
-- **Analistas de Basquete** - Para curadoria de dados e insights
-- **Desenvolvedores** - Para expandir funcionalidades
-- **Designers** - Para melhorar UX/UI
-- **Fãs Engajados** - Para feedback e sugestões
-
----
 
 ## 🇧🇷 **Para a Comunidade Brasileira de Basquete**
 
-### **🏀 Nosso Momento**
 O basquete brasileiro vive um momento especial. Temos cada vez mais fãs engajados, canais de conteúdo de qualidade, e uma comunidade apaixonada que merece ferramentas à altura da nossa paixão.
 
-### **💪 Juntos Somos Mais Fortes**
+### ** Juntos somos mais fortes**
 - **Compartilhe** este projeto com outros fãs
 - **Contribua** com ideias e feedback
 - **Use** para suas análises e discussões
@@ -206,21 +198,3 @@ Este é apenas o começo. Com o apoio da comunidade, podemos criar a melhor plat
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **🔄 Este é um trabalho em progresso - Contribuições e feedback são bem-vindos!**
-
----
-
-## 🇧🇷 **Para a Comunidade Brasileira de Basquete**
-
-### **🏀 Nosso Momento**
-O basquete brasileiro vive um momento especial. Temos cada vez mais fãs engajados, canais de conteúdo de qualidade, e uma comunidade apaixonada que merece ferramentas à altura da nossa paixão.
-
-### **� Juntos Somos Mais Fortes**
-- **Compartilhe** este projeto com outros fãs
-- **Contribua** com ideias e feedback
-- **Use** para suas análises e discussões
-- **Inspire** outros desenvolvedores brasileiros
-
-### **🚀 O Futuro é Nosso**
-Este é apenas o começo. Com o apoio da comunidade, podemos criar a melhor plataforma de prospects de basquete em português, feita por brasileiros, para brasileiros.
-
-**#BasqueteBrasil #NBABrasil #MadeInBrazil**
