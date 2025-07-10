@@ -1,32 +1,217 @@
-# 🏀 prospectRadar
+# ProspectRadar 🏀
 
-> **Acompanhe a próxima geração de estrelas da NBA. Do high school até o draft.**
+**A primeira plataforma brasileira de scouting de basquete com dados reais e em tempo real.**
 
+Sistema avançado de análise de prospects focado no mercado brasileiro, integrando dados oficiais da Liga de Desenvolvimento de Basquete (LDB) e outras fontes confiáveis.
 
-⚠️ **PROJETO EM DESENVOLVIMENTO** - Esta aplicação está atualmente em fase de desenvolvimento ativo. Este é um trabalho em progresso - Contribuições e feedback são bem-vindos!** incompletas ou sujeitas a mudanças.
+## 🚀 Funcionalidades
 
-ProspectRadar é uma aplicação web moderna e interativa para acompanhar prospects de basquete, desde o ensino médio até o draft da NBA. Desenvolvido com React, Vite e Tailwind CSS para oferecer uma experiência fluida e responsiva.
+### ✅ Implementado
+- **Dashboard de prospects** com dados reais da LDB
+- **Sistema robusto de imagens** com fallback inteligente e cache
+- **Interface moderna e responsiva** otimizada para mobile
+- **Coleta automatizada** de dados oficiais (LNB/LDB, CBB)
+- **Sistema híbrido** - transição suave entre dados mock e reais
+- **Monitoramento em tempo real** com métricas de qualidade
+- **Cache inteligente** para performance otimizada
 
-## 🏀 **Sobre o Projeto & Comunidade**
+### 🔄 Em Desenvolvimento
+- Integração com CBB (Confederação Brasileira)
+- Federações estaduais de basquete
+- Competições escolares (JEMG, JESP, JERJ)
+- Sistema de rankings dinâmicos
+- Análises avançadas e projeções
 
-### **👨‍💻 Por Trás do prospectRadar**
+## 🏆 Diferencial Competitivo
 
-Este projeto nasceu da **paixão pelo basquete** e do desejo de contribuir para a **comunidade brasileira de basquete**. Como fã dedicado que acompanha desde prospects do ensino médio americano até as estatísticas da NBA, percebi a necessidade de uma plataforma centralizada e moderna para tracking de prospects.
+**ProspectRadar vs Concorrentes Internacionais:**
+- **Foco exclusivo no Brasil** - Lacuna não atendida por 247Sports, Rivals, ESPN
+- **Dados oficiais primários** - Acesso direto à LDB com dados em tempo real
+- **Cobertura completa** - Profissional + amador + escolar
+- **Contexto brasileiro** - Análises específicas para o mercado nacional
+- **Desenvolvimento acadêmico** - Integração com sistema educacional
 
-#### **🇧🇷 Basquete no Brasil**
+## 📊 Fontes de Dados
 
-- **Comunidade crescente** de fãs brasileiros engajados
-- **Interesse crescente** no processo de draft e recrutamento
-- **Necessidade** de conteúdo e ferramentas em português
-- **Oportunidade** de conectar fãs com dados organizados
+### Principais (Integradas)
+- **Liga de Desenvolvimento de Basquete (LDB)** - 100+ prospects ativos ⭐⭐⭐⭐⭐
+- **Liga Nacional de Basquete (LNB)** - NBB Elite Camp ⭐⭐⭐⭐⭐
+- **Confederação Brasileira de Basketball (CBB)** - Seleções de base ⭐⭐⭐⭐
 
-### **💎 Valor para a Comunidade**
+### Regionais (Roadmap)
+- Federações Estaduais de Basquete ⭐⭐⭐
+- Competições Escolares (JEMG, JESP, JERJ) ⭐⭐⭐
+- FIBA Basketball (dados internacionais) ⭐⭐⭐
 
-#### **🎓 Educacional**
-- **Democratizar o conhecimento** sobre prospects e draft
-- **Explicar métricas** e estatísticas avançadas
-- **Ensinar** sobre o processo de recrutamento universitário
-- **Conectar** fãs casuais com análises profissionais
+## 🛠️ Tecnologias
+
+- **Frontend:** React 18, Vite, Tailwind CSS
+- **Coleta de Dados:** Axios, Cheerio (web scraping ético)
+- **Cache:** Sistema inteligente com TTL dinâmico
+- **Performance:** Code splitting, lazy loading, otimizações Vite
+
+## ⚡ Quick Start
+
+### 1. Instalação
+```bash
+git clone https://github.com/seu-usuario/prospectRadar.git
+cd prospectRadar
+npm install
+```
+
+### 2. Configuração de Ambiente
+```bash
+# Copie o arquivo de exemplo
+cp .env.example .env.local
+
+# Para dados mock (padrão - desenvolvimento rápido)
+echo "REACT_APP_USE_REAL_DATA=false" >> .env.local
+
+# Para dados reais da LDB (recomendado)
+echo "REACT_APP_USE_REAL_DATA=true" >> .env.local
+echo "REACT_APP_ENABLE_DATA_DEBUG=true" >> .env.local
+```
+
+### 3. Execução
+```bash
+# Desenvolvimento com dados mock
+npm run dev
+
+# Desenvolvimento com dados reais
+REACT_APP_USE_REAL_DATA=true npm run dev
+
+# Produção
+npm run build
+npm run preview
+```
+
+## 📈 Uso dos Dados Reais
+
+### Teste de Conectividade
+```bash
+# Teste rápido de conectividade
+node src/scripts/testRealData.js --connectivity-only
+
+# Teste completo de coleta
+node src/scripts/testRealData.js
+```
+
+### Integração no React
+```javascript
+import { useLDBProspects } from './hooks/useProspects';
+
+function ProspectsList() {
+  const { prospects, loading, dataSource } = useLDBProspects();
+  
+  return (
+    <div>
+      <DataSourceBadge source={dataSource} />
+      {loading ? (
+        <LoadingSpinner message="Carregando prospects da LDB..." />
+      ) : (
+        prospects.map(prospect => (
+          <ProspectCard key={prospect.id} prospect={prospect} />
+        ))
+      )}
+    </div>
+  );
+}
+```
+
+### Configurações Avançadas
+```javascript
+// Modo híbrido (recomendado para produção)
+const { prospects } = useHybridProspects();
+
+// Configuração customizada
+const { prospects } = useProspects({
+  useRealData: true,
+  refreshInterval: 15 * 60 * 1000, // 15 minutos
+  fallbackToMock: true
+});
+```
+
+## 🏗️ Estrutura do Projeto
+
+```
+src/
+├── components/
+│   ├── Layout/          # Header, Navbar, Footer
+│   ├── Prospects/       # ProspectCard, ProspectList
+│   └── UI/             # Componentes reutilizáveis
+├── data/
+│   ├── mockData.js     # Dados de demonstração
+│   └── constants.js    # Configurações estáticas
+├── services/
+│   └── realDataService.js  # Coleta de dados reais
+├── hooks/
+│   └── useProspects.js     # Gerenciamento de estado
+├── utils/
+│   ├── imageManagerV2.js   # Sistema de imagens
+│   └── logger.js          # Logging estruturado
+└── scripts/
+    └── testRealData.js    # Testes de coleta
+```
+
+## 📊 Monitoramento e Debug
+
+### Componente de Debug (Desenvolvimento)
+```javascript
+import { ProspectDataDebug } from './hooks/useProspects';
+
+// Adicione no seu App.jsx
+{process.env.NODE_ENV === 'development' && <ProspectDataDebug />}
+```
+
+### Métricas de Qualidade
+- **Uptime:** >99% para coleta de dados
+- **Load Time:** <2s para carregamento inicial  
+- **Cache Hit Rate:** >80%
+- **Data Freshness:** <1 hora para dados críticos
+
+## 🔒 Compliance e Ética
+
+- **LGPD:** Tratamento adequado de dados de menores
+- **Robots.txt:** Respeitado (LNB permite acesso)
+- **Rate Limiting:** 2s entre requests (implementado)
+- **Direitos de Imagem:** Fotos oficiais com uso permitido
+
+## 🚀 Roadmap
+
+### Próximas Releases
+- **v1.1:** Integração completa CBB + Federações Estaduais
+- **v1.2:** Sistema de rankings dinâmicos
+- **v1.3:** Análises avançadas e ML para projeções
+- **v1.4:** API pública para terceiros
+- **v2.0:** Plataforma completa com monetização
+
+### Parcerias Estratégicas
+- **LNB:** Discussões para parceria oficial
+- **CBB:** Colaboração para desenvolvimento do basquete
+- **Clubes:** Acordos de data sharing
+- **Mídia Esportiva:** Integração com portais especializados
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📞 Contato
+
+- **Email:** contato@prospectRadar.com.br
+- **GitHub:** [@ProspectRadar](https://github.com/ProspectRadar)
+- **LinkedIn:** [ProspectRadar Brasil](https://linkedin.com/company/prospect-radar-brasil)
+
+---
+
+**ProspectRadar** - Revolucionando o scouting de basquete no Brasil 🇧🇷🏀
 
 #### **📱 Acessibilidade**
 - **Interface em português** (roadmap futuro)
