@@ -209,11 +209,10 @@ export const mockProspects = [
     strengths: ["Scoring instincts", "Size", "Basketball IQ", "Clutch gene"],
     weaknesses: ["Consistency", "Defensive effort"],
     watchlisted: true,
-    imageUrl: "https://images.unsplash.com/photo-1577036853819-0238e7ba2d93?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1594736797933-d0c16ff64de2?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=KiyanAnthony&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=d08b5b,ae5d29"
+    // Sistema de imagens reais do Kiyan Anthony
+    imageUrl: getProspectImageUrls("Kiyan Anthony")[0],
+    alternativeImageUrls: getProspectImageUrls("Kiyan Anthony").slice(1),
+    fallbackImageUrl: generateProspectFallback("Kiyan Anthony", "2027")
   },
   {
     id: 8,
@@ -240,11 +239,10 @@ export const mockProspects = [
     strengths: ["Playmaking", "Leadership", "Basketball IQ", "Shooting"],
     weaknesses: ["Size", "Athletic ceiling"],
     watchlisted: false,
-    imageUrl: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=400&h=500&fit=crop&crop=face",
-    alternativeImageUrls: [
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=500&fit=crop&crop=face"
-    ],
-    fallbackImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=LabaronPhilon&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=ae5d29,f8d25c"
+    // Sistema de imagens reais do Labaron Philon
+    imageUrl: getProspectImageUrls("Labaron Philon")[0],
+    alternativeImageUrls: getProspectImageUrls("Labaron Philon").slice(1),
+    fallbackImageUrl: generateProspectFallback("Labaron Philon", "2027")
   },
   // Classe 2028 Prospects
   {
@@ -272,8 +270,10 @@ export const mockProspects = [
     strengths: ["Basketball IQ", "Fundamentals", "Size", "Versatility"],
     weaknesses: ["Athleticism", "Strength"],
     watchlisted: true,
-    imageUrl: "https://images.unsplash.com/photo-1558618491-fcd25c85cd64?w=400&h=500&fit=crop&crop=face",
-    fallbackImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=CameronBoozerJr&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=d08b5b,ae5d29"
+    // Sistema de imagens reais do Cameron Boozer Jr.
+    imageUrl: getProspectImageUrls("Cameron Boozer Jr.")[0],
+    alternativeImageUrls: getProspectImageUrls("Cameron Boozer Jr.").slice(1),
+    fallbackImageUrl: generateProspectFallback("Cameron Boozer Jr.", "2028")
   },
   {
     id: 10,
@@ -300,8 +300,10 @@ export const mockProspects = [
     strengths: ["Shooting", "Scoring", "Size", "Work ethic"],
     weaknesses: ["Athleticism", "Defense"],
     watchlisted: false,
-    imageUrl: "https://images.unsplash.com/photo-1594736797933-d0c16ff64de2?w=400&h=500&fit=crop&crop=face",
-    fallbackImageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=BraylonMullins&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=f8d25c,fdbcb4"
+    // Sistema de imagens reais do Braylon Mullins
+    imageUrl: getProspectImageUrls("Braylon Mullins")[0],
+    alternativeImageUrls: getProspectImageUrls("Braylon Mullins").slice(1),
+    fallbackImageUrl: generateProspectFallback("Braylon Mullins", "2028")
   }
 ];
 

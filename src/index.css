@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Variáveis CSS baseadas no logo ProspectRadar */
+:root {
+  --brand-dark: #0f172a;
+  --brand-navy: #1e293b;
+  --brand-orange: #ff6b35;
+  --brand-cyan: #06b6d4;
+  --brand-light: #f8fafc;
+}
+
+/* Estilos globais */
+@layer base {
+  body {
+    @apply bg-brand-light text-slate-800 font-display antialiased;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Componentes customizados */
+@layer components {
+  /* Card do prospect com tema do logo */
+  .prospect-card {
+    @apply bg-white rounded-xl shadow-brand hover:shadow-brand-lg transition-all duration-300 p-6 border border-slate-200/50;
+  }
+  
+  .prospect-card:hover {
+    @apply transform -translate-y-1;
+  }
+  
+  /* Botão principal com gradiente */
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-orange to-brand-cyan text-white font-semibold py-3 px-6 rounded-lg shadow-brand hover:shadow-brand-lg transition-all duration-300;
+  }
+  
+  .btn-primary:hover {
+    @apply transform -translate-y-0.5;
+  }
+  
+  /* Navbar com estilo moderno */
+  .nav-brand {
+    @apply bg-white/95 backdrop-blur-md border-b border-slate-200/50 shadow-brand;
+  }
+  
+  /* Cards com accent */
+  .card-accent {
+    @apply border-l-4 border-brand-orange;
+  }
+  
+  /* Texto com gradiente */
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-orange to-brand-cyan bg-clip-text text-transparent;
+  }
+  
+  /* Stats highlight */
+  .stat-highlight {
+    @apply text-brand-orange font-bold;
+  }
+}
