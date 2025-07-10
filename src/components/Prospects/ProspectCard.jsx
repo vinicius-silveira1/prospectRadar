@@ -1,83 +1,82 @@
 import { Star, TrendingUp, TrendingDown, Minus, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { imageManager } from '../../utils/imageManagerV2.js';
 
 const ProspectCard = ({ prospect, onToggleWatchlist }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [allImagesFailed, setAllImagesFailed] = useState(false);
+  const [imageState, setImageState] = useState({
+    currentUrl: null,
+    isLoading: true,
+    hasError: false
+  });
 
-  // Create array of all possible image URLs
-  const getAllImageUrls = () => {
-    const urls = [];
-    if (prospect.imageUrl) urls.push(prospect.imageUrl);
-    if (prospect.alternativeImageUrls) urls.push(...prospect.alternativeImageUrls);
-    return urls;
-  };
+  // Load image when component mounts
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        setImageState(prev => ({ ...prev, isLoading: true, hasError: false }));
+        const imageUrl = await imageManager.getProspectImage(prospect.name, prospect.id);
+        setImageState(prev => ({ ...prev, currentUrl: imageUrl, isLoading: false }));
+      } catch (error) {
+        console.error('Error loading image:', error);
+        setImageState(prev => ({ ...prev, hasError: true, isLoading: false }));
+      }
+    };
 
-  const imageUrls = getAllImageUrls();
-  const fallbackImageUrl = prospect.fallbackImageUrl || 
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(prospect.name)}&backgroundColor=1d428a,3b82f6&clothesColor=262e33,65c5db&skinColor=ae5d29,f8d25c`;
+    loadImage();
+  }, [prospect.name, prospect.id]);
 
   const getTrendingIcon = (trend) => {
     switch (trend) {
       case 'up':
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
+        return <TrendingUp className="h-4 w-4 text-emerald-500" />;
       case 'down':
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
+        return <TrendingDown className="h-4 w-4 text-rose-500" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-400" />;
+        return <Minus className="h-4 w-4 text-slate-400" />;
     }
   };
 
   const getTrendingColor = (trend) => {
     switch (trend) {
       case 'up':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-emerald-600 bg-emerald-50 border-emerald-200';
       case 'down':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-rose-600 bg-rose-50 border-rose-200';
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return 'text-slate-600 bg-slate-50 border-slate-200';
     }
   };
 
-  const handleImageError = () => {
-    // Try next image URL if available
-    if (currentImageIndex < imageUrls.length - 1) {
-      setCurrentImageIndex(prev => prev + 1);
-      setImageLoading(true);
-    } else {
-      // All images failed, use fallback
-      setAllImagesFailed(true);
-      setImageLoading(false);
-    }
+  const handleImageError = async () => {
+    // Use image manager to handle error and get next URL
+    const nextImageData = await imageManager.handleImageError(imageState.currentIndex);
+    
+    setImageState(prev => ({
+      ...prev,
+      currentIndex: nextImageData.nextIndex,
+      hasError: nextImageData.allFailed,
+      isLoading: !nextImageData.allFailed
+    }));
   };
 
   const handleImageLoad = () => {
-    setImageLoading(false);
+    setImageState(prev => ({
+      ...prev,
+      isLoading: false,
+      hasError: false
+    }));
   };
 
-  // Reset image state when prospect changes
-  useEffect(() => {
-    setCurrentImageIndex(0);
-    setImageLoading(true);
-    setAllImagesFailed(false);
-  }, [prospect.id]);
-
-  // Get current image URL to display
-  const getCurrentImageUrl = () => {
-    if (allImagesFailed || imageUrls.length === 0) {
-      return fallbackImageUrl;
-    }
-    return imageUrls[currentImageIndex];
-  };
+  // Get display URL from state
+  const displayImageUrl = imageState.currentUrl || imageManager.generateAvatar(prospect.name);
 
   return (
     <div className="prospect-card">
       {/* Header with ranking and watchlist */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-nba-blue">#{prospect.mockDraftPosition}</span>
+          <span className="text-2xl font-bold text-gradient">#{prospect.mockDraftPosition}</span>
           <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${getTrendingColor(prospect.trending)}`}>
             {getTrendingIcon(prospect.trending)}
             <span className="text-xs font-medium">
@@ -91,32 +90,37 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
           onClick={() => onToggleWatchlist(prospect.id)}
           className={`p-1 rounded-full transition-colors ${
             prospect.watchlisted 
-              ? 'text-yellow-500 hover:text-yellow-600' 
-              : 'text-gray-400 hover:text-yellow-500'
+              ? 'text-brand-orange hover:text-brand-orange/80' 
+              : 'text-slate-400 hover:text-brand-orange'
           }`}
         >
           <Star className={`h-5 w-5 ${prospect.watchlisted ? 'fill-current' : ''}`} />
         </button>
       </div>
 
-      {/* Prospect Image with Real Photo + Multiple Fallbacks */}
+      {/* Prospect Image with Robust Image System */}
       <div className="flex justify-center mb-4">
         <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-gray-200">
-          {imageLoading && (
+          {imageState.isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-nba-blue border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-cyan border-t-transparent"></div>
             </div>
           )}
           <img 
-            src={getCurrentImageUrl()} 
-            alt={allImagesFailed ? `${prospect.name} avatar` : prospect.name}
+            src={displayImageUrl} 
+            alt={imageState.hasError ? `${prospect.name} avatar` : prospect.name}
             className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageLoading ? 'opacity-0' : 'opacity-100'
+              imageState.isLoading ? 'opacity-0' : 'opacity-100'
             }`}
             onError={handleImageError}
             onLoad={handleImageLoad}
           />
-          {/* Quality indicator - removed "Real" since we're using high-quality stock photos */}
+          {/* Image quality indicator */}
+          {!imageState.hasError && !imageState.isLoading && (
+            <div className="absolute bottom-0 right-0 bg-emerald-500 text-white text-xs px-1 rounded-tl-md">
+              ✓
+            </div>
+          )}
         </div>
       </div>
 

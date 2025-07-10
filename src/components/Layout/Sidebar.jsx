@@ -13,13 +13,13 @@ const Sidebar = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Dashboard' },
-    { path: '/prospects', icon: Users, label: 'All Prospects' },
+    { path: '/', icon: Home, label: 'Início' },
+    { path: '/prospects', icon: Users, label: 'Todos os Prospects' },
     { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
-    { path: '/compare', icon: GitCompare, label: 'Compare' },
-    { path: '/watchlist', icon: Star, label: 'Watchlist' },
-    { path: '/trending', icon: TrendingUp, label: 'Trending' },
-    { path: '/draft-history', icon: Calendar, label: 'Draft History' },
+    { path: '/compare', icon: GitCompare, label: 'Comparar' },
+    { path: '/watchlist', icon: Star, label: 'Favoritos' },
+    { path: '/trending', icon: TrendingUp, label: 'Em Alta' },
+    { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
   ];
 
   return (
@@ -49,7 +49,7 @@ const Sidebar = () => {
       {/* Draft Class Filter */}
       <div className="mt-8 pt-6 border-t border-gray-200">
         <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-          Draft Classes
+          Classes do Draft
         </h3>
         <div className="space-y-1">
           {['2025', '2026', '2027'].map((year) => (
@@ -58,7 +58,7 @@ const Sidebar = () => {
               to={`/prospects?class=${year}`}
               className="block px-4 py-2 text-sm text-gray-600 hover:text-nba-blue hover:bg-gray-50 rounded-lg transition-colors"
             >
-              Class of {year}
+              Turma de {year}
             </Link>
           ))}
         </div>
