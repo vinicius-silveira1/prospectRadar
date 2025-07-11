@@ -15,7 +15,8 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
     const loadImage = async () => {
       try {
         setImageState(prev => ({ ...prev, isLoading: true, hasError: false }));
-        const imageUrl = await imageManager.getProspectImage(prospect.name, prospect.id);
+        // Passa o objeto completo do prospect para o sistema de imagens
+        const imageUrl = await imageManager.getProspectImage(prospect);
         setImageState(prev => ({ ...prev, currentUrl: imageUrl, isLoading: false }));
       } catch (error) {
         console.error('Error loading image:', error);
@@ -49,14 +50,14 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   };
 
   const handleImageError = async () => {
-    // Use image manager to handle error and get next URL
-    const nextImageData = await imageManager.handleImageError(imageState.currentIndex);
+    // Se falhar, usa o avatar como fallback
+    const fallbackUrl = imageManager.generateDetailedAvatar(prospect.name, prospect.position, prospect.height, prospect.weight);
     
     setImageState(prev => ({
       ...prev,
-      currentIndex: nextImageData.nextIndex,
-      hasError: nextImageData.allFailed,
-      isLoading: !nextImageData.allFailed
+      currentUrl: fallbackUrl,
+      hasError: true,
+      isLoading: false
     }));
   };
 
@@ -69,7 +70,7 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   };
 
   // Get display URL from state
-  const displayImageUrl = imageState.currentUrl || imageManager.generateAvatar(prospect.name);
+  const displayImageUrl = imageState.currentUrl || imageManager.generateDetailedAvatar(prospect.name, prospect.position, prospect.height, prospect.weight);
 
   return (
     <div className="prospect-card">

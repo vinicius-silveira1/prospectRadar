@@ -92,8 +92,9 @@ export const enrichProspectWithImages = (prospect) => {
 // Curated real image URLs for known prospects (manually verified)
 export const knownProspectImages = {
   'AJ Dybantsa': [
-    'https://dbukjj6eu5tsf.cloudfront.net/sidearm.sites/byusports.com/images/2024/10/14/AJ_Dybantsa.jpg',
-    'https://s3media.247sports.com/Uploads/Assets/442/548/12548442.jpg'
+    'https://s3media.247sports.com/Uploads/Assets/362/790/11790362.jpeg', // URL TESTADA E FUNCIONANDO
+    'https://byucougars.com/imgproxy/IAJa6l12dN3WKIt-Xzs3brRqZdi0RbTrMZLMmc4hj6Y/rs:fit:1980:0:0/g:ce/q:90/aHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL2J5dWNvdWdhcnMtcHJvZC8yMDI0LzEyLzEwL3BSRVM2N1ZxNWpQUjNmcW1xdzFCRE1DdFh0czZDMjZJTFNhQ0x0SWsuanBn.jpg', // BYU OFICIAL (backup - possível problema CORS)
+    'https://dbukjj6eu5tsf.cloudfront.net/sidearm.sites/byusports.com/images/2024/10/14/AJ_Dybantsa.jpg'
   ],
   'Jasper Johnson': [
     'https://s3media.247sports.com/Uploads/Assets/442/548/12548442.jpg',
@@ -104,10 +105,12 @@ export const knownProspectImages = {
     'https://s3media.247sports.com/Uploads/Assets/335/678/12678335.jpg'
   ],
   'Cayden Boozer': [
+    'https://cdn.vox-cdn.com/thumbor/nc6KvZNh8z74rI0nRTuHGbSVHxM=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/25503286/2113293607.jpg', // URL TESTADA E FUNCIONANDO
     'https://goduke.com/images/2024/10/24/Cayden_Boozer_Commit.jpg',
     'https://s3media.247sports.com/Uploads/Assets/234/567/12567234.jpg'
   ],
   'Cameron Boozer': [
+    'https://dukewire.usatoday.com/gcdn/authoring/images/smg/2024/11/21/SMGW/76485849007-120-9886.jpeg', // URL TESTADA E FUNCIONANDO
     'https://goduke.com/images/2024/10/24/Cameron_Boozer_Commit.jpg',
     'https://s3media.247sports.com/Uploads/Assets/80/548/12548080.jpg'
   ],

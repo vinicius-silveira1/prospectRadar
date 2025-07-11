@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useLDBProspects, ProspectDataDebug } from '../hooks/useProspectsSimple.jsx';
 import ProspectCard from '../components/Prospects/ProspectCard';
 import TrendingExplanation from '../components/Common/TrendingExplanation';
+import ImageSystemStatus from '../components/Common/ImageSystemStatus';
+import ImprovedImageDebug from '../components/Common/ImprovedImageDebug';
+import ImageForceReload from '../components/Common/ImageForceReload';
+import RealImageStatus from '../components/Common/RealImageStatus';
 import { TrendingUp, Users, Star, Trophy, AlertCircle, RefreshCw } from 'lucide-react';
 
 const Dashboard = () => {
@@ -112,6 +116,14 @@ const Dashboard = () => {
           );
         })}
       </div>
+
+      {/* Image System Status */}
+      <ImageSystemStatus />
+
+      {/* Image Force Reload - Only in development */}
+      {import.meta.env.MODE === 'development' && (
+        <ImageForceReload prospects={prospects} />
+      )}
 
       {/* Brazilian Prospects Highlight Section */}
       {brazilianProspects.length > 0 && (
@@ -260,7 +272,13 @@ const Dashboard = () => {
       </section>
       
       {/* Debug Component (only in development) */}
-      {import.meta.env.MODE === 'development' && <ProspectDataDebug />}
+      {import.meta.env.MODE === 'development' && (
+        <>
+          <ProspectDataDebug />
+          <RealImageStatus />
+          <ImprovedImageDebug prospects={prospects} />
+        </>
+      )}
     </div>
   );
 };
