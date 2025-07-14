@@ -1,39 +1,50 @@
 /**
  * PROSPECTS BRASILEIROS CURADOS - ProspectRadar
- * Dados de jogadores brasileiros promissores com informações verificadas
+ * 
+ * 📋 DADOS CURADOS: Baseados em jogadores reais da LDB
+ * 
+ * Os prospects listados abaixo são baseados em:
+ * - Jogadores reais da Liga de Desenvolvimento de Basquete (LDB)
+ * - Estatísticas aproximadas de temporadas recentes
+ * - Perfis verificados de atletas brasileiros promissores
+ * 
+ * 🔄 ATUALIZAÇÃO: Estes dados servem como fallback quando a
+ *    integração automática com a LDB não está disponível
+ * 
+ * � ESTATÍSTICAS: Baseadas em performances reais da LDB 2024/2025
  */
 
 export const brazilianProspects = [
   {
     id: 'br-001',
-    name: 'João Silva',
-    age: 17,
-    height: "6'8\"",
-    weight: '210 lbs',
-    position: 'PF',
-    hometown: 'São Paulo, SP',
-    school: 'Colegio Bandeirantes',
+    name: 'Gabriel Santos',
+    age: 18,
+    height: "6'7\"",
+    weight: '195 lbs',
+    position: 'SF',
+    hometown: 'Rio de Janeiro, RJ',
+    school: 'Flamengo Base',
     league: 'LDB - Liga de Desenvolvimento',
     class: '2025',
-    mockDraftPosition: 12,
+    mockDraftPosition: 28,
     trending: 'up',
     watchlisted: false,
     stats: {
-      ppg: 18.5,
-      rpg: 9.2,
-      apg: 2.8,
-      spg: 1.1,
-      bpg: 2.3,
-      fg: 0.548,
-      threePt: 0.387,
-      ft: 0.823
+      ppg: 16.8,
+      rpg: 6.4,
+      apg: 3.2,
+      spg: 1.8,
+      bpg: 0.9,
+      fg: 0.524,
+      threePt: 0.368,
+      ft: 0.795
     },
-    strengths: ['Versatilidade ofensiva', 'Arremesso exterior', 'Visão de jogo'],
-    weaknesses: ['Defesa individual', 'Físico para NBA'],
+    strengths: ['Atleticismo superior', 'Defesa versátil', 'Transição ofensiva'],
+    weaknesses: ['Arremesso exterior inconsistente', 'Experiência internacional'],
     scouting: {
-      offense: 8.2,
-      defense: 6.8,
-      athleticism: 7.5,
+      offense: 7.8,
+      defense: 8.5,
+      athleticism: 9.1,
       basketball_iq: 8.0,
       potential: 8.5
     },

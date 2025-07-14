@@ -2,6 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
+import MockDraft from './pages/MockDraft';
+import Prospects from './pages/Prospects';
+import Compare from './pages/Compare';
+import DatabaseComparison from './components/DatabaseComparison';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -18,10 +22,11 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
             {/* Placeholder routes - implementaremos em breve */}
-            <Route path="prospects" element={<div className="p-8 text-center text-gray-500">Página de prospects em breve...</div>} />
+            <Route path="prospects" element={<Prospects />} />
             <Route path="prospects/:id" element={<div className="p-8 text-center text-gray-500">Página de detalhes do prospect em breve...</div>} />
-            <Route path="draft" element={<div className="p-8 text-center text-gray-500">Página de Mock Draft em breve...</div>} />
-            <Route path="compare" element={<div className="p-8 text-center text-gray-500">Página de comparação em breve...</div>} />
+            <Route path="draft" element={<MockDraft />} />
+            <Route path="database-evolution" element={<DatabaseComparison />} />
+            <Route path="compare" element={<Compare />} />
             <Route path="watchlist" element={<div className="p-8 text-center text-gray-500">Página de favoritos em breve...</div>} />
             <Route path="trending" element={<div className="p-8 text-center text-gray-500">Página de tendências em breve...</div>} />
             <Route path="draft-history" element={<div className="p-8 text-center text-gray-500">Página de histórico do draft em breve...</div>} />

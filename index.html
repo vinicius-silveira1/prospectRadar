@@ -1,13 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>ProspectRadar - Sistema de Scouting de Basquete</title>
+    <meta name="description" content="Sistema avançado de scouting para prospects brasileiros e internacionais de basquete com integração LDB" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Debug tools for development -->
+    <script>
+      // Only load debug tools in development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('🔧 Modo desenvolvimento - carregando ferramentas de debug LDB');
+        import('/src/debug/ldbDiagnostic.js').then(() => {
+          console.log('✅ Ferramentas de debug LDB carregadas');
+          console.log('💡 Use fullLDBDiagnostic() para diagnóstico completo');
+        }).catch(err => {
+          console.log('⚠️ Não foi possível carregar debug tools:', err.message);
+        });
+      }
+    </script>
   </body>
 </html>

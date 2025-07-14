@@ -1,0 +1,453 @@
+// 🏀 MockDraft.jsx - Página principal do Mock Draft
+import { useState } from 'react';
+import { 
+  Shuffle, Users, Target, Filter, Search, Trophy, 
+  RotateCcw, Download, Play, Pause, ChevronRight,
+  Star, Globe, Flag, TrendingUp, Database
+} from 'lucide-react';
+import useMockDraft from '../hooks/useMockDraft.js';
+import MultiSourceProspectCard from '../components/Prospects/MultiSourceProspectCard.jsx';
+import ExportModal from '../components/MockDraft/ExportModal.jsx';
+import Draft2026Database from '../services/Draft2026Database.js';
+
+const MockDraft = () => {
+  const database = new Draft2026Database();
+  
+  const {
+    draftBoard,
+    availableProspects,
+    currentPick,
+    draftSettings,
+    filters,
+    selectedProspect,
+    isLoading,
+    draftHistory,
+    draftProspect,
+    undraftProspect,
+    setDraftSettings,
+    setFilters,
+    setSelectedProspect,
+    initializeDraft,
+    getBigBoard,
+    getProspectRecommendations,
+    exportDraft,
+    exportDraftToPDF,
+    getDraftStats,
+    isDraftComplete,
+    progress
+  } = useMockDraft();
+
+  const [view, setView] = useState('draft'); // draft, bigboard, prospects
+  const [showFilters, setShowFilters] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const draftStats = getDraftStats();
+  const bigBoard = getBigBoard();
+  const recommendations = getProspectRecommendations(currentPick);
+
+  const handleDraftProspect = (prospect) => {
+    const success = draftProspect(prospect);
+    if (success) {
+      setSelectedProspect(null);
+    }
+  };
+
+  const handleUndraftPick = (pickNumber) => {
+    undraftProspect(pickNumber);
+  };
+
+  const handleExportToPDF = async (exportOptions) => {
+    setIsExporting(true);
+    try {
+      const result = await exportDraftToPDF(exportOptions);
+      return result;
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const currentPickInfo = draftBoard[currentPick - 1];
+
+  return (
+    <div className="space-y-6">      
+      {/* Header com Status do Mock Draft */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center">
+              <Shuffle className="h-8 w-8 mr-3" />
+              Mock Draft {draftSettings.draftClass}
+            </h1>
+            <p className="text-blue-100 mt-2">
+              Monte seu próprio draft com {database.getDatabaseStats().totalProspects} prospects reais e curados
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-4xl font-bold">{currentPick}</div>
+            <div className="text-sm text-blue-200">Pick Atual</div>
+          </div>
+        </div>
+        
+        {/* Barra de Progresso */}
+        <div className="mt-4">
+          <div className="flex justify-between text-sm text-blue-200 mb-2">
+            <span>Progresso do Draft</span>
+            <span>{Math.floor(progress)}% completo</span>
+          </div>
+          <div className="w-full bg-blue-700 rounded-full h-3">
+            <div 
+              className="bg-yellow-400 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Controles e Estatísticas */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Estatísticas do Draft */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+              Estatísticas
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Draftados:</span>
+                <span className="font-medium">{draftStats.totalPicked}/{draftSettings.totalPicks}</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Disponíveis:</span>
+                <span className="font-medium">{draftStats.remaining}</span>
+              </div>
+              
+              <div className="border-t pt-3">
+                <div className="text-xs text-gray-500 mb-2">Por Posição:</div>
+                {Object.entries(draftStats.byPosition).map(([pos, count]) => (
+                  <div key={pos} className="flex justify-between text-sm">
+                    <span>{pos}:</span>
+                    <span>{count}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="border-t pt-3">
+                <div className="text-xs text-gray-500 mb-2">Por Região:</div>
+                <div className="flex justify-between text-sm">
+                  <span>🇧🇷 Brasil:</span>
+                  <span>{draftStats.byRegion.BRAZIL}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>🇺🇸 EUA:</span>
+                  <span>{draftStats.byRegion.USA}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>🇪🇺 Europa:</span>
+                  <span>{draftStats.byRegion.EUROPE}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Controles */}
+            <div className="mt-6 space-y-2">
+              <button
+                onClick={initializeDraft}
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset Draft
+              </button>
+              
+              <button
+                onClick={() => setShowExportModal(true)}
+                disabled={draftStats.totalPicked === 0}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Área Principal */}
+        <div className="lg:col-span-3">
+          {/* Tabs de Navegação */}
+          <div className="bg-white rounded-lg shadow-md mb-6">
+            <div className="flex border-b">
+              <button
+                onClick={() => setView('draft')}
+                className={`px-6 py-3 font-medium transition-colors ${
+                  view === 'draft' 
+                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Target className="h-4 w-4 inline mr-2" />
+                Draft Board
+              </button>
+              
+              <button
+                onClick={() => setView('bigboard')}
+                className={`px-6 py-3 font-medium transition-colors ${
+                  view === 'bigboard' 
+                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Star className="h-4 w-4 inline mr-2" />
+                Big Board
+              </button>
+              
+              <button
+                onClick={() => setView('prospects')}
+                className={`px-6 py-3 font-medium transition-colors ${
+                  view === 'prospects' 
+                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Users className="h-4 w-4 inline mr-2" />
+                Prospects Disponíveis
+              </button>
+            </div>
+            
+            {/* Filtros */}
+            <div className="p-4 border-b bg-gray-50">
+              <div className="flex flex-wrap items-center gap-4">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros
+                </button>
+                
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Buscar prospects..."
+                    value={filters.searchTerm}
+                    onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                
+                {showFilters && (
+                  <div className="flex flex-wrap gap-3">
+                    <select
+                      value={filters.position}
+                      onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="ALL">Todas Posições</option>
+                      <option value="PG">Point Guard</option>
+                      <option value="SG">Shooting Guard</option>
+                      <option value="SF">Small Forward</option>
+                      <option value="PF">Power Forward</option>
+                      <option value="C">Center</option>
+                    </select>
+                    
+                    <select
+                      value={filters.region}
+                      onChange={(e) => setFilters(prev => ({ ...prev, region: e.target.value }))}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="ALL">Todas Regiões</option>
+                      <option value="BRAZIL">🇧🇷 Brasil</option>
+                      <option value="USA">🇺🇸 EUA</option>
+                      <option value="EUROPE">🇪🇺 Europa</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Conteúdo baseado na view selecionada */}
+          {view === 'draft' && (
+            <DraftBoardView 
+              draftBoard={draftBoard}
+              currentPick={currentPick}
+              onUndraftPick={handleUndraftPick}
+            />
+          )}
+          
+          {view === 'bigboard' && (
+            <BigBoardView 
+              prospects={bigBoard}
+              onDraftProspect={handleDraftProspect}
+              currentPick={currentPick}
+            />
+          )}
+          
+          {view === 'prospects' && (
+            <ProspectsView 
+              prospects={availableProspects}
+              recommendations={recommendations}
+              onDraftProspect={handleDraftProspect}
+              currentPick={currentPick}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Modal de Exportação */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={handleExportToPDF}
+        draftData={exportDraft()}
+        isExporting={isExporting}
+      />
+    </div>
+  );
+};
+
+// Componente para visualização do Draft Board
+const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-xl font-bold text-gray-900 mb-6">Draft Board</h3>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {draftBoard.slice(0, 30).map((pick) => (
+        <div
+          key={pick.pick}
+          className={`p-4 border rounded-lg transition-all ${
+            pick.pick === currentPick 
+              ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
+              : pick.prospect 
+                ? 'border-green-500 bg-green-50' 
+                : 'border-gray-200 bg-gray-50'
+          }`}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <div className="text-sm">
+              <div className="font-bold">Pick #{pick.pick}</div>
+              <div className="text-gray-500">Round {pick.round}</div>
+            </div>
+            {pick.prospect && (
+              <button
+                onClick={() => onUndraftPick(pick.pick)}
+                className="text-red-500 hover:text-red-700 text-xs"
+              >
+                Desfazer
+              </button>
+            )}
+          </div>
+          
+          <div className="text-xs text-gray-600 mb-2">{pick.team}</div>
+          
+          {pick.prospect ? (
+            <div>
+              <div className="font-medium text-gray-900">{pick.prospect.name}</div>
+              <div className="text-sm text-gray-600">
+                {pick.prospect.position} • {pick.prospect.nationality}
+              </div>
+              <div className="text-xs text-gray-500">{pick.prospect.team}</div>
+            </div>
+          ) : (
+            <div className="text-gray-400 text-sm italic">
+              {pick.pick === currentPick ? 'Sua vez!' : 'Disponível'}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Componente para Big Board
+const BigBoardView = ({ prospects, onDraftProspect, currentPick }) => (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-xl font-bold text-gray-900 mb-6">Big Board - Top Prospects</h3>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {prospects.slice(0, 30).map((prospect, index) => (
+        <div key={prospect.id} className="relative">
+          <div className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+            #{index + 1}
+          </div>
+          <MultiSourceProspectCard
+            prospect={prospect}
+            onToggleWatchlist={() => {}}
+            isExpanded={false}
+            onExpand={() => {}}
+            showVerification={true}
+            actionButton={{
+              text: 'Draft',
+              onClick: () => onDraftProspect(prospect),
+              icon: <ChevronRight className="h-4 w-4" />
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Componente para Prospects Disponíveis
+const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick }) => (
+  <div className="space-y-6">
+    {/* Recomendações para o pick atual */}
+    {recommendations.length > 0 && (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+          <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" />
+          Recomendações para Pick #{currentPick}
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recommendations.map((prospect) => (
+            <MultiSourceProspectCard
+              key={prospect.id}
+              prospect={prospect}
+              onToggleWatchlist={() => {}}
+              isExpanded={false}
+              onExpand={() => {}}
+              showVerification={true}
+              actionButton={{
+                text: 'Draft',
+                onClick: () => onDraftProspect(prospect),
+                icon: <ChevronRight className="h-4 w-4" />
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    )}
+    
+    {/* Todos os prospects disponíveis */}
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
+        <Users className="h-5 w-5 text-blue-500 mr-2" />
+        Prospects Disponíveis ({prospects.length})
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {prospects.map((prospect) => (
+          <MultiSourceProspectCard
+            key={prospect.id}
+            prospect={prospect}
+            onToggleWatchlist={() => {}}
+            isExpanded={false}
+            onExpand={() => {}}
+            showVerification={true}
+            actionButton={{
+              text: 'Draft',
+              onClick: () => onDraftProspect(prospect),
+              icon: <ChevronRight className="h-4 w-4" />
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+export default MockDraft;

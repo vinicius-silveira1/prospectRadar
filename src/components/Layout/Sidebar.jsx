@@ -15,7 +15,7 @@ const Sidebar = () => {
   const navItems = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/prospects', icon: Users, label: 'Todos os Prospects' },
-    { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
+    { path: '/draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
     { path: '/trending', icon: TrendingUp, label: 'Em Alta' },

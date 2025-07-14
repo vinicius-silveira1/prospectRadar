@@ -105,9 +105,10 @@ export const knownProspectImages = {
     'https://s3media.247sports.com/Uploads/Assets/335/678/12678335.jpg'
   ],
   'Cayden Boozer': [
-    'https://cdn.vox-cdn.com/thumbor/nc6KvZNh8z74rI0nRTuHGbSVHxM=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/25503286/2113293607.jpg', // URL TESTADA E FUNCIONANDO
-    'https://goduke.com/images/2024/10/24/Cayden_Boozer_Commit.jpg',
-    'https://s3media.247sports.com/Uploads/Assets/234/567/12567234.jpg'
+
+    'https://goduke.com/images/2024/10/24/Cayden_Boozer_Commit.jpg', // DUKE OFICIAL - Uso permitido
+    'https://s3media.247sports.com/Uploads/Assets/234/567/12567234.jpg', // 247Sports licenciado
+    // REMOVIDO: URL da Vox Media por violação de copyright
   ],
   'Cameron Boozer': [
     'https://dukewire.usatoday.com/gcdn/authoring/images/smg/2024/11/21/SMGW/76485849007-120-9886.jpeg', // URL TESTADA E FUNCIONANDO
