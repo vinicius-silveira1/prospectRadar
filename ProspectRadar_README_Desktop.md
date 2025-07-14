@@ -9,15 +9,6 @@
 
 Uma ferramenta moderna para acompanhar prospects do draft da NBA, feita por brasileiros para a comunidade brasileira de basquete.
 
-## 🏆 Diferencial Competitivo
-
-**ProspectRadar vs Concorrentes Internacionais:**
-- **Foco exclusivo no Brasil** - Lacuna não atendida por 247Sports, Rivals, ESPN
-- **Dados oficiais brasileiros** - Destaque para talentos nacionais no cenário internacional
-- **Cobertura completa** - Profissional + universitário americano + brasileiros
-- **Contexto brasileiro** - Análises específicas para nossa comunidade
-- **Interface em português** - Experiência nativa para fãs brasileiros
-
 ## 🚀 Funcionalidades
 
 ### ✅ Implementado
@@ -68,28 +59,6 @@ npm run lint     # Análise de código
 - **Dashboard (/)** - Visão geral dos prospects com destaques e estatísticas
 - **Compare (/compare)** - Ferramenta de comparação lado a lado
 - **Draft History (/draft-history)** - Análise histórica dos últimos drafts
-
-## 📋 Casos de Uso Principais
-
-### 🔍 Descoberta de Talentos
-- "*Quais são os próximos grandes prospects da classe 2026?*"
-- "*Que jogadores estão subindo no ranking este mês?*"
-- "*Onde estão os melhores armadores da próxima classe?*"
-
-### 📊 Análise Comparativa
-- "*Como Cayden Boozer se compara ao seu irmão Cameron?*"
-- "*Quais prospects têm o melhor percentual de 3 pontos?*"
-- "*Que jogadores brasileiros têm chance no draft?*"
-
-### 🏆 Preparação para o Draft
-- "*Quem deve ser a primeira escolha do draft 2026?*"
-- "*Como seria meu mock draft ideal?*"
-- "*Que surpresas podem acontecer na loteria?*"
-
-### 📰 Criação de Conteúdo
-- "*Preciso de dados para meu artigo sobre prospects*"
-- "*Quero criar um vídeo sobre talentos brasileiros*"
-- "*Onde encontro estatísticas atualizadas?*"
 
 ## 🇧🇷 Para a Comunidade Brasileira
 
