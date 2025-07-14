@@ -34,8 +34,8 @@ Sistema avançado de análise de prospects focado no mercado brasileiro, integra
 ## 📊 Fontes de Dados
 
 ### Principais (Integradas)
-- **Liga de Desenvolvimento de Basquete (LDB)** - 100+ prospects ativos ⭐⭐⭐⭐⭐
-- **Liga Nacional de Basquete (LNB)** - NBB Elite Camp ⭐⭐⭐⭐⭐
+- **Draft 2026 Database** - 60 prospects verificados da classe 2025 ⭐⭐⭐⭐⭐
+- **ESPN 100 & 247Sports** - Rankings oficiais integrados ⭐⭐⭐⭐⭐
 - **Confederação Brasileira de Basketball (CBB)** - Seleções de base ⭐⭐⭐⭐
 
 ### Regionais (Roadmap)
