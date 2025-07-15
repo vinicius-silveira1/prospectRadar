@@ -4,6 +4,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import MockDraft from './pages/MockDraft';
 import Prospects from './pages/Prospects';
+import ProspectDetail from './pages/ProspectDetail';
 import Compare from './pages/Compare';
 import DraftHistory from './pages/DraftHistory';
 import DatabaseComparison from './components/DatabaseComparison';
@@ -24,7 +25,7 @@ function App() {
             <Route index element={<Dashboard />} />
             {/* Placeholder routes - implementaremos em breve */}
             <Route path="prospects" element={<Prospects />} />
-            <Route path="prospects/:id" element={<div className="p-8 text-center text-gray-500">Página de detalhes do prospect em breve...</div>} />
+            <Route path="prospects/:id" element={<ProspectDetail />} />
             <Route path="draft" element={<MockDraft />} />
             <Route path="database-evolution" element={<DatabaseComparison />} />
             <Route path="compare" element={<Compare />} />

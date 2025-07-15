@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, Filter, Grid, List, Shuffle, Heart, TrendingUp, TrendingDown, Star, Users, Globe, GraduationCap } from 'lucide-react';
 import Draft2026Database from '../services/Draft2026Database.js';
 
@@ -289,9 +290,9 @@ const Prospects = () => {
 
                   {/* Informações do Prospect */}
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
+                    <Link to={`/prospects/${prospect.id}`} className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1 hover:text-blue-600 transition-colors">
                       {prospect.name}
-                    </h3>
+                    </Link>
                     
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${

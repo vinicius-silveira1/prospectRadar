@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Star, TrendingUp, Users, CheckCircle, Shield, Globe, Award, Verified } from 'lucide-react';
 
 const MultiSourceProspectCard = ({ 
@@ -59,7 +60,12 @@ const MultiSourceProspectCard = ({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h3 className="font-bold text-lg text-gray-900 truncate">{name}</h3>
+              <Link 
+                to={`/prospects/${prospect?.id || id}`}
+                className="font-bold text-lg text-gray-900 truncate hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                {name}
+              </Link>
               {verified && showVerification && (
                 <Verified className="h-4 w-4 text-green-600" title="Dados Verificados" />
               )}

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, MapPin, Trophy, Users } from 'lucide-react';
 
 const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) => {
@@ -97,7 +98,12 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
       <div className="p-4">
         {/* Nome e informações básicas */}
         <div className="mb-3">
-          <h3 className="font-bold text-lg text-gray-900 mb-1">{prospect.name}</h3>
+          <Link 
+            to={`/prospects/${prospect.id}`}
+            className="font-bold text-lg text-gray-900 mb-1 hover:text-blue-600 transition-colors cursor-pointer block"
+          >
+            {prospect.name}
+          </Link>
           <div className="flex items-center justify-between text-sm text-gray-600">
             <div className="flex items-center space-x-2">
               <span className={`px-2 py-1 rounded-md text-xs font-medium ${getPositionColor(prospect.position)}`}>
