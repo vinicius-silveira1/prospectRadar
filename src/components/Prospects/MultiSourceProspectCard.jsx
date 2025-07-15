@@ -36,7 +36,14 @@ const MultiSourceProspectCard = ({
     nationality,
     draftClass,
     projectedDraftPosition,
-    prospectRank
+    prospectRank,
+    // Novos campos para dados híbridos
+    dataSource,
+    isUsingHighSchoolData,
+    displayInfo,
+    school,
+    season,
+    fallbackUsed
   } = prospect;
 
   // Cor do trending
@@ -74,11 +81,18 @@ const MultiSourceProspectCard = ({
                   REAL
                 </div>
               )}
+              {displayInfo?.sourceBadge && (
+                <div className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  displayInfo.sourceColor || 'bg-blue-100 text-blue-700'
+                }`}>
+                  {displayInfo.sourceBadge}
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <span className="font-medium">{position}</span>
               <span>•</span>
-              <span>{team}</span>
+              <span>{school || team}</span>
               {age && (
                 <>
                   <span>•</span>
@@ -96,8 +110,12 @@ const MultiSourceProspectCard = ({
             </div>
             <div className="text-xs text-gray-500 mt-1">
               {height} 
+              {season && ` • Temporada ${season}`}
               {showSource && source && ` • ${source}`}
               {draftClass && ` • Draft ${draftClass}`}
+              {fallbackUsed && (
+                <span className="text-orange-600 font-medium"> • Dados HS</span>
+              )}
             </div>
           </div>
           
