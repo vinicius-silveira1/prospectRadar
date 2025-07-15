@@ -8,8 +8,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, MapPin, Trophy, Users } from 'lucide-react';
+import { useHybridProspectData } from '../../hooks/useHybridProspectData';
 
 const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) => {
+  // Use hybrid data system
+  const hybridData = useHybridProspectData(prospect);
+  const { 
+    stats, 
+    displayInfo, 
+    fallbackUsed,
+    school,
+    season 
+  } = hybridData;
   // Renderiza ícone de trending baseado no status
   const renderTrendingIcon = () => {
     if (prospect.trending === 'up') {
@@ -34,17 +44,17 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
 
   // Formatação de estatísticas brasileiras
   const formatBrazilianStats = () => {
-    if (!prospect.stats) return null;
+    if (!stats) return null;
     
     return {
-      pontos: parseFloat(prospect.stats.ppg || 0).toFixed(1),
-      rebotes: parseFloat(prospect.stats.rpg || 0).toFixed(1),
-      assistencias: parseFloat(prospect.stats.apg || 0).toFixed(1),
-      aproveitamento: (parseFloat(prospect.stats.fg || 0) * 100).toFixed(0)
+      pontos: parseFloat(stats.ppg || 0).toFixed(1),
+      rebotes: parseFloat(stats.rpg || 0).toFixed(1),
+      assistencias: parseFloat(stats.apg || 0).toFixed(1),
+      aproveitamento: (parseFloat(stats.fg || 0) * 100).toFixed(0)
     };
   };
 
-  const stats = formatBrazilianStats();
+  const formattedStats = formatBrazilianStats();
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -108,11 +118,10 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
             <div className="flex items-center space-x-2">
               <span className={`px-2 py-1 rounded-md text-xs font-medium ${getPositionColor(prospect.position)}`}>
                 {prospect.position}
-              </span>
-              <span className="flex items-center">
-                <Users className="h-3 w-3 mr-1" />
-                {prospect.school || 'Time LDB'}
-              </span>
+              </span>            <span className="flex items-center">
+              <Users className="h-3 w-3 mr-1" />
+              {school || prospect.school || 'Time LDB'}
+            </span>
             </div>
             <span className="text-gray-500">
               {prospect.age} anos
@@ -133,24 +142,32 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
         </div>
 
         {/* Estatísticas principais */}
-        {stats && (
+        {formattedStats && (
           <div className="mb-3">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Estatísticas</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Estatísticas
+              {fallbackUsed && (
+                <span className="text-orange-600 text-xs ml-2">(High School)</span>
+              )}
+              {season && (
+                <span className="text-gray-500 text-xs ml-2">({season})</span>
+              )}
+            </h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="text-center bg-blue-50 p-2 rounded">
-                <div className="font-bold text-blue-600">{stats.pontos}</div>
+                <div className="font-bold text-blue-600">{formattedStats.pontos}</div>
                 <div className="text-gray-600">PPG</div>
               </div>
               <div className="text-center bg-green-50 p-2 rounded">
-                <div className="font-bold text-green-600">{stats.rebotes}</div>
+                <div className="font-bold text-green-600">{formattedStats.rebotes}</div>
                 <div className="text-gray-600">RPG</div>
               </div>
               <div className="text-center bg-yellow-50 p-2 rounded">
-                <div className="font-bold text-yellow-600">{stats.assistencias}</div>
+                <div className="font-bold text-yellow-600">{formattedStats.assistencias}</div>
                 <div className="text-gray-600">APG</div>
               </div>
               <div className="text-center bg-purple-50 p-2 rounded">
-                <div className="font-bold text-purple-600">{stats.aproveitamento}%</div>
+                <div className="font-bold text-purple-600">{formattedStats.aproveitamento}%</div>
                 <div className="text-gray-600">FG%</div>
               </div>
             </div>
