@@ -1720,6 +1720,33 @@ class Draft2026Database {
         hometown: 'Rio de Janeiro, Brazil',
         highSchool: 'Flamengo Basketball Academy',
         espnGrade: 78
+      },
+      {
+        id: 'samis-calderon-brasil-2026',
+        name: 'Samis Calderon',
+        age: 20,
+        team: 'Kansas Jayhawks',
+        position: 'SG/PG',
+        height: '1.88m', // 6'2"
+        weight: '80kg', // 176 lbs
+        nationality: '🇧🇷',
+        region: 'INTERNATIONAL',
+        draftClass: 2026,
+        stats: { ppg: 0, apg: 0, rpg: 0, fg: 0, ft: 0 }, // Fallback para high school
+        ranking: 65,
+        tier: 'SLEEPER',
+        mockDraftRange: 'Undrafted-45',
+        strengths: ['Versatility', 'Basketball IQ', 'International experience', 'Leadership'],
+        weaknesses: ['Size', 'Athleticism', 'Physicality'],
+        trending: 'stable',
+        college: 'Kansas',
+        verified: true,
+        eligibilityStatus: 'College prospect - Draft Eligible 2026',
+        lastUpdate: '2025-07-16',
+        source: 'Kansas Basketball - Overtime Elite Alumni',
+        hometown: 'São Paulo, Brazil',
+        highSchool: 'Overtime Elite',
+        espnGrade: 75
       }
     ];
   }
