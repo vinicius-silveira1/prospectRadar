@@ -5,21 +5,60 @@
  * brasileiros coletados da Liga de Desenvolvimento de Basquete
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, MapPin, Trophy, Users } from 'lucide-react';
-import { useHybridProspectData } from '../../hooks/useHybridProspectData';
+import HighSchoolStatsService from '../../services/HighSchoolStatsService';
 
 const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) => {
-  // Use hybrid data system
-  const hybridData = useHybridProspectData(prospect);
-  const { 
-    stats, 
-    displayInfo, 
-    fallbackUsed,
-    school,
-    season 
-  } = hybridData;
+  // Aplicar dados híbridos diretamente no componente
+  const enhancedProspect = useMemo(() => {
+    if (!prospect) return prospect;
+    
+    const hsService = new HighSchoolStatsService();
+    
+    // Verifica se precisa de dados de HS
+    const needsHSData = !prospect.stats || 
+                        (!prospect.stats.ppg && !prospect.stats.rpg && !prospect.stats.apg) || 
+                        (prospect.stats.ppg === 0 && prospect.stats.rpg === 0 && prospect.stats.apg === 0);
+    
+    const hasHSData = hsService.hasHighSchoolData(prospect.id, prospect.name);
+    
+    if (needsHSData && hasHSData) {
+      const hsData = hsService.getHighSchoolStats(prospect.id, prospect.name);
+      
+      return {
+        ...prospect, // Preserva TUDO
+        stats: hsData.stats, // Substitui apenas stats
+        dataSource: 'high_school',
+        fallbackUsed: true,
+        season: hsData.season,
+        hsSchool: hsData.school,
+        hsAchievements: hsData.achievements,
+        displayInfo: {
+          sourceBadge: 'High School 2024-25',
+          sourceColor: 'bg-orange-100 text-orange-700',
+          reliability: 'Dados do último ano de High School'
+        }
+      };
+    }
+    
+    // Se não precisa de HS, retorna o original
+    return {
+      ...prospect,
+      dataSource: 'college',
+      fallbackUsed: false
+    };
+  }, [prospect]);
+  
+  // Use enhanced prospect
+  const workingProspect = enhancedProspect || prospect;
+  
+  // Extract hybrid data, with fallback to original prospect data
+  const hybridStats = workingProspect?.stats || {};
+  const hybridFallbackUsed = workingProspect?.fallbackUsed || false;
+  const hybridSchool = workingProspect?.hsSchool || workingProspect?.school || workingProspect?.team;
+  const hybridSeason = workingProspect?.season || null;
   // Renderiza ícone de trending baseado no status
   const renderTrendingIcon = () => {
     if (prospect.trending === 'up') {
@@ -44,13 +83,13 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
 
   // Formatação de estatísticas brasileiras
   const formatBrazilianStats = () => {
-    if (!stats) return null;
+    if (!hybridStats) return null;
     
     return {
-      pontos: parseFloat(stats.ppg || 0).toFixed(1),
-      rebotes: parseFloat(stats.rpg || 0).toFixed(1),
-      assistencias: parseFloat(stats.apg || 0).toFixed(1),
-      aproveitamento: (parseFloat(stats.fg || 0) * 100).toFixed(0)
+      pontos: parseFloat(hybridStats.ppg || 0).toFixed(1),
+      rebotes: parseFloat(hybridStats.rpg || 0).toFixed(1),
+      assistencias: parseFloat(hybridStats.apg || 0).toFixed(1),
+      aproveitamento: (parseFloat(hybridStats.fg || 0) * 100).toFixed(0)
     };
   };
 
@@ -120,7 +159,7 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
                 {prospect.position}
               </span>            <span className="flex items-center">
               <Users className="h-3 w-3 mr-1" />
-              {school || prospect.school || 'Time LDB'}
+              {hybridSchool || prospect.school || 'Time LDB'}
             </span>
             </div>
             <span className="text-gray-500">
@@ -146,11 +185,11 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
           <div className="mb-3">
             <h4 className="text-sm font-medium text-gray-700 mb-2">
               Estatísticas
-              {fallbackUsed && (
+              {hybridFallbackUsed && (
                 <span className="text-orange-600 text-xs ml-2">(High School)</span>
               )}
-              {season && (
-                <span className="text-gray-500 text-xs ml-2">({season})</span>
+              {hybridSeason && (
+                <span className="text-gray-500 text-xs ml-2">({hybridSeason})</span>
               )}
             </h4>
             <div className="grid grid-cols-2 gap-2 text-xs">

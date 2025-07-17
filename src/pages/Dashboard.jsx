@@ -8,7 +8,7 @@ import MultiSourceProspectCard from '../components/Prospects/MultiSourceProspect
 const Dashboard = () => {
   const [expandedProspect, setExpandedProspect] = useState(null);
   
-  // Usar o novo hook de dados reais
+  // Usar o hook original para teste
   const {
     prospects,
     loading,
@@ -19,11 +19,16 @@ const Dashboard = () => {
     brazilianProspects,
     internationalProspects,
     dataStats,
-    refreshData,
+    refreshData: originalRefreshData,
     isRealData,
     hasError,
     isLoaded
   } = useRealProspectData();
+
+  // Função para recarregar os dados
+  const refreshData = originalRefreshData || (() => {
+    window.location.reload();
+  });
 
   const handleToggleWatchlist = (prospectId) => {
     console.log(`Toggle watchlist para prospect: ${prospectId}`);

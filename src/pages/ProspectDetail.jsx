@@ -1,13 +1,58 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe } from 'lucide-react';
 import useRealProspectData from '../hooks/useRealProspectData';
+import HighSchoolStatsService from '../services/HighSchoolStatsService';
 
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { prospects, loading, error } = useRealProspectData();
 
+  // TODOS OS HOOKS DEVEM VIR ANTES DE QUALQUER RETURN
+  const originalProspect = prospects.find(p => p.id === id);
+
+  // Aplicar dados híbridos se necessário - HOOK SEMPRE EXECUTADO
+  const prospect = useMemo(() => {
+    if (!originalProspect) return null;
+    
+    const hsService = new HighSchoolStatsService();
+    
+    // Verifica se precisa de dados de HS
+    const needsHSData = !originalProspect.stats || 
+                        (!originalProspect.stats.ppg && !originalProspect.stats.rpg && !originalProspect.stats.apg) || 
+                        (originalProspect.stats.ppg === 0 && originalProspect.stats.rpg === 0 && originalProspect.stats.apg === 0);
+    
+    const hasHSData = hsService.hasHighSchoolData(originalProspect.id, originalProspect.name);
+    
+    if (needsHSData && hasHSData) {
+      const hsData = hsService.getHighSchoolStats(originalProspect.id, originalProspect.name);
+      
+      return {
+        ...originalProspect, // Preserva TUDO
+        stats: hsData.stats, // Substitui apenas stats
+        dataSource: 'high_school',
+        fallbackUsed: true,
+        season: hsData.season,
+        hsSchool: hsData.school,
+        hsAchievements: hsData.achievements,
+        displayInfo: {
+          sourceBadge: 'High School 2024-25',
+          sourceColor: 'bg-orange-100 text-orange-700',
+          reliability: 'Dados do último ano de High School'
+        }
+      };
+    }
+    
+    // Se não precisa de HS, retorna o original
+    return {
+      ...originalProspect,
+      dataSource: 'college',
+      fallbackUsed: false
+    };
+  }, [originalProspect]);
+
+  // CONDIÇÕES DE RETORNO APÓS TODOS OS HOOKS
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -35,20 +80,21 @@ const ProspectDetail = () => {
     );
   }
 
-  const prospect = prospects.find(p => p.id === id);
-
-  if (!prospect) {
+  if (!originalProspect || !prospect) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Prospect não encontrado</h2>
-          <p className="text-gray-600 mb-6">O prospect que você está procurando não existe ou foi removido.</p>
-          <button 
-            onClick={() => navigate('/prospects')}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            Voltar para Prospects
-          </button>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Prospect não encontrado...</p>
+          <div className="mt-4">
+            <p className="text-sm text-gray-500 mb-2">ID procurado: {id}</p>
+            <button 
+              onClick={() => navigate('/prospects')}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Voltar para Prospects
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -258,7 +304,14 @@ const ProspectDetail = () => {
             
             {/* Stats Card */}
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Estatísticas</h3>                <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">Estatísticas</h3>
+                {prospect.fallbackUsed && (
+                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                    High School 2024-25
+                  </span>
+                )}
+              </div>                <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Pontos por Jogo</span>
                   <span className="font-bold text-orange-500">{prospect.stats?.ppg || 'N/A'}</span>

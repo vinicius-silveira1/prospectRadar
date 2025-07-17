@@ -3,6 +3,8 @@
 // ✅ APENAS prospects da classe 2025 que serão elegíveis para Draft 2026
 // ✅ SEM jogadores já draftados - VERIFICADO
 
+import HighSchoolStatsService from './HighSchoolStatsService.js';
+
 class Draft2026Database {
   constructor() {
     this.prospects = [];
@@ -1753,7 +1755,65 @@ class Draft2026Database {
 
   // MÉTODOS DA CLASSE
   getAllProspects() {
-    return this.prospects;
+    // Dados originais do Draft2026Database
+    const draftProspects = this.prospects;
+    
+    // Adicionar prospects do HighSchoolStatsService que não estão no Draft2026Database
+    const hsService = new HighSchoolStatsService();
+    const hsProspects = Object.keys(hsService.highSchoolDatabase).map((key, index) => {
+      const data = hsService.highSchoolDatabase[key];
+      return {
+        id: key,
+        name: data.name,
+        position: data.position || 'N/A',
+        school: data.school,
+        ranking: draftProspects.length + index + 1,
+        height: data.height || 'N/A',
+        weight: data.weight || 'N/A',
+        stats: {
+          ppg: data.stats?.ppg || 0,
+          rpg: data.stats?.rpg || 0,
+          apg: data.stats?.apg || 0,
+          fg: data.stats?.fg_pct ? Math.round(data.stats.fg_pct * 100) : 0,
+          threePt: data.stats?.three_pct ? Math.round(data.stats.three_pct * 100) : 0,
+          ft: data.stats?.ft_pct ? Math.round(data.stats.ft_pct * 100) : 0
+        },
+        tier: data.tier || 'SLEEPER',
+        potentialPick: draftProspects.length + index + 1,
+        lastUpdate: '2025-07-16',
+        source: 'High School Stats Service',
+        hometown: data.hometown || 'Unknown',
+        highSchool: data.school,
+        espnGrade: data.espnGrade || 50,
+        season: data.season,
+        age: data.age || 19,
+        nationality: data.nationality || 'USA',
+        mockDraftRange: data.mockDraftRange || 'Undrafted',
+        strengths: data.strengths || ['Potencial'],
+        weaknesses: data.weaknesses || ['Inexperiência'],
+        college: data.college || data.school,
+        verified: false,
+        eligibilityStatus: 'High School prospect - Draft Eligible 2026',
+        draftClass: 2026,
+        region: data.region || 'USA',
+        team: data.school,
+        trending: 'stable'
+      };
+    });
+    
+    // Combinar evitando duplicatas
+    const existingIds = new Set(draftProspects.map(p => p.id));
+    const additionalProspects = hsProspects.filter(p => !existingIds.has(p.id));
+    
+    const allProspects = [...draftProspects, ...additionalProspects];
+    
+    console.log('🏀 Draft2026Database - Prospects carregados:', {
+      fromDraft: draftProspects.length,
+      fromHighSchool: additionalProspects.length,
+      total: allProspects.length
+    });
+    
+    return allProspects;
   }
 
   getTopProspects(count = 10) {
@@ -1826,3 +1886,4 @@ class Draft2026Database {
 
 // Exportar a classe para permitir instanciação
 export default Draft2026Database;
+

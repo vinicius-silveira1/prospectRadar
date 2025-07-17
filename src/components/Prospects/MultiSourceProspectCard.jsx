@@ -3,9 +3,10 @@
  * Mostra dados autênticos coletados de fontes oficiais
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, TrendingUp, Users, CheckCircle, Shield, Globe, Award, Verified } from 'lucide-react';
+import HighSchoolStatsService from '../../services/HighSchoolStatsService';
 
 const MultiSourceProspectCard = ({ 
   prospect, 
@@ -17,17 +18,66 @@ const MultiSourceProspectCard = ({
   showSource = false,
   actionButton = null // { text, onClick, icon, className }
 }) => {
+  // Aplicar dados híbridos diretamente no componente
+  const enhancedProspect = useMemo(() => {
+    if (!prospect) return prospect;
+    
+    const hsService = new HighSchoolStatsService();
+    
+    // Verifica se precisa de dados de HS
+    const needsHSData = !prospect.stats || 
+                        (!prospect.stats.ppg && !prospect.stats.rpg && !prospect.stats.apg) || 
+                        (prospect.stats.ppg === 0 && prospect.stats.rpg === 0 && prospect.stats.apg === 0);
+    
+    const hasHSData = hsService.hasHighSchoolData(prospect.id, prospect.name);
+    
+    if (needsHSData && hasHSData) {
+      const hsData = hsService.getHighSchoolStats(prospect.id, prospect.name);
+      
+      return {
+        ...prospect, // Preserva TUDO
+        stats: hsData.stats, // Substitui apenas stats
+        dataSource: 'high_school',
+        fallbackUsed: true,
+        season: hsData.season,
+        hsSchool: hsData.school,
+        hsAchievements: hsData.achievements,
+        displayInfo: {
+          sourceBadge: 'High School 2024-25',
+          sourceColor: 'bg-orange-100 text-orange-700',
+          reliability: 'Dados do último ano de High School'
+        }
+      };
+    }
+    
+    // Se não precisa de HS, retorna o original
+    return {
+      ...prospect,
+      dataSource: 'college',
+      fallbackUsed: false
+    };
+  }, [prospect]);
+  
+  // Use enhanced prospect
+  const workingProspect = enhancedProspect || prospect;
+  
+  // Extract hybrid data, with fallback to original prospect data
+  const hybridStats = workingProspect?.stats || {};
+  const hybridDisplayInfo = workingProspect?.displayInfo || {};
+  const hybridFallbackUsed = workingProspect?.fallbackUsed || false;
+  const hybridSchool = workingProspect?.hsSchool || workingProspect?.school || workingProspect?.team;
+  const hybridSeason = workingProspect?.season || null;
+
   const {
-    name,
-    age,
-    position,
-    team,
-    height,
-    stats = {},
-    achievements = [],
-    source,
-    isReal,
-    verified,
+    name = prospect.name,
+    age = prospect.age,
+    position = prospect.position,
+    team = hybridSchool || prospect.team,
+    height = prospect.height,
+    achievements = prospect.achievements || [],
+    source = prospect.source,
+    isReal = prospect.isReal,
+    verified = prospect.verified,
     trending,
     mockDraftPosition,
     prospectScore,
@@ -36,14 +86,7 @@ const MultiSourceProspectCard = ({
     nationality,
     draftClass,
     projectedDraftPosition,
-    prospectRank,
-    // Novos campos para dados híbridos
-    dataSource,
-    isUsingHighSchoolData,
-    displayInfo,
-    school,
-    season,
-    fallbackUsed
+    prospectRank
   } = prospect;
 
   // Cor do trending
@@ -81,18 +124,18 @@ const MultiSourceProspectCard = ({
                   REAL
                 </div>
               )}
-              {displayInfo?.sourceBadge && (
+              {hybridDisplayInfo?.sourceBadge && (
                 <div className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  displayInfo.sourceColor || 'bg-blue-100 text-blue-700'
+                  hybridDisplayInfo.sourceColor || 'bg-blue-100 text-blue-700'
                 }`}>
-                  {displayInfo.sourceBadge}
+                  {hybridDisplayInfo.sourceBadge}
                 </div>
               )}
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <span className="font-medium">{position}</span>
               <span>•</span>
-              <span>{school || team}</span>
+              <span>{hybridSchool || team}</span>
               {age && (
                 <>
                   <span>•</span>
@@ -110,10 +153,10 @@ const MultiSourceProspectCard = ({
             </div>
             <div className="text-xs text-gray-500 mt-1">
               {height} 
-              {season && ` • Temporada ${season}`}
+              {hybridSeason && ` • Temporada ${hybridSeason}`}
               {showSource && source && ` • ${source}`}
               {draftClass && ` • Draft ${draftClass}`}
-              {fallbackUsed && (
+              {hybridFallbackUsed && (
                 <span className="text-orange-600 font-medium"> • Dados HS</span>
               )}
             </div>
@@ -148,20 +191,20 @@ const MultiSourceProspectCard = ({
       <div className="p-4">
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="text-center p-2 bg-gray-50 rounded">
-            <div className="text-lg font-bold text-gray-900">{stats.ppg || 0}</div>
+            <div className="text-lg font-bold text-gray-900">{hybridStats.ppg || 0}</div>
             <div className="text-xs text-gray-600">PPG</div>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded">
-            <div className="text-lg font-bold text-gray-900">{stats.rpg || 0}</div>
+            <div className="text-lg font-bold text-gray-900">{hybridStats.rpg || 0}</div>
             <div className="text-xs text-gray-600">RPG</div>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded">
-            <div className="text-lg font-bold text-gray-900">{stats.apg || 0}</div>
+            <div className="text-lg font-bold text-gray-900">{hybridStats.apg || 0}</div>
             <div className="text-xs text-gray-600">APG</div>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded">
             <div className="text-lg font-bold text-gray-900">
-              {stats.fg_pct ? (stats.fg_pct * 100).toFixed(1) : 0}%
+              {hybridStats.fg_pct ? (hybridStats.fg_pct * 100).toFixed(1) : 0}%
             </div>
             <div className="text-xs text-gray-600">FG%</div>
           </div>
@@ -281,10 +324,10 @@ const MultiSourceProspectCard = ({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Stats Avançadas</h4>
-              {stats.three_pct && (
+              {hybridStats.three_pct && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">3P%:</span>
-                  <span className="font-medium">{(stats.three_pct * 100).toFixed(1)}%</span>
+                  <span className="font-medium">{(hybridStats.three_pct * 100).toFixed(1)}%</span>
                 </div>
               )}
               {stats.ft_pct && (
