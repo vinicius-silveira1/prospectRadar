@@ -14,7 +14,8 @@
 /* Estilos globais */
 @layer base {
   body {
-    @apply bg-brand-light text-slate-800 font-display antialiased;
+    @apply text-slate-800 font-display antialiased;
+    background: linear-gradient(120deg, #f3f4f6 0%, #e0e7ef 100%);
   }
   
   html {

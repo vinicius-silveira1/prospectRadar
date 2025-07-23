@@ -43,7 +43,7 @@ const RealProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) =
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow relative">
+    <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1 relative">
       
       {/* Data Type Indicator */}
       <div className="absolute top-3 right-3">
@@ -119,7 +119,8 @@ const RealProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) =
         </Link>
         <p className="text-sm text-gray-600">{prospect.school}</p>
         <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-500">
-          <span>{prospect.height}</span>
+          <span>{prospect.height && typeof prospect.height === 'object' ? `${prospect.height.us} (${prospect.height.intl} cm)` : prospect.height}</span>
+          <span>{prospect.weight && typeof prospect.weight === 'object' ? `${prospect.weight.us} lbs (${prospect.weight.intl} kg)` : prospect.weight}</span>
           <span>{prospect.position}</span>
           <span>Class of {prospect.class}</span>
         </div>

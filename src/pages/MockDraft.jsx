@@ -365,7 +365,9 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
 // Componente para Big Board
 const BigBoardView = ({ prospects, onDraftProspect, currentPick }) => (
   <div className="bg-white rounded-lg shadow-md p-6">
-    <h3 className="text-xl font-bold text-gray-900 mb-6">Big Board - Top Prospects</h3>
+    <h3 className="text-xl font-bold text-gray-900 mb-6">
+      Big Board - Top <span className="text-brand-orange">Prospects</span>
+    </h3>
     
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {prospects.slice(0, 30).map((prospect, index) => (
@@ -426,7 +428,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
         <Users className="h-5 w-5 text-blue-500 mr-2" />
-        Prospects Disponíveis ({prospects.length})
+        <span className="text-brand-orange mr-1">Prospects</span> Disponíveis ({prospects.length})
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

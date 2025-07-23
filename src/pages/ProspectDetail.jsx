@@ -1,56 +1,16 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe } from 'lucide-react';
 import useRealProspectData from '../hooks/useRealProspectData';
-import HighSchoolStatsService from '../services/HighSchoolStatsService';
+import useHybridProspect from '../hooks/useHybridProspect';
 
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { prospects, loading, error } = useRealProspectData();
 
-  // TODOS OS HOOKS DEVEM VIR ANTES DE QUALQUER RETURN
   const originalProspect = prospects.find(p => p.id === id);
-
-  // Aplicar dados híbridos se necessário - HOOK SEMPRE EXECUTADO
-  const prospect = useMemo(() => {
-    if (!originalProspect) return null;
-    
-    const hsService = new HighSchoolStatsService();
-    
-    // Verifica se precisa de dados de HS
-    const needsHSData = !originalProspect.stats || 
-                        (!originalProspect.stats.ppg && !originalProspect.stats.rpg && !originalProspect.stats.apg) || 
-                        (originalProspect.stats.ppg === 0 && originalProspect.stats.rpg === 0 && originalProspect.stats.apg === 0);
-    
-    const hasHSData = hsService.hasHighSchoolData(originalProspect.id, originalProspect.name);
-    
-    if (needsHSData && hasHSData) {
-      const hsData = hsService.getHighSchoolStats(originalProspect.id, originalProspect.name);
-      
-      return {
-        ...originalProspect, // Preserva TUDO
-        stats: hsData.stats, // Substitui apenas stats
-        dataSource: 'high_school',
-        fallbackUsed: true,
-        season: hsData.season,
-        hsSchool: hsData.school,
-        hsAchievements: hsData.achievements,
-        displayInfo: {
-          sourceBadge: 'High School 2024-25',
-          sourceColor: 'bg-orange-100 text-orange-700',
-          reliability: 'Dados do último ano de High School'
-        }
-      };
-    }
-    
-    // Se não precisa de HS, retorna o original
-    return {
-      ...originalProspect,
-      dataSource: 'college',
-      fallbackUsed: false
-    };
-  }, [originalProspect]);
+  const prospect = useHybridProspect(originalProspect);
 
   // CONDIÇÕES DE RETORNO APÓS TODOS OS HOOKS
   if (loading) {
@@ -147,7 +107,7 @@ const ProspectDetail = () => {
             className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Voltar para Prospects
+            Voltar para <span className="text-brand-orange font-semibold ml-1">Prospects</span>
           </button>
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">

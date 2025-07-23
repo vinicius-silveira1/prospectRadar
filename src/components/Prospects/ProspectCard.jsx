@@ -73,11 +73,21 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   const displayImageUrl = imageState.currentUrl || imageManager.generateDetailedAvatar(prospect.name, prospect.position, prospect.height, prospect.weight);
 
   return (
-    <div className="prospect-card">
+    <div className="prospect-card bg-white/60 backdrop-blur-lg border border-slate-200 rounded-2xl shadow-xl hover:shadow-2xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1">
       {/* Header with ranking and watchlist */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-2">
           <span className="text-2xl font-bold text-gradient">#{prospect.mockDraftPosition}</span>
+          {/* Badge de status */}
+          {prospect.verified && (
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold animate-pulse">Verificado</span>
+          )}
+          {prospect.trending === 'up' && (
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold animate-bounce">Trending</span>
+          )}
+          {prospect.isNew && (
+            <span className="ml-2 px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold animate-pulse">Novo</span>
+          )}
           <div className={`flex items-center space-x-1 px-2 py-1 rounded-full border ${getTrendingColor(prospect.trending)}`}>
             {getTrendingIcon(prospect.trending)}
             <span className="text-xs font-medium">
@@ -89,11 +99,12 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
         </div>
         <button
           onClick={() => onToggleWatchlist(prospect.id)}
-          className={`p-1 rounded-full transition-colors ${
+          className={`p-1 rounded-full transition-colors active:scale-90 shadow hover:shadow-lg ${
             prospect.watchlisted 
-              ? 'text-brand-orange hover:text-brand-orange/80' 
-              : 'text-slate-400 hover:text-brand-orange'
+              ? 'text-brand-orange hover:text-brand-orange/80 bg-orange-50' 
+              : 'text-slate-400 hover:text-brand-orange bg-white'
           }`}
+          title={prospect.watchlisted ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
         >
           <Star className={`h-5 w-5 ${prospect.watchlisted ? 'fill-current' : ''}`} />
         </button>
@@ -107,15 +118,23 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-cyan border-t-transparent"></div>
             </div>
           )}
-          <img 
-            src={displayImageUrl} 
-            alt={imageState.hasError ? `${prospect.name} avatar` : prospect.name}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              imageState.isLoading ? 'opacity-0' : 'opacity-100'
-            }`}
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-          />
+          {!imageState.hasError ? (
+            <img 
+              src={displayImageUrl} 
+              alt={imageState.hasError ? `${prospect.name} avatar` : prospect.name}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageState.isLoading ? 'opacity-0' : 'opacity-100'
+              }`}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-orange to-brand-cyan">
+              <span className="text-white text-3xl font-bold select-none">
+                {prospect.name && prospect.name[0]}
+              </span>
+            </div>
+          )}
           {/* Image quality indicator */}
           {!imageState.hasError && !imageState.isLoading && (
             <div className="absolute bottom-0 right-0 bg-emerald-500 text-white text-xs px-1 rounded-tl-md">
@@ -135,7 +154,8 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
         </Link>
         <p className="text-sm text-gray-600">{prospect.school}</p>
         <div className="flex justify-center space-x-4 mt-2 text-xs text-gray-500">
-          <span>{prospect.height}</span>
+          <span>{prospect.height && typeof prospect.height === 'object' ? `${prospect.height.us} (${prospect.height.intl} cm)` : prospect.height}</span>
+          <span>{prospect.weight && typeof prospect.weight === 'object' ? `${prospect.weight.us} lbs (${prospect.weight.intl} kg)` : prospect.weight}</span>
           <span>{prospect.position}</span>
           <span>Class of {prospect.class}</span>
         </div>

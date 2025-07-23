@@ -68,85 +68,16 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Banner de Status dos Dados */}
-      <div className={`p-4 rounded-lg border ${
-        hasError ? 'bg-red-50 border-red-200' : 
-        isRealData ? 'bg-green-50 border-green-200' :
-        'bg-blue-50 border-blue-200'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {loading && <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />}
-            {hasError ? (
-              <AlertCircle className="h-5 w-5 text-red-600" />
-            ) : isRealData ? (
-              <Verified className="h-5 w-5 text-green-600" />
-            ) : (
-              <Database className="h-5 w-5 text-blue-600" />
-            )}
-            <div className="flex flex-col">
-              <span className={`font-bold text-lg ${
-                hasError ? 'text-red-800' : 
-                isRealData ? 'text-green-800' :
-                'text-blue-800'
-              }`}>
-                {hasError ? '❌ ERRO AO CARREGAR DADOS' : 
-                 loading ? '🔄 CARREGANDO...' :
-                 isRealData ? '✅ BASE VERIFICADA' :
-                 '📊 CARREGANDO...'}
-              </span>
-              <span className="text-sm font-medium">
-                {loading ? 'Carregando prospects da classe 2025...' : 
-                 hasError ? 'Erro ao carregar dados - clique para tentar novamente' :
-                 isRealData ? `${prospects.length} prospects verificados • ESPN 100 & 247Sports` :
-                 'Preparando dados...'}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            {isRealData && (
-              <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-xs font-medium text-green-700">VERIFICADO</span>
-              </div>
-            )}
-            <button
-              onClick={refreshData}
-              className={`px-4 py-2 text-white text-sm font-bold rounded transition-colors ${
-                loading ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-              disabled={loading}
-            >
-              {loading ? '🔄 Carregando...' : '🔄 Atualizar'}
-            </button>
+      {/* Banner de Boas-Vindas */}
+      <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 border border-blue-200 rounded-lg shadow p-6 mb-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-900 mb-2">Bem vindo ao prospectRadar!</h1>
+            <p className="text-base text-blue-800 max-w-2xl">
+              Plataforma de análise de jogadores jovens baseada em dados reais do ESPN 100, 247Sports e rankings internacionais. Explore, compare e simule o futuro do basquete com os melhores <span className="font-semibold text-brand-orange">prospects</span> da classe 2025!
+            </p>
           </div>
         </div>
-        
-        {hasError && (
-          <div className="mt-3 p-3 bg-red-100 rounded border border-red-300">
-            <p className="text-sm text-red-700 font-medium">
-              <strong>Erro:</strong> {error}
-            </p>
-            <p className="text-xs text-red-600 mt-1">
-              Não foi possível carregar os dados. Verifique sua conexão e tente novamente.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {dashboardStats.map((stat, index) => (
-          <div key={index} className="bg-white p-6 rounded-lg shadow-md border hover:shadow-lg transition-shadow">
-            <div className="flex items-center">
-              <stat.icon className={`h-8 w-8 ${stat.color}`} />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Banner do Mock Draft */}
@@ -159,12 +90,12 @@ const Dashboard = () => {
                 <h2 className="text-2xl font-bold">🏀 Mock Draft 2026</h2>
               </div>
               <p className="text-lg mb-2 text-blue-100">
-                Simule seu próprio draft com 60 prospects verificados da classe 2025!
+                Simule seu próprio draft com {prospects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados da classe 2025!
               </p>
               <div className="flex items-center space-x-6 text-sm text-blue-200 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>60 prospects da classe 2025</span>
+                  <span>{prospects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Globe className="h-4 w-4" />
@@ -184,16 +115,13 @@ const Dashboard = () => {
                   Começar Mock Draft
                   <ChevronRight className="h-5 w-5 ml-2" />
                 </Link>
-                <div className="text-sm text-blue-200">
-                  <div className="font-medium">BASE LIMPA!</div>
-                  <div>100% prospects reais</div>
-                </div>
+                
               </div>
             </div>
             <div className="hidden lg:block">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-yellow-300">60</div>
-                <div className="text-sm text-blue-200">Prospects Verificados</div>
+                <div className="text-3xl font-bold text-yellow-300">{prospects.length}</div>
+                <div className="text-sm text-blue-200"><span className="font-semibold">Prospects</span> Verificados</div>
                 <div className="mt-2 text-xs text-blue-300">
                   Classe 2025 • Draft 2026
                 </div>
@@ -209,10 +137,10 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
-              🇧🇷 Prospects Brasileiros
+              🇧🇷 <span className="text-brand-orange ml-2">Prospects </span>     Brasileiros
             </h2>
             <span className="text-sm text-green-700 bg-green-200 px-3 py-1 rounded-full font-medium">
-              {brazilianProspects.length} prospects
+              {brazilianProspects.length} <span className="font-semibold">prospects</span>
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -236,15 +164,15 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 flex items-center">
               <Globe className="h-5 w-5 text-blue-500 mr-2" />
-              🌍 Top Prospects Internacionais
+              🌍 Top <span className="text-brand-orange mx-1">Prospects</span> Internacionais
             </h2>
             <span className="text-sm text-gray-500 bg-blue-100 px-2 py-1 rounded">
-              {internationalProspects.length} prospects elite
+              {internationalProspects.length} <span className="font-semibold">prospects</span> elite
             </span>
           </div>
           <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-700">
-              <strong>📊 ESPN 100:</strong> Prospects internacionais baseados em rankings oficiais do ESPN, 247Sports e DraftExpress. 
+              <strong>📊 ESPN 100:</strong> <span className="font-semibold text-brand-orange">Prospects</span> internacionais baseados em rankings oficiais do ESPN, 247Sports e DraftExpress. 
               Incluem AJ Dybantsa (#1 ranking) e os irmãos Boozer.
             </p>
           </div>

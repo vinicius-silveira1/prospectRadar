@@ -35,22 +35,7 @@ function App() {
           </Route>
         </Routes>
         
-        {/* Indicador de status dos dados */}
-        {useRealData && (
-          <div className="fixed top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg z-50">
-            🔴 DADOS AO VIVO - LDB
-          </div>
-        )}
-        
-        {/* Debug component em desenvolvimento */}
-        {import.meta.env.MODE === 'development' && enableDebug && (
-          <div className="fixed bottom-4 right-4 bg-gray-900 text-white p-3 rounded-lg text-xs max-w-xs shadow-lg z-50">
-            <div className="font-bold mb-1">🔍 ProspectRadar Debug</div>
-            <div>Dados Reais: {useRealData ? '✅ Ativado' : '❌ Desativado'}</div>
-            <div>Modo: {import.meta.env.MODE}</div>
-            <div>Debug: {enableDebug ? '✅' : '❌'}</div>
-          </div>
-        )}
+        {/* ...existing code... */}
       </Router>
     </QueryClientProvider>
   );

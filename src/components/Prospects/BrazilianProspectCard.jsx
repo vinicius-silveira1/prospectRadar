@@ -5,51 +5,13 @@
  * brasileiros coletados da Liga de Desenvolvimento de Basquete
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Minus, MapPin, Trophy, Users } from 'lucide-react';
-import HighSchoolStatsService from '../../services/HighSchoolStatsService';
+import useHybridProspect from '../../hooks/useHybridProspect';
 
 const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) => {
-  // Aplicar dados híbridos diretamente no componente
-  const enhancedProspect = useMemo(() => {
-    if (!prospect) return prospect;
-    
-    const hsService = new HighSchoolStatsService();
-    
-    // Verifica se precisa de dados de HS
-    const needsHSData = !prospect.stats || 
-                        (!prospect.stats.ppg && !prospect.stats.rpg && !prospect.stats.apg) || 
-                        (prospect.stats.ppg === 0 && prospect.stats.rpg === 0 && prospect.stats.apg === 0);
-    
-    const hasHSData = hsService.hasHighSchoolData(prospect.id, prospect.name);
-    
-    if (needsHSData && hasHSData) {
-      const hsData = hsService.getHighSchoolStats(prospect.id, prospect.name);
-      
-      return {
-        ...prospect, // Preserva TUDO
-        stats: hsData.stats, // Substitui apenas stats
-        dataSource: 'high_school',
-        fallbackUsed: true,
-        season: hsData.season,
-        hsSchool: hsData.school,
-        hsAchievements: hsData.achievements,
-        displayInfo: {
-          sourceBadge: 'High School 2024-25',
-          sourceColor: 'bg-orange-100 text-orange-700',
-          reliability: 'Dados do último ano de High School'
-        }
-      };
-    }
-    
-    // Se não precisa de HS, retorna o original
-    return {
-      ...prospect,
-      dataSource: 'college',
-      fallbackUsed: false
-    };
-  }, [prospect]);
+  const enhancedProspect = useHybridProspect(prospect);
   
   // Use enhanced prospect
   const workingProspect = enhancedProspect || prospect;
@@ -96,7 +58,7 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
   const formattedStats = formatBrazilianStats();
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
       {/* Header com bandeira e badges */}
       <div className="relative">
         {/* Imagem do prospect */}
@@ -172,11 +134,11 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
         <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
           <div className="bg-gray-50 p-2 rounded">
             <span className="text-gray-600">Altura:</span>
-            <span className="font-medium ml-1">{prospect.height}</span>
+            <span className="font-medium ml-1">{prospect.height && typeof prospect.height === 'object' ? `${prospect.height.us} (${prospect.height.intl} cm)` : prospect.height}</span>
           </div>
           <div className="bg-gray-50 p-2 rounded">
             <span className="text-gray-600">Peso:</span>
-            <span className="font-medium ml-1">{prospect.weight}</span>
+            <span className="font-medium ml-1">{prospect.weight && typeof prospect.weight === 'object' ? `${prospect.weight.us} lbs (${prospect.weight.intl} kg)` : prospect.weight}</span>
           </div>
         </div>
 

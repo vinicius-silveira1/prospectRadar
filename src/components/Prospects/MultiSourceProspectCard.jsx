@@ -3,10 +3,10 @@
  * Mostra dados autênticos coletados de fontes oficiais
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, TrendingUp, Users, CheckCircle, Shield, Globe, Award, Verified } from 'lucide-react';
-import HighSchoolStatsService from '../../services/HighSchoolStatsService';
+import useHybridProspect from '../../hooks/useHybridProspect';
 
 const MultiSourceProspectCard = ({ 
   prospect, 
@@ -18,45 +18,8 @@ const MultiSourceProspectCard = ({
   showSource = false,
   actionButton = null // { text, onClick, icon, className }
 }) => {
-  // Aplicar dados híbridos diretamente no componente
-  const enhancedProspect = useMemo(() => {
-    if (!prospect) return prospect;
-    
-    const hsService = new HighSchoolStatsService();
-    
-    // Verifica se precisa de dados de HS
-    const needsHSData = !prospect.stats || 
-                        (!prospect.stats.ppg && !prospect.stats.rpg && !prospect.stats.apg) || 
-                        (prospect.stats.ppg === 0 && prospect.stats.rpg === 0 && prospect.stats.apg === 0);
-    
-    const hasHSData = hsService.hasHighSchoolData(prospect.id, prospect.name);
-    
-    if (needsHSData && hasHSData) {
-      const hsData = hsService.getHighSchoolStats(prospect.id, prospect.name);
-      
-      return {
-        ...prospect, // Preserva TUDO
-        stats: hsData.stats, // Substitui apenas stats
-        dataSource: 'high_school',
-        fallbackUsed: true,
-        season: hsData.season,
-        hsSchool: hsData.school,
-        hsAchievements: hsData.achievements,
-        displayInfo: {
-          sourceBadge: 'High School 2024-25',
-          sourceColor: 'bg-orange-100 text-orange-700',
-          reliability: 'Dados do último ano de High School'
-        }
-      };
-    }
-    
-    // Se não precisa de HS, retorna o original
-    return {
-      ...prospect,
-      dataSource: 'college',
-      fallbackUsed: false
-    };
-  }, [prospect]);
+  // Aplica o hook de dados híbridos para obter a versão mais completa do prospect
+  const enhancedProspect = useHybridProspect(prospect);
   
   // Use enhanced prospect
   const workingProspect = enhancedProspect || prospect;
@@ -104,7 +67,7 @@ const MultiSourceProspectCard = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md border hover:shadow-lg transition-all duration-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
       {/* Header com verificação */}
       <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-green-50">
         <div className="flex items-start justify-between">
@@ -152,7 +115,7 @@ const MultiSourceProspectCard = ({
               )}
             </div>
             <div className="text-xs text-gray-500 mt-1">
-              {height} 
+              {height && typeof height === 'object' ? `${height.us} (${height.intl} cm)` : height} 
               {hybridSeason && ` • Temporada ${hybridSeason}`}
               {showSource && source && ` • ${source}`}
               {draftClass && ` • Draft ${draftClass}`}
@@ -330,16 +293,16 @@ const MultiSourceProspectCard = ({
                   <span className="font-medium">{(hybridStats.three_pct * 100).toFixed(1)}%</span>
                 </div>
               )}
-              {stats.ft_pct && (
+              {hybridStats.ft_pct && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">FT%:</span>
-                  <span className="font-medium">{(stats.ft_pct * 100).toFixed(1)}%</span>
+                  <span className="font-medium">{(hybridStats.ft_pct * 100).toFixed(1)}%</span>
                 </div>
               )}
-              {stats.bpg && (
+              {hybridStats.bpg && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">BPG:</span>
-                  <span className="font-medium">{stats.bpg}</span>
+                  <span className="font-medium">{hybridStats.bpg}</span>
                 </div>
               )}
             </div>
