@@ -1,67 +1,23 @@
 # 🏀 ProspectRadar
 
-**A plataforma brasileira para acompanhar prospects de basquete universitário americano**
+**A plataforma definitiva para análise de prospects de basquete, com foco na comunidade brasileira.**
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-36B37E?logo=supabase&logoColor=white)](https://supabase.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=tanstack&logoColor=white)](https://tanstack.com/query/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Uma ferramenta moderna para acompanhar prospects do draft da NBA, feita por brasileiros para a comunidade brasileira de basquete.
-
-## 🏆 Diferencial Competitivo
-
-**ProspectRadar vs Concorrentes Internacionais:**
-- **Foco exclusivo no Brasil** - Lacuna não atendida por 247Sports, Rivals, ESPN
-- **Dados oficiais brasileiros** - Destaque para talentos nacionais no cenário internacional
-- **Cobertura completa** - Profissional + universitário americano + brasileiros
-- **Contexto brasileiro** - Análises específicas para nossa comunidade
-- **Interface em português** - Experiência nativa para fãs brasileiros
+Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, construída com a comunidade brasileira de basquete em mente.
 
 ## 🚀 Funcionalidades
 
-### ✅ Implementado
-- **Dashboard Interativo** - Visão geral dos principais prospects da classe 2026
-- **Comparação de Prospects** - Compare até 4 jogadores lado a lado com análises visuais
-- **Histórico de Drafts** - Dados completos dos drafts 2022-2024 com destaque para brasileiros
-- **Filtragem Avançada** - Por posição, tier, nacionalidade e características
-- **Interface Responsiva** - Otimizada para mobile e desktop
-
-### 📊 Base de Dados
-- **64 prospects verificados** da classe 2026 incluindo 4 brasileiros
-- **Histórico completo** dos últimos 3 drafts (2022-2024) com todos os 58 picks
-- **Dados integrados** do Basketball Reference para precisão histórica
-- **Prospects brasileiros** destacados: Reynan Santos, Wini Silva, Gabi Campos, Serjão Conceição
-
-## �️ Tecnologias
-
-- **React 18** - Framework principal
-- **Vite** - Build tool e dev server
-- **Tailwind CSS** - Styling moderno
-- **React Router** - Navegação SPA
-- **Lucide React** - Ícones consistentes
-
-## 📋 Instalação
-
-```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/prospectRadar.git
-cd prospectRadar
-
-# Instale as dependências
-npm install
-
-# Inicie o servidor de desenvolvimento
-npm run dev
-```
-
-### Scripts Disponíveis
-```bash
-npm run dev      # Servidor de desenvolvimento
-npm run build    # Build para produção
-npm run preview  # Preview do build
-npm run lint     # Análise de código
-```
+-   **Dashboard Interativo:** Visão geral dos principais prospects, com destaques para jogadores brasileiros e os melhores ranqueados.
+-   **Database de Prospects:** Explore uma lista completa de jogadores com filtros avançados por posição, tier, nacionalidade e mais.
+-   **Análise Detalhada:** Mergulhe em perfis completos de jogadores, com estatísticas, atributos físicos, pontos fortes e fracos.
+-   **Ferramenta de Comparação:** Compare até 4 prospects lado a lado em uma análise head-to-head detalhada.
+-   **Simulador de Mock Draft:** Crie e exporte seu próprio Mock Draft, fazendo as escolhas para cada time da loteria.
 
 ## 🎯 Páginas Principais
 
@@ -90,6 +46,47 @@ npm run lint     # Análise de código
 - "*Preciso de dados para meu artigo sobre prospects*"
 - "*Quero criar um vídeo sobre talentos brasileiros*"
 - "*Onde encontro estatísticas atualizadas?*"
+
+### 📊 Base de Dados
+
+-   **Backend com Supabase:** Toda a aplicação é alimentada por um backend robusto e escalável no Supabase, garantindo dados consistentes e em tempo real.
+-   **Prospects Verificados:** Acompanhe dezenas de prospects da classe de 2026, incluindo os principais talentos brasileiros.
+-   **Fontes Confiáveis:** Os dados são curados e agregados a partir de fontes renomadas como ESPN, 247Sports e Basketball Reference.
+
+## 🛠️ Tecnologias
+
+-   **React 19:** Framework principal para uma UI moderna e reativa.
+-   **Vite:** Build tool de alta performance.
+-   **Tailwind CSS:** Styling utilitário para um design rápido e consistente.
+-   **React Router:** Navegação e roteamento SPA.
+-   **Supabase:** Backend as a Service para banco de dados, autenticação e APIs.
+-   **TanStack Query (React Query):** Gerenciamento de estado do servidor, cache e sincronização de dados.
+-   **Lucide React:** Biblioteca de ícones leve e consistente.
+
+## 📋 Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/vinicius-silveira1/prospectRadar.git
+cd prospectRadar
+
+# Instale as dependências
+npm install
+
+# Crie seu arquivo .env a partir do exemplo
+cp .env.example .env
+
+# Inicie o servidor de desenvolvimento
+npm run dev
+```
+
+### Scripts Disponíveis
+```bash
+npm run dev      # Servidor de desenvolvimento
+npm run build    # Build para produção
+npm run preview  # Preview do build
+npm run lint     # Análise de código
+```
 
 ## 🇧🇷 Para a Comunidade Brasileira
 
