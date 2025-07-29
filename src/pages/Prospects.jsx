@@ -1,11 +1,21 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, Grid, List, Shuffle, Heart, TrendingUp, TrendingDown, Star, Users, Globe, GraduationCap } from 'lucide-react';
-import Draft2026Database from '../services/Draft2026Database.js';
+import useProspects from '@/hooks/useProspects.js';
+import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const Prospects = () => {
-  const database = new Draft2026Database();
+  const { prospects: allProspects, loading, error } = useProspects();
   
+  // Estados para filtros e visualização
+  const getTier = (index) => {
+    if (index < 5) return 'Lottery';
+    if (index < 15) return 'First Round';
+    if (index < 30) return 'Late First';
+    if (index < 45) return 'Second Round';
+    return 'Undrafted';
+  };
+
   // Estados para filtros e visualização
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('all');
@@ -16,31 +26,14 @@ const Prospects = () => {
   const [sortBy, setSortBy] = useState('ranking'); // ranking, name, position
   const [watchList, setWatchList] = useState(new Set());
 
-  // Obter dados dos prospects
-  const allProspects = database.getAllProspects();
-
-  // Filtros únicos para os dropdowns
-  const positions = [...new Set(allProspects.map(p => p.position))].filter(Boolean);
-  const countries = [...new Set(allProspects.map(p => p.nationality || p.country))].filter(Boolean);
-  const universities = [...new Set(allProspects.map(p => p.team))].filter(Boolean);
-
-  // Definir tiers baseados no ranking
-  const getTier = (index) => {
-    if (index < 5) return 'Lottery';
-    if (index < 15) return 'First Round';
-    if (index < 30) return 'Late First';
-    if (index < 45) return 'Second Round';
-    return 'Undrafted';
-  };
-
   // Prospects filtrados e ordenados
   const filteredProspects = useMemo(() => {
     let filtered = allProspects.filter(prospect => {
       const matchesSearch = prospect.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          prospect.team?.toLowerCase().includes(searchTerm.toLowerCase());
+                          prospect.high_school_team?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPosition = selectedPosition === 'all' || prospect.position === selectedPosition;
-      const matchesCountry = selectedCountry === 'all' || prospect.nationality === selectedCountry || prospect.country === selectedCountry;
-      const matchesUniversity = selectedUniversity === 'all' || prospect.team === selectedUniversity;
+      const matchesCountry = selectedCountry === 'all' || prospect.nationality === selectedCountry;
+      const matchesUniversity = selectedUniversity === 'all' || prospect.high_school_team === selectedUniversity;
       
       const prospectIndex = allProspects.indexOf(prospect);
       const tier = getTier(prospectIndex);
@@ -59,6 +52,28 @@ const Prospects = () => {
 
     return filtered;
   }, [allProspects, searchTerm, selectedPosition, selectedTier, selectedCountry, selectedUniversity, sortBy]);
+
+  // Adiciona tratamento para os estados de carregamento e erro APÓS todos os hooks.
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        <p>Ocorreu um erro ao carregar os prospects: {error}</p>
+      </div>
+    );
+  }
+
+  // Filtros únicos para os dropdowns (calculados apenas se não estiver carregando/com erro)
+  const positions = [...new Set(allProspects.map(p => p.position))].filter(Boolean);
+  const countries = [...new Set(allProspects.map(p => p.nationality))].filter(Boolean);
+  const universities = [...new Set(allProspects.map(p => p.high_school_team))].filter(Boolean);
 
   // Função para adicionar/remover da watch list
   const toggleWatchList = (prospectId) => {
@@ -94,9 +109,11 @@ const Prospects = () => {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Prospects Database</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                <span className="text-brand-orange">Prospects</span> Database
+              </h1>
               <p className="text-gray-600 mt-2">
-                Explore e analise {allProspects.length} prospects do Draft 2026
+                Explore e analise {allProspects.length} <span className="font-semibold text-brand-orange">prospects</span> do Draft 2026
               </p>
             </div>
             
@@ -225,7 +242,7 @@ const Prospects = () => {
           <div className="mt-4 flex items-center gap-6 text-sm text-gray-600">
             <span className="flex items-center gap-1">
               <Users size={16} />
-              {filteredProspects.length} prospects encontrados
+              {filteredProspects.length} <span className="font-semibold text-brand-orange">prospects</span> encontrados
             </span>
             {watchList.size > 0 && (
               <span className="flex items-center gap-1">
@@ -310,16 +327,23 @@ const Prospects = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <GraduationCap size={14} />
-                        <span className="line-clamp-1">{prospect.team || 'N/A'}</span>
+                        <span className="line-clamp-1">{prospect.high_school_team || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Globe size={14} />
                         <span>
                           {prospect.nationality === '🇺🇸' ? 'USA' : 
                            prospect.nationality === '🇧🇷' ? 'Brasil' : 
-                           prospect.nationality || prospect.country || 'N/A'}
+                           prospect.nationality || 'N/A'}
                         </span>
                       </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="border-t mt-3 pt-3 space-y-1 text-xs text-gray-500">
+                      <div className="flex justify-between"><span>PPG:</span> <span className="font-medium text-gray-700">{prospect.ppg?.toFixed(1) || '-'}</span></div>
+                      <div className="flex justify-between"><span>RPG:</span> <span className="font-medium text-gray-700">{prospect.rpg?.toFixed(1) || '-'}</span></div>
+                      <div className="flex justify-between"><span>APG:</span> <span className="font-medium text-gray-700">{prospect.apg?.toFixed(1) || '-'}</span></div>
                     </div>
 
                     {/* Ações */}
@@ -340,12 +364,14 @@ const Prospects = () => {
           /* Lista Compacta */
           <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
             <div className="px-6 py-4 border-b bg-gray-50">
-              <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700">
+              <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 <div className="col-span-1">#</div>
                 <div className="col-span-4">Nome</div>
                 <div className="col-span-1">Pos</div>
-                <div className="col-span-3">Universidade</div>
-                <div className="col-span-2">País</div>
+                <div className="col-span-1 text-center">PPG</div>
+                <div className="col-span-1 text-center">RPG</div>
+                <div className="col-span-1 text-center">APG</div>
+                <div className="col-span-2">Universidade</div>
                 <div className="col-span-1">Ações</div>
               </div>
             </div>
@@ -385,14 +411,18 @@ const Prospects = () => {
                         </span>
                       </div>
                       
-                      <div className="col-span-3 text-gray-600">
-                        {prospect.team || 'N/A'}
+                      <div className="col-span-1 text-center text-gray-800 font-medium">
+                        {prospect.ppg?.toFixed(1) ?? '-'}
+                      </div>
+                      <div className="col-span-1 text-center text-gray-800 font-medium">
+                        {prospect.rpg?.toFixed(1) ?? '-'}
+                      </div>
+                      <div className="col-span-1 text-center text-gray-800 font-medium">
+                        {prospect.apg?.toFixed(1) ?? '-'}
                       </div>
                       
                       <div className="col-span-2 text-gray-600">
-                        {prospect.nationality === '🇺🇸' ? 'USA' : 
-                         prospect.nationality === '🇧🇷' ? 'Brasil' : 
-                         prospect.nationality || prospect.country || 'N/A'}
+                        {prospect.high_school_team || 'N/A'}
                       </div>
                       
                       <div className="col-span-1">

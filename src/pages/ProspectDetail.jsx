@@ -1,25 +1,19 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe } from 'lucide-react';
-import useRealProspectData from '../hooks/useRealProspectData';
-import useHybridProspect from '../hooks/useHybridProspect';
+import useProspect from '@/hooks/useProspect.js';
+import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { prospects, loading, error } = useRealProspectData();
-
-  const originalProspect = prospects.find(p => p.id === id);
-  const prospect = useHybridProspect(originalProspect);
+  const { prospect, loading, error } = useProspect(id);
 
   // CONDIÇÕES DE RETORNO APÓS TODOS OS HOOKS
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando detalhes do prospect...</p>
-        </div>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -27,8 +21,8 @@ const ProspectDetail = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Erro ao carregar dados do prospect</p>
+        <div className="text-center text-red-500">
+          <p className="mb-4">Erro ao carregar dados do prospect: {error}</p>
           <button 
             onClick={() => navigate('/prospects')}
             className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
@@ -40,22 +34,10 @@ const ProspectDetail = () => {
     );
   }
 
-  if (!originalProspect || !prospect) {
+  if (!prospect) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Prospect não encontrado...</p>
-          <div className="mt-4">
-            <p className="text-sm text-gray-500 mb-2">ID procurado: {id}</p>
-            <button 
-              onClick={() => navigate('/prospects')}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-            >
-              Voltar para Prospects
-            </button>
-          </div>
-        </div>
+        <p className="text-gray-600">Prospect não encontrado.</p>
       </div>
     );
   }
@@ -83,8 +65,8 @@ const ProspectDetail = () => {
 
   const getStarRating = (prospect) => {
     // Usar ESPN grade para calcular rating de estrelas
-    const rating = prospect.espnGrade ? Math.round(prospect.espnGrade / 20) : 
-                   prospect.tier === 'ELITE' ? 5 :
+    const rating = prospect.ranking ? Math.max(1, 5 - Math.floor((prospect.ranking - 1) / 10)) : // Simple rank-based rating
+                   prospect.tier === 'Elite' ? 5 :
                    prospect.tier === 'Elite' ? 5 :
                    prospect.tier === 'First Round' ? 4 :
                    prospect.tier === 'Second Round' ? 3 : 2;
@@ -151,7 +133,7 @@ const ProspectDetail = () => {
               </h2>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {prospect.isBrazilian && (
+                {prospect.nationality === 'BR' && (
                   <div className="flex items-center">
                     <Globe className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
@@ -168,7 +150,7 @@ const ProspectDetail = () => {
                   <MapPin className="w-5 h-5 text-gray-400 mr-3" />
                   <div>
                     <div className="text-sm text-gray-600">Escola/College</div>
-                    <div className="font-medium">{prospect.team || prospect.college || prospect.school}</div>
+                    <div className="font-medium">{prospect.high_school_team || 'N/A'}</div>
                   </div>
                 </div>
                 
@@ -184,7 +166,9 @@ const ProspectDetail = () => {
                   <Ruler className="w-5 h-5 text-gray-400 mr-3" />
                   <div>
                     <div className="text-sm text-gray-600">Altura</div>
-                    <div className="font-medium">{prospect.height}</div>
+                    <div className="font-medium">
+                      {typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}
+                    </div>
                   </div>
                 </div>
                 
@@ -192,7 +176,16 @@ const ProspectDetail = () => {
                   <Weight className="w-5 h-5 text-gray-400 mr-3" />
                   <div>
                     <div className="text-sm text-gray-600">Peso</div>
-                    <div className="font-medium">{prospect.weight}</div>
+                    <div className="font-medium">
+                      {(() => {
+                        try {
+                          const parsedWeight = JSON.parse(prospect.weight);
+                          return `${parsedWeight.us} lbs`;
+                        } catch (e) {
+                          return prospect.weight || 'N/A';
+                        }
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -266,35 +259,33 @@ const ProspectDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900">Estatísticas</h3>
-                {prospect.fallbackUsed && (
-                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
-                    High School 2024-25
-                  </span>
-                )}
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  High School
+                </span>
               </div>                <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Pontos por Jogo</span>
-                  <span className="font-bold text-orange-500">{prospect.stats?.ppg || 'N/A'}</span>
+                  <span className="font-bold text-orange-500">{prospect.ppg?.toFixed(1) || 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Rebotes por Jogo</span>
-                  <span className="font-bold text-blue-500">{prospect.stats?.rpg || 'N/A'}</span>
+                  <span className="font-bold text-blue-500">{prospect.rpg?.toFixed(1) || 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Assistências por Jogo</span>
-                  <span className="font-bold text-green-500">{prospect.stats?.apg || 'N/A'}</span>
+                  <span className="font-bold text-green-500">{prospect.apg?.toFixed(1) || 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">% Field Goal</span>
-                  <span className="font-bold text-purple-500">{prospect.stats?.fg ? `${prospect.stats.fg}%` : 'N/A'}</span>
+                  <span className="font-bold text-purple-500">{prospect.fg_pct ? `${prospect.fg_pct.toFixed(1)}%` : 'N/A'}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">% Free Throw</span>
-                  <span className="font-bold text-red-500">{prospect.stats?.ft ? `${prospect.stats.ft}%` : 'N/A'}</span>
+                  <span className="font-bold text-red-500">{prospect.ft_pct ? `${prospect.ft_pct.toFixed(1)}%` : 'N/A'}</span>
                 </div>
                 
                 {prospect.espnGrade && (
@@ -311,7 +302,7 @@ const ProspectDetail = () => {
             {/* Mock Draft Position */}
             <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-sm p-6 text-white">
               <h3 className="text-lg font-bold mb-2">Projeção Mock Draft</h3>
-              <div className="text-3xl font-bold mb-1">Pick #{prospect.mockDraftPosition || prospect.ranking}</div>
+              <div className="text-3xl font-bold mb-1">Pick #{prospect.ranking || 'N/A'}</div>
               <div className="text-orange-100 text-sm">
                 {prospect.tier === 'Elite' ? 'Lottery Pick' : 
                  prospect.tier === 'First Round' ? 'First Round' :

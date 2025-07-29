@@ -76,8 +76,9 @@ export const prospectEvaluationMetrics = {
  */
 export class ProspectRankingAlgorithm {
   
-  constructor() {
-    this.weights = prospectEvaluationMetrics;
+  // CORREÇÃO: Permite injetar diferentes modelos de avaliação.
+  constructor(evaluationModel = prospectEvaluationMetrics) {
+    this.weights = evaluationModel;
     this.nbaSuccessDatabase = this.loadNBASuccessPatterns();
   }
 

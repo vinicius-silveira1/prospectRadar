@@ -7,7 +7,7 @@ import Prospects from './pages/Prospects';
 import ProspectDetail from './pages/ProspectDetail';
 import Compare from './pages/Compare';
 import DraftHistory from './pages/DraftHistory';
-import DatabaseComparison from './components/DatabaseComparison';
+
 
 // Create a client
 const queryClient = new QueryClient();
@@ -27,7 +27,6 @@ function App() {
             <Route path="prospects" element={<Prospects />} />
             <Route path="prospects/:id" element={<ProspectDetail />} />
             <Route path="draft" element={<MockDraft />} />
-            <Route path="database-evolution" element={<DatabaseComparison />} />
             <Route path="compare" element={<Compare />} />
             <Route path="watchlist" element={<div className="p-8 text-center text-gray-500">Página de favoritos em breve...</div>} />
             <Route path="trending" element={<div className="p-8 text-center text-gray-500">Página de tendências em breve...</div>} />

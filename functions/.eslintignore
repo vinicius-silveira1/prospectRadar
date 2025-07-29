@@ -1,0 +1,2 @@
+# Ignora o próprio arquivo de configuração do ESLint durante a verificação.
+.eslintrc.js

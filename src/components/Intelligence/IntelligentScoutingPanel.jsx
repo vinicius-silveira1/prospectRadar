@@ -306,12 +306,12 @@ const ProspectIntelligentCard = ({ prospect, rank }) => {
       </div>
 
       {/* Estatísticas Básicas */}
-      {prospect.stats && (
+      {(prospect.ppg || prospect.rpg || prospect.apg) && (
         <div className="mt-3 flex items-center space-x-4 text-sm text-gray-600">
-          {prospect.stats.ppg && <span>{prospect.stats.ppg} PPG</span>}
-          {prospect.stats.rpg && <span>{prospect.stats.rpg} RPG</span>}
-          {prospect.stats.apg && <span>{prospect.stats.apg} APG</span>}
-          {prospect.stats.fg && <span>{(prospect.stats.fg * 100).toFixed(1)}% FG</span>}
+          {prospect.ppg && <span>{prospect.ppg.toFixed(1)} PPG</span>}
+          {prospect.rpg && <span>{prospect.rpg.toFixed(1)} RPG</span>}
+          {prospect.apg && <span>{prospect.apg.toFixed(1)} APG</span>}
+          {prospect.fg_pct && <span>{prospect.fg_pct.toFixed(1)}% FG</span>}
         </div>
       )}
 

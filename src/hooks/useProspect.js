@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { getProspectById } from '@/services/prospects.js';
 
 /**
- * Hook para buscar um único documento de prospect do Firestore pelo seu ID.
- * @param {string} prospectId - O ID do documento no Firestore.
+* Hook para buscar um único prospect pelo seu ID.
+ * @param {string} prospectId - O ID do prospecto.
  * @returns {{prospect: object|null, loading: boolean, error: string|null}}
  */
 const useProspect = (prospectId) => {
@@ -18,42 +17,20 @@ const useProspect = (prospectId) => {
       return;
     }
 
-    let isActive = true;
-
     const fetchProspect = async () => {
       setLoading(true);
-      // Reset previous state when a new ID is provided
-      setProspect(null);
-      setError(null);
-
       try {
-        const docRef = doc(db, 'prospects', prospectId);
-        const docSnap = await getDoc(docRef);
-
-        if (isActive) {
-          if (docSnap.exists()) {
-            setProspect({ id: docSnap.id, ...docSnap.data() });
-          } else {
-            setError('Prospect não encontrado.');
-          }
-        }
+        const data = await getProspectById(prospectId);
+        setProspect(data);
       } catch (err) {
         console.error('Erro ao buscar prospect:', err);
-        if (isActive) {
-          setError('Ocorreu um erro ao carregar os dados do prospect.');
-        }
+        setError(err.message || 'Ocorreu um erro ao carregar os dados do prospect.');
       } finally {
-        if (isActive) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchProspect();
-
-    return () => {
-      isActive = false;
-    };
   }, [prospectId]);
 
   return { prospect, loading, error };

@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Users, Star, Search, Trophy, Filter, RefreshCw, Database, CheckCircle, AlertCircle, Verified, Globe, Shuffle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import useRealProspectData from '../hooks/useRealProspectData.js';
-import ProspectCard from '../components/Prospects/ProspectCard';
-import MultiSourceProspectCard from '../components/Prospects/MultiSourceProspectCard';
+import useProspects from '../hooks/useProspects.js';
 
 const Dashboard = () => {
   const [expandedProspect, setExpandedProspect] = useState(null);
@@ -13,17 +11,22 @@ const Dashboard = () => {
     prospects,
     loading,
     error,
-    dataSource,
-    metadata,
-    topProspects,
-    brazilianProspects,
-    internationalProspects,
-    dataStats,
     refreshData: originalRefreshData,
-    isRealData,
-    hasError,
     isLoaded
-  } = useRealProspectData();
+  } = useProspects();
+
+  // CORREÇÃO: Criamos uma lista dedicada para os melhores prospects gerais.
+  const topProspects = useMemo(() => {
+    if (!prospects) return [];
+    return prospects.slice(0, 3); // A lista já vem ordenada por ranking do hook.
+  }, [prospects]);
+
+  // CORREÇÃO: Recalculamos os dados derivados aqui para garantir que a lógica está correta.
+  const brazilianProspects = useMemo(() => {
+    if (!prospects) return [];
+    // O banco de dados usa o emoji da bandeira, não o código 'BR'.
+    return prospects.filter(p => p.nationality === '🇧🇷');
+  }, [prospects]);
 
   // Função para recarregar os dados
   const refreshData = originalRefreshData || (() => {
@@ -47,12 +50,6 @@ const Dashboard = () => {
       color: 'text-green-600' 
     },
     { 
-      label: 'Prospects Internacionais', 
-      value: internationalProspects.length, 
-      icon: Globe, 
-      color: 'text-blue-600' 
-    },
-    { 
       label: 'Total de Prospects', 
       value: prospects.length, 
       icon: Users, 
@@ -60,7 +57,7 @@ const Dashboard = () => {
     },
     { 
       label: 'Prospects Verificados', 
-      value: dataStats?.verifiedReal || prospects.length, 
+      value: prospects.length, 
       icon: Verified, 
       color: 'text-purple-600' 
     }
@@ -143,49 +140,41 @@ const Dashboard = () => {
               {brazilianProspects.length} <span className="font-semibold">prospects</span>
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {brazilianProspects.slice(0, 6).map((prospect) => (
-              <MultiSourceProspectCard
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {brazilianProspects.map((prospect) => (
+              <DashboardProspectCard
                 key={prospect.name}
                 prospect={prospect}
-                onToggleWatchlist={handleToggleWatchlist}
-                isExpanded={expandedProspect === prospect.id}
                 onExpand={() => handleProspectExpand(prospect)}
-                showVerification={true}
               />
             ))}
           </div>
         </div>
       )}
 
-      {/* Top Prospects Internacionais */}
-      {isLoaded && internationalProspects.length > 0 && (
+      {/* Top Prospects Gerais */}
+      {isLoaded && topProspects.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 flex items-center">
-              <Globe className="h-5 w-5 text-blue-500 mr-2" />
-              🌍 Top <span className="text-brand-orange mx-1">Prospects</span> Internacionais
+              <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+              🏆 Top <span className="text-brand-orange mx-1">Prospects</span> Gerais
             </h2>
-            <span className="text-sm text-gray-500 bg-blue-100 px-2 py-1 rounded">
-              {internationalProspects.length} <span className="font-semibold">prospects</span> elite
+            <span className="text-sm text-gray-500 bg-yellow-100 px-2 py-1 rounded">
+              Os melhores da classe
             </span>
           </div>
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-700">
-              <strong>📊 ESPN 100:</strong> <span className="font-semibold text-brand-orange">Prospects</span> internacionais baseados em rankings oficiais do ESPN, 247Sports e DraftExpress. 
-              Incluem AJ Dybantsa (#1 ranking) e os irmãos Boozer.
+          <div className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-sm text-yellow-800">
+              <strong>📊 ESPN 100 & 247Sports:</strong> Os prospects mais bem ranqueados da classe, incluindo AJ Dybantsa (#1), Cameron Boozer (#2) e outros.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {internationalProspects.slice(0, 6).map((prospect) => (
-              <MultiSourceProspectCard
+            {topProspects.map((prospect) => (
+              <DashboardProspectCard
                 key={prospect.name}
                 prospect={prospect}
-                onToggleWatchlist={handleToggleWatchlist}
-                isExpanded={expandedProspect === prospect.id}
                 onExpand={() => handleProspectExpand(prospect)}
-                showVerification={true}
-                showSource={true}
               />
             ))}
           </div>
@@ -208,7 +197,7 @@ const Dashboard = () => {
       )}
 
       {/* Empty State */}
-      {isLoaded && prospects.length === 0 && !hasError && (
+      {isLoaded && prospects.length === 0 && !error && (
         <div className="text-center py-12">
           <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -225,6 +214,50 @@ const Dashboard = () => {
           </button>
         </div>
       )}
+    </div>
+  );
+};
+
+// NOVO COMPONENTE: Card de Prospect para o Dashboard que exibe estatísticas.
+const DashboardProspectCard = ({ prospect }) => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border hover:shadow-lg transition-all duration-300">
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-gray-900 hover:text-blue-600">
+              {prospect.name}
+            </Link>
+            <p className="text-sm text-gray-500">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
+          </div>
+          <span className="text-2xl font-bold text-gray-300">#{prospect.ranking}</span>
+        </div>
+
+        <div className="mt-4 border-t pt-3">
+          <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Estatísticas</h4>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-xl font-bold text-blue-600">{prospect.ppg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-gray-500">PPG</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-green-600">{prospect.rpg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-gray-500">RPG</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-orange-600">{prospect.apg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-gray-500">APG</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+           <Link to={`/prospects/${prospect.id}`} className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 transition-colors text-sm">
+              Ver Perfil Completo
+              <ChevronRight className="h-4 w-4 ml-1" />
+           </Link>
+        </div>
+      </div>
     </div>
   );
 };

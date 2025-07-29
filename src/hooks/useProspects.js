@@ -1,264 +1,73 @@
-/**
- * HOOK PARA DADOS REAIS DE PROSPECTS
- * 
- * Este hook gerencia a transição entre dados mockados e dados reais
- * da LDB, permitindo uma migração gradual e segura.
- */
-
-import { useState, useEffect } from 'react';
-import { updateProspectsDatabase, convertToProspectFormat, getSystemHealth } from '../services/realDataService';
-import { mockProspects } from '../data/mockData';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { getProspects } from '@/services/prospects.js';
 
 /**
- * Hook para gerenciar dados de prospects (mock + real)
+ * Hook para buscar e gerenciar a lista completa de prospects.
  */
-export function useProspects(options = {}) {
-  const {
-    useRealData = false, // Flag para alternar entre dados reais e mock
-    refreshInterval = 30 * 60 * 1000, // 30 minutos
-    fallbackToMock = true // Fallback para dados mock em caso de erro
-  } = options;
-
-  const [prospects, setProspects] = useState(mockProspects);
-  const [loading, setLoading] = useState(false);
+const useProspects = () => {
+  const [prospects, setProspects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dataSource, setDataSource] = useState('mock');
-  const [lastUpdate, setLastUpdate] = useState(null);
-  const [systemHealth, setSystemHealth] = useState(null);
 
-  /**
-   * Carrega dados reais da LDB
-   */
-  const loadRealData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
-      console.log('🔄 Carregando dados reais da LDB...');
-      
-      const realData = await updateProspectsDatabase();
-      const formattedProspects = convertToProspectFormat(realData);
-      
-      if (formattedProspects.length > 0) {
-        setProspects(formattedProspects);
-        setDataSource('real');
-        setLastUpdate(new Date().toISOString());
-        
-        console.log(`✅ ${formattedProspects.length} prospects carregados da LDB`);
-      } else {
-        throw new Error('Nenhum prospect foi carregado da fonte real');
-      }
-      
+      const data = await getProspects();
+      setProspects(data);
     } catch (err) {
-      console.error('❌ Erro ao carregar dados reais:', err.message);
-      setError(err.message);
-      
-      if (fallbackToMock) {
-        console.log('🔄 Usando dados mock como fallback...');
-        setProspects(mockProspects);
-        setDataSource('mock_fallback');
-      }
+      setError(err.message || 'Ocorreu um erro ao carregar os dados.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  /**
-   * Força uso de dados mock
-   */
-  const loadMockData = () => {
-    setProspects(mockProspects);
-    setDataSource('mock');
-    setLastUpdate(new Date().toISOString());
-    setError(null);
-  };
-
-  /**
-   * Atualiza saúde do sistema
-   */
-  const updateSystemHealth = () => {
-    const health = getSystemHealth();
-    setSystemHealth(health);
-  };
-
-  /**
-   * Força refresh dos dados
-   */
-  const refreshData = async () => {
-    if (useRealData) {
-      await loadRealData();
-    } else {
-      loadMockData();
-    }
-    updateSystemHealth();
-  };
-
-  // Efeito inicial e configuração de refresh automático
   useEffect(() => {
-    if (useRealData) {
-      loadRealData();
-    } else {
-      loadMockData();
-    }
-    
-    updateSystemHealth();
+    fetchData();
+  }, [fetchData]);
 
-    // Configura refresh automático apenas para dados reais
-    let interval;
-    if (useRealData && refreshInterval > 0) {
-      interval = setInterval(() => {
-        console.log('🔄 Refresh automático dos dados...');
-        loadRealData();
-      }, refreshInterval);
-    }
+  // --- Dados Derivados (Memoizados para Performance) ---
+  const topProspects = useMemo(() => {
+    return prospects.slice(0, 10);
+  }, [prospects]);
 
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [useRealData, refreshInterval]);
+  const brazilianProspects = useMemo(() => {
+    return prospects.filter(p => p.nationality === '🇧🇷');
+  }, [prospects]);
+
+  const internationalProspects = useMemo(() => {
+    return prospects.filter(p => p.nationality && p.nationality !== '🇧🇷' && p.nationality !== 'US');
+  }, [prospects]);
+
+  const trendingPlayers = useMemo(() => {
+    return prospects.filter(p => p.trending === 'hot' || p.trending === 'rising');
+  }, [prospects]);
+
+  const dataStats = useMemo(() => {
+    if (prospects.length === 0) return null;
+    const totalPlayers = prospects.length;
+    const safeProspects = prospects.filter(p => typeof p.age === 'number');
+    const averageAge = safeProspects.reduce((acc, p) => acc + p.age, 0) / (safeProspects.length || 1);
+    const positions = prospects.reduce((acc, p) => {
+      acc[p.position] = (acc[p.position] || 0) + 1;
+      return acc;
+    }, {});
+    return { totalPlayers, averageAge, topPositions: positions };
+  }, [prospects]);
 
   return {
     prospects,
     loading,
     error,
-    dataSource,
-    lastUpdate,
-    systemHealth,
-    refreshData,
-    loadRealData,
-    loadMockData,
-    // Estatísticas úteis
-    stats: {
-      total: prospects.length,
-      byLeague: prospects.reduce((acc, p) => {
-        acc[p.league] = (acc[p.league] || 0) + 1;
-        return acc;
-      }, {}),
-      avgRating: prospects.reduce((acc, p) => {
-        const rating = p.recruitment?.rating || 0;
-        return acc + (typeof rating === 'string' ? rating.length : rating);
-      }, 0) / prospects.length
-    }
+    topProspects,
+    brazilianProspects,
+    internationalProspects,
+    trendingPlayers,
+    dataStats,
+    refreshData: fetchData,
+    hasError: !!error,
+    isLoaded: !loading && !error
   };
-}
+};
 
-/**
- * Hook específico para prospects da LDB
- */
-export function useLDBProspects() {
-  return useProspects({
-    useRealData: true,
-    refreshInterval: 15 * 60 * 1000, // 15 minutos para dados mais frescos
-    fallbackToMock: true
-  });
-}
-
-/**
- * Hook para dados híbridos (mix de real + mock)
- */
-export function useHybridProspects() {
-  const [hybridProspects, setHybridProspects] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const realData = useProspects({ useRealData: true });
-  const mockData = useProspects({ useRealData: false });
-
-  useEffect(() => {
-    setLoading(realData.loading);
-
-    // Combina dados reais (prioritários) com mock (complementares)
-    const combined = [
-      ...realData.prospects.map(p => ({ ...p, source: 'real', priority: 1 })),
-      ...mockData.prospects
-        .filter(mp => !realData.prospects.some(rp => rp.name === mp.name))
-        .map(p => ({ ...p, source: 'mock', priority: 2 }))
-    ].sort((a, b) => a.priority - b.priority);
-
-    setHybridProspects(combined);
-  }, [realData.prospects, mockData.prospects, realData.loading]);
-
-  return {
-    prospects: hybridProspects,
-    loading,
-    realCount: realData.prospects.length,
-    mockCount: mockData.prospects.length,
-    dataSource: 'hybrid',
-    systemHealth: realData.systemHealth,
-    refreshData: realData.refreshData
-  };
-}
-
-/**
- * Provider de contexto para configurações globais
- */
-import React, { createContext, useContext } from 'react';
-
-const ProspectDataContext = createContext();
-
-export function ProspectDataProvider({ children, config = {} }) {
-  const {
-    preferRealData = false,
-    refreshInterval = 30 * 60 * 1000,
-    fallbackEnabled = true
-  } = config;
-
-  const contextValue = {
-    preferRealData,
-    refreshInterval,
-    fallbackEnabled
-  };
-
-  return (
-    <ProspectDataContext.Provider value={contextValue}>
-      {children}
-    </ProspectDataContext.Provider>
-  );
-}
-
-export function useProspectConfig() {
-  const context = useContext(ProspectDataContext);
-  if (!context) {
-    throw new Error('useProspectConfig deve ser usado dentro de ProspectDataProvider');
-  }
-  return context;
-}
-
-/**
- * Componente de debug para desenvolvimento
- */
-export function ProspectDataDebug() {
-  const realData = useProspects({ useRealData: true });
-  const mockData = useProspects({ useRealData: false });
-
-  return (
-    <div className="fixed bottom-4 right-4 bg-gray-900 text-white p-4 rounded-lg text-xs max-w-sm">
-      <h3 className="font-bold mb-2">🔍 Debug: Prospect Data</h3>
-      
-      <div className="space-y-1">
-        <div>📊 Real Data: {realData.prospects.length} prospects</div>
-        <div>🎭 Mock Data: {mockData.prospects.length} prospects</div>
-        <div>🏥 System Health: {realData.systemHealth?.status || 'unknown'}</div>
-        <div>⚡ Cache Size: {realData.systemHealth?.cacheSize || 0}</div>
-        <div>🕐 Last Update: {realData.lastUpdate ? new Date(realData.lastUpdate).toLocaleTimeString() : 'Never'}</div>
-        
-        {realData.error && (
-          <div className="text-red-400 mt-2">
-            ❌ Error: {realData.error}
-          </div>
-        )}
-      </div>
-      
-      <div className="mt-2 space-x-2">
-        <button 
-          onClick={realData.refreshData}
-          className="bg-blue-600 px-2 py-1 rounded text-xs"
-          disabled={realData.loading}
-        >
-          {realData.loading ? '⏳' : '🔄'} Refresh
-        </button>
-      </div>
-    </div>
-  );
-}
+export default useProspects;

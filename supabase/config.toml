@@ -1,0 +1,7 @@
+# supabase/config.toml
+
+# Define as configurações para a função específica 'update-prospect-stats'
+[functions.update-prospect-stats]
+# Aponta para o mapa de importação. O caminho é relativo à raiz do projeto.
+# O caminho deve ser relativo à pasta 'supabase', onde este config.toml está.
+import_map = "import_map.json"

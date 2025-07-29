@@ -6,14 +6,16 @@ import {
   Star, Globe, Flag, TrendingUp, Database
 } from 'lucide-react';
 import useMockDraft from '../hooks/useMockDraft.js';
-import MultiSourceProspectCard from '../components/Prospects/MultiSourceProspectCard.jsx';
-import ExportModal from '../components/MockDraft/ExportModal.jsx';
-import Draft2026Database from '../services/Draft2026Database.js';
+import MultiSourceProspectCard from '@/components/Prospects/MultiSourceProspectCard.jsx';
+import ExportModal from '@/components/MockDraft/ExportModal.jsx';
+import useProspects from '@/hooks/useProspects.js';
+import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const MockDraft = () => {
-  const database = new Draft2026Database();
   
-  const {
+  const { prospects: allProspects, loading, error } = useProspects();
+  
+  const { // O hook agora é inicializado com os prospects do Firestore.
     draftBoard,
     availableProspects,
     currentPick,
@@ -35,7 +37,7 @@ const MockDraft = () => {
     getDraftStats,
     isDraftComplete,
     progress
-  } = useMockDraft();
+  } = useMockDraft(allProspects);
 
   const [view, setView] = useState('draft'); // draft, bigboard, prospects
   const [showFilters, setShowFilters] = useState(false);
@@ -69,6 +71,22 @@ const MockDraft = () => {
 
   const currentPickInfo = draftBoard[currentPick - 1];
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        <p>Ocorreu um erro ao carregar os prospects: {error.message || 'Tente novamente.'}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">      
       {/* Header com Status do Mock Draft */}
@@ -80,7 +98,7 @@ const MockDraft = () => {
               Mock Draft {draftSettings.draftClass}
             </h1>
             <p className="text-blue-100 mt-2">
-              Monte seu próprio draft com {database.getDatabaseStats().totalProspects} prospects reais e curados
+              Monte seu próprio draft com {allProspects.length} prospects reais e curados
             </p>
           </div>
           <div className="text-right">
@@ -347,9 +365,9 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
             <div>
               <div className="font-medium text-gray-900">{pick.prospect.name}</div>
               <div className="text-sm text-gray-600">
-                {pick.prospect.position} • {pick.prospect.nationality}
+                {pick.prospect.position} • {pick.prospect.nationality || 'N/A'}
               </div>
-              <div className="text-xs text-gray-500">{pick.prospect.team}</div>
+              <div className="text-xs text-gray-500">{pick.prospect.high_school_team || 'N/A'}</div>
             </div>
           ) : (
             <div className="text-gray-400 text-sm italic">
