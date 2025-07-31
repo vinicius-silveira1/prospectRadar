@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import puppeteer from 'puppeteer-extra'; // Usamos puppeteer-extra para o plugin
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'; // Plugin para dificultar a detecção
 import 'dotenv/config'; // Para carregar as variáveis de ambiente
 
 // --- Configuração ---
