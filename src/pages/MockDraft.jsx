@@ -6,7 +6,6 @@ import {
   Star, Globe, Flag, TrendingUp, Database
 } from 'lucide-react';
 import useMockDraft from '../hooks/useMockDraft.js';
-import MultiSourceProspectCard from '@/components/Prospects/MultiSourceProspectCard.jsx';
 import ExportModal from '@/components/MockDraft/ExportModal.jsx';
 import useProspects from '@/hooks/useProspects.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
@@ -152,22 +151,6 @@ const MockDraft = () => {
                   </div>
                 ))}
               </div>
-              
-              <div className="border-t pt-3">
-                <div className="text-xs text-gray-500 mb-2">Por Região:</div>
-                <div className="flex justify-between text-sm">
-                  <span>🇧🇷 Brasil:</span>
-                  <span>{draftStats.byRegion.BRAZIL}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>🇺🇸 EUA:</span>
-                  <span>{draftStats.byRegion.USA}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>🇪🇺 Europa:</span>
-                  <span>{draftStats.byRegion.EUROPE}</span>
-                </div>
-              </div>
             </div>
             
             {/* Controles */}
@@ -269,17 +252,6 @@ const MockDraft = () => {
                       <option value="SF">Small Forward</option>
                       <option value="PF">Power Forward</option>
                       <option value="C">Center</option>
-                    </select>
-                    
-                    <select
-                      value={filters.region}
-                      onChange={(e) => setFilters(prev => ({ ...prev, region: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="ALL">Todas Regiões</option>
-                      <option value="BRAZIL">🇧🇷 Brasil</option>
-                      <option value="USA">🇺🇸 EUA</option>
-                      <option value="EUROPE">🇪🇺 Europa</option>
                     </select>
                   </div>
                 )}
@@ -393,16 +365,12 @@ const BigBoardView = ({ prospects, onDraftProspect, currentPick }) => (
           <div className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
             #{index + 1}
           </div>
-          <MultiSourceProspectCard
+          <MockDraftProspectCard
             prospect={prospect}
-            onToggleWatchlist={() => {}}
-            isExpanded={false}
-            onExpand={() => {}}
-            showVerification={true}
-            actionButton={{
-              text: 'Draft',
+            action={{
+              label: 'Draft',
+              icon: <ChevronRight className="h-4 w-4" />,
               onClick: () => onDraftProspect(prospect),
-              icon: <ChevronRight className="h-4 w-4" />
             }}
           />
         </div>
@@ -423,18 +391,14 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recommendations.map((prospect) => (
-            <MultiSourceProspectCard
+          {recommendations.map(prospect => (
+            <MockDraftProspectCard
               key={prospect.id}
               prospect={prospect}
-              onToggleWatchlist={() => {}}
-              isExpanded={false}
-              onExpand={() => {}}
-              showVerification={true}
-              actionButton={{
-                text: 'Draft',
+              action={{
+                label: 'Draft',
+                icon: <ChevronRight className="h-4 w-4" />,
                 onClick: () => onDraftProspect(prospect),
-                icon: <ChevronRight className="h-4 w-4" />
               }}
             />
           ))}
@@ -450,18 +414,14 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {prospects.map((prospect) => (
-          <MultiSourceProspectCard
+        {prospects.map(prospect => (
+          <MockDraftProspectCard
             key={prospect.id}
             prospect={prospect}
-            onToggleWatchlist={() => {}}
-            isExpanded={false}
-            onExpand={() => {}}
-            showVerification={true}
-            actionButton={{
-              text: 'Draft',
+            action={{
+              label: 'Draft',
+              icon: <ChevronRight className="h-4 w-4" />,
               onClick: () => onDraftProspect(prospect),
-              icon: <ChevronRight className="h-4 w-4" />
             }}
           />
         ))}
@@ -469,5 +429,41 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
     </div>
   </div>
 );
+
+// NOVO COMPONENTE: Card leve e otimizado para o Mock Draft.
+const MockDraftProspectCard = ({ prospect, action }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border hover:border-blue-400 hover:shadow-2xl hover:-translate-y-2 hover:-translate-x-1 transform transition-all duration-300">
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="font-bold text-gray-900">{prospect.name}</p>
+            <p className="text-sm text-gray-500">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
+          </div>
+          <span className="text-lg font-bold text-gray-300">#{prospect.ranking}</span>
+        </div>
+        <div className="mt-3 border-t pt-3 space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="text-gray-500">PPG</span>
+            <span className="font-medium text-gray-800">{prospect.ppg?.toFixed(1) || '-'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">RPG</span>
+            <span className="font-medium text-gray-800">{prospect.rpg?.toFixed(1) || '-'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">APG</span>
+            <span className="font-medium text-gray-800">{prospect.apg?.toFixed(1) || '-'}</span>
+          </div>
+        </div>
+        {action && (
+          <button onClick={action.onClick} className="mt-4 w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm">
+            {action.label} {action.icon}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default MockDraft;

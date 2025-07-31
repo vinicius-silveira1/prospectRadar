@@ -13,10 +13,12 @@ const Layout = () => {
 
    {/* Content area */}
       <div className="md:ml-64">
-        <header className="sticky top-0 z-10">
+        {/* O header agora tem padding para alinhar a Navbar com o conteúdo abaixo */}
+        <header className="sticky top-0 z-10 px-6 pt-6 bg-slate-100">
           <Navbar onMenuClick={() => setSidebarOpen(true)} />
         </header>
-        <main className="p-6">
+        {/* O padding superior do main foi reduzido para compensar o padding do header */}
+        <main className="px-6 pb-6">
           <Outlet />
         </main>
       </div>

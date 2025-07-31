@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   GitCompare,
   TrendingUp,
@@ -23,11 +24,17 @@ import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const Compare = () => {
   const {
-    prospects,
+    prospects: allProspects,
     loading,
     error,
   } = useProspects();
 
+  const prospects = useMemo(() => {
+    if (!allProspects) return [];
+    return allProspects.filter(p => p.scope === 'NBA_DRAFT');
+  }, [allProspects]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedProspects, setSelectedProspects] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [positionFilter, setPositionFilter] = useState('ALL');
@@ -48,6 +55,29 @@ const Compare = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportMenu]);
 
+  const addProspect = useCallback((prospect) => {
+    setSelectedProspects(prev => {
+      if (prev.length < 4 && !prev.find(p => p.id === prospect.id)) {
+        return [...prev, prospect];
+      }
+      return prev;
+    });
+    setSearchTerm('');
+  }, []);
+
+  useEffect(() => {
+    const prospectIdToAdd = searchParams.get('add');
+    if (prospectIdToAdd && prospects.length > 0) {
+      const prospectToAdd = prospects.find(p => p.id === prospectIdToAdd);
+      if (prospectToAdd) {
+        addProspect(prospectToAdd);
+        if (selectedProspects.length === 0) setShowSearch(true);
+        searchParams.delete('add');
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [prospects, searchParams, addProspect, setSearchParams, selectedProspects.length]);
+
   const filteredProspects = useMemo(() => {
     if (!prospects || prospects.length === 0) return [];
     return prospects.filter(prospect => {
@@ -60,14 +90,6 @@ const Compare = () => {
              !selectedProspects.find(p => p.id === prospect.id);
     });
   }, [prospects, searchTerm, positionFilter, tierFilter, selectedProspects]);
-
-
-  const addProspect = (prospect) => {
-    if (selectedProspects.length < 4) {
-      setSelectedProspects([...selectedProspects, prospect]);
-      setSearchTerm('');
-    }
-  };
 
   const removeProspect = (prospectId) => {
     setSelectedProspects(selectedProspects.filter(p => p.id !== prospectId));

@@ -1,73 +1,59 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getProspects } from '@/services/prospects.js';
+import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/lib/supabaseClient.js';
+import { prospectsData as eliteProspectsData } from '@/data/prospects-data.js';
+import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
 
-/**
- * Hook para buscar e gerenciar a lista completa de prospects.
- */
-const useProspects = () => {
+// Centralized tier logic based on ranking
+const getTier = (ranking) => {
+  if (ranking <= 5) return 'Elite';
+  if (ranking <= 15) return 'First Round';
+  if (ranking <= 30) return 'Late First';
+  if (ranking <= 45) return 'Second Round';
+  return 'Undrafted';
+};
+
+export default function useProspects(options = {}) {
   const [prospects, setProspects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getProspects();
-      setProspects(data);
-    } catch (err) {
-      setError(err.message || 'Ocorreu um erro ao carregar os dados.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  const eliteProspectsMap = useMemo(() => 
+    new Map(eliteProspectsData.map(p => [p.id, p]))
+  , []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        let query = supabase.from('prospects').select('*').order('ranking', { ascending: true });
+        
+        const { data, error: dbError } = await query;
+        if (dbError) throw dbError;
+
+        const enrichedData = data.map(prospect => {
+          const tier = getTier(prospect.ranking);
+
+          if (eliteProspectsMap.has(prospect.id)) {
+            // Mescla dados do Supabase com os dados de elite, dando preferência aos de elite
+            return { ...prospect, ...eliteProspectsMap.get(prospect.id), tier };
+          }
+          // Gera dados de scouting para os demais
+          return { ...prospect, ...generateScoutingData(prospect), tier };
+        });
+
+        setProspects(enrichedData);
+      } catch (err) {
+        setError('Falha ao carregar os dados dos prospects.');
+      } finally {
+        setLoading(false);
+        setIsLoaded(true);
+      }
+    };
+
     fetchData();
-  }, [fetchData]);
+  }, []);
 
-  // --- Dados Derivados (Memoizados para Performance) ---
-  const topProspects = useMemo(() => {
-    return prospects.slice(0, 10);
-  }, [prospects]);
-
-  const brazilianProspects = useMemo(() => {
-    return prospects.filter(p => p.nationality === '🇧🇷');
-  }, [prospects]);
-
-  const internationalProspects = useMemo(() => {
-    return prospects.filter(p => p.nationality && p.nationality !== '🇧🇷' && p.nationality !== 'US');
-  }, [prospects]);
-
-  const trendingPlayers = useMemo(() => {
-    return prospects.filter(p => p.trending === 'hot' || p.trending === 'rising');
-  }, [prospects]);
-
-  const dataStats = useMemo(() => {
-    if (prospects.length === 0) return null;
-    const totalPlayers = prospects.length;
-    const safeProspects = prospects.filter(p => typeof p.age === 'number');
-    const averageAge = safeProspects.reduce((acc, p) => acc + p.age, 0) / (safeProspects.length || 1);
-    const positions = prospects.reduce((acc, p) => {
-      acc[p.position] = (acc[p.position] || 0) + 1;
-      return acc;
-    }, {});
-    return { totalPlayers, averageAge, topPositions: positions };
-  }, [prospects]);
-
-  return {
-    prospects,
-    loading,
-    error,
-    topProspects,
-    brazilianProspects,
-    internationalProspects,
-    trendingPlayers,
-    dataStats,
-    refreshData: fetchData,
-    hasError: !!error,
-    isLoaded: !loading && !error
-  };
-};
-
-export default useProspects;
+  return { prospects, loading, error, isLoaded };
+}

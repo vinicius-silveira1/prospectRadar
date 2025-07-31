@@ -7,7 +7,8 @@ import {
   Star, 
   TrendingUp,
   Calendar,
-  X
+  X,
+  Info
 } from 'lucide-react'
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -21,6 +22,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
     { path: '/trending', icon: TrendingUp, label: 'Em Alta' },
     { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
+    { path: '/about', icon: Info, label: 'Sobre' },
   ];
 
   return (

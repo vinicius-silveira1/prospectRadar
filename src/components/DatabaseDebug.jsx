@@ -1,80 +1,100 @@
-// Componente Debug para verificar a base de dados
-import React, { useState, useEffect } from 'react';
-import Draft2026Database from '../services/Draft2026Database.js';
+import React, { useMemo } from 'react';
+import useProspects from '@/hooks/useProspects.js';
+import { ExternalLink, CheckCircle, AlertCircle, Database, Clock } from 'lucide-react';
+import LoadingSpinner from './Layout/LoadingSpinner.jsx';
 
 const DatabaseDebug = () => {
-  const database = new Draft2026Database();
-  const [debugInfo, setDebugInfo] = useState(null);
+  const { prospects, loading, error } = useProspects();
 
-  useEffect(() => {
-    try {
-      const allProspects = database.getAllProspects();
-      const prospects2026 = allProspects.filter(p => p.draftClass === 2026);
-      const prospects2025 = allProspects.filter(p => p.draftClass === 2025);
-      
-      const stats = database.getDatabaseStats();
-      
-      setDebugInfo({
-        total: allProspects.length,
-        draftClass2026: prospects2026.length,
-        draftClass2025: prospects2025.length,
-        stats: stats,
-        sampleProspects: prospects2026.slice(0, 5),
-        ajDybantsa: prospects2026.find(p => p.name.includes('AJ Dybantsa'))
-      });
-      
-    } catch (error) {
-      setDebugInfo({ error: error.message });
-    }
-  }, []);
+  const debugInfo = useMemo(() => {
+    if (loading || error || prospects.length === 0) return null;
 
-  if (!debugInfo) return <div>Loading debug info...</div>;
+    const byDraftClass = prospects.reduce((acc, p) => {
+      // Assumindo que a classe do draft é 2026 para todos, vamos simular uma verificação
+      // Em um cenário real, você teria um campo `draftClass` no seu DB.
+      const draftClass = p.class || '2026'; // Usando o campo 'class' se existir
+      acc[draftClass] = (acc[draftClass] || 0) + 1;
+      return acc;
+    }, {});
 
-  if (debugInfo.error) {
-    return (
-      <div className="p-4 bg-red-100 border border-red-400 rounded">
-        <h3 className="text-red-800 font-bold">Erro:</h3>
-        <p className="text-red-600">{debugInfo.error}</p>
-      </div>
-    );
-  }
+    const byScope = prospects.reduce((acc, p) => {
+      const scope = p.scope || 'N/A';
+      acc[scope] = (acc[scope] || 0) + 1;
+      return acc;
+    }, {});
+
+    const statsCompleteness = prospects.reduce((acc, p) => {
+      if (p.ppg && p.rpg && p.apg) acc.complete += 1;
+      else acc.incomplete += 1;
+      return acc;
+    }, { complete: 0, incomplete: 0 });
+
+    const brazilianProspects = prospects.filter(p => p.nationality === '🇧🇷');
+
+    // Identifica prospects que podem precisar de verificação (ex: sem fonte ou com fonte genérica)
+    const unverifiedProspects = prospects.filter(p => !p.source || (!p.source.includes('Curated') && !p.source.includes('LDB_Official_Scrape')));
+
+    const lastScraped = prospects
+      .filter(p => p.source === 'LDB_Official_Scrape' && p.last_verified_at)
+      .map(p => new Date(p.last_verified_at))
+      .sort((a, b) => b - a)[0];
+
+    return {
+      total: prospects.length,
+      byDraftClass,
+      byScope,
+      statsCompleteness,
+      brazilianCount: brazilianProspects.length,
+      lastScraped: lastScraped ? lastScraped.toLocaleString('pt-BR') : 'Nunca',
+      sampleBrazilian: brazilianProspects.slice(0, 3),
+      unverifiedCount: unverifiedProspects.length,
+      sampleInternational: prospects.filter(p => p.nationality !== '🇧🇷').slice(0, 3),
+    };
+  }, [prospects, loading, error]);
+
+  if (loading) return <div className="p-4 bg-blue-100 border border-blue-400 rounded"><LoadingSpinner /></div>;
+  if (error) return <div className="p-4 bg-red-100 border border-red-400 rounded"><p>Erro ao carregar dados para debug: {error}</p></div>;
+  if (!debugInfo) return null;
 
   return (
-    <div className="p-4 bg-blue-100 border border-blue-400 rounded">
-      <h3 className="text-blue-800 font-bold mb-4">🔍 Debug Database Info</h3>
-      
-      <div className="space-y-2 text-sm">
-        <p><strong>Total Prospects:</strong> {debugInfo.total}</p>
-        <p><strong>Draft Class 2026:</strong> {debugInfo.draftClass2026}</p>
-        <p><strong>Draft Class 2025:</strong> {debugInfo.draftClass2025}</p>
-        
-        <div className="mt-4">
-          <strong>Stats from getDatabaseStats():</strong>
-          <pre className="bg-gray-100 p-2 rounded text-xs overflow-auto">
-            {JSON.stringify(debugInfo.stats, null, 2)}
-          </pre>
+    <div className="p-4 bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-lg my-6">
+      <h3 className="text-yellow-800 font-bold mb-4 text-lg">🔍 Painel de Diagnóstico da Base de Dados</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm">
+        <div className="flex items-center gap-2"><Database className="h-4 w-4" /><strong>Total:</strong> {debugInfo.total}</div>
+        <div><strong>Prospects por Classe:</strong> <pre className="inline bg-yellow-100 p-1 rounded">{JSON.stringify(debugInfo.byDraftClass)}</pre></div>
+        <div><strong>Prospects por Escopo:</strong> <pre className="inline bg-yellow-100 p-1 rounded">{JSON.stringify(debugInfo.byScope)}</pre></div>
+        <div><strong>Completude de Stats:</strong> {debugInfo.statsCompleteness.complete} completos / {debugInfo.statsCompleteness.incomplete} incompletos</div>
+        <div className="flex items-center gap-2">
+          {debugInfo.unverifiedCount > 0 ? <AlertCircle className="text-red-500 h-4 w-4" /> : <CheckCircle className="text-green-500 h-4 w-4" />}
+          <strong>A Verificar:</strong> {debugInfo.unverifiedCount}
         </div>
-        
+        <div className="flex items-center gap-2 col-span-full md:col-span-1 lg:col-auto">
+          <Clock className="h-4 w-4" />
+          <strong>Último Scrape LDB:</strong> {debugInfo.lastScraped}
+        </div>
+      </div>
+      <div className="mt-4">
+        <strong>Amostra de Dados (para verificação visual):</strong>
+        <pre className="bg-yellow-100 p-2 rounded text-xs overflow-auto mt-2">
+          {JSON.stringify({ brasileiros: debugInfo.sampleBrazilian, internacionais: debugInfo.sampleInternational }, null, 2)}
+        </pre>
+      </div>
+      {debugInfo.unverifiedCount > 0 && (
         <div className="mt-4">
-          <strong>Sample Prospects (Draft 2026):</strong>
-          <ul className="list-disc list-inside">
-            {debugInfo.sampleProspects.map((p, i) => (
-              <li key={i} className="text-xs">
-                {p.name} ({p.position}) - Draft: {p.draftClass} - Ranking: {p.ranking}
+          <h4 className="text-yellow-800 font-bold mb-2">Prospects para Verificação</h4>
+          <ul className="text-sm space-y-1">
+            {prospects.filter(p => !p.source || (!p.source.includes('Curated') && !p.source.includes('LDB_Official_Scrape'))).slice(0, 5).map(p => (
+              <li key={p.id} className="flex items-center gap-4">
+                <span>{p.name} (Fonte: {p.source || 'N/A'})</span>
+                <div className="flex gap-2">
+                  <a href={`https://basketball.latinbasket.com/search.asp?Player=${encodeURIComponent(p.name)}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs flex items-center">Latinbasket <ExternalLink size={12} className="ml-1" /></a>
+                  <a href={`https://www.google.com/search?q=${encodeURIComponent(p.name)}+basketball+stats`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs flex items-center">Google <ExternalLink size={12} className="ml-1" /></a>
+                </div>
               </li>
             ))}
           </ul>
         </div>
-        
-        <div className="mt-4">
-          <strong>AJ Dybantsa encontrado:</strong> {debugInfo.ajDybantsa ? '✅ SIM' : '❌ NÃO'}
-          {debugInfo.ajDybantsa && (
-            <div className="text-xs ml-4">
-              Ranking: {debugInfo.ajDybantsa.ranking}, Draft: {debugInfo.ajDybantsa.draftClass}
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

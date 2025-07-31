@@ -1,39 +1,39 @@
 import { useState, useEffect } from 'react';
-import { getProspectById } from '@/services/prospects.js';
+import { supabase } from '@/lib/supabaseClient.js';
+import { prospectsData as eliteProspectsData } from '@/data/prospects-data.js';
+import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
 
-/**
-* Hook para buscar um único prospect pelo seu ID.
- * @param {string} prospectId - O ID do prospecto.
- * @returns {{prospect: object|null, loading: boolean, error: string|null}}
- */
-const useProspect = (prospectId) => {
+// O Map é criado apenas uma vez quando o módulo é carregado, otimizando a performance.
+const eliteProspectsMap = new Map(eliteProspectsData.map(p => [p.id, p]));
+
+export default function useProspect(id) {
   const [prospect, setProspect] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!prospectId) {
-      setLoading(false);
-      return;
-    }
-
     const fetchProspect = async () => {
-      setLoading(true);
       try {
-        const data = await getProspectById(prospectId);
-        setProspect(data);
+        setLoading(true);
+        const { data, error: dbError } = await supabase.from('prospects').select('*').eq('id', id).single();
+        if (dbError) throw dbError;
+
+        if (data) {
+          const eliteData = eliteProspectsMap.get(data.id);
+          const generatedData = eliteData ? {} : generateScoutingData(data);
+          setProspect({ ...data, ...generatedData, ...eliteData });
+        } else {
+          setProspect(null);
+        }
       } catch (err) {
-        console.error('Erro ao buscar prospect:', err);
-        setError(err.message || 'Ocorreu um erro ao carregar os dados do prospect.');
+        setError('Falha ao carregar os dados do prospect.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProspect();
-  }, [prospectId]);
+    if (id) fetchProspect(); // eliteProspectsMap não é mais uma dependência do useEffect
+  }, [id]);
 
   return { prospect, loading, error };
-};
-
-export default useProspect;
+}

@@ -1,13 +1,42 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
+import useWatchlist from '@/hooks/useWatchlist.js';
+import { useAuth } from '@/context/AuthContext.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
+
 
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { prospect, loading, error } = useProspect(id);
+  const { user } = useAuth();
+  const { watchlist, toggleWatchlist } = useWatchlist();
+
+  // Funções auxiliares para limpar o JSX
+  const getWeightDisplay = (weight) => {
+    if (!weight) return 'N/A';
+    try {
+      const parsed = JSON.parse(weight);
+      return parsed.us ? `${parsed.us} lbs` : 'N/A';
+    } catch (e) {
+      return weight;
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({
+        title: `ProspectRadar: ${prospect.name}`,
+        text: `Confira o perfil completo de ${prospect.name} no ProspectRadar.`,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link do perfil copiado para a área de transferência!');
+    }
+  };
 
   // CONDIÇÕES DE RETORNO APÓS TODOS OS HOOKS
   if (loading) {
@@ -42,6 +71,8 @@ const ProspectDetail = () => {
     );
   }
 
+  const isInWatchlist = watchlist.has(prospect.id);
+
   const getPositionColor = (position) => {
     const colors = {
       'PG': 'bg-blue-100 text-blue-800',
@@ -66,7 +97,6 @@ const ProspectDetail = () => {
   const getStarRating = (prospect) => {
     // Usar ESPN grade para calcular rating de estrelas
     const rating = prospect.ranking ? Math.max(1, 5 - Math.floor((prospect.ranking - 1) / 10)) : // Simple rank-based rating
-                   prospect.tier === 'Elite' ? 5 :
                    prospect.tier === 'Elite' ? 5 :
                    prospect.tier === 'First Round' ? 4 :
                    prospect.tier === 'Second Round' ? 3 : 2;
@@ -133,7 +163,7 @@ const ProspectDetail = () => {
               </h2>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {prospect.nationality === 'BR' && (
+                {prospect.nationality === '🇧🇷' && (
                   <div className="flex items-center">
                     <Globe className="w-5 h-5 text-gray-400 mr-3" />
                     <div>
@@ -176,21 +206,49 @@ const ProspectDetail = () => {
                   <Weight className="w-5 h-5 text-gray-400 mr-3" />
                   <div>
                     <div className="text-sm text-gray-600">Peso</div>
-                    <div className="font-medium">
-                      {(() => {
-                        try {
-                          const parsedWeight = JSON.parse(prospect.weight);
-                          return `${parsedWeight.us} lbs`;
-                        } catch (e) {
-                          return prospect.weight || 'N/A';
-                        }
-                      })()}
-                    </div>
+                    <div className="font-medium">{getWeightDisplay(prospect.weight)}</div>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Scouting Report */}
+            {prospect.scouting && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-orange-500" />
+                  Scouting Report
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {Object.entries(prospect.scouting).map(([key, value]) => (
+                    <div key={key} className="text-center bg-gray-50 p-3 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{value.toFixed(1)}</div>
+                      <div className="text-xs text-gray-500 uppercase font-semibold">
+                        {key.replace('_', ' ')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Highlights */}
+            {prospect.highlights && prospect.highlights.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <Star className="w-5 h-5 mr-2 text-yellow-500" />
+                  Destaques e Conquistas
+                </h2>
+                <ul className="space-y-2">
+                  {prospect.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span className="text-gray-700">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {/* Strengths & Weaknesses */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
@@ -317,17 +375,29 @@ const ProspectDetail = () => {
               
               <div className="space-y-3">
                 <button 
-                  onClick={() => navigate(`/compare?players=${prospect.id}`)}
-                  className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
+                  onClick={() => navigate(`/compare?add=${prospect.id}`)}
+                  className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                 >
+                  <GitCompare className="w-4 h-4 mr-2" />
                   Comparar Jogador
                 </button>
                 
-                <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
-                  Adicionar à Watchlist
-                </button>
+                {user && (
+                  <button 
+                    onClick={() => toggleWatchlist(prospect.id)}
+                    className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${
+                      isInWatchlist 
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />
+                    {isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}
+                  </button>
+                )}
                 
-                <button className="w-full bg-blue-100 text-blue-700 py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors">
+                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                  <Share2 className="w-4 h-4 mr-2" />
                   Compartilhar Perfil
                 </button>
               </div>

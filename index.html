@@ -11,17 +11,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <!-- Debug tools for development -->
-    <script>
-      // Only load debug tools in development
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('🔧 Modo desenvolvimento - carregando ferramentas de debug LDB');
-        import('/src/debug/ldbDiagnostic.js').then(() => {
-          console.log('✅ Ferramentas de debug LDB carregadas');
-          console.log('💡 Use fullLDBDiagnostic() para diagnóstico completo');
-        }).catch(err => {
-          console.log('⚠️ Não foi possível carregar debug tools:', err.message);
-        });
-      }
-    </script>
+    
   </body>
 </html>

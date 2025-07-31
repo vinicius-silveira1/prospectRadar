@@ -1,37 +1,60 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Bell, User, Menu } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Menu, LogOut } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext'; // Importe o contexto de autenticação
 
 // AnimatedSearchInput: placeholder animado
-const searchPlaceholders = [
+const animatedSearchPlaceholders = [
   '🔍 Buscar prospects...',
   '🔍 Buscar escolas...',
   '🔍 Buscar posições...',
   '🔍 Buscar times...'
 ];
 
-const AnimatedSearchInput = () => {
-  const [placeholder, setPlaceholder] = useState(searchPlaceholders[0]);
+const AnimatedSearchInput = ({ value, onChange, onFocus, onBlur }) => {
+  const [placeholder, setPlaceholder] = useState(animatedSearchPlaceholders[0]);
+  const intervalRef = useRef(null);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setPlaceholder((prev) => {
-        const idx = searchPlaceholders.indexOf(prev);
-        return searchPlaceholders[(idx + 1) % searchPlaceholders.length];
+        return animatedSearchPlaceholders[(animatedSearchPlaceholders.indexOf(prev) + 1) % animatedSearchPlaceholders.length];
       });
     }, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [value]); // Reinicia a animação se o valor for limpo
+
   return (
     <input
       type="text"
       placeholder={placeholder}
-      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white/10 backdrop-blur-xl transition-all placeholder:italic placeholder:text-slate-400"
+      value={value}
+      onChange={onChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white/10 backdrop-blur-xl transition-all placeholder:italic placeholder:text-slate-400 peer"
     />
   );
 };
 
-const Navbar = ({ onMenuClick }) => { // Adicionado onMenuClick
+const Navbar = ({ onMenuClick }) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login'); // Redireciona para a página de login após o logout
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/prospects?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchTerm(''); // Limpa o campo após a busca
+    }
+  };
   return (
     <nav className="bg-white/80 backdrop-blur-md rounded-xl shadow-md border border-slate-200/60 px-4 py-3">
       <div className="flex items-center justify-between">
@@ -39,7 +62,7 @@ const Navbar = ({ onMenuClick }) => { // Adicionado onMenuClick
         <div className="flex items-center">
           <button 
             onClick={onMenuClick}
-            className="md:hidden p-2 mr-2 text-slate-600 hover:text-brand-orange transition-colors"
+            className="lg:hidden p-2 mr-2 text-slate-600 hover:text-brand-orange transition-colors"
           >
             <Menu className="h-6 w-6" />
           </button>
@@ -54,24 +77,28 @@ const Navbar = ({ onMenuClick }) => { // Adicionado onMenuClick
         </div>
 
         {/* Search Bar (Centralizado) */}
-        <div className="flex-1 max-w-lg mx-auto">
+        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-auto">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 pointer-events-none" />
-            <AnimatedSearchInput />
+            <button type="submit" className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 hover:text-brand-orange transition-colors focus:outline-none z-10" aria-label="Buscar">
+              <Search className="h-5 w-5" />
+            </button>
+            <AnimatedSearchInput 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-        </div>
+        </form>
 
         {/* Right Section (Notificações e Perfil) */}
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-slate-600 hover:text-brand-orange transition-colors relative active:scale-90 transition-transform rounded-full bg-white/40 shadow hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-orange group">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-tr from-brand-orange to-yellow-400 rounded-full animate-pulse border-2 border-white"></span>
-            <span className="sr-only">Notificações</span>
-          </button>
-          <button className="p-2 text-slate-600 hover:text-brand-orange transition-colors active:scale-90 transition-transform rounded-full bg-white/40 shadow hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-orange group">
-            <User className="h-5 w-5" />
-            <span className="sr-only">Perfil</span>
-          </button>
+          {/* Botões de Autenticação */}
+            {user ? (
+              <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors" title="Sair">
+                <LogOut size={20} />
+              </button>
+            ) : (
+              <Link to="/login" className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Entrar</Link>
+            )}
         </div>
       </div>
     </nav>

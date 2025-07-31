@@ -1,21 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, Shuffle, Heart, TrendingUp, TrendingDown, Star, Users, Globe, GraduationCap } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
+import useWatchlist from '@/hooks/useWatchlist.js'; // Importar o novo hook
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const Prospects = () => {
   const { prospects: allProspects, loading, error } = useProspects();
+  const { watchlist, toggleWatchlist } = useWatchlist(); // Usar o hook da watchlist
   
-  // Estados para filtros e visualização
-  const getTier = (index) => {
-    if (index < 5) return 'Lottery';
-    if (index < 15) return 'First Round';
-    if (index < 30) return 'Late First';
-    if (index < 45) return 'Second Round';
-    return 'Undrafted';
-  };
-
   // Estados para filtros e visualização
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('all');
@@ -24,7 +17,16 @@ const Prospects = () => {
   const [selectedUniversity, setSelectedUniversity] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // grid ou list
   const [sortBy, setSortBy] = useState('ranking'); // ranking, name, position
-  const [watchList, setWatchList] = useState(new Set());
+  const [searchParams] = useSearchParams();
+
+  // Efeito para ler o termo de busca da URL
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      setSearchTerm(query);
+    }
+    // Não é necessário limpar os searchParams, pois a página deve refletir a URL.
+  }, [searchParams]);
 
   // Prospects filtrados e ordenados
   const filteredProspects = useMemo(() => {
@@ -34,10 +36,7 @@ const Prospects = () => {
       const matchesPosition = selectedPosition === 'all' || prospect.position === selectedPosition;
       const matchesCountry = selectedCountry === 'all' || prospect.nationality === selectedCountry;
       const matchesUniversity = selectedUniversity === 'all' || prospect.high_school_team === selectedUniversity;
-      
-      const prospectIndex = allProspects.indexOf(prospect);
-      const tier = getTier(prospectIndex);
-      const matchesTier = selectedTier === 'all' || tier === selectedTier;
+      const matchesTier = selectedTier === 'all' || prospect.tier === selectedTier;
 
       return matchesSearch && matchesPosition && matchesCountry && matchesUniversity && matchesTier;
     });
@@ -74,17 +73,6 @@ const Prospects = () => {
   const positions = [...new Set(allProspects.map(p => p.position))].filter(Boolean);
   const countries = [...new Set(allProspects.map(p => p.nationality))].filter(Boolean);
   const universities = [...new Set(allProspects.map(p => p.high_school_team))].filter(Boolean);
-
-  // Função para adicionar/remover da watch list
-  const toggleWatchList = (prospectId) => {
-    const newWatchList = new Set(watchList);
-    if (newWatchList.has(prospectId)) {
-      newWatchList.delete(prospectId);
-    } else {
-      newWatchList.add(prospectId);
-    }
-    setWatchList(newWatchList);
-  };
 
   // Função para prospect aleatório
   const getRandomProspect = () => {
@@ -202,7 +190,7 @@ const Prospects = () => {
               className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Todos os Tiers</option>
-              <option value="Lottery">Lottery (1-5)</option>
+              <option value="Elite">Elite (1-5)</option>
               <option value="First Round">First Round (6-15)</option>
               <option value="Late First">Late First (16-30)</option>
               <option value="Second Round">Second Round (31-45)</option>
@@ -244,10 +232,10 @@ const Prospects = () => {
               <Users size={16} />
               {filteredProspects.length} <span className="font-semibold text-brand-orange">prospects</span> encontrados
             </span>
-            {watchList.size > 0 && (
+            {watchlist.size > 0 && (
               <span className="flex items-center gap-1">
                 <Heart size={16} className="text-red-500" />
-                {watchList.size} na watch list
+                {watchlist.size} na watch list
               </span>
             )}
           </div>
@@ -257,19 +245,18 @@ const Prospects = () => {
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProspects.map((prospect, index) => {
-              const originalIndex = allProspects.indexOf(prospect);
-              const tier = getTier(originalIndex);
-              const isInWatchList = watchList.has(prospect.id || prospect.name);
+              const originalIndex = allProspects.findIndex(p => p.id === prospect.id);
+              const isInWatchList = watchlist.has(prospect.id);
               
               return (
-                <div key={prospect.id || prospect.name} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 overflow-hidden">
+                <div key={prospect.id || prospect.name} className="bg-white rounded-xl shadow-sm border hover:shadow-2xl hover:-translate-y-2 hover:-translate-x-1 transform transition-all duration-300 overflow-hidden">
                   {/* Ranking Badge */}
                   <div className="relative">
                     <div className="absolute top-3 left-3 z-10">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        originalIndex < 5 ? 'bg-yellow-100 text-yellow-800' :
-                        originalIndex < 15 ? 'bg-green-100 text-green-800' :
-                        originalIndex < 30 ? 'bg-blue-100 text-blue-800' :
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${                      
+                        prospect.ranking <= 5 ? 'bg-yellow-100 text-yellow-800' :
+                        prospect.ranking <= 15 ? 'bg-green-100 text-green-800' :
+                        prospect.ranking <= 30 ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         #{originalIndex + 1}
@@ -278,7 +265,7 @@ const Prospects = () => {
 
                     {/* Watch List Button */}
                     <button
-                      onClick={() => toggleWatchList(prospect.id || prospect.name)}
+                      onClick={() => toggleWatchlist(prospect.id)}
                       className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 hover:bg-white transition-all"
                     >
                       <Heart 
@@ -319,9 +306,9 @@ const Prospects = () => {
                         prospect.position === 'PF' ? 'bg-orange-100 text-orange-700' :
                         'bg-red-100 text-red-700'
                       }`}>
-                        {prospect.position}
-                      </span>
-                      <span className="text-xs text-gray-500">{tier}</span>
+                        {prospect.position}                      
+                      </span>                      
+                      <span className="text-xs text-gray-500">{prospect.tier}</span>
                     </div>
 
                     <div className="space-y-2 text-sm text-gray-600">
@@ -348,12 +335,12 @@ const Prospects = () => {
 
                     {/* Ações */}
                     <div className="mt-4 flex gap-2">
-                      <button className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                      <Link to={`/prospects/${prospect.id}`} className="flex-1 text-center px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
                         Ver Detalhes
-                      </button>
-                      <button className="px-3 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                      </Link>
+                      <Link to={`/compare?add=${prospect.id}`} className="px-3 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                         Comparar
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -378,8 +365,8 @@ const Prospects = () => {
             
             <div className="divide-y divide-gray-100">
               {filteredProspects.map((prospect, index) => {
-                const originalIndex = allProspects.indexOf(prospect);
-                const isInWatchList = watchList.has(prospect.id || prospect.name);
+                const originalIndex = allProspects.findIndex(p => p.id === prospect.id);
+                const isInWatchList = watchlist.has(prospect.id);
                 
                 return (
                   <div key={prospect.id || prospect.name} className="px-6 py-4 hover:bg-gray-50 transition-colors">
@@ -428,7 +415,7 @@ const Prospects = () => {
                       <div className="col-span-1">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => toggleWatchList(prospect.id || prospect.name)}
+                            onClick={() => toggleWatchlist(prospect.id)}
                             className="p-1 rounded hover:bg-gray-100 transition-colors"
                           >
                             <Heart 
