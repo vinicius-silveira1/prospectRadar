@@ -77,8 +77,8 @@ const Navbar = ({ onMenuClick }) => {
         </div>
 
         {/* Search Bar (Centralizado) */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-auto">
-          <div className="relative w-full">
+        <div className="flex-1 flex justify-center px-4">
+          <form onSubmit={handleSearch} className="relative w-full max-w-lg hidden md:block">
             <button type="submit" className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 hover:text-brand-orange transition-colors focus:outline-none z-10" aria-label="Buscar">
               <Search className="h-5 w-5" />
             </button>
@@ -86,11 +86,14 @@ const Navbar = ({ onMenuClick }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-        </form>
+          </form>
+        </div>
 
         {/* Right Section (Notificações e Perfil) */}
         <div className="flex items-center space-x-4">
+          <Link to="/prospects" className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors md:hidden" title="Buscar">
+            <Search size={20} />
+          </Link>
           {/* Botões de Autenticação */}
             {user ? (
               <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors" title="Sair">

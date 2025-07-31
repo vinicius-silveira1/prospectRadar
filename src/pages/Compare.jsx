@@ -81,8 +81,8 @@ const Compare = () => {
   const filteredProspects = useMemo(() => {
     if (!prospects || prospects.length === 0) return [];
     return prospects.filter(prospect => {
-      const matchesSearch = prospect.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (prospect.high_school_team && prospect.high_school_team.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesSearch = (prospect.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (prospect.high_school_team || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPosition = positionFilter === 'ALL' || prospect.position === positionFilter;
       const matchesTier = tierFilter === 'ALL' || prospect.tier === tierFilter;
 
@@ -241,7 +241,7 @@ const Compare = () => {
 
     const getGridLayout = () => {
       switch (prospects.length) {
-        case 2: return 'grid-cols-3';
+        case 2: return 'grid-cols-1 md:grid-cols-3';
         case 3: return 'grid-cols-3';
         case 4: return 'grid-cols-2 md:grid-cols-4';
         default: return 'grid-cols-1';
@@ -251,17 +251,17 @@ const Compare = () => {
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
         <div className={`bg-gradient-to-r ${prospects.length === 2 ? 'from-blue-50 via-gray-50 to-green-50' : 'from-blue-50 via-purple-50 to-green-50'} p-4 md:p-6`}>
-          <div className={`grid ${getGridLayout()} gap-3 md:gap-4 items-center`}>
+          <div className={`grid ${getGridLayout()} gap-4 items-center`}>
             {prospects.map((prospect, index) => (
               <React.Fragment key={prospect.id}>
                 {prospects.length === 2 && index === 1 && (
-                  <div className="text-center">
+                  <div className="text-center hidden md:block">
                     <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-bold text-sm md:text-lg shadow-lg">
                       VS
                     </div>
                   </div>
                 )}
-                <div className="text-center relative">
+                <div className="text-center relative group">
                   <button onClick={() => onRemove(prospect.id)} className="absolute -top-2 -right-2 text-gray-400 hover:text-red-500 transition-colors z-10 bg-white rounded-full p-1 shadow-sm">
                     <X className="h-4 w-4" />
                   </button>
@@ -298,19 +298,19 @@ const Compare = () => {
               <BarChart3 className="h-5 w-5 text-blue-600 mr-2" />
               Comparação de Estatísticas
             </h4>
-            <div className="space-y-3 md:space-y-4">
+            <div className="space-y-4">
               {stats.map(({ key, label, suffix }) => {
                 const winners = getStatWinners(key);
                 return (
-                  <div key={key} className="border rounded-lg p-3 md:p-4 bg-gray-50">
-                    <div className="text-center mb-3 md:mb-4">
+                  <div key={key} className="border rounded-lg p-3 md:p-4 bg-gray-50/70">
+                    <div className="text-center mb-3">
                       <h5 className="font-medium text-gray-900 text-sm md:text-base">{label}</h5>
                     </div>
-                    <div className={`grid ${prospects.length === 2 ? 'grid-cols-3 gap-4' : prospects.length === 3 ? 'grid-cols-3 gap-2 md:gap-4' : 'grid-cols-2 md:grid-cols-4 gap-2 md:gap-4'} items-center`}>
+                    <div className={`grid ${prospects.length === 2 ? 'grid-cols-2 md:grid-cols-3 gap-4' : prospects.length === 3 ? 'grid-cols-3 gap-2 md:gap-4' : 'grid-cols-2 md:grid-cols-4 gap-2 md:gap-4'} items-center`}>
                       {prospects.map((prospect, index) => (
                         <React.Fragment key={prospect.id}>
                           {prospects.length === 2 && index === 1 && (
-                            <div className="text-center">
+                            <div className="text-center hidden md:block">
                               <div className="bg-gray-100 p-2 md:p-3 rounded-lg">
                                 <div className="text-xs md:text-sm font-bold text-gray-700">{label}</div>
                               </div>

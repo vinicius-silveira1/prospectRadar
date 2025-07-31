@@ -2,15 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
 import { prospectsData as eliteProspectsData } from '@/data/prospects-data.js';
 import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
-
-// Centralized tier logic based on ranking
-const getTier = (ranking) => {
-  if (ranking <= 5) return 'Elite';
-  if (ranking <= 15) return 'First Round';
-  if (ranking <= 30) return 'Late First';
-  if (ranking <= 45) return 'Second Round';
-  return 'Undrafted';
-};
+import { getTierByRanking } from '@/lib/constants.js';
 
 export default function useProspects(options = {}) {
   const [prospects, setProspects] = useState([]);
@@ -33,7 +25,7 @@ export default function useProspects(options = {}) {
         if (dbError) throw dbError;
 
         const enrichedData = data.map(prospect => {
-          const tier = getTier(prospect.ranking);
+          const tier = getTierByRanking(prospect.ranking);
 
           if (eliteProspectsMap.has(prospect.id)) {
             // Mescla dados do Supabase com os dados de elite, dando preferência aos de elite

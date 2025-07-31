@@ -122,7 +122,7 @@ const MockDraft = () => {
       </div>
 
       {/* Controles e Estatísticas */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         {/* Estatísticas do Draft */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-md p-6">
@@ -176,10 +176,10 @@ const MockDraft = () => {
         </div>
 
         {/* Área Principal */}
-        <div className="lg:col-span-3">
+        <div className="xl:col-span-3">
           {/* Tabs de Navegação */}
           <div className="bg-white rounded-lg shadow-md mb-6">
-            <div className="flex border-b">
+            <div className="flex border-b overflow-x-auto whitespace-nowrap">
               <button
                 onClick={() => setView('draft')}
                 className={`px-6 py-3 font-medium transition-colors ${
@@ -304,8 +304,8 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
   <div className="bg-white rounded-lg shadow-md p-6">
     <h3 className="text-xl font-bold text-gray-900 mb-6">Draft Board</h3>
     
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {draftBoard.slice(0, 30).map((pick) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {draftBoard.map((pick) => (
         <div
           key={pick.pick}
           className={`p-4 border rounded-lg transition-all ${
@@ -360,7 +360,7 @@ const BigBoardView = ({ prospects, onDraftProspect, currentPick }) => (
     </h3>
     
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {prospects.slice(0, 30).map((prospect, index) => (
+      {prospects.map((prospect, index) => (
         <div key={prospect.id} className="relative">
           <div className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
             #{index + 1}

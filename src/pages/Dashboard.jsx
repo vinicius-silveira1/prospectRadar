@@ -3,6 +3,7 @@ import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, ChevronRig
 import { Link } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
 import useWatchlist from '../hooks/useWatchlist.js';
+import DashboardProspectCard from '@/components/DashboardProspectCard.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
 const Dashboard = () => {
@@ -72,7 +73,7 @@ const Dashboard = () => {
           <div>
             <h1 className="text-3xl font-bold text-blue-900 mb-2">Bem vindo ao prospectRadar!</h1>
             <p className="text-base text-blue-800 max-w-2xl">
-              Plataforma de análise de jogadores jovens baseada em dados do ESPN 100, 247Sports e rankings internacionais. Explore, compare e simule o futuro do basquete. Feito por brasileiros para brasileiros.
+              Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
         </div>
@@ -90,7 +91,7 @@ const Dashboard = () => {
               <p className="text-lg mb-2 text-blue-100">
                 Simule seu próprio draft com {nbaProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
               </p>
-              <div className="flex items-center space-x-6 text-sm text-blue-200 mb-4">
+              <div className="hidden md:flex items-center space-x-6 text-sm text-blue-200 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
                   <span>{nbaProspects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
@@ -144,7 +145,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {brazilianProspects.slice(0, 5).map((prospect) => (
               <DashboardProspectCard
-                key={prospect.name}
+                key={prospect.id}
                 prospect={prospect}
                 isInWatchlist={watchlist.has(prospect.id)}
                 onToggleWatchlist={() => toggleWatchlist(prospect.id)}
@@ -174,7 +175,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topProspects.map((prospect) => (
               <DashboardProspectCard
-                key={prospect.name}
+                key={prospect.id}
                 prospect={prospect}
                 isInWatchlist={watchlist.has(prospect.id)}
                 onToggleWatchlist={() => toggleWatchlist(prospect.id)}
@@ -205,62 +206,6 @@ const Dashboard = () => {
           </h3>
         </div>
       )}
-    </div>
-  );
-};
-
-// NOVO COMPONENTE: Card de Prospect para o Dashboard que exibe estatísticas.
-const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm border hover:shadow-2xl hover:-translate-y-2 hover:-translate-x-1 transform transition-all duration-300 relative">
-      {/* Watch List Button */}
-      <button
-        onClick={onToggleWatchlist}
-        className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 hover:bg-white transition-all"
-      >
-        <Heart 
-          size={16} 
-          className={`transition-colors ${
-            isInWatchlist ? 'text-red-500 fill-red-500' : 'text-gray-400 hover:text-red-500'
-          }`} 
-        />
-      </button>
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-gray-900 hover:text-blue-600">
-              {prospect.name}
-            </Link>
-            <p className="text-sm text-gray-500">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
-          </div>
-          <span className="text-2xl font-bold text-gray-300">#{prospect.ranking}</span>
-        </div>
-
-        <div className="mt-4 border-t pt-3">
-          <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Estatísticas</h4>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-xl font-bold text-blue-600">{prospect.ppg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-gray-500">PPG</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold text-green-600">{prospect.rpg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-gray-500">RPG</p>
-            </div>
-            <div>
-              <p className="text-xl font-bold text-orange-600">{prospect.apg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-gray-500">APG</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4">
-           <Link to={`/prospects/${prospect.id}`} className="w-full flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 transition-colors text-sm">
-              Ver Perfil Completo
-              <ChevronRight className="h-4 w-4 ml-1" />
-           </Link>
-        </div>
-      </div>
     </div>
   );
 };
