@@ -54,6 +54,15 @@ const ProspectDetail = () => {
   const evaluation = prospect.evaluation || {};
   const advancedStats = prospect.stats?.advanced || {};
 
+  // CORREÇÃO: Movido para o local correto
+  const fgPercentage = (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
+    ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) 
+    : 'N/A';
+
+  const ftPercentage = prospect.ft_attempts > 0 
+    ? ((prospect.ft_makes / prospect.ft_attempts) * 100).toFixed(1) 
+    : 'N/A';
+
   const getPositionColor = (position) => {
     const colors = { 'PG': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300', 'SG': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 'SF': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', 'PF': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300', 'C': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' };
     return colors[position] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-300';
@@ -153,8 +162,8 @@ const ProspectDetail = () => {
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">Pontos por Jogo</span><span className="font-bold text-orange-500">{prospect.ppg?.toFixed(1) || 'N/A'}</span></div>
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">Rebotes por Jogo</span><span className="font-bold text-blue-500">{prospect.rpg?.toFixed(1) || 'N/A'}</span></div>
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">Assistências por Jogo</span><span className="font-bold text-green-500">{prospect.apg?.toFixed(1) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">% Field Goal</span><span className="font-bold text-purple-500">{prospect.fg_pct ? `${prospect.fg_pct.toFixed(1)}%` : 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">% Free Throw</span><span className="font-bold text-red-500">{prospect.ft_pct ? `${prospect.ft_pct.toFixed(1)}%` : 'N/A'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">% Field Goal</span><span className="font-bold text-purple-500">{fgPercentage !== 'N/A' ? `${fgPercentage}%` : 'N/A'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">% Free Throw</span><span className="font-bold text-red-500">{ftPercentage !== 'N/A' ? `${ftPercentage}%` : 'N/A'}</span></div>
               </div>
             </div>
             <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg p-6 text-white">
