@@ -1,15 +1,12 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
-const SignUp = () => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +14,11 @@ const SignUp = () => {
     setMessage('');
     setLoading(true);
     try {
-      const { error } = await signUp({ email, password });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
       if (error) throw error;
-      setMessage('Quase lá! 🏀 Enviamos um link de confirmação para o seu e-mail. Clique nele para validar sua conta e começar a descobrir os futuros talentos. Não se esqueça de checar sua caixa de spam!');
-      // Opcional: redirecionar para o login após um tempo
-      setTimeout(() => navigate('/login'), 5000);
+      setMessage('Se uma conta com este e-mail existir, enviaremos um link para redefinir sua senha. Verifique sua caixa de entrada e spam.');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -31,7 +28,7 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen flex bg-slate-100 dark:bg-slate-900">
-      {/* Painel da Marca (Esquerda) */}
+      {/* Painel Esquerdo - Branding */}
       <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
         <div className="text-center">
           <img src="/logo.svg" alt="ProspectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
@@ -43,50 +40,40 @@ const SignUp = () => {
         </div>
       </div>
 
-      {/* Painel do Formulário (Direita) */}
+      {/* Painel Direito - Formulário */}
       <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl dark:shadow-brand-dark/50">
-          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-6">Criar Conta no ProspectRadar</h2>
+          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-2">Esqueceu sua senha?</h2>
+          <p className="text-center text-sm text-slate-600 dark:text-slate-400 mb-6">Sem problemas. Digite seu e-mail e enviaremos um link para redefini-la.</p>
+          
+          {/* Mensagens de Alerta */}
           {error && <p className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-md mb-4 text-sm">{error}</p>}
           {message && <p className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-md mb-4 text-sm">{message}</p>}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+              <input 
+                id="email" 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
                 className="w-full mt-1 px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-colors"
                 placeholder="seu.email@exemplo.com"
               />
             </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Senha</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full mt-1 px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
+            <button 
+              type="submit" 
+              disabled={loading} 
               className="w-full py-3 px-4 bg-brand-orange text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out"
             >
-              {loading ? 'Criando...' : 'Criar Conta'}
+              {loading ? 'Enviando...' : 'Enviar Link de Redefinição'}
             </button>
           </form>
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
-            Já tem uma conta?{' '}
-            <Link to="/login" className="font-medium text-brand-cyan hover:text-cyan-500 transition-colors">
-              Faça login
-            </Link>
+            Lembrou a senha?{' '}
+            <Link to="/login" className="font-medium text-brand-cyan hover:text-cyan-500 transition-colors">Voltar para o Login</Link>
           </p>
         </div>
       </div>
@@ -94,5 +81,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
-          
+export default ForgotPassword;

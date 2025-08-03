@@ -4,7 +4,7 @@ import { Github, Twitter, Linkedin } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-slate-200 mt-auto">
+    <footer className="bg-white dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700 mt-auto">
       <div className="max-w-7xl mx-auto py-6 px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
           {/* Logo e Missão */}
@@ -16,34 +16,34 @@ const Footer = () => {
                 <span className="text-brand-cyan">Radar</span>
               </h1>
             </div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               Analisando o futuro do basquete, um prospect de cada vez.
             </p>
           </div>
 
           {/* Links de Navegação */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Navegação</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider mb-4">Navegação</h3>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-sm text-slate-600 hover:text-brand-orange transition-colors">Início</Link></li>
-              <li><Link to="/prospects" className="text-sm text-slate-600 hover:text-brand-orange transition-colors">Prospects</Link></li>
-              <li><Link to="/draft" className="text-sm text-slate-600 hover:text-brand-orange transition-colors">Mock Draft</Link></li>
-              <li><Link to="/about" className="text-sm text-slate-600 hover:text-brand-orange transition-colors">Sobre</Link></li>
+              <li><Link to="/" className="text-sm text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">Início</Link></li>
+              <li><Link to="/prospects" className="text-sm text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">Prospects</Link></li>
+              <li><Link to="/draft" className="text-sm text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">Mock Draft</Link></li>
+              <li><Link to="/about" className="text-sm text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">Sobre</Link></li>
             </ul>
           </div>
 
           {/* Social e Contato */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Conecte-se</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider mb-4">Conecte-se</h3>
             <div className="flex space-x-4 justify-center md:justify-start">
-              <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors"><span className="sr-only">GitHub</span><Github size={20} /></a>
-              <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors"><span className="sr-only">Twitter</span><Twitter size={20} /></a>
-              <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors"><span className="sr-only">LinkedIn</span><Linkedin size={20} /></a>
+              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors"><span className="sr-only">GitHub</span><Github size={20} /></a>
+              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors"><span className="sr-only">Twitter</span><Twitter size={20} /></a>
+              <a href="#" className="text-slate-500 dark:text-slate-400 hover:text-brand-cyan transition-colors"><span className="sr-only">LinkedIn</span><Linkedin size={20} /></a>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-slate-200 text-center text-sm text-slate-500">
+        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500 dark:text-slate-400">
           <p>&copy; {new Date().getFullYear()} ProspectRadar. Todos os direitos reservados.</p>
           <p className="mt-1">Feito com 🏀 no Brasil.</p>
         </div>

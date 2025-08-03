@@ -43,6 +43,19 @@ const prospectsToPopulate = [
     wingspan: "6'6.5\"", // Estimated
     // Draft info
     draft_class: 2026,
+    // Strengths and Weaknesses from scouting reports
+    strengths: [
+        'Defensor de elite no perímetro, tanto no um-contra-um quanto fora da bola.',
+        'Motor e nível de energia altos durante todo o jogo.',
+        'Fisicamente forte e atlético, com bom poder de finalização ao redor do aro.',
+        'Ótimo em pressionar a defesa e atacar a cesta em transição.',
+        'Experiência em competições de alto nível (NBB, OTE, FIBA).'
+    ],
+    weaknesses: [
+        'Consistência do arremesso de longa distância.',
+        'Mecânica do arremesso pode ser um problema (ponto de lançamento baixo).',
+        'Necessita de maior refinamento no jogo ofensivo de meia-quadra.'
+    ],
     // Advanced stats for the 'stats' JSONB column
     stats: {
         advanced: {
@@ -64,13 +77,14 @@ const prospectsToPopulate = [
             'DRtg': 104.9
         }
     },
-    // Subjective scores based on scouting reports
-    athleticism: 7.5,
+    // Subjective scores based on final user assessment
+    athleticism: 7,
     strength: 7,
-    speed: 7, // As per user feedback
+    speed: 7,
+    shooting: 5,
     ball_handling: 6.5,
     defense: 6.5,
-    basketball_iq: 7.5,
+    basketball_iq: 7,
     leadership: 5, // Neutral
     improvement: 7,
     competition_level: 8.5,

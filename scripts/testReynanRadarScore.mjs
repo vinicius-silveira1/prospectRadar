@@ -45,13 +45,14 @@ const reynanSantosData = {
           'USG%': 30.38,
       }
   },
-  // Subjective scores based on scouting reports
-  athleticism: 7.5,
+  // Subjective scores based on user's latest assessment
+  athleticism: 7,
   strength: 7,
   speed: 7,
+  shooting: 5,
   ball_handling: 6.5,
   defense: 6.5,
-  basketball_iq: 7.5,
+  basketball_iq: 7,
   leadership: 5, // Neutral
   improvement: 7,
   competition_level: 8.5,

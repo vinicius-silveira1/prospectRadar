@@ -6,6 +6,8 @@ import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
+import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
+
 
 const ProspectDetail = () => {
   const { id } = useParams();
@@ -52,8 +54,6 @@ const ProspectDetail = () => {
 
   const isInWatchlist = watchlist.has(prospect.id);
   const evaluation = prospect.evaluation || {};
-  const advancedStats = prospect.stats?.advanced || {};
-
   // CORREÇÃO: Movido para o local correto
   const fgPercentage = (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
     ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) 
@@ -119,19 +119,20 @@ const ProspectDetail = () => {
             <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-blue-500" />Estatísticas Avançadas</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TS%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(advancedStats['TS%'] * 100)?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">eFG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(advancedStats['eFG%'] * 100)?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">PER</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats.PER?.toFixed(2) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">USG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['USG%']?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">ORtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats.ORtg?.toFixed(1) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">DRtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats.DRtg?.toFixed(1) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TOV%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['TOV%']?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">AST%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['AST%']?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TRB%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['TRB%']?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">STL%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['STL%']?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">BLK%</span><span className="font-bold text-gray-800 dark:text-slate-200">{advancedStats['BLK%']?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TS%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.ts_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">eFG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.efg_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">PER</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.per?.toFixed(2) || 'N/A'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">USG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.usg_percent?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">ORtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ortg?.toFixed(1) || 'N/A'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">DRtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.drtg?.toFixed(1) || 'N/A'}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TOV%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.tov_percent?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">AST%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ast_percent?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TRB%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.trb_percent?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">STL%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.stl_percent?.toFixed(1) || 'N/A'}%</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">BLK%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.blk_percent?.toFixed(1) || 'N/A'}%</span></div>
               </div>
             </div>
+            <AdvancedStatsExplanation />
 
             {evaluation.totalScore && (
               <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">

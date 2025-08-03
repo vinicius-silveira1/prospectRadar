@@ -4,12 +4,12 @@ import { Wrench, ArrowLeft } from 'lucide-react';
 
 const ComingSoon = ({ title, message }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center bg-gray-50 p-6 rounded-lg shadow-inner">
-      <div className="bg-yellow-100 text-yellow-700 p-4 rounded-full mb-6">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg shadow-inner border dark:border-slate-700">
+      <div className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 p-4 rounded-full mb-6">
         <Wrench className="h-12 w-12" />
       </div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">{title}</h1>
-      <p className="text-gray-600 max-w-md mb-8">
+      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">{title}</h1>
+      <p className="text-slate-600 dark:text-slate-400 max-w-md mb-8">
         {message}
       </p>
       <Link

@@ -317,19 +317,56 @@ export class IntelligentScoutingSystem {
    * Calcula estatísticas avançadas
    */
   calculateAdvancedStats(basicStats) {
-    if (!basicStats || !basicStats.ppg) return null;
+    if (!basicStats || !basicStats.total_points) return null;
 
-    const { ppg, rpg, apg, fg, threePt, ft } = basicStats;
-    
-    // Cálculos aproximados baseados em fórmulas conhecidas
-    const ts = this.calculateTrueShootingPercentage(fg, threePt, ft, ppg);
-    const per = this.estimatePlayerEfficiencyRating(ppg, rpg, apg, fg);
-    const usage = this.estimateUsageRate(ppg, apg);
+    const {
+      total_points,
+      total_rebounds,
+      total_assists,
+      two_pt_makes,
+      two_pt_attempts,
+      three_pt_makes,
+      three_pt_attempts,
+      ft_makes,
+      ft_attempts,
+      minutes_played,
+      turnovers,
+      total_blocks,
+      total_steals,
+      games_played
+    } = basicStats;
+
+    // Calcular FG% (Field Goal Percentage) a partir de 2P e 3P
+    const fg_makes = (two_pt_makes || 0) + (three_pt_makes || 0);
+    const fg_attempts = (two_pt_attempts || 0) + (three_pt_attempts || 0);
+    const fg_percentage = fg_attempts > 0 ? fg_makes / fg_attempts : 0;
+
+    // True Shooting Percentage (TS%)
+    // TS% = PTS / (2 * (FGA + 0.44 * FTA))
+    // FGA = two_pt_attempts + three_pt_attempts
+    // FTA = ft_attempts
+    const total_attempts_for_ts = (fg_attempts || 0) + 0.44 * (ft_attempts || 0);
+    const ts_percentage = total_attempts_for_ts > 0 ? total_points / (2 * total_attempts_for_ts) : 0;
+
+    // Player Efficiency Rating (PER) - Simplificado
+    // PER é complexo, mas podemos fazer uma versão mais robusta com os dados disponíveis.
+    // Componentes positivos: pontos, rebotes, assistências, roubos, tocos
+    // Componentes negativos: erros, arremessos errados
+    const per_positive = (total_points || 0) + (total_rebounds || 0) + (total_assists || 0) + (total_steals || 0) + (total_blocks || 0);
+    const per_negative = (turnovers || 0) + (fg_attempts - fg_makes || 0) + (ft_attempts - ft_makes || 0);
+    const per = (minutes_played && minutes_played > 0) ? ((per_positive - per_negative) / minutes_played) * 10 : 0; // Fator de escala
+
+    // Usage Rate - Simplificado
+    // UR = 100 * ((FGA + 0.44 * FTA + TO) * (Team Minutes / 5)) / (Minutes * Team Possessions)
+    // Sem dados de equipe, faremos uma estimativa baseada no volume de ações do jogador.
+    const player_possessions_actions = (fg_attempts || 0) + 0.44 * (ft_attempts || 0) + (turnovers || 0);
+    const usage_rate = (minutes_played && minutes_played > 0) ? (player_possessions_actions / minutes_played) * 100 : 0; // Escala para %
 
     return {
-      ts_percentage: ts,
-      per: per,
-      usage_rate: usage,
+      ts_percentage: isNaN(ts_percentage) ? 0 : parseFloat(ts_percentage.toFixed(3)),
+      per: isNaN(per) ? 0 : parseFloat(per.toFixed(3)),
+      usage_rate: isNaN(usage_rate) ? 0 : parseFloat(usage_rate.toFixed(3)),
+      fg_percentage: isNaN(fg_percentage) ? 0 : parseFloat(fg_percentage.toFixed(3)),
       calculated: true
     };
   }

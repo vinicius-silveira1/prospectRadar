@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
-import { prospectsData as eliteProspectsData } from '@/data/prospects-data.js';
 import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
+import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
-// O Map é criado apenas uma vez quando o módulo é carregado, otimizando a performance.
-const eliteProspectsMap = new Map(eliteProspectsData.map(p => [p.id, p]));
+const rankingAlgorithm = new ProspectRankingAlgorithm();
 
 export default function useProspect(id) {
   const [prospect, setProspect] = useState(null);
@@ -19,20 +18,27 @@ export default function useProspect(id) {
         if (dbError) throw dbError;
 
         if (data) {
-          const eliteData = eliteProspectsMap.get(data.id);
-          const generatedData = eliteData ? {} : generateScoutingData(data);
-          setProspect({ ...data, ...generatedData, ...eliteData });
+          // Gera dados de scouting se não existirem
+          const scoutingData = data.strengths ? {} : generateScoutingData(data);
+          const baseProspect = { ...data, ...scoutingData };
+
+          // Aplica o algoritmo de ranking para obter a avaliação
+          const evaluation = rankingAlgorithm.evaluateProspect(baseProspect);
+          
+          setProspect({ ...baseProspect, evaluation });
+
         } else {
           setProspect(null);
         }
       } catch (err) {
-        setError('Falha ao carregar os dados do prospect.');
+        console.error("Erro detalhado ao buscar prospecto:", err);
+        setError('Falha ao carregar ou avaliar os dados do prospect.');
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchProspect(); // eliteProspectsMap não é mais uma dependência do useEffect
+    if (id) fetchProspect();
   }, [id]);
 
   return { prospect, loading, error };

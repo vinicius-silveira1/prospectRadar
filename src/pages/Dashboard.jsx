@@ -12,6 +12,7 @@ const Dashboard = () => {
     loading,
     error,
     isLoaded,
+    refresh // Adicionado o método refresh
   } = useProspects(); // Busca todos os prospects
 
   const { watchlist, toggleWatchlist } = useWatchlist();
@@ -68,19 +69,26 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Banner de Boas-Vindas */}
-      <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 border border-blue-200 rounded-lg shadow p-6 mb-2">
+      <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 dark:from-blue-900/50 dark:via-green-900/50 dark:to-yellow-900/50 border border-blue-200 dark:border-blue-800 rounded-lg shadow p-6 mb-2">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-blue-900 mb-2">Bem vindo ao prospectRadar!</h1>
-            <p className="text-base text-blue-800 max-w-2xl">
+            <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-2">Bem vindo ao prospectRadar!</h1>
+            <p className="text-base text-blue-800 dark:text-blue-200 max-w-2xl">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
+          <button
+            onClick={refresh}
+            className="mt-4 md:mt-0 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
+          >
+            <RefreshCw size={16} className="mr-2" />
+            Atualizar Dados
+          </button>
         </div>
       </div>
 
       {/* Banner do Mock Draft */}
-      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-blue-800 dark:to-green-800 rounded-lg shadow-lg overflow-hidden">
         <div className="px-8 py-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -88,10 +96,10 @@ const Dashboard = () => {
                 <Shuffle className="h-8 w-8 text-yellow-300" />
                 <h2 className="text-2xl font-bold">🏀 Mock Draft 2026</h2>
               </div>
-              <p className="text-lg mb-2 text-blue-100">
+              <p className="text-lg mb-2 text-blue-100 dark:text-blue-200">
                 Simule seu próprio draft com {nbaProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
               </p>
-              <div className="hidden md:flex items-center space-x-6 text-sm text-blue-200 mb-4">
+              <div className="hidden md:flex items-center space-x-6 text-sm text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
                   <span>{nbaProspects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
@@ -132,13 +140,13 @@ const Dashboard = () => {
 
       {/* Prospects Brasileiros */}
       {isLoaded && brazilianProspects.length > 0 && (
-        <div className="bg-gradient-to-br from-green-50 to-yellow-50 border border-green-200 rounded-lg shadow-md p-6">
+        <div className="bg-gradient-to-br from-green-50 to-yellow-50 dark:from-green-900/30 dark:to-yellow-900/30 border border-green-200 dark:border-green-800 rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
-              🇧🇷 <span className="text-brand-orange ml-2">Prospects </span>     Brasileiros
+              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects </span>     Brasileiros
             </h2>
-            <span className="text-sm text-green-700 bg-green-200 px-3 py-1 rounded-full font-medium">
+            <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
               {brazilianProspects.length} <span className="font-semibold">prospects</span>
             </span>
           </div>
@@ -157,18 +165,18 @@ const Dashboard = () => {
 
       {/* Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700 rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
               <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-              🏆 Top <span className="text-brand-orange mx-1">Prospects</span> Gerais
+              🏆 Top <span className="text-brand-orange dark:text-orange-400 mx-1">Prospects</span> Gerais
             </h2>
-            <span className="text-sm text-gray-500 bg-yellow-100 px-2 py-1 rounded">
+            <span className="text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded">
               Os melhores da classe
             </span>
           </div>
-          <div className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-            <p className="text-sm text-yellow-800">
+          <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
               <strong>📊 ESPN 100 & 247Sports:</strong> Os prospects mais bem ranqueados, incluindo AJ Dybantsa, Cameron Boozer e outros.
             </p>
           </div>

@@ -14,8 +14,7 @@
 /* Estilos globais */
 @layer base {
   body {
-    @apply text-slate-800 font-display antialiased;
-    background: linear-gradient(120deg, #f3f4f6 0%, #e0e7ef 100%);
+    @apply bg-slate-50 text-slate-800 font-display antialiased dark:bg-slate-900 dark:text-slate-200;
   }
   
   html {
@@ -27,16 +26,16 @@
 @layer components {
   /* Card do prospect com tema do logo */
   .prospect-card {
-    @apply bg-white rounded-xl shadow-brand hover:shadow-brand-lg transition-all duration-300 p-6 border border-slate-200/50;
+    @apply bg-white dark:bg-slate-800/50 rounded-xl shadow-brand hover:shadow-brand-lg transition-all duration-300 p-6 border border-slate-200/50 dark:border-slate-700/50;
   }
   
   .prospect-card:hover {
-    @apply transform -translate-y-1;
+    @apply transform -translate-y-1 dark:shadow-brand-cyan/20;
   }
   
   /* Botão principal com gradiente */
   .btn-primary {
-    @apply bg-gradient-to-r from-brand-orange to-brand-cyan text-white font-semibold py-3 px-6 rounded-lg shadow-brand hover:shadow-brand-lg transition-all duration-300;
+    @apply bg-gradient-to-r from-brand-orange to-brand-cyan text-white font-semibold py-3 px-6 rounded-lg shadow-brand hover:shadow-brand-lg transition-all duration-300 dark:shadow-brand-orange/30;
   }
   
   .btn-primary:hover {
@@ -45,12 +44,12 @@
   
   /* Navbar com estilo moderno */
   .nav-brand {
-    @apply bg-white/95 backdrop-blur-md border-b border-slate-200/50 shadow-brand;
+    @apply bg-white/95 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 shadow-brand;
   }
   
   /* Cards com accent */
   .card-accent {
-    @apply border-l-4 border-brand-orange;
+    @apply border-l-4 border-brand-orange dark:border-brand-cyan;
   }
   
   /* Texto com gradiente */
@@ -61,5 +60,36 @@
   /* Stats highlight */
   .stat-highlight {
     @apply text-brand-orange font-bold;
+  }
+
+  /* --- NOVOS ESTILOS PARA DARK MODE --- */
+
+  /* Inputs e Selects para Filtros */
+  .select-filter {
+    @apply w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-colors;
+  }
+
+  /* Badges de Posição e Ranking */
+  .badge-ranking {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200;
+  }
+
+  .badge-position {
+    @apply px-2 py-1 rounded-full text-xs font-medium;
+  }
+  .badge-position.PG {
+    @apply bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300;
+  }
+  .badge-position.SG {
+    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300;
+  }
+  .badge-position.SF {
+    @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+  }
+  .badge-position.PF {
+    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300;
+  }
+  .badge-position.C {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300;
   }
 }
