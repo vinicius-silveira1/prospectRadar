@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useProspectImage } from '@/hooks/useProspectImage';
+import { assignBadges } from '@/lib/badges';
+import Badge from './Common/Badge';
 
 const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect);
+  const badges = assignBadges(prospect);
 
   return (
     <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border dark:border-slate-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative">
@@ -36,16 +39,9 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
             <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1">
-              {(prospect.name?.trim().toLowerCase() === 'reynan santos' || prospect.name?.trim().toLowerCase() === 'gabi campos' || prospect.name?.trim().toLowerCase() === 'serjão conceição') && (
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full dark:bg-purple-900/50 dark:text-purple-300">
-                  Draft G League
-                </span>
-              )}
-              {prospect.name === 'Samis Calderon' && (
-                <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-semibold rounded-full dark:bg-red-900/50 dark:text-red-300">
-                  Kansas Commit
-                </span>
-              )}
+              {badges.map((badge, index) => (
+                <Badge key={index} badge={badge} />
+              ))}
             </div>
           </div>
           <span className="text-2xl font-bold text-slate-300 dark:text-slate-600">#{prospect.ranking}</span>

@@ -240,6 +240,7 @@ async function populateEduardoKlafkeStats() {
     motor: parseFloat((1 + ((scrapedData.advanced.usg_pct - 15) / 20) * 9).toFixed(1)),
     basketball_iq: parseFloat(((scrapedData.advanced.ast_pct - scrapedData.advanced.tov_pct) / 10 + 5).toFixed(1)),
     last_verified_at: new Date().toISOString(),
+    badges: ["shooter"],
   };
 
   // Remove undefined values to avoid issues with Supabase update

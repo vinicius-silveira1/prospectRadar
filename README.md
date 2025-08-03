@@ -2,14 +2,16 @@
 
 **A plataforma definitiva para análise de prospects de basquete, com foco na comunidade brasileira.**
 
+Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, construída com a comunidade brasileira de basquete em mente.
+
+## ✨ Badges
+
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-36B37E?logo=supabase&logoColor=white)](https://supabase.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=tanstack&logoColor=white)](https://tanstack.com/query/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, construída com a comunidade brasileira de basquete em mente.
 
 ## 🚀 Funcionalidades
 
@@ -19,12 +21,28 @@ Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos d
 -   **Radar Score Inteligente:** Nosso algoritmo exclusivo avalia o potencial de cada prospecto com base em uma combinação de estatísticas avançadas, atributos físicos e fatores de desenvolvimento, gerando uma pontuação de 0 a 1 que reflete sua projeção no draft e prontidão para a NBA.
 -   **Ferramenta de Comparação:** Compare até 4 prospects lado a lado em uma análise head-to-head detalhada.
 -   **Simulador de Mock Draft:** Crie e exporte seu próprio Mock Draft, fazendo as escolhas para cada time da loteria.
+-   **Badges de Habilidade:** Identifique rapidamente as principais características de um jogador através de um sistema de badges, como "Bom Arremessador", "Defensor de Elite", "Playmaker", etc.
 
 ## 🎯 Páginas Principais
 
 - **Dashboard (/)** - Visão geral dos prospects com destaques e estatísticas
 - **Compare (/compare)** - Ferramenta de comparação lado a lado
 - **Draft History (/draft-history)** - Análise histórica dos últimos drafts
+
+## 🧠 O que é o Radar Score?
+
+O **Radar Score** é uma métrica proprietária do ProspectRadar, projetada para fornecer uma avaliação holística do potencial de um prospecto. Ele vai além das estatísticas tradicionais, incorporando uma variedade de fatores para criar um perfil completo do jogador.
+
+### Como é Calculado?
+
+O cálculo do Radar Score é baseado em quatro pilares principais:
+
+1.  **Estatísticas Avançadas (Advanced Stats):** Métricas como Player Efficiency Rating (PER), True Shooting Percentage (TS%), Win Shares (WS), e Box Plus/Minus (BPM) são analisadas para medir a eficiência e o impacto do jogador em quadra.
+2.  **Atributos Físicos (Physical Attributes):** Altura, peso, envergadura e capacidade atlética são avaliados para determinar o potencial físico do jogador e sua adaptação ao nível da NBA.
+3.  **Potencial de Desenvolvimento (Upside):** Fatores como idade, ética de trabalho, e trajetória de desenvolvimento são considerados para projetar o crescimento futuro do jogador.
+4.  **Inteligência em Quadra (Basketball IQ):** Habilidades como tomada de decisão, visão de jogo e capacidade de leitura da defesa são avaliadas através de análise de vídeo e relatórios de scouting.
+
+O resultado é uma pontuação de 0 a 1, onde valores mais altos indicam um maior potencial e prontidão para a NBA.
 
 ## 📋 Casos de Uso Principais
 
