@@ -6,6 +6,8 @@ import useWatchlist from '../hooks/useWatchlist.js';
 import DashboardProspectCard from '@/components/DashboardProspectCard.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 
+import AlertBox from '@/components/Layout/AlertBox.jsx';
+
 const Dashboard = () => {
   const {
     prospects: allProspects,
@@ -77,13 +79,6 @@ const Dashboard = () => {
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
-          <button
-            onClick={refresh}
-            className="mt-4 md:mt-0 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
-          >
-            <RefreshCw size={16} className="mr-2" />
-            Atualizar Dados
-          </button>
         </div>
       </div>
 
@@ -138,10 +133,12 @@ const Dashboard = () => {
         </div>
       </div>
 
+      
+
       {/* Prospects Brasileiros */}
       {isLoaded && brazilianProspects.length > 0 && (
         <div className="bg-gradient-to-br from-green-50 to-yellow-50 dark:from-green-900/30 dark:to-yellow-900/30 border border-green-200 dark:border-green-800 rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
               🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects </span>     Brasileiros
@@ -150,6 +147,9 @@ const Dashboard = () => {
               {brazilianProspects.length} <span className="font-semibold">prospects</span>
             </span>
           </div>
+          <p className="text-sm text-gray-600 dark:text-slate-300 mb-6 -mt-2">
+            Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {brazilianProspects.slice(0, 5).map((prospect) => (
               <DashboardProspectCard
@@ -163,6 +163,12 @@ const Dashboard = () => {
         </div>
       )}
 
+      <AlertBox 
+        type="info"
+        title="Temporada 2025-26 em Breve!"
+        message="As estatísticas completas e o Radar Score de todos os prospectos serão atualizados em tempo real assim que os jogos da NCAA começarem. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
+      />
+
       {/* Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
         <div className="bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700 rounded-lg shadow-md p-6">
@@ -175,11 +181,7 @@ const Dashboard = () => {
               Os melhores da classe
             </span>
           </div>
-          <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>📊 ESPN 100 & 247Sports:</strong> Os prospects mais bem ranqueados, incluindo AJ Dybantsa, Cameron Boozer e outros.
-            </p>
-          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topProspects.map((prospect) => (
               <DashboardProspectCard

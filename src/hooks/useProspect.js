@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
-import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
+import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
 const rankingAlgorithm = new ProspectRankingAlgorithm();
@@ -19,7 +19,7 @@ export default function useProspect(id) {
 
         if (data) {
           // Gera dados de scouting se não existirem
-          const scoutingData = data.strengths ? {} : generateScoutingData(data);
+          const scoutingData = data.strengths ? {} : generateDataDrivenScoutingReport(data);
           const baseProspect = { ...data, ...scoutingData };
 
           // Aplica o algoritmo de ranking para obter a avaliação

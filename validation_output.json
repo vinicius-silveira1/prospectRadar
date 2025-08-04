@@ -1,0 +1,47 @@
+{
+  "prospect": "Killian Hayes",
+  "draft_class": 2020,
+  "evaluation": {
+    "totalScore": 0.79,
+    "categoryScores": {
+      "basicStats": 1,
+      "advancedStats": 1,
+      "physicalAttributes": 0.6599999999999999,
+      "technicalSkills": 0.4910000000000001,
+      "development": 0.825
+    },
+    "draftProjection": {
+      "round": 1,
+      "range": "11-20",
+      "description": "Mid-First Round"
+    },
+    "nbaReadiness": "NBA Ready",
+    "comparablePlayers": [
+      {
+        "name": "Tyrese Haliburton",
+        "similarity": 88,
+        "draftPosition": 12,
+        "careerSuccess": 8.4
+      },
+      {
+        "name": "Jrue Holiday",
+        "similarity": 80,
+        "draftPosition": 17,
+        "careerSuccess": 7.9
+      },
+      {
+        "name": "Luka Dončić",
+        "similarity": 78,
+        "draftPosition": 3,
+        "careerSuccess": 9.5
+      }
+    ]
+  },
+  "reality": {
+    "draft_position": "Undrafted",
+    "accolades": [
+      "Solid Role Player",
+      "NBA Finals Starter"
+    ]
+  }
+}

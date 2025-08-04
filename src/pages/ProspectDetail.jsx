@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
@@ -8,6 +8,16 @@ import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
 
+
+const AwaitingStats = ({ prospectName }) => (
+  <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 text-center">
+    <Clock className="mx-auto h-10 w-10 text-blue-500 mb-4" />
+    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Aguardando Início da Temporada</h3>
+    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+      As estatísticas detalhadas e a análise do Radar Score para {prospectName} serão geradas assim que a temporada 2025-26 começar.
+    </p>
+  </div>
+);
 
 const ProspectDetail = () => {
   const { id } = useParams();
@@ -17,6 +27,9 @@ const ProspectDetail = () => {
   const { watchlist, toggleWatchlist } = useWatchlist();
 
   const getWeightDisplay = (weight) => {
+    if (typeof weight === 'object' && weight !== null) {
+      return `${weight.us} lbs (${weight.intl} kg)`;
+    }
     return weight || 'N/A';
   };
 
@@ -54,6 +67,9 @@ const ProspectDetail = () => {
 
   const isInWatchlist = watchlist.has(prospect.id);
   const evaluation = prospect.evaluation || {};
+  const flags = evaluation.flags || [];
+  const hasStats = prospect.ppg > 0;
+
   // CORREÇÃO: Movido para o local correto
   const fgPercentage = (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
     ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) 
@@ -116,34 +132,54 @@ const ProspectDetail = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-blue-500" />Estatísticas Avançadas</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TS%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.ts_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">eFG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.efg_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">PER</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.per?.toFixed(2) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">USG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.usg_percent?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">ORtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ortg?.toFixed(1) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">DRtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.drtg?.toFixed(1) || 'N/A'}</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TOV%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.tov_percent?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">AST%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ast_percent?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TRB%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.trb_percent?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">STL%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.stl_percent?.toFixed(1) || 'N/A'}%</span></div>
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">BLK%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.blk_percent?.toFixed(1) || 'N/A'}%</span></div>
-              </div>
-            </div>
-            <AdvancedStatsExplanation />
-
-            {evaluation.totalScore && (
-              <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-purple-500" />Análise do Radar Score</Link></h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                  <div><RadarScoreChart data={evaluation.categoryScores} /></div>
-                  <div className="space-y-4">
-                    <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-slate-400">Range: {evaluation.draftProjection?.range || 'N/A'}</p></div>
-                    <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Prontidão para a NBA</h3><p className="text-lg font-bold text-green-600 dark:text-green-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
-                    <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Score Total</h3><p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{evaluation.totalScore}</p></div>
+            {hasStats ? (
+              <>
+                <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-blue-500" />Estatísticas Avançadas</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TS%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.ts_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">eFG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{(prospect.efg_percent * 100)?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">PER</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.per?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">USG%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.usg_percent?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">ORtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ortg?.toFixed(1) || 'N/A'}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">DRtg</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.drtg?.toFixed(1) || 'N/A'}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TOV%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.tov_percent?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">AST%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.ast_percent?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">TRB%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.trb_percent?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">STL%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.stl_percent?.toFixed(1) || 'N/A'}%</span></div>
+                    <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-slate-400">BLK%</span><span className="font-bold text-gray-800 dark:text-slate-200">{prospect.blk_percent?.toFixed(1) || 'N/A'}%</span></div>
                   </div>
+                </div>
+                <AdvancedStatsExplanation />
+
+                {evaluation.totalScore && (
+                  <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-purple-500" />Análise do Radar Score</Link></h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                      <div><RadarScoreChart data={evaluation.categoryScores} /></div>
+                      <div className="space-y-4">
+                        <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-slate-400">Range: {evaluation.draftProjection?.range || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Prontidão para a NBA</h3><p className="text-lg font-bold text-green-600 dark:text-green-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Score Total</h3><p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{evaluation.totalScore}</p></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <AwaitingStats prospectName={prospect.name} />
+            )}
+
+            {flags.length > 0 && (
+              <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />Destaques & Alertas do Radar</h2>
+                <div className="space-y-3">
+                  {flags.map((flag, index) => (
+                    <div key={index} className={`flex items-start p-3 rounded-lg ${flag.type === 'green' ? 'bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500' : 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500'}`}>
+                      {flag.type === 'green' ? <CheckCircle2 className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" /> : <AlertTriangle className="w-5 h-5 mr-3 text-red-500 flex-shrink-0" />}
+                      <p className={`text-sm ${flag.type === 'green' ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>{flag.message}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

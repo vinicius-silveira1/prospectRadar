@@ -1,67 +1,67 @@
 import ProspectRankingAlgorithm, { prospectEvaluationMetrics } from '../src/intelligence/prospectRankingAlgorithm.js';
 
 // Usando os dados mais recentes e detalhados, alinhados com o que foi populado no DB
-const reynanSantosData = {
-  id: 'reynan-santos-brasil-2026',
-  name: 'Reynan Santos',
-  nationality: '🇧🇷',
-  scope: 'NBB',
-  // Base stats
-  games_played: 40,
-  total_points: 583,
-  total_rebounds: 192,
-  total_assists: 85,
-  two_pt_makes: 135,
-  two_pt_attempts: 296,
-  three_pt_makes: 68,
-  three_pt_attempts: 217,
-  ft_makes: 109,
-  ft_attempts: 151,
-  minutes_played: 1050.2,
-  turnovers: 101,
-  total_blocks: 3,
-  total_steals: 26,
+const austinReavesData = {
+  id: 'austin-reaves-nba',
+  name: 'Austin Reaves',
+  nationality: '🇺🇸',
+  scope: 'NBA',
+  // Base stats (example college stats, not NBA)
+  games_played: 31,
+  total_points: 527,
+  total_rebounds: 196,
+  total_assists: 116,
+  two_pt_makes: 130,
+  two_pt_attempts: 260,
+  three_pt_makes: 50,
+  three_pt_attempts: 150,
+  ft_makes: 117,
+  ft_attempts: 130,
+  minutes_played: 1085,
+  turnovers: 70,
+  total_blocks: 10,
+  total_steals: 35,
   // Physical attributes
-  age: 21,
-  height: 76, // 6'4" in inches
-  weight: 187,
+  age: 23, // Age when drafted
+  height: 77, // 6'5" in inches
+  weight: 197,
   position: "SG",
-  wingspan: 78.5, // 6'6.5" in inches (Estimated)
+  wingspan: 77, // 6'5" in inches (Estimated)
   // Draft info
-  draftClass: 2026,
-  // Advanced stats for the 'stats' JSONB column
+  draftClass: 2021,
+  // Advanced stats (example college stats)
   stats: {
       advanced: {
-          'PER': 15.57,
-          'TS%': 0.503,
-          'eFG%': 0.462,
-          'ORB%': 5.15,
-          'DRB%': 17.12,
-          'TRB%': 11.08,
-          'AST%': 16.88,
-          'TOV%': 14.84,
-          'STL%': 1.38,
-          'BLK%': 0.34,
-          'USG%': 30.38,
+          'PER': 20.0,
+          'TS%': 0.580,
+          'eFG%': 0.550,
+          'ORB%': 3.0,
+          'DRB%': 15.0,
+          'TRB%': 9.0,
+          'AST%': 20.0,
+          'TOV%': 12.0,
+          'STL%': 2.0,
+          'BLK%': 1.0,
+          'USG%': 25.0,
       }
   },
-  // Subjective scores based on user's latest assessment
-  athleticism: 7,
+  // Subjective scores (estimated for Austin Reaves)
+  
   strength: 7,
-  speed: 7,
-  shooting: 5,
-  ball_handling: 6.5,
-  defense: 6.5,
-  basketball_iq: 7,
-  leadership: 5, // Neutral
-  improvement: 7,
-  competition_level: 8.5,
-  coachability: 5, // Neutral
-  work_ethic: 8.5,
+  speed: 6,
+  shooting: 8, // Good shooter
+  ball_handling: 7,
+  defense: 7, // Solid defender
+  basketball_iq: 8, // High IQ
+  leadership: 6,
+  improvement: 8, // Showed good improvement
+  competition_level: 9, // Played in Big 12
+  coachability: 8,
+  work_ethic: 9,
 };
 
 const algorithm = new ProspectRankingAlgorithm(prospectEvaluationMetrics);
-const result = algorithm.evaluateProspect(reynanSantosData);
+const result = algorithm.evaluateProspect(austinReavesData);
 
-console.log('Radar Score para Reynan Santos (com dados atualizados):');
+console.log('Radar Score para Austin Reaves (com dados atualizados):');
 console.log(JSON.stringify(result, null, 2));

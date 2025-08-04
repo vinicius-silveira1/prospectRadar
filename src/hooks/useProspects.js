@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
-import { generateScoutingData } from '@/services/scoutingDataGenerator.js';
+import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import { getTierByRanking } from '@/lib/constants.js';
 
 export default function useProspects() {
@@ -31,7 +31,7 @@ export default function useProspects() {
         let processedProspects = dbProspects.map(prospect => {
           const tier = getTierByRanking(prospect.ranking);
           // Gera dados de scouting (pontos fortes/fracos) se não existirem no DB.
-          const scoutingData = prospect.strengths ? {} : generateScoutingData(prospect);
+          const scoutingData = prospect.strengths ? {} : generateDataDrivenScoutingReport(prospect);
           
           // Usa diretamente as estatísticas ppg, rpg, apg do banco de dados
           return { 

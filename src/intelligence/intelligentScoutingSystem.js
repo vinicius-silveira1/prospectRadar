@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import ProspectRankingAlgorithm from './prospectRankingAlgorithm.js';
+import { generateDataDrivenScoutingReport } from '../services/scoutingDataGenerator.js';
 
 /**
  * Configuração das fontes de dados
@@ -304,12 +304,17 @@ export class IntelligentScoutingSystem {
     // Analisa contexto de desenvolvimento
     const developmentContext = this.analyzeDevelopmentContext(prospect);
 
+    // Gera pontos fortes e fracos baseados em dados
+    const scoutingReport = generateDataDrivenScoutingReport(prospect);
+
     return {
       ...prospect,
       advancedStats,
       physical: physicalAttributes,
       skills: technicalSkills,
-      development: developmentContext
+      development: developmentContext,
+      strengths: scoutingReport.strengths,
+      weaknesses: scoutingReport.weaknesses,
     };
   }
 

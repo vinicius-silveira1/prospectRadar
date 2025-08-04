@@ -106,7 +106,11 @@ const Prospects = () => {
         </div>
 
         <div className="mb-6">
-          <AlertBox message="As estatísticas dos prospects serão populadas assim que a temporada 2025-26 da NCAA começar." />
+          <AlertBox 
+            type="info"
+            title="Temporada 2025-26 em Breve!"
+            message="As estatísticas completas e o Radar Score de todos os prospectos serão atualizados em tempo real assim que os jogos da NCAA começarem. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
+          />
         </div>
 
         {/* Conteúdo */}

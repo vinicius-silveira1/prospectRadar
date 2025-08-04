@@ -5,11 +5,33 @@ const RadarScoreChart = ({ data }) => {
   if (!data) return null;
 
   // Transforma os dados para o formato que o Recharts espera
-  const chartData = Object.keys(data).map(key => ({
-    subject: key.charAt(0).toUpperCase() + key.slice(1), // Capitaliza a chave (ex: basic -> Basic)
-    score: Math.round(data[key] * 100), // Converte para uma escala de 0-100
-    fullMark: 100,
-  }));
+  const chartData = Object.keys(data).map(key => {
+    let subjectName = '';
+    switch (key) {
+      case 'basicStats':
+        subjectName = 'Básicas';
+        break;
+      case 'advancedStats':
+        subjectName = 'Avançadas';
+        break;
+      case 'physicalAttributes':
+        subjectName = 'Físicos';
+        break;
+      case 'technicalSkills':
+        subjectName = 'Técnicas';
+        break;
+      case 'development':
+        subjectName = 'Desenvolvimento';
+        break;
+      default:
+        subjectName = key;
+    }
+    return {
+      subject: subjectName,
+      score: Math.round(data[key] * 100), // Converte para uma escala de 0-100
+      fullMark: 100,
+    };
+  });
 
   return (
     <div style={{ width: '100%', height: 350 }}>

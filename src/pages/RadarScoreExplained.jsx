@@ -49,8 +49,8 @@ const RadarScoreExplained = () => {
     <div className="bg-white dark:bg-slate-900/80 py-12 sm:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <Lightbulb className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">
+          
+          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white">
             O <span className="text-brand-orange">Radar Score</span>
           </h1>
           <p className="mt-4 text-lg leading-6 text-slate-600 dark:text-slate-400">
@@ -68,7 +68,7 @@ const RadarScoreExplained = () => {
                 <div>
                   <div className="flex items-center gap-4">
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{pillar.title}</h2>
-                    <span className={`px-3 py-1 text-sm font-semibold text-${pillar.color}-800 bg-${pillar.color}-100 dark:text-white dark:bg-${pillar.color}-500/50 rounded-full`}>
+                    <span className={`px-3 py-1 text-sm font-semibold text-${pillar.color}-800 bg-${pillar.color}-100 dark:text-orange-100 dark:bg-orange-700 rounded-full`}>
                       Peso: {pillar.weight}
                     </span>
                   </div>

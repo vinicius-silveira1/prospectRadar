@@ -1,7 +1,19 @@
 import puppeteer from 'puppeteer';
+import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config';
 
-export async function scrapePlayerStats(url) {
-  console.log(`🚀 Iniciando o scraper para LatinBasket...`);
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error("Erro: VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY são necessários.");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export async function scrapePlayerStats(url, prospectId) {
+  console.log(`🚀 Iniciando o scraper para LatinBasket: ${url}`);
   let browser = null;
 
   try {
@@ -15,7 +27,7 @@ export async function scrapePlayerStats(url) {
     });
 
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 }); // Aumentar timeout
 
     console.log('Página carregada. Extraindo dados...');
 
@@ -26,7 +38,7 @@ export async function scrapePlayerStats(url) {
       const nameElement = document.querySelector('.player-title');
       stats.name = nameElement ? nameElement.textContent.replace(' basketball profile', '').trim() : 'N/A';
 
-      // Extract summary stats (PTS, REB, AST) from the AVERAGES table
+      // --- Extract summary stats (PTS, REB, AST) from the AVERAGES table ---
       const averagesTable = Array.from(document.querySelectorAll('table.my_Title')).find(table => {
         const header = table.querySelector('tr.my_Headers b');
         return header && header.innerText.includes('AVERAGES');
@@ -36,20 +48,22 @@ export async function scrapePlayerStats(url) {
         const statsRow = averagesTable.querySelector('tr.my_pStats1');
         if (statsRow) {
           const columns = statsRow.querySelectorAll('td');
-          stats.ppg = parseFloat(columns[3].innerText) || 0;
-          stats.rpg = parseFloat(columns[9].innerText) || 0;
-          stats.apg = parseFloat(columns[10].innerText) || 0;
+          // Corrected indices based on provided HTML
+          stats.ppg = parseFloat(columns[2].innerText) || 0; // PTS (index 2 in the provided HTML for my_pStats1)
+          stats.rpg = parseFloat(columns[8].innerText) || 0; // RT (index 8)
+          stats.apg = parseFloat(columns[9].innerText) || 0; // AS (index 9)
 
-          stats.fg_pct = parseFloat(columns[4].innerText.replace('%', '')) / 100 || 0;
-          stats.three_pct = parseFloat(columns[5].innerText.replace('%', '')) / 100 || 0;
-          stats.ft_pct = parseFloat(columns[6].innerText.replace('%', '')) / 100 || 0;
+          stats.fg_pct = parseFloat(columns[3].innerText.replace('%', '')) / 100 || 0; // 2FGP (index 3)
+          stats.three_pct = parseFloat(columns[4].innerText.replace('%', '')) / 100 || 0; // 3FGP (index 4)
+          stats.ft_pct = parseFloat(columns[5].innerText.replace('%', '')) / 100 || 0; // FT (index 5)
 
-          stats.bpg = parseFloat(columns[12].innerText) || 0;
-          stats.spg = parseFloat(columns[13].innerText) || 0;
+          stats.bpg = parseFloat(columns[11].innerText) || 0; // BS (index 11)
+          stats.spg = parseFloat(columns[12].innerText) || 0; // ST (index 12)
+          stats.turnovers = parseFloat(columns[13].innerText) || 0; // TO (index 13)
         }
       }
 
-      // Extract advanced stats (PER 40 MINUTES)
+      // --- Extract advanced stats (PER 40 MINUTES) ---
       const per40Table = Array.from(document.querySelectorAll('table.my_Title')).find(table => {
         const header = table.querySelector('tr.my_Headers b');
         return header && header.innerText.includes('PER 40 MINUTES');
@@ -59,28 +73,26 @@ export async function scrapePlayerStats(url) {
         const per40Row = per40Table.querySelector('tr.my_pStats2');
         if (per40Row) {
           const columns = per40Row.querySelectorAll('td');
-          stats.per = parseFloat(columns[12].innerText) || 0; // RNK is the last column in the PER 40 table
+          stats.per = parseFloat(columns[12].innerText) || 0; // RNK (Efficiency Rating) is at index 12
         }
       }
-
-      // Initialize other advanced stats to 0 if not found
-      stats.usg_percent = 0;
-      stats.ts_percent = 0; 
-      stats.efg_percent = 0; 
-      stats.orb_percent = 0;
-      stats.drb_percent = 0;
-      stats.trb_percent = 0;
-      stats.ast_percent = 0;
-      stats.tov_percent = 0;
-      stats.stl_percent = 0;
-      stats.blk_percent = 0;
-
 
       return stats;
     });
 
     if (playerStats && Object.keys(playerStats).length > 0 && playerStats.name !== 'N/A') {
       console.log('✅ Sucesso! Dados do jogador extraídos:', playerStats);
+      
+      const { data, error } = await supabase
+        .from('prospects')
+        .update(playerStats)
+        .eq('id', prospectId);
+
+      if (error) {
+        console.error(`Erro ao atualizar prospecto ${prospectId} no Supabase:`, error);
+      } else {
+        console.log(`Prospecto ${prospectId} atualizado com sucesso!`, data);
+      }
       return playerStats; // Return the scraped data
     } else {
       console.error('❌ Falha: Não foi possível extrair dados válidos do jogador.');
@@ -97,3 +109,6 @@ export async function scrapePlayerStats(url) {
     }
   }
 }
+
+// Exemplo de uso para Samis Calderon
+scrapePlayerStats('https://basketball.latinbasket.com/player/Samis-Calderon/614493', 'samis-calderon-latinbasket');
