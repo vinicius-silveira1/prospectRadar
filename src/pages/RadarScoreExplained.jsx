@@ -5,40 +5,40 @@ const RadarScoreExplained = () => {
   const pillars = [
     {
       icon: <BarChart3 className="w-10 h-10 text-blue-500" />,
-      title: "Estatísticas Básicas",
-      weight: "30%",
+      title: "Estatísticas básicas",
+      weight: "15%",
       description: "Analisamos o desempenho bruto do jogador em quadra. Pontos, rebotes e assistências formam a base da avaliação, mostrando a produção imediata do atleta.",
       metrics: ["PPG", "RPG", "APG", "% FG", "% 3PT", "% FT"],
       color: "blue"
     },
     {
       icon: <Zap className="w-10 h-10 text-purple-500" />,
-      title: "Métricas Avançadas",
-      weight: "25%",
+      title: "Métricas avançadas",
+      weight: "20%",
       description: "Vamos além dos números básicos para medir a eficiência e o impacto real. Métricas como PER e True Shooting nos dizem o quão eficaz é um jogador, não apenas o quanto ele produz.",
-      metrics: ["PER", "TS%", "Usage Rate", "Win Shares", "VORP", "BPM"],
+      metrics: ["PER", "TS%", "Taxa de Uso", "Vitórias Compartilhadas", "VORP", "BPM"],
       color: "purple"
     },
     {
       icon: <Ruler className="w-10 h-10 text-green-500" />,
-      title: "Atributos Físicos",
-      weight: "20%",
+      title: "Atributos físicos",
+      weight: "10%",
       description: "O potencial de um jogador na NBA está diretamente ligado às suas ferramentas físicas. Avaliamos altura, envergadura e capacidade atlética para projetar sua adaptação ao próximo nível.",
       metrics: ["Altura", "Envergadura", "Atletismo", "Força", "Velocidade"],
       color: "green"
     },
     {
       icon: <Award className="w-10 h-10 text-red-500" />,
-      title: "Habilidades Técnicas",
-      weight: "15%",
+      title: "Habilidades técnicas",
+      weight: "35%",
       description: "A técnica refina o talento. Analisamos a qualidade do arremesso, o controle de bola, a visão defensiva e o QI de basquete para entender o quão polido é o jogador.",
       metrics: ["Arremesso", "Controle de Bola", "Defesa", "QI de Basquete", "Liderança"],
       color: "red"
     },
     {
       icon: <TrendingUp className="w-10 h-10 text-orange-500" />,
-      title: "Desenvolvimento e Contexto",
-      weight: "10%",
+      title: "Desenvolvimento e contexto",
+      weight: "20%",
       description: "Um prospect não é uma foto, é um filme. Avaliamos sua curva de melhora, a idade em relação ao nível de competição e sua ética de trabalho para projetar seu crescimento futuro.",
       metrics: ["Idade vs Nível", "Melhora Ano a Ano", "Nível da Competição", "Mentalidade"],
       color: "orange"

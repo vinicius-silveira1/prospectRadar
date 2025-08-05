@@ -69,7 +69,7 @@ const Prospects = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                <span className="text-brand-orange">Prospects</span> Database
+                <span className="text-brand-orange">Banco de Dados de Prospects</span>
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">
                 Explore e analise {allProspects.length} <span className="font-semibold text-brand-orange">prospects</span> do Draft 2026

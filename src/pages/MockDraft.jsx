@@ -25,6 +25,7 @@ const MockDraft = () => {
     draftHistory,
     draftProspect,
     undraftProspect,
+    simulateLottery,
     setDraftSettings,
     setFilters,
     setSelectedProspect,
@@ -46,6 +47,12 @@ const MockDraft = () => {
   const draftStats = getDraftStats();
   const bigBoard = getBigBoard();
   const recommendations = getProspectRecommendations(currentPick);
+
+  useEffect(() => {
+    if (!loading && allProspects.length > 0) {
+      initializeDraft();
+    }
+  }, [loading, allProspects, initializeDraft]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -196,6 +203,9 @@ const MockDraft = () => {
               <button onClick={initializeDraft} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center">
                 <RotateCcw className="h-4 w-4 mr-2" /> Reset Draft
               </button>
+              <button onClick={simulateLottery} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center">
+                <Shuffle className="h-4 w-4 mr-2" /> Simular Loteria
+              </button>
               <div className="relative export-menu-container">
                 <button onClick={() => setShowExportMenu(!showExportMenu)} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
                   {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Download className="h-4 w-4 mr-2" />} {isExporting ? 'Exportando...' : 'Exportar'}
@@ -221,8 +231,8 @@ const MockDraft = () => {
         <div className="xl:col-span-3">
           <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-md border dark:border-slate-700 mb-6">
             <div className="flex border-b dark:border-slate-700 overflow-x-auto whitespace-nowrap">
-              <button onClick={() => setView('draft')} className={`px-6 py-3 font-medium transition-colors ${view === 'draft' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Target className="h-4 w-4 inline mr-2" /> Draft Board</button>
-              <button onClick={() => setView('bigboard')} className={`px-6 py-3 font-medium transition-colors ${view === 'bigboard' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Star className="h-4 w-4 inline mr-2" /> Big Board</button>
+              <button onClick={() => setView('draft')} className={`px-6 py-3 font-medium transition-colors ${view === 'draft' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Target className="h-4 w-4 inline mr-2" /> Quadro do Draft</button>
+              <button onClick={() => setView('bigboard')} className={`px-6 py-3 font-medium transition-colors ${view === 'bigboard' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Star className="h-4 w-4 inline mr-2" /> Big Board - Principais Prospects</button>
               <button onClick={() => setView('prospects')} className={`px-6 py-3 font-medium transition-colors ${view === 'prospects' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Users className="h-4 w-4 inline mr-2" /> Prospects Disponíveis</button>
             </div>
             <div className="p-4 border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
@@ -274,7 +284,9 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
             </div>
             {pick.prospect && <button onClick={() => onUndraftPick(pick.pick)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs">Desfazer</button>}
           </div>
-          <div className="text-xs text-slate-600 dark:text-slate-400 mb-2">{pick.team}</div>
+          <div className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+            {teamFullNames[pick.team] || pick.team}
+          </div>
           {pick.prospect ? (
             <div>
               <div className="font-medium text-slate-900 dark:text-white">{pick.prospect.name}</div>
@@ -282,7 +294,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
               <div className="text-xs text-slate-500 dark:text-slate-500">{pick.prospect.high_school_team || 'N/A'}</div>
             </div>
           ) : (
-            <div className="text-slate-400 dark:text-slate-500 text-sm italic">{pick.pick === currentPick ? 'Sua vez!' : 'Disponível'}</div>
+            <div className="text-slate-400 dark:text-slate-500 text-sm italic">{pick.pick === currentPick ? 'Sua vez de selecionar!' : 'Disponível'}</div>
           )}
         </div>
       ))}
@@ -292,12 +304,12 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
 
 const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
   <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-md border dark:border-slate-700 p-6">
-    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Big Board - Top <span className="text-brand-orange">Prospects</span></h3>
+    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Big Board - Principais Prospects</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {prospects.map((prospect, index) => (
         <div key={prospect.id} className="relative">
           <div className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
-          <MockDraftProspectCard prospect={prospect} action={{ label: 'Draft', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
+          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
         </div>
       ))}
     </div>
@@ -310,14 +322,14 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
       <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-md border dark:border-slate-700 p-6">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center"><TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> Recomendações para Pick #{currentPick}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recommendations.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Draft', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
+          {recommendations.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
         </div>
       </div>
     )}
     <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-md border dark:border-slate-700 p-6">
       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center"><Users className="h-5 w-5 text-blue-500 mr-2" /> <span className="text-brand-orange mr-1">Prospects</span> Disponíveis ({prospects.length})</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {prospects.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Draft', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
+        {prospects.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
       </div>
     </div>
   </div>
@@ -350,3 +362,36 @@ const MockDraftProspectCard = ({ prospect, action }) => {
 };
 
 export default MockDraft;
+
+const teamFullNames = {
+  'ATL': 'Atlanta Hawks',
+  'BKN': 'Brooklyn Nets',
+  'BOS': 'Boston Celtics',
+  'CHA': 'Charlotte Hornets',
+  'CHI': 'Chicago Bulls',
+  'CLE': 'Cleveland Cavaliers',
+  'DAL': 'Dallas Mavericks',
+  'DEN': 'Denver Nuggets',
+  'DET': 'Detroit Pistons',
+  'GSW': 'Golden State Warriors',
+  'HOU': 'Houston Rockets',
+  'IND': 'Indiana Pacers',
+  'LAC': 'LA Clippers',
+  'LAL': 'Los Angeles Lakers',
+  'MEM': 'Memphis Grizzlies',
+  'MIA': 'Miami Heat',
+  'MIL': 'Milwaukee Bucks',
+  'MIN': 'Minnesota Timberwolves',
+  'NOP': 'New Orleans Pelicans',
+  'NYK': 'New York Knicks',
+  'OKC': 'Oklahoma City Thunder',
+  'ORL': 'Orlando Magic',
+  'PHI': 'Philadelphia 76ers',
+  'PHX': 'Phoenix Suns',
+  'POR': 'Portland Trail Blazers',
+  'SAC': 'Sacramento Kings',
+  'SAS': 'San Antonio Spurs',
+  'TOR': 'Toronto Raptors',
+  'UTA': 'Utah Jazz',
+  'WAS': 'Washington Wizards',
+};

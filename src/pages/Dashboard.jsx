@@ -141,7 +141,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
-              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects </span>     Brasileiros
+              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects</span> Brasileiros
             </h2>
             <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
               {brazilianProspects.length} <span className="font-semibold">prospects</span>

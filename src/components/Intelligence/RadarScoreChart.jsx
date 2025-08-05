@@ -47,7 +47,7 @@ const RadarScoreChart = ({ data }) => {
           <PolarAngleAxis dataKey="subject" tick={{ fill: '#4A5568', fontSize: 14 }} />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#718096', fontSize: 12 }} />
           <Radar 
-            name="Radar Score"
+            name="Score do Radar"
             dataKey="score" 
             stroke="#8884d8" 
             fill="url(#radarGradient)" 

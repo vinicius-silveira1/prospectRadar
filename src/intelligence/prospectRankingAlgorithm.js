@@ -39,7 +39,7 @@ export const prospectEvaluationMetrics = {
     weight: 0.10,
     metrics: {
       height: { weight: 0.30, bonusByPosition: true },
-      wingspan: { weight: 0.25, nbaAdvantage: 2 },
+      wingspan: { weight: 0.20, nbaAdvantage: 2 },
       athleticism: { weight: 0.20, scaleOf10: true },
       strength: { weight: 0.15, scaleOf10: true },
       speed: { weight: 0.10, scaleOf10: true }
@@ -63,7 +63,7 @@ export const prospectEvaluationMetrics = {
     weight: 0.20,
     metrics: {
       ageVsLevel: { weight: 0.30, youngerIsBetter: true },
-      improvement: { weight: 0.25, yearOverYear: true },
+      improvement: { weight: 0.30, yearOverYear: true },
       competition: { weight: 0.20, levelOfPlay: true },
       coachability: { weight: 0.15, scaleOf10: true },
       workEthic: { weight: 0.10, scaleOf10: true }
@@ -103,6 +103,16 @@ export class ProspectRankingAlgorithm {
 
   // Helper to parse wingspan from text (e.g., "7'0"") to inches
   parseWingspanToInches(wingspanData) {
+    if (wingspanData === null || typeof wingspanData === 'undefined') return null;
+    if (typeof wingspanData === 'object' && wingspanData !== null) { // Handle object format if it exists
+      if (typeof wingspanData.us === 'string' && wingspanData.us.includes('\'')) {
+        const parts = wingspanData.us.split('\'');
+        const feet = parseInt(parts[0]);
+        const inches = parseFloat(parts[1].replace('"', ''));
+        return (feet * 12) + inches;
+      }
+      return parseFloat(wingspanData.us) || 0;
+    }
     if (typeof wingspanData === 'string' && wingspanData.includes('\'')) {
       const parts = wingspanData.split('\'');
       const feet = parseInt(parts[0]);
@@ -110,6 +120,13 @@ export class ProspectRankingAlgorithm {
       return (feet * 12) + inches;
     }
     return parseFloat(wingspanData) || 0;
+  }
+
+  calculateAssistToTurnoverRatio(prospect) {
+    const apg = prospect.apg || 0;
+    const tov_per_game = prospect.tov_per_game || 0;
+    if (tov_per_game === 0) return apg > 0 ? 99 : 0; // High ratio if no turnovers, 0 if no assists either
+    return apg / tov_per_game;
   }
 
   /**
@@ -136,7 +153,7 @@ export class ProspectRankingAlgorithm {
     const totalAttempts = (p.two_pt_attempts || 0) + (p.three_pt_attempts || 0);
     const fg_percentage = totalAttempts > 0 ? (totalMakes / totalAttempts) : (p.fg_pct || 0);
 
-    const three_pt_percentage = p.three_pt_attempts > 0 ? (p.three_pt_makes / p.three_pt_attempts) : (p.three_pct || 0);
+    const three_pt_percentage = (p.three_pt_attempts > 0 && p.three_pt_makes !== undefined) ? (p.three_pt_makes / p.three_pt_attempts) : (p.three_pct || 0);
     const ft_percentage = p.ft_attempts > 0 ? (p.ft_makes / p.ft_attempts) : (p.ft_pct || 0);
 
     const basicStats = {
@@ -146,13 +163,16 @@ export class ProspectRankingAlgorithm {
       fg_percentage,
       three_pt_percentage,
       ft_percentage,
+      tov_per_game: p.tov_per_game || 0,
+      stl_per_game: p.stl_per_game || 0,
+      blk_per_game: p.blk_per_game || 0,
     };
 
     // CORREÇÃO: Acessar os stats avançados do objeto aninhado 'stats.advanced' ou do nível raiz do prospecto
     const advancedStats = {
       per: (statsData.advanced?.PER || p.per) || 0,
       ts_percentage: (statsData.advanced?.['TS%'] || p.ts_percent) || 0,
-      usage_rate: (statsData.advanced?.['USG%'] || p.usg_percent) || 0,
+      usage_rate: (statsData.advanced?.['USG%'] || p.usage_rate) || 0,
       win_shares: (statsData.advanced?.win_shares || p.win_shares) || 0,
       vorp: (statsData.advanced?.vorp || p.vorp) || 0,
       bpm: (statsData.advanced?.bpm || p.bpm) || 0,
@@ -163,7 +183,7 @@ export class ProspectRankingAlgorithm {
 
     const physical = {
       height: parsedHeight,
-      wingspan: parsedWingspan || (parsedHeight + 2.5), // Média da NBA é 2.5in a mais
+      wingspan: parsedWingspan === null ? (parsedHeight + 2.5) : parsedWingspan, // Média da NBA é 2.5in a mais
       athleticism: p.athleticism || estimatedSkills.athleticism, // Usa manual ou estimado
       strength: p.strength || 6,
       speed: p.speed || 8, // Estimado baseado em relatórios (rápido em transição)
@@ -208,7 +228,14 @@ export class ProspectRankingAlgorithm {
       return total + (scores[category] * categoryWeight);
     }, 0);
 
-    const finalTotalScore = (totalScore * 0.8) + (externalRankingInfluence * 0.2);
+    const flags = this.generateProspectFlags(p, basicStats, advancedStats, physical);
+
+    let redFlagPenalty = 0;
+    if (flags.some(flag => flag.type === 'red')) {
+      redFlagPenalty = 0.1; // Example penalty, can be adjusted
+    }
+
+    const finalTotalScore = (totalScore * 0.8) + (externalRankingInfluence * 0.2) - redFlagPenalty;
 
     const draftProjection = this.calculateDraftProjection(finalTotalScore, p);
 
@@ -216,13 +243,13 @@ export class ProspectRankingAlgorithm {
       totalScore: Math.round(finalTotalScore * 100) / 100,
       categoryScores: scores,
       draftProjection,
-      nbaReadiness: this.assessNBAReadiness(finalTotalScore),
+      nbaReadiness: this.assessNBAReadiness(finalTotalScore, flags),
       comparablePlayers: this.findComparablePlayers(p, physical, basicStats),
-      flags: this.generateProspectFlags(p, basicStats, advancedStats)
+      flags: flags
     };
   }
 
-  generateProspectFlags(prospect, basicStats, advancedStats) {
+  generateProspectFlags(prospect, basicStats, advancedStats, physical) {
     const p = prospect || {};
     const flags = [];
     const safeAccess = (value) => value || 0;
@@ -230,41 +257,103 @@ export class ProspectRankingAlgorithm {
     // --- Green Flags (Pontos Positivos Notáveis) ---
     const wingspanAdvantage = this.parseWingspanToInches(p.wingspan) - this.parseHeightToInches(p.height);
     if (wingspanAdvantage >= 5) {
-      flags.push({ type: 'green', message: `Envergadura de Elite (+${wingspanAdvantage.toFixed(1)}" em relação à altura)` });
+      flags.push({ type: 'green', message: `\u00A0\u00A0Envergadura de elite (+${wingspanAdvantage.toFixed(1)}" em relação à altura)` });
     }
 
     if (basicStats.ft_percentage >= 0.90 && p.ft_attempts >= 50) {
-      flags.push({ type: 'green', message: 'Cobrador de Lance Livre de Elite' });
+      flags.push({ type: 'green', message: '\u00A0\u00A0Cobrador de lance livre de elite' });
     }
 
     if (basicStats.three_pt_percentage >= 0.40 && p.three_pt_attempts >= 80) {
-      flags.push({ type: 'green', message: 'Arremessador de 3pt de Elite' });
+      flags.push({ type: 'green', message: '\u00A0\u00A0Arremessador de 3pt de elite' });
     }
 
-    const assistToTurnoverRatio = safeAccess(p.tov_percent) > 0 ? safeAccess(p.ast_percent) / safeAccess(p.tov_percent) : 0;
-    if (assistToTurnoverRatio >= 2.5 && safeAccess(p.ast_percent) > 20) {
-      flags.push({ type: 'green', message: 'Playmaker de Baixo Erro e Alto Impacto' });
+    const assistToTurnoverRatio = this.calculateAssistToTurnoverRatio(p);
+    if (assistToTurnoverRatio >= 2.5 && safeAccess(p.apg) > 4) { // Usando apg para volume de assistências
+      flags.push({ type: 'green', message: '\u00A0\u00A0Playmaker de poucos erros e muito impacto' });
     }
 
     if (advancedStats.per >= 25) {
-      flags.push({ type: 'green', message: 'Produção Ofensiva Extremamente Eficiente (PER)' });
+      flags.push({ type: 'green', message: '\u00A0\u00A0Produção ofensiva extremamente eficiente (PER)' });
+    }
+
+    // New Green Flags
+    if (basicStats.three_pt_percentage >= 0.38 && basicStats.ft_percentage >= 0.85 && p.three_pt_attempts >= 100) {
+      flags.push({ type: 'green', message: '\u00A0\u00A0Atirador de elite' });
+    }
+
+    if (assistToTurnoverRatio >= 2.0 && basicStats.apg >= 4.0 && safeAccess(p.tov_percent) < 0.10) { // Added apg threshold for meaningful playmaking
+      flags.push({ type: 'green', message: '\u00A0\u00A0Criador eficiente' });
+    }
+
+    if (safeAccess(p.stl_per_game) >= 1.5 && safeAccess(p.blk_per_game) >= 1.0) {
+      flags.push({ type: 'green', message: '\u00A0\u00A0Motor defensivo' });
+    }
+
+    if (basicStats.three_pt_percentage >= 0.36 && advancedStats.dbpm > 3.0) {
+      flags.push({ type: 'green', message: '\u00A0\u00A0Potencial "3&D"' });
+    }
+
+    if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && basicStats.rpg >= 6) {
+      flags.push({ type: 'green', message: '\u00A0\u00A0Alto volume de rebotes para guard/ala' });
+    }
+
+    if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && (safeAccess(p.stl_per_game) > 2.5 || safeAccess(p.blk_per_game) > 1.5)) {
+      flags.push({ type: 'green', message: '\u00A0\u00A0Alto volume de roubos/tocos para guard/ala' });
+    }
+
+    if (p.improvement >= 8) { // Assuming 8 is a high subjective score for improvement
+      flags.push({ type: 'green', message: '\u00A0\u00A0Melhora significativa ano a ano' });
     }
 
     // --- Red Flags (Pontos de Atenção) ---
     if (p.age >= 22) {
-      flags.push({ type: 'red', message: `Idade Avançada para a Classe (${p.age} anos)` });
+      flags.push({ type: 'red', message: `\u00A0\u00A0Idade avançada para a classe (${p.age} anos)` });
     }
 
     if (basicStats.ft_percentage < 0.65 && p.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: 'Mecânica de Arremesso Questionável (Baixo FT%)' });
+      flags.push({ type: 'red', message: '\u00A0\u00A0Mecânica de arremesso questionável (Baixo FT%)' });
     }
 
     if (advancedStats.ts_percentage < 0.50 && advancedStats.usage_rate > 25) {
-      flags.push({ type: 'red', message: 'Alto Volume com Baixa Eficiência Ofensiva' });
+      flags.push({ type: 'red', message: '\u00A0\u00A0Alto volume com baixa eficiência ofensiva' });
     }
 
     if (assistToTurnoverRatio < 1.0 && advancedStats.usage_rate > 20) {
-      flags.push({ type: 'red', message: 'Alto Volume de Erros (Mais Turnovers que Assistências)' });
+      flags.push({ type: 'red', message: '\u00A0\u00A0Alto volume de erros (mais turnovers que assistências)' });
+    }
+
+    // New Red Flags
+    if (advancedStats.usage_rate >= 0.28 && advancedStats.ts_percentage < 0.53) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Pontuador ineficiente (alto volume, baixa eficiência)' });
+    }
+
+    if (safeAccess(p.tov_percent) >= 0.15) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Máquina de turnovers (alta taxa de erros)' });
+    }
+
+    if ((p.position === 'PG' || p.position === 'SG') && basicStats.ft_percentage < 0.70 && p.ft_attempts >= 50) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Arremesso questionável (baixo FT% para guard)' });
+    } else if ((p.position === 'SF' || p.position === 'PF' || p.position === 'C') && basicStats.ft_percentage < 0.65 && p.ft_attempts >= 50) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Arremesso questionável (baixo FT% para big)' });
+    }
+
+    const parsedHeight = this.parseHeightToInches(p.height);
+    const parsedWingspan = this.parseWingspanToInches(p.wingspan);
+    if (physical.wingspan <= physical.height) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Potencial físico limitado (envergadura curta)' });
+    }
+
+    if ((p.position === 'PF' || p.position === 'C') && basicStats.rpg < 7) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Baixa taxa de rebotes para pivô/ala-pivô' });
+    }
+
+    if (p.fouls_per_game > 3.5) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Alta taxa de faltas' });
+    }
+
+    if (p.position === 'PG' && basicStats.apg < 4) {
+      flags.push({ type: 'red', message: '\u00A0\u00A0Baixa taxa de assistências para armador principal' });
     }
 
     return flags;
@@ -278,12 +367,14 @@ export class ProspectRankingAlgorithm {
     const threePtPct = safeAccess(p.three_pct);
     const ftPct = safeAccess(p.ft_pct);
     const ts_percent = safeAccess(p.ts_percent);
+    const fgPct = safeAccess(p.fg_pct); // Added fg_pct
     const threePtAttempts = safeAccess(p.three_pt_attempts);
     // O volume de arremessos agora influencia a confiança na % de 3PT
     const volumeBonus = Math.min(threePtAttempts / 100, 1.0); // Bônus máximo com 100 tentativas
-    const shootingScore = ((threePtPct * 10 * (0.5 + volumeBonus * 0.5)) * 0.3) + ((ftPct * 10) * 0.5) + ((ts_percent * 10) * 0.2);
+    // Increased weight for FT% and 3PT%, added FG%
+    const shootingScore = ((threePtPct * 10 * (0.5 + volumeBonus * 0.5)) * 0.35) + ((ftPct * 10) * 0.4) + ((ts_percent * 10) * 0.15) + ((fgPct * 10) * 0.1);
 
-    // --- 2. IQ & Ball Handling Score (Contextual por Posição) ---
+    // --- 2. IQ & Ball Handling Score (Contextual por Posição e com penalidade de TOV%) ---
     const ast_percent = safeAccess(p.ast_percent);
     const tov_percent = safeAccess(p.tov_percent);
     const bpm = safeAccess(p.bpm);
@@ -294,8 +385,8 @@ export class ProspectRankingAlgorithm {
     switch (p.position) {
       case 'PG':
       case 'SG':
-        // Para Guards, a criação de jogadas e a eficiência são cruciais.
-        iqScore = Math.min(((assistToTurnoverRatio * 1.5) + (bpm * 0.8) + (apg * 0.4)), 10);
+        // Para Guards, a criação de jogadas e a eficiência são cruciais. Penalidade maior para turnovers.
+        iqScore = Math.min(((assistToTurnoverRatio * 1.5) + (bpm * 0.8) + (apg * 0.4) - (tov_percent * 0.2)), 10);
         break;
       case 'SF':
       case 'PF':
@@ -308,7 +399,7 @@ export class ProspectRankingAlgorithm {
         iqScore = Math.min(((bpm * 1.0) + (drb_percent * 0.2) - (tov_percent * 0.2)), 10);
         break;
       default:
-        iqScore = Math.min(((assistToTurnoverRatio * 0.8) + (bpm * 0.8) + (apg * 0.3)), 10);
+        iqScore = Math.min(((assistToTurnoverRatio * 0.8) + (bpm * 0.8) + (apg * 0.3) - (tov_percent * 0.1)), 10);
     }
 
     // --- 3. Defense Score (Aprimorado) ---
@@ -318,7 +409,8 @@ export class ProspectRankingAlgorithm {
     // Adiciona DBPM para uma visão mais holística do impacto defensivo.
     const defenseScore = Math.min((stl_percent * 3) + (blk_percent * 3) + (dbpm * 1.5), 10);
 
-    // --- 4. Athleticism Score (Mantido) ---
+    // --- 4. Athleticism Score (Refatorado para ser mais intuitivo) ---
+    // Usa proxies estatísticos mais diretos para estimar o atleticismo.
     let athleticismScore;
     const orb_percent = safeAccess(p.orb_percent);
     const trb_percent = safeAccess(p.trb_percent);
@@ -326,17 +418,20 @@ export class ProspectRankingAlgorithm {
     switch (p.position) {
       case 'PG':
       case 'SG':
-        athleticismScore = Math.min(4, (stl_percent * 0.005) + (bpm * 0.002) + 0.02);
+        // Proxy para agilidade e velocidade lateral
+        athleticismScore = Math.min(stl_percent * 5, 10);
         break;
       case 'SF':
       case 'PF':
-        athleticismScore = Math.min((stl_percent * 2) + (blk_percent * 2) + (trb_percent * 1), 10);
+        // Proxy para versatilidade atlética (rebotes e defesa de perímetro)
+        athleticismScore = Math.min((trb_percent * 1.5) + (stl_percent * 2.5), 10);
         break;
       case 'C':
-        athleticismScore = Math.min((blk_percent * 4) + (orb_percent * 2), 10);
+        // Proxy para impulsão vertical e "motor"
+        athleticismScore = Math.min((blk_percent * 3) + (orb_percent * 2.5), 10);
         break;
       default:
-        athleticismScore = Math.min((orb_percent * 3) + (trb_percent * 1.5), 10);
+        athleticismScore = 5.0; // Valor neutro
     }
 
     return {
@@ -405,7 +500,7 @@ export class ProspectRankingAlgorithm {
 
     // Envergadura
     const wingspanAdvantage = physical.wingspan - physical.height;
-    const wingspanScore = Math.min(wingspanAdvantage / 2, 1.0); // +2 inches = 100%
+    const wingspanScore = Math.min(wingspanAdvantage / 1.5, 1.0); // +2 inches = 100%
     score += wingspanScore * metrics.wingspan.weight;
 
     // Outros atributos (escala 1-10) - estes serão 0 se não presentes no DB
@@ -457,19 +552,35 @@ export class ProspectRankingAlgorithm {
       if (prospect.ranking <= 30) return { round: 1, range: '21-30', description: 'Late First Round' };
     }
 
-    if (totalScore >= 0.85) return { round: 1, range: '1-10', description: 'Lottery Pick' };
-    if (totalScore >= 0.75) return { round: 1, range: '11-20', description: 'Mid-First Round' };
-    if (totalScore >= 0.65) return { round: 1, range: '21-30', description: 'Late First Round' };
-    if (totalScore >= 0.55) return { round: 2, range: '31-45', description: 'Early Second' };
-    if (totalScore >= 0.45) return { round: 2, range: '46-60', description: 'Late Second' };
-    return { round: 'Undrafted', range: 'UDFA', description: 'Needs Development' };
+    if (!prospect.ppg && prospect.ranking) {
+      if (prospect.ranking <= 10) return { round: 1, range: '1-10', description: 'Loteria' };
+      if (prospect.ranking <= 20) return { round: 1, range: '11-20', description: 'Meio da Primeira Rodada' };
+      if (prospect.ranking <= 30) return { round: 1, range: '21-30', description: 'Final da Primeira Rodada' };
+    }
+
+    if (totalScore >= 0.85) return { round: 1, range: '1-10', description: 'Loteria' };
+    if (totalScore >= 0.75) return { round: 1, range: '11-20', description: 'Meio da Primeira Rodada' };
+    if (totalScore >= 0.65) return { round: 1, range: '21-30', description: 'Final da Primeira Rodada' };
+    if (totalScore >= 0.55) return { round: 2, range: '31-45', description: 'Início da Segunda Rodada' };
+    if (totalScore >= 0.45) return { round: 2, range: '46-60', description: 'Final da Segunda Rodada' };
+    return { round: 'Não Draftado', range: 'UDFA', description: 'Precisa de Desenvolvimento' };
   }
 
-  assessNBAReadiness(totalScore) {
-    if (totalScore >= 0.60) return 'NBA Ready';
-    if (totalScore >= 0.45) return '1-2 Years Development';
-    if (totalScore >= 0.30) return '2-3 Years Development';
-    return 'Long-term Project';
+  assessNBAReadiness(totalScore, flags) {
+    let readiness = '';
+    if (totalScore >= 0.60) readiness = 'Pronto para NBA';
+    else if (totalScore >= 0.45) readiness = '1-2 Anos de Desenvolvimento';
+    else if (totalScore >= 0.30) readiness = '2-3 Anos de Desenvolvimento';
+    else readiness = 'Projeto de Longo Prazo';
+
+    // Downgrade readiness if critical red flags are present
+    const hasRedFlags = flags.some(flag => flag.type === 'red');
+
+    if (hasRedFlags) {
+      return 'Projeto de Longo Prazo';
+    }
+
+    return readiness;
   }
 
   findComparablePlayers(player, physical, stats) {
@@ -500,41 +611,66 @@ export class ProspectRankingAlgorithm {
   // Add calculateStatSimilarity helper function
   calculateStatSimilarity(prospectStats, nbaPlayerStats) {
     if (!prospectStats || !nbaPlayerStats) return 0;
-    const ppgDiff = Math.abs(prospectStats.ppg - nbaPlayerStats.ppg) / 10; // Normalize difference
+
+    const ppgDiff = Math.abs(prospectStats.ppg - nbaPlayerStats.ppg) / 10;
     const rpgDiff = Math.abs(prospectStats.rpg - nbaPlayerStats.rpg) / 5;
     const apgDiff = Math.abs(prospectStats.apg - nbaPlayerStats.apg) / 3;
-    return Math.max(0, 1 - ((ppgDiff + rpgDiff + apgDiff) / 3)); // Average difference, capped at 0
+    const tsDiff = Math.abs((prospectStats.ts_percent || 0) - (nbaPlayerStats.ts_percent || 0)) / 0.1;
+    const usageDiff = Math.abs((prospectStats.usage_rate || 0) - (nbaPlayerStats.usage_rate || 0)) / 0.05;
+    const perDiff = Math.abs((prospectStats.per || 0) - (nbaPlayerStats.per || 0)) / 5;
+    const tovDiff = Math.abs((prospectStats.tov_percent || 0) - (nbaPlayerStats.tov_percent || 0)) / 0.02; // Normalizar por 0.02 (2% de diferença)
+
+    // Aumentar o peso das diferenças de habilidades subjetivas
+    const shootingDiff = Math.abs((prospectStats.shooting || 0) - (nbaPlayerStats.shooting || 0)) / 5; // Normalizar por 5 pontos
+    const ballHandlingDiff = Math.abs((prospectStats.ballHandling || 0) - (nbaPlayerStats.ballHandling || 0)) / 5; // Normalizar por 5 pontos
+    const defenseDiff = Math.abs((prospectStats.defense || 0) - (nbaPlayerStats.defense || 0)) / 10;
+    const basketballIQDiff = Math.abs((prospectStats.basketballIQ || 0) - (nbaPlayerStats.basketballIQ || 0)) / 5; // Normalizar por 5 pontos
+    const leadershipDiff = Math.abs((prospectStats.leadership || 0) - (nbaPlayerStats.leadership || 0)) / 10;
+
+    const totalDiff = (ppgDiff + rpgDiff + apgDiff + tsDiff + usageDiff + perDiff + tovDiff +
+                       shootingDiff + ballHandlingDiff + defenseDiff + basketballIQDiff + leadershipDiff) / 12;
+    return Math.max(0, 1 - totalDiff);
   }
 
   loadNBASuccessPatterns() {
     return [
       // Superstars (Tier 1)
-      { name: 'Luka Dončić', position: 'PG', height: 79, collegeStats: { ppg: 16.0, rpg: 4.8, apg: 4.3 }, draftPosition: 3, careerRating: 9.5, archetype: 'Primary Playmaker' },
-      { name: 'LeBron James', position: 'SF', height: 80, collegeStats: { ppg: 29.0, rpg: 8.0, apg: 6.0 }, draftPosition: 1, careerRating: 10.0, archetype: 'Point Forward' },
-      { name: 'Stephen Curry', position: 'PG', height: 75, collegeStats: { ppg: 25.3, rpg: 4.5, apg: 5.7 }, draftPosition: 7, careerRating: 9.8, archetype: 'Elite Shooter' },
-      { name: 'Giannis Antetokounmpo', position: 'PF', height: 83, collegeStats: { ppg: 10.0, rpg: 5.0, apg: 2.0 }, draftPosition: 15, careerRating: 9.5, archetype: 'Athletic Finisher' },
-      { name: 'Nikola Jokic', position: 'C', height: 83, collegeStats: { ppg: 15.0, rpg: 10.0, apg: 4.0 }, draftPosition: 41, careerRating: 9.7, archetype: 'Playmaking Big' },
+      { name: 'Luka Dončić', position: 'PG', height: 79, collegeStats: { ppg: 16.0, rpg: 4.8, apg: 4.3, ts_percent: 0.60, usage_rate: 0.30, per: 30, tov_percent: 0.15, shooting: 8.5, ballHandling: 9.0, defense: 7.0, basketballIQ: 9.5, leadership: 9.0 }, draftPosition: 3, careerRating: 9.5, archetype: 'Primary Playmaker' },
+      { name: 'LeBron James', position: 'SF', height: 80, collegeStats: { ppg: 29.0, rpg: 8.0, apg: 6.0, ts_percent: 0.60, usage_rate: 0.35, per: 35, tov_percent: 0.18, shooting: 8.0, ballHandling: 9.0, defense: 8.0, basketballIQ: 10.0, leadership: 10.0 }, draftPosition: 1, careerRating: 10.0, archetype: 'Point Forward' },
+      { name: 'Stephen Curry', position: 'PG', height: 75, collegeStats: { ppg: 25.3, rpg: 4.5, apg: 5.7, ts_percent: 0.60, usage_rate: 0.30, per: 28, tov_percent: 0.15, shooting: 10.0, ballHandling: 8.5, defense: 6.0, basketballIQ: 9.0, leadership: 9.0 }, draftPosition: 7, careerRating: 9.8, archetype: 'Elite Shooter' },
+      { name: 'Giannis Antetokounmpo', position: 'PF', height: 83, collegeStats: { ppg: 10.0, rpg: 5.0, apg: 2.0, ts_percent: 0.55, usage_rate: 0.18, per: 20, tov_percent: 0.12, shooting: 6.0, ballHandling: 7.0, defense: 8.0, basketballIQ: 8.0, leadership: 8.0 }, draftPosition: 15, careerRating: 9.5, archetype: 'Athletic Finisher' },
+      { name: 'Nikola Jokic', position: 'C', height: 83, collegeStats: { ppg: 15.0, rpg: 10.0, apg: 4.0, ts_percent: 0.60, usage_rate: 0.25, per: 25, tov_percent: 0.15, shooting: 7.0, ballHandling: 8.0, defense: 7.0, basketballIQ: 10.0, leadership: 9.0 }, draftPosition: 41, careerRating: 9.7, archetype: 'Playmaking Big' },
 
       // All-Stars (Tier 2)
-      { name: 'Jayson Tatum', position: 'SF', height: 80, collegeStats: { ppg: 16.8, rpg: 7.3, apg: 2.1 }, draftPosition: 3, careerRating: 8.8, archetype: 'Scoring Wing' },
-      { name: 'Devin Booker', position: 'SG', height: 77, collegeStats: { ppg: 10.0, rpg: 2.0, apg: 1.1 }, draftPosition: 13, careerRating: 8.5, archetype: 'Three-Level Scorer' },
-      { name: 'Zion Williamson', position: 'PF', height: 79, collegeStats: { ppg: 22.6, rpg: 8.9, apg: 2.1 }, draftPosition: 1, careerRating: 8.2, archetype: 'Interior Force' },
-      { name: 'Trae Young', position: 'PG', height: 73, collegeStats: { ppg: 27.4, rpg: 3.9, apg: 8.7 }, draftPosition: 5, careerRating: 8.0, archetype: 'Offensive Engine' },
-      { name: 'Bam Adebayo', position: 'C', height: 81, collegeStats: { ppg: 13.0, rpg: 8.0, apg: 1.5 }, draftPosition: 14, careerRating: 8.3, archetype: 'Defensive Anchor' },
+      { name: 'Jayson Tatum', position: 'SF', height: 80, collegeStats: { ppg: 16.8, rpg: 7.3, apg: 2.1, ts_percent: 0.58, usage_rate: 0.28, per: 22, tov_percent: 0.12, shooting: 8.0, ballHandling: 7.5, defense: 7.5, basketballIQ: 8.0, leadership: 8.0 }, draftPosition: 3, careerRating: 8.8, archetype: 'Scoring Wing' },
+      { name: 'Devin Booker', position: 'SG', height: 77, collegeStats: { ppg: 10.0, rpg: 2.0, apg: 1.1, ts_percent: 0.58, usage_rate: 0.25, per: 20, tov_percent: 0.10, shooting: 9.0, ballHandling: 7.0, defense: 6.5, basketballIQ: 7.5, leadership: 7.0 }, draftPosition: 13, careerRating: 8.5, archetype: 'Three-Level Scorer' },
+      { name: 'Zion Williamson', position: 'PF', height: 79, collegeStats: { ppg: 22.6, rpg: 8.9, apg: 2.1, ts_percent: 0.68, usage_rate: 0.35, per: 35, tov_percent: 0.15, shooting: 6.0, ballHandling: 7.0, defense: 7.0, basketballIQ: 7.0, leadership: 7.0 }, draftPosition: 1, careerRating: 8.2, archetype: 'Interior Force' },
+      { name: 'Trae Young', position: 'PG', height: 73, collegeStats: { ppg: 27.4, rpg: 3.9, apg: 8.7, ts_percent: 0.58, usage_rate: 0.35, per: 28, tov_percent: 0.20, shooting: 8.5, ballHandling: 9.0, defense: 5.0, basketballIQ: 8.5, leadership: 8.0 }, draftPosition: 5, careerRating: 8.0, archetype: 'Offensive Engine' },
+      { name: 'Bam Adebayo', position: 'C', height: 81, collegeStats: { ppg: 13.0, rpg: 8.0, apg: 1.5, ts_percent: 0.60, usage_rate: 0.20, per: 20, tov_percent: 0.10, shooting: 6.0, ballHandling: 6.0, defense: 9.0, basketballIQ: 8.0, leadership: 7.5 }, draftPosition: 14, careerRating: 8.3, archetype: 'Defensive Anchor' },
 
       // High-Level Starters (Tier 3)
-      { name: 'Mikal Bridges', position: 'SF', height: 78, collegeStats: { ppg: 17.7, rpg: 5.6, apg: 2.1 }, draftPosition: 10, careerRating: 7.8, archetype: '3-and-D Wing' },
-      { name: 'Jrue Holiday', position: 'PG', height: 75, collegeStats: { ppg: 14.2, rpg: 4.2, apg: 3.8 }, draftPosition: 17, careerRating: 7.9, archetype: 'Two-Way Guard' },
-      { name: 'Myles Turner', position: 'C', height: 83, collegeStats: { ppg: 10.3, rpg: 6.5, apg: 0.6 }, draftPosition: 11, careerRating: 7.5, archetype: 'Stretch Five' },
-      { name: 'Tyrese Haliburton', position: 'PG', height: 77, collegeStats: { ppg: 15.2, rpg: 5.9, apg: 6.5 }, draftPosition: 12, careerRating: 8.4, archetype: 'Pass-First Guard' },
-      { name: 'OG Anunoby', position: 'SF', height: 79, collegeStats: { ppg: 11.1, rpg: 5.0, apg: 1.4 }, draftPosition: 23, careerRating: 7.6, archetype: 'Versatile Defender' },
+      { name: 'Mikal Bridges', position: 'SF', height: 78, collegeStats: { ppg: 17.7, rpg: 5.6, apg: 2.1, ts_percent: 0.60, usage_rate: 0.18, per: 18, tov_percent: 0.08, shooting: 7.5, ballHandling: 6.5, defense: 9.0, basketballIQ: 8.0, leadership: 7.0 }, draftPosition: 10, careerRating: 7.8, archetype: '3-and-D Wing' },
+      { name: 'Jrue Holiday', position: 'PG', height: 75, collegeStats: { ppg: 14.2, rpg: 4.2, apg: 3.8, ts_percent: 0.55, usage_rate: 0.22, per: 18, tov_percent: 0.12, shooting: 7.0, ballHandling: 7.5, defense: 9.0, basketballIQ: 8.5, leadership: 8.0 }, draftPosition: 17, careerRating: 7.9, archetype: 'Two-Way Guard' },
+      { name: 'Myles Turner', position: 'C', height: 83, collegeStats: { ppg: 10.3, rpg: 6.5, apg: 0.6, ts_percent: 0.58, usage_rate: 0.20, per: 18, tov_percent: 0.10, shooting: 7.0, ballHandling: 5.0, defense: 9.0, basketballIQ: 7.0, leadership: 6.0 }, draftPosition: 11, careerRating: 7.5, archetype: 'Stretch Five' },
+      { name: 'Tyrese Haliburton', position: 'PG', height: 77, collegeStats: { ppg: 15.2, rpg: 5.9, apg: 6.5, ts_percent: 0.60, usage_rate: 0.20, per: 20, tov_percent: 0.08, shooting: 7.5, ballHandling: 8.5, defense: 7.0, basketballIQ: 9.0, leadership: 8.0 }, draftPosition: 12, careerRating: 8.4, archetype: 'Pass-First Guard' },
+      { name: 'OG Anunoby', position: 'SF', height: 79, collegeStats: { ppg: 11.1, rpg: 5.0, apg: 1.4, ts_percent: 0.55, usage_rate: 0.18, per: 16, tov_percent: 0.10, shooting: 7.0, ballHandling: 6.0, defense: 9.0, basketballIQ: 7.0, leadership: 6.0 }, draftPosition: 23, careerRating: 7.6, archetype: 'Versatile Defender' },
 
       // Role Players (Tier 4)
-      { name: 'Robert Covington', position: 'PF', height: 79, collegeStats: { ppg: 12.3, rpg: 7.3, apg: 1.3 }, draftPosition: -1, careerRating: 7.0, archetype: '3-and-D Forward' },
-      { name: 'Derrick White', position: 'SG', height: 76, collegeStats: { ppg: 18.1, rpg: 5.1, apg: 4.1 }, draftPosition: 29, careerRating: 7.7, archetype: 'Combo Guard' },
-      { name: 'Brook Lopez', position: 'C', height: 84, collegeStats: { ppg: 20.2, rpg: 8.2, apg: 1.5 }, draftPosition: 10, careerRating: 7.2, archetype: 'Rim Protector' },
+      { name: 'Robert Covington', position: 'PF', height: 79, collegeStats: { ppg: 12.3, rpg: 7.3, apg: 1.3, ts_percent: 0.55, usage_rate: 0.18, per: 16, tov_percent: 0.10, shooting: 7.0, ballHandling: 6.0, defense: 8.0, basketballIQ: 7.0, leadership: 6.0 }, draftPosition: -1, careerRating: 7.0, archetype: '3-and-D Forward' },
+      { name: 'Derrick White', position: 'SG', height: 76, collegeStats: { ppg: 18.1, rpg: 5.1, apg: 4.1, ts_percent: 0.58, usage_rate: 0.25, per: 20, tov_percent: 0.12, shooting: 7.5, ballHandling: 7.0, defense: 8.0, basketballIQ: 8.5, leadership: 7.0 }, draftPosition: 29, careerRating: 7.7, archetype: 'Combo Guard' },
+      { name: 'Brook Lopez', position: 'C', height: 84, collegeStats: { ppg: 20.2, rpg: 8.2, apg: 1.5, ts_percent: 0.58, usage_rate: 0.25, per: 20, tov_percent: 0.10, shooting: 7.0, ballHandling: 5.0, defense: 9.0, basketballIQ: 7.0, leadership: 6.0 }, draftPosition: 10, careerRating: 7.2, archetype: 'Rim Protector' },
+
+      // Busts/Underperformers (Tier 5)
+      { name: 'Markelle Fultz', position: 'PG', height: 75, collegeStats: { ppg: 23.2, rpg: 5.7, apg: 5.9, ts_percent: 0.58, usage_rate: 0.30, per: 27, tov_percent: 0.18, shooting: 5.0, ballHandling: 8.0, defense: 7.0, basketballIQ: 7.0, leadership: 6.0 }, draftPosition: 1, careerRating: 4.0, archetype: 'Combo Guard' },
+      { name: 'Dante Exum', position: 'PG', height: 78, collegeStats: { ppg: 18.2, rpg: 3.8, apg: 4.2, ts_percent: 0.55, usage_rate: 0.15, per: 20, tov_percent: 0.15, shooting: 6.0, ballHandling: 7.0, defense: 7.0, basketballIQ: 6.5, leadership: 6.0 }, draftPosition: 5, careerRating: 3.5, archetype: 'Athletic Guard' },
+      { name: 'Ben McLemore', position: 'SG', height: 77, collegeStats: { ppg: 15.9, rpg: 5.2, apg: 2.0, ts_percent: 0.55, usage_rate: 0.25, per: 18, tov_percent: 0.10, shooting: 7.0, ballHandling: 6.0, defense: 6.0, basketballIQ: 6.0, leadership: 5.0 }, draftPosition: 7, careerRating: 3.0, archetype: 'Shooting Guard' },
+      { name: 'Frank Ntilikina', position: 'PG', height: 77, collegeStats: { ppg: 5.2, rpg: 2.1, apg: 1.6, ts_percent: 0.45, usage_rate: 0.15, per: 12, tov_percent: 0.15, shooting: 4.0, ballHandling: 6.0, defense: 8.0, basketballIQ: 6.0, leadership: 5.0 }, draftPosition: 8, careerRating: 2.5, archetype: 'Defensive Guard' },
+      { name: 'Dragan Bender', position: 'PF', height: 85, collegeStats: { ppg: 7.5, rpg: 4.5, apg: 1.0, ts_percent: 0.50, usage_rate: 0.15, per: 15, tov_percent: 0.10, shooting: 6.0, ballHandling: 5.0, defense: 6.0, basketballIQ: 6.0, leadership: 5.0 }, draftPosition: 4, careerRating: 2.0, archetype: 'Stretch Big' },
+      { name: 'Anthony Bennett', position: 'PF', height: 80, collegeStats: { ppg: 16.1, rpg: 8.2, apg: 1.0, ts_percent: 0.55, usage_rate: 0.28, per: 22, tov_percent: 0.15, shooting: 6.0, ballHandling: 6.0, defense: 5.0, basketballIQ: 5.0, leadership: 5.0 }, draftPosition: 1, careerRating: 1.0, archetype: 'Power Forward' },
     ];
   }
 }
+
+
 
 export default ProspectRankingAlgorithm;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
@@ -68,6 +68,7 @@ const ProspectDetail = () => {
   const isInWatchlist = watchlist.has(prospect.id);
   const evaluation = prospect.evaluation || {};
   const flags = evaluation.flags || [];
+  const comparablePlayers = evaluation.comparablePlayers || [];
   const hasStats = prospect.ppg > 0;
 
   // CORREÇÃO: Movido para o local correto
@@ -158,7 +159,7 @@ const ProspectDetail = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                       <div><RadarScoreChart data={evaluation.categoryScores} /></div>
                       <div className="space-y-4">
-                        <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-slate-400">Range: {evaluation.draftProjection?.range || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-slate-400">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
                         <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Prontidão para a NBA</h3><p className="text-lg font-bold text-green-600 dark:text-green-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
                         <div><h3 className="font-semibold text-gray-700 dark:text-slate-300">Score Total</h3><p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{evaluation.totalScore}</p></div>
                       </div>
@@ -170,14 +171,33 @@ const ProspectDetail = () => {
               <AwaitingStats prospectName={prospect.name} />
             )}
 
-            {flags.length > 0 && (
+            {/* SEÇÃO DE FLAGS (DESTAQUES E ALERTAS) */}
+            {flags.length > 0 && hasStats && (
               <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />Destaques & Alertas do Radar</h2>
                 <div className="space-y-3">
                   {flags.map((flag, index) => (
                     <div key={index} className={`flex items-start p-3 rounded-lg ${flag.type === 'green' ? 'bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500' : 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500'}`}>
-                      {flag.type === 'green' ? <CheckCircle2 className="w-5 h-5 mr-3 text-green-500 flex-shrink-0" /> : <AlertTriangle className="w-5 h-5 mr-3 text-red-500 flex-shrink-0" />}
+                      <div className="flex-shrink-0 mt-0.5">
+                        {flag.type === 'green' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <AlertTriangle className="w-5 h-5 text-red-500" />}
+                      </div>
                       <p className={`text-sm ${flag.type === 'green' ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}`}>{flag.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SEÇÃO DE COMPARAÇÕES NBA */}
+            {comparablePlayers.length > 0 && hasStats && (
+              <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-cyan-500" />Comparações NBA</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {comparablePlayers.map((player, index) => (
+                    <div key={index} className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-600">
+                      <p className="font-bold text-slate-800 dark:text-slate-100">{player.name}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Similaridade: <span className="font-semibold text-cyan-600 dark:text-cyan-400">{player.similarity}%</span></p>
+                      <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
                     </div>
                   ))}
                 </div>

@@ -18,6 +18,16 @@ const defaultDraftOrder = [
     { pick: 56, team: 'DEN' }, { pick: 57, team: 'MEM' }, { pick: 58, team: 'DAL' }, { pick: 59, team: 'IND' }, { pick: 60, team: 'BOS' }
 ];
 
+// Função utilitária para embaralhar um array (Fisher-Yates shuffle)
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 const useMockDraft = (allProspects) => {
   const [draftSettings, setDraftSettings] = useState({ draftClass: 2026, totalPicks: 60 });
   const [draftBoard, setDraftBoard] = useState([]);
@@ -26,6 +36,29 @@ const useMockDraft = (allProspects) => {
   const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL', region: 'ALL' });
   const [selectedProspect, setSelectedProspect] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const availableProspects = useMemo(() => {
+    const draftedProspectIds = new Set(draftBoard.filter(pick => pick.prospect).map(pick => pick.prospect.id));
+    
+    let filtered = allProspects.filter(prospect => !draftedProspectIds.has(prospect.id));
+
+    // Aplicar filtro de busca
+    if (filters.searchTerm) {
+      const lowerCaseSearchTerm = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(prospect => 
+        prospect.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        prospect.position.toLowerCase().includes(lowerCaseSearchTerm) ||
+        (prospect.high_school_team && prospect.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
+      );
+    }
+
+    // Aplicar filtro de posição
+    if (filters.position !== 'ALL') {
+      filtered = filtered.filter(prospect => prospect.position === filters.position);
+    }
+
+    return filtered;
+  }, [allProspects, draftBoard, filters.searchTerm, filters.position]);
   
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
@@ -40,65 +73,24 @@ const useMockDraft = (allProspects) => {
     setIsLoading(false);
   }, []); 
   
-  useEffect(() => {
-    if (allProspects && allProspects.length > 0) {
-      initializeDraft();
-    }
-  }, [allProspects, initializeDraft]);
-  
-  const draftedProspectIds = useMemo(() => {
-    return new Set(draftBoard.filter(p => p.prospect).map(p => p.prospect.id));
-  }, [draftBoard]);
-  
-  const availableProspects = useMemo(() => {
-    if (!allProspects) return [];
-    
-    const filtered = allProspects.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      const matchesPosition = filters.position === 'ALL' || p.position === filters.position;
-      return !draftedProspectIds.has(p.id) && matchesSearch && matchesPosition;
-    });
-    
-    return filtered;
-  }, [allProspects, draftedProspectIds, filters]);
-  
-  const draftProspect = useCallback((prospect) => {
-    if (currentPick > draftSettings.totalPicks) return false;
-    
+  const simulateLottery = useCallback(() => {
+    const lotteryPicksCount = 14; // As primeiras 14 escolhas são da loteria
+    const lotteryTeams = defaultDraftOrder.slice(0, lotteryPicksCount).map(pick => pick.team);
+    const shuffledLotteryTeams = shuffleArray(lotteryTeams);
+
     setDraftBoard(prevBoard => {
       const newBoard = [...prevBoard];
-      const pickIndex = newBoard.findIndex(p => p.pick === currentPick);
-      if (pickIndex !== -1) {
-        newBoard[pickIndex].prospect = prospect;
+      for (let i = 0; i < lotteryPicksCount; i++) {
+        newBoard[i] = { ...newBoard[i], team: shuffledLotteryTeams[i] };
       }
+      // Resetar prospects draftados se a loteria for simulada no meio do draft
+      newBoard.forEach(pick => pick.prospect = null);
       return newBoard;
     });
-    
-    setDraftHistory(prev => [...prev, { pick: currentPick, prospectId: prospect.id }]);
-    setCurrentPick(prev => prev + 1);
-    return true;
-  }, [currentPick, draftSettings.totalPicks]);
+    setCurrentPick(1);
+    setDraftHistory([]);
+  }, []);
   
-  const undraftProspect = useCallback((pickNumber) => {
-    let undraftedProspectId = null;
-    setDraftBoard(prevBoard => {
-      const newBoard = [...prevBoard];
-      const pickIndex = newBoard.findIndex(p => p.pick === pickNumber);
-      if (pickIndex !== -1 && newBoard[pickIndex].prospect) {
-        undraftedProspectId = newBoard[pickIndex].prospect.id;
-        newBoard[pickIndex].prospect = null;
-      }
-      return newBoard;
-    });
-    
-    if (undraftedProspectId) {
-      setDraftHistory(prev => prev.filter(h => !(h.pick === pickNumber && h.prospectId === undraftedProspectId)));
-    }
-    
-    if (pickNumber < currentPick) {
-      setCurrentPick(pickNumber);
-    }
-  }, [currentPick]);
   
   const getBigBoard = useCallback(() => {
     return [...allProspects].sort((a, b) => a.ranking - b.ranking);
@@ -142,6 +134,34 @@ const useMockDraft = (allProspects) => {
     settings: draftSettings,
     stats: getDraftStats(),
   }), [draftBoard, draftSettings, getDraftStats]);
+
+  const draftProspect = useCallback((prospect) => {
+    setDraftBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      const pickIndex = newBoard.findIndex(pick => pick.pick === currentPick);
+      if (pickIndex !== -1) {
+        newBoard[pickIndex] = { ...newBoard[pickIndex], prospect: prospect };
+      }
+      return newBoard;
+    });
+    setDraftHistory(prevHistory => [...prevHistory, { pick: currentPick, prospect: prospect }]);
+    setCurrentPick(prevPick => prevPick + 1);
+  }, [currentPick]);
+
+  const undraftProspect = useCallback((pickNumber) => {
+    setDraftBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      const pickIndex = newBoard.findIndex(pick => pick.pick === pickNumber);
+      if (pickIndex !== -1) {
+        newBoard[pickIndex] = { ...newBoard[pickIndex], prospect: null };
+      }
+      return newBoard;
+    });
+    setDraftHistory(prevHistory => prevHistory.filter(item => item.pick !== pickNumber));
+    if (pickNumber < currentPick) {
+      setCurrentPick(pickNumber);
+    }
+  }, [currentPick]);
   
   return {
     draftBoard,
@@ -154,6 +174,7 @@ const useMockDraft = (allProspects) => {
     draftHistory,
     draftProspect,
     undraftProspect,
+    simulateLottery, // Adicionado
     setDraftSettings,
     setFilters,
     setSelectedProspect,
