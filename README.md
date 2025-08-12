@@ -35,12 +35,20 @@ O **Radar Score** é uma métrica proprietária do ProspectRadar, projetada para
 
 ### Como é Calculado?
 
-O cálculo do Radar Score é baseado em quatro pilares principais:
+O cálculo do Radar Score é baseado em quatro pilares principais, com pesos rebalanceados para refletir o basquete moderno:
 
-1.  **Estatísticas Avançadas (Advanced Stats):** Métricas como Player Efficiency Rating (PER), True Shooting Percentage (TS%), Win Shares (WS), e Box Plus/Minus (BPM) são analisadas para medir a eficiência e o impacto do jogador em quadra.
-2.  **Atributos Físicos (Physical Attributes):** Altura, peso, envergadura e capacidade atlética são avaliados para determinar o potencial físico do jogador e sua adaptação ao nível da NBA.
-3.  **Potencial de Desenvolvimento (Upside):** Fatores como idade, ética de trabalho, e trajetória de desenvolvimento são considerados para projetar o crescimento futuro do jogador.
-4.  **Inteligência em Quadra (Basketball IQ):** Habilidades como tomada de decisão, visão de jogo e capacidade de leitura da defesa são avaliadas através de análise de vídeo e relatórios de scouting.
+1.  **Habilidades Técnicas (Peso: 35%):** Estimativas do impacto do jogador em áreas fundamentais. A defesa agora tem o mesmo peso do arremesso, refletindo sua importância na NBA.
+2.  **Métricas Avançadas (Peso: 30%):** Medem a eficiência e o impacto real de um jogador em quadra, ajustando sua produção por posse de bola e ritmo de jogo.
+3.  **Atributos Físicos (Peso: 20%):** Ferramentas físicas que se traduzem diretamente para o nível da NBA. Envergadura e altura para a posição são cruciais.
+4.  **Estatísticas Básicas (Peso: 15%):** Métricas de produção bruta. Têm um peso menor, pois a eficiência e o contexto são mais preditivos.
+
+**Ajustes Dinâmicos e Contextuais:**
+
+O verdadeiro poder do Radar Score vem de seus ajustes inteligentes:
+
+*   **Nível de Competição:** O algoritmo aplica um multiplicador às estatísticas com base na força da liga e da conferência do jogador. Um bom desempenho na EuroLeague ou em uma conferência Power 5 da NCAA é mais valorizado do que em competições de nível inferior.
+*   **Análise de Risco (Confidence Score):** Para jogadores com poucos jogos (devido a lesões ou início de temporada), o sistema calcula um 'Nível de Confiança'. A projeção se torna mais conservadora até que o jogador atinja uma amostragem mínima de jogos, separando o **potencial** do **risco**.
+*   **Red Flags:** Penalidades são aplicadas ao score final para "red flags" (pontos de atenção) identificadas, como idade avançada para a classe ou potencial físico limitado.
 
 O resultado é uma pontuação de 0 a 1, onde valores mais altos indicam um maior potencial e prontidão para a NBA.
 

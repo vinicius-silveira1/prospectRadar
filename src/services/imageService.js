@@ -1,5 +1,7 @@
 // src/services/imageService.js
 
+import { getColorFromName } from '@/utils/imageUtils.js';
+
 /**
  * Gera um avatar consistente para um prospect usando o serviço DiceBear.
  * @param {object} prospect - O objeto do prospect.
@@ -7,20 +9,11 @@
  */
 const generateAvatar = (prospect) => {
   const seed = prospect.name || 'default';
-
-  // Paleta de cores para brasileiros, inspirada na bandeira
-  const brazilianColors = '009c3b,ffdf00'; // Verde e amarelo para o gradiente
-
-  // Paleta de cores para NBA/internacional, inspirada no logo da NBA
-  const internationalColors = 'c8102e,1d428a'; // Vermelho e azul para o gradiente
-
-  const colors = prospect.nationality === '🇧🇷' 
-    ? brazilianColors
-    : internationalColors;
+  const baseColor = getColorFromName(prospect.name).substring(1); // Remove o #
 
   // Usando o serviço DiceBear com o estilo "initials", que é limpo e profissional.
-  // O tamanho é 120px e as cores de fundo são um gradiente baseado na nacionalidade.
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${colors}&backgroundType=gradientLinear&fontSize=40`;
+  // O tamanho é 120px e a cor de fundo é baseada no nome do prospect.
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${baseColor}&fontSize=40`;
 };
 
 /**

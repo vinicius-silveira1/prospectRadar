@@ -71,11 +71,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Banner de Boas-Vindas */}
-      <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 dark:from-blue-900/50 dark:via-green-900/50 dark:to-yellow-900/50 border border-blue-200 dark:border-blue-800 rounded-lg shadow p-6 mb-2">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-8 mb-6 overflow-hidden animate-fade-in">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-2">Bem vindo ao prospectRadar!</h1>
-            <p className="text-base text-blue-800 dark:text-blue-200 max-w-2xl">
+            <h1 className="text-4xl font-extrabold mb-3 leading-tight">Bem-vindo ao <span className="text-yellow-300">ProspectRadar!</span></h1>
+            <p className="text-lg text-blue-100 max-w-2xl">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
@@ -83,7 +83,7 @@ const Dashboard = () => {
       </div>
 
       {/* Banner do Mock Draft */}
-      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-blue-800 dark:to-green-800 rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-black dark:to-black rounded-lg shadow-lg overflow-hidden">
         <div className="px-8 py-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -91,10 +91,10 @@ const Dashboard = () => {
                 <Shuffle className="h-8 w-8 text-yellow-300" />
                 <h2 className="text-2xl font-bold">🏀 Mock Draft 2026</h2>
               </div>
-              <p className="text-lg mb-2 text-blue-100 dark:text-blue-200">
+              <p className="text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
                 Simule seu próprio draft com {nbaProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
               </p>
-              <div className="hidden md:flex items-center space-x-6 text-sm text-blue-200 dark:text-blue-300 mb-4">
+              <div className="hidden md:flex items-center space-x-6 text-sm leading-normal text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
                   <span>{nbaProspects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
@@ -137,17 +137,17 @@ const Dashboard = () => {
 
       {/* Prospects Brasileiros */}
       {isLoaded && brazilianProspects.length > 0 && (
-        <div className="bg-gradient-to-br from-green-50 to-yellow-50 dark:from-green-900/30 dark:to-yellow-900/30 border border-green-200 dark:border-green-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
-              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects</span> Brasileiros
+              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects Brasileiros</span>
             </h2>
             <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
               {brazilianProspects.length} <span className="font-semibold">prospects</span>
             </span>
           </div>
-          <p className="text-sm text-gray-600 dark:text-slate-300 mb-6 -mt-2">
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-6 -mt-2">
             Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,9 +171,9 @@ const Dashboard = () => {
 
       {/* Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
-        <div className="bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100 flex items-center">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
               🏆 Top <span className="text-brand-orange dark:text-orange-400 mx-1">Prospects</span> Gerais
             </h2>
@@ -200,7 +200,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <LoadingSpinner />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">
               Carregando prospects...
             </h3>
           </div>
@@ -210,10 +210,11 @@ const Dashboard = () => {
       {/* Empty State */}
       {isLoaded && allProspects.length === 0 && !error && (
         <div className="text-center py-12">
-          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Users className="h-12 w-12 text-gray-400 dark:text-super-dark-text-secondary mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">
             Nenhum jogador encontrado
           </h3>
+          <p className="text-slate-600 dark:text-super-dark-text-secondary mb-4">Tente ajustar os filtros ou termos de busca</p>
         </div>
       )}
     </div>

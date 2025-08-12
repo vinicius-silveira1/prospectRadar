@@ -62,7 +62,7 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
       {/* Header com bandeira e badges */}
       <div className="relative">
         {/* Imagem do prospect */}
-        <div className="h-48 bg-gradient-to-br from-green-100 to-yellow-100 flex items-center justify-center">
+        <div className="h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
           {prospect.imageUrl ? (
             <img 
               src={prospect.imageUrl} 
@@ -74,7 +74,7 @@ const BrazilianProspectCard = ({ prospect, onToggleWatchlist, isRealData = false
               }}
             />
           ) : null}
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-green-100 to-yellow-100">
+          <div className="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
             <div className="text-center">
               <div className="text-4xl mb-2">🏀</div>
               <div className="text-sm font-medium text-gray-600">{prospect.name}</div>

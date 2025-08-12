@@ -14,7 +14,7 @@
 /* Estilos globais */
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 font-display antialiased dark:bg-slate-900 dark:text-slate-200;
+    @apply bg-slate-50 text-slate-800 font-display antialiased dark:bg-super-dark-primary dark:text-super-dark-text-primary;
   }
   
   html {

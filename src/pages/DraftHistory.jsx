@@ -5,7 +5,7 @@ const DraftHistory = () => {
   return (
     <ComingSoon
       title="Histórico de Drafts (Em Breve)"
-      message="Explore um acervo completo de classes de Drafts passados da NBA. Analise os resultados, descubra quem foram os 'steals' e compare com as projeções da época, utilizando dados históricos do Basketball-Reference."
+      message="Estamos preparando uma análise aprofundada dos drafts passados da NBA, com dados históricos e o impacto do Radar Score na projeção de talentos. Volte em breve para conferir!"
     />
   );
 };

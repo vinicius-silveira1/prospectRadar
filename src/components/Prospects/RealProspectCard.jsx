@@ -93,7 +93,7 @@ const RealProspectCard = ({ prospect, onToggleWatchlist, isRealData = false }) =
               <User className="h-8 w-8 text-gray-400" />
             </div>
           ) : imageState.hasError || !imageState.currentUrl ? (
-            <div className="w-full h-full bg-gradient-to-br from-nba-blue to-blue-600 flex items-center justify-center">
+            <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <span className="text-white font-bold text-lg">
                 {prospect.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
               </span>

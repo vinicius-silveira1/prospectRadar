@@ -4,7 +4,9 @@ import {
   GitCompare, Users, X, Plus, Search, Download, Share2, FileImage, FileText, BarChart3
 } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
+
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
+import CompareProspectCard from '@/components/Compare/CompareProspectCard.jsx';
 import HeadToHeadComparison from '@/components/Compare/HeadToHeadComparison.jsx';
 import ComparisonImage from '@/components/Compare/ComparisonImage.jsx';
 
@@ -73,7 +75,7 @@ const Compare = () => {
       const html2canvas = (await import('html2canvas')).default;
       if (imageExportRef.current) {
         const canvas = await html2canvas(imageExportRef.current, {
-          backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#f8fafc', scale: 2, useCORS: true
+          backgroundColor: document.documentElement.classList.contains('dark') ? '#0A0A0A' : '#f8fafc', scale: 2, useCORS: true
         });
         const link = document.createElement('a');
         link.download = `prospects-comparison.png`;
@@ -93,23 +95,29 @@ const Compare = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+      <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center"><GitCompare className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" /> Comparar <span className="text-brand-orange ml-2">Prospects</span></h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Compare até 4 prospects lado a lado para análise detalhada</p>
+            <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center">
+              <GitCompare className="h-8 w-8 text-yellow-300 mr-3" /> Comparar <span className="text-yellow-300 ml-2">Prospects</span>
+            </h1>
+            <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
+              Compare até 4 prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
+            </p>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="text-sm text-blue-700 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/50 px-3 py-2 rounded-lg">{selectedProspects.length}/4 selecionados</div>
+            <div className="text-lg font-bold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
+              {selectedProspects.length}/4 selecionados
+            </div>
             {selectedProspects.length >= 2 && (
               <div className="relative export-menu-container z-10">
-                <button onClick={() => setShowExportMenu(!showExportMenu)} className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" disabled={isExporting}>
+                <button onClick={() => setShowExportMenu(!showExportMenu)} className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md" disabled={isExporting}>
                   {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Download className="h-4 w-4 mr-2" />} {isExporting ? 'Exportando...' : 'Exportar'}
                 </button>
                 {showExportMenu && !isExporting && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-super-dark-secondary rounded-lg shadow-lg border border-slate-200 dark:border-super-dark-border z-50">
                     <div className="p-2">
-                      <button onClick={exportAsImage} className="w-full flex items-center px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md"><FileImage className="h-4 w-4 mr-3 text-blue-500" /> Exportar como Imagem</button>
+                      <button onClick={exportAsImage} className="w-full flex items-center px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-50 dark:hover:bg-super-dark-secondary rounded-md"><FileImage className="h-4 w-4 mr-3 text-blue-500" /> Exportar como Imagem</button>
                     </div>
                   </div>
                 )}
@@ -119,51 +127,52 @@ const Compare = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900 dark:text-white">Adicionar Prospects</h2>
+          <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
           <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled={selectedProspects.length >= 4}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
         </div>
         {showSearch && (
-          <div className="border-t dark:border-slate-700 pt-4 space-y-4">
+          <div className="border-t dark:border-super-dark-border pt-4 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-              <input type="text" placeholder="Buscar por nome ou time..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <input type="text" placeholder="Buscar por nome ou time..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-300 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
-            <div className="max-h-60 overflow-y-auto border dark:border-slate-700 rounded-lg divide-y dark:divide-slate-700">
+            <div className="max-h-60 overflow-y-auto border dark:border-super-dark-border rounded-lg divide-y dark:divide-super-dark-border">
               {filteredProspects.length > 0 ? (
                 filteredProspects.map(prospect => (
-                  <div key={prospect.id} onClick={() => addProspect(prospect)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
+                  <div key={prospect.id} onClick={() => addProspect(prospect)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-super-dark-secondary cursor-pointer">
                     <div>
-                      <p className="font-medium text-slate-800 dark:text-slate-200">{prospect.name}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{prospect.position} - {prospect.high_school_team}</p>
+                      <p className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.name}</p>
+                      <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} - {prospect.high_school_team}</p>
                     </div>
                     <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"><Plus className="h-5 w-5" /></button>
                   </div>
                 ))
               ) : (
-                <p className="p-4 text-center text-slate-500 dark:text-slate-400">Nenhum prospect encontrado.</p>
+                <p className="p-4 text-center text-slate-500 dark:text-super-dark-text-secondary">Nenhum prospect encontrado.</p>
               )}
             </div>
           </div>
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900 dark:text-white">Selecionados ({selectedProspects.length} / 4)</h2>
+          <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / 4)</h2>
           {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[6rem]">
-          {selectedProspects.map((prospect, index) => (
-            <div key={prospect.id} className={`relative p-3 rounded-lg shadow-sm border-2 flex flex-col justify-center bg-blue-50 dark:bg-slate-800 border-blue-200 dark:border-slate-700`}>
-              <button onClick={() => removeProspect(prospect.id)} className="absolute -top-2 -right-2 bg-white dark:bg-slate-600 p-0.5 rounded-full text-slate-500 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 transition-colors shadow-md"><X size={16} /></button>
-              <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{prospect.name}</p>
-              <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{prospect.position} • {prospect.high_school_team}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[6rem] ">
+          {selectedProspects.map((prospect) => {
+            return (
+              <CompareProspectCard key={prospect.id} prospect={prospect} onRemove={removeProspect} />
+            );
+          })}
           {Array.from({ length: 4 - selectedProspects.length }).map((_, index) => (
-            <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg text-slate-400 dark:text-slate-500 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}><Plus size={18} /><span className="text-xs mt-1">Adicionar</span></div>
+            <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-super-dark-secondary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-400 dark:text-super-dark-text-secondary text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}>
+              <Plus size={24} className="text-blue-400" />
+              <span className="text-sm mt-2">Adicionar Prospect</span>
+            </div>
           ))}
         </div>
       </div>
@@ -172,10 +181,10 @@ const Compare = () => {
         {selectedProspects.length >= 2 ? (
           <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} />
         ) : (
-          <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg">
-            <GitCompare className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" />
-            <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-white">Comece a Comparar</h3>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
+          <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
+            <GitCompare className="mx-auto h-12 w-12 text-slate-400 dark:text-super-dark-text-secondary" />
+            <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Comece a Comparar</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
           </div>
         )}
       </div>

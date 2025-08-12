@@ -27,7 +27,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-100 dark:bg-slate-900">
+    <div className="min-h-screen flex bg-slate-100 dark:bg-super-dark-primary">
       {/* Painel Esquerdo - Branding */}
       <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
         <div className="text-center">
@@ -42,9 +42,9 @@ const ForgotPassword = () => {
 
       {/* Painel Direito - Formulário */}
       <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl dark:shadow-brand-dark/50">
-          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white mb-2">Esqueceu sua senha?</h2>
-          <p className="text-center text-sm text-slate-600 dark:text-slate-400 mb-6">Sem problemas. Digite seu e-mail e enviaremos um link para redefini-la.</p>
+        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50">
+          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-2">Esqueceu sua senha?</h2>
+          <p className="text-center text-sm text-slate-600 dark:text-super-dark-text-secondary mb-6">Sem problemas. Digite seu e-mail e enviaremos um link para redefini-la.</p>
           
           {/* Mensagens de Alerta */}
           {error && <p className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-md mb-4 text-sm">{error}</p>}
@@ -52,14 +52,14 @@ const ForgotPassword = () => {
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-super-dark-text-secondary">Email</label>
               <input 
                 id="email" 
                 type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
-                className="w-full mt-1 px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-colors"
+                className="w-full mt-1 px-4 py-3 bg-slate-50 dark:bg-super-dark-secondary border border-slate-300 dark:border-super-dark-border rounded-lg shadow-sm text-slate-900 dark:text-super-dark-text-primary placeholder-slate-400 focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-colors"
                 placeholder="seu.email@exemplo.com"
               />
             </div>
@@ -71,7 +71,7 @@ const ForgotPassword = () => {
               {loading ? 'Enviando...' : 'Enviar Link de Redefinição'}
             </button>
           </form>
-          <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-8 text-center text-sm text-slate-600 dark:text-super-dark-text-secondary">
             Lembrou a senha?{' '}
             <Link to="/login" className="font-medium text-brand-cyan hover:text-cyan-500 transition-colors">Voltar para o Login</Link>
           </p>

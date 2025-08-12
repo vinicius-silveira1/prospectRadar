@@ -65,11 +65,11 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
 
   const renderRound = (round, title) => (
     <div key={title}>
-      <h3 className="text-2xl font-bold text-gray-800 my-6 text-center bg-gray-100 py-2 rounded-lg">{title}</h3>
+      <h3 className="text-2xl font-bold text-gray-800 dark:text-super-dark-text-primary my-6 text-center bg-gray-100 dark:bg-super-dark-secondary py-2 rounded-lg">{title}</h3>
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         {round.map((pick) => (
-          <div key={pick.pick} className="flex items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-            <div className="w-10 text-center font-bold text-gray-500 text-xl">
+          <div key={pick.pick} className="flex items-center bg-white dark:bg-super-dark-secondary p-3 rounded-lg shadow-sm border border-gray-200 dark:border-super-dark-border">
+            <div className="w-10 text-center font-bold text-gray-500 dark:text-super-dark-text-secondary text-xl">
               {pick.pick}
             </div>
             <div className="w-16 flex-shrink-0 flex items-center justify-center">
@@ -82,12 +82,12 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                     <ProspectImage prospect={pick.prospect} />
                   </div>
                   <div>
-                    <p className="font-bold text-lg text-gray-900">{pick.prospect.name}</p>
-                    <p className="text-sm text-gray-600">{pick.prospect.position} • {pick.prospect.high_school_team}</p>
+                    <p className="font-bold text-lg text-gray-900 dark:text-super-dark-text-primary">{pick.prospect.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-super-dark-text-secondary">{pick.prospect.position} • {pick.prospect.high_school_team}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400 italic">Seleção em aberto</p>
+                <p className="text-gray-400 dark:text-super-dark-text-secondary italic">Seleção em aberto</p>
               )}
             </div>
           </div>
@@ -97,21 +97,21 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
   );
 
   return (
-    <div ref={ref} className="w-[1200px] bg-slate-50 p-10 font-sans border-4 border-blue-600">
-      <header className="flex justify-between items-center pb-6 border-b-2 border-gray-200">
+    <div ref={ref} className="w-[1200px] bg-slate-50 dark:bg-super-dark-primary p-10 font-sans border-4 border-blue-600">
+      <header className="flex justify-between items-center pb-6 border-b-2 border-gray-200 dark:border-super-dark-border">
         <div className="flex items-center">
           <img src="/logo.svg" alt="ProspectRadar Logo" className="w-16 h-16 mr-4" />
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-super-dark-text-primary">
               <span className="text-brand-orange">prospect</span>
               <span className="text-brand-cyan">Radar</span>
             </h1>
-            <p className="text-gray-500 text-lg">Seu Mock Draft Personalizado</p>
+            <p className="text-gray-500 dark:text-super-dark-text-secondary text-lg">Seu Mock Draft Personalizado</p>
           </div>
         </div>
         <div className="text-right">
           <h2 className="text-3xl font-bold text-blue-700">Mock Draft {settings.draftClass}</h2>
-          <p className="text-sm text-gray-500">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
+          <p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
         </div>
       </header>
 
@@ -121,9 +121,9 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       </section>
 
       {/* Footer */}
-      <footer className="text-center pt-6 mt-6 border-t-2 border-gray-200">
-        <p className="text-gray-500">Relatório gerado por <span className="font-bold text-brand-orange">prospect</span><span className="font-bold text-brand-cyan">Radar</span></p>
-        <p className="text-sm text-gray-400">prospectradar.com</p>
+      <footer className="text-center pt-6 mt-6 border-t-2 border-gray-200 dark:border-super-dark-border">
+        <p className="text-gray-500 dark:text-super-dark-text-secondary">Relatório gerado por <span className="font-bold text-brand-orange">prospect</span><span className="font-bold text-brand-cyan">Radar</span></p>
+        <p className="text-sm text-gray-400 dark:text-super-dark-text-secondary">prospectradar.com</p>
       </footer>
     </div>
   );

@@ -8,7 +8,7 @@ import puppeteer from 'puppeteer';
  * node scripts/scrapeNCAAStats.mjs "Nome do Jogador"
  */
 
-async function scrapeNCAAStats(playerName) {
+export async function scrapeNCAAStats(playerName) {
   if (!playerName) {
     console.error('❌ Erro: Por favor, forneça o nome do jogador como um argumento entre aspas.');
     console.log('Exemplo: node scripts/scrapeNCAAStats.mjs "Cooper Flagg"');
@@ -115,6 +115,13 @@ async function scrapeNCAAStats(playerName) {
       const awardsText = awardsElement ? awardsElement.textContent.trim() : '';
       const awards = awardsText.split(',').map(a => a.trim()).filter(a => a !== '');
 
+      // NOVO: Extrair a conferência
+      let conference = null;
+      const conferenceLink = document.querySelector('#players_per_game tbody tr:last-child td[data-stat="conf_abbr"] a');
+      if (conferenceLink) {
+        conference = conferenceLink.textContent.trim();
+      }
+
       return {
         perGame: perGame || {},
         totals: totals || {},
@@ -122,18 +129,22 @@ async function scrapeNCAAStats(playerName) {
         perMinute: perMinute || {},
         perPoss: perPoss || {},
         awards: awards,
+        conference: conference, // Adiciona a conferência ao resultado
       };
     });
 
     if (allStats && (Object.keys(allStats.perGame).length > 0 || Object.keys(allStats.totals).length > 0 || Object.keys(allStats.advanced).length > 0 || Object.keys(allStats.perMinute).length > 0 || Object.keys(allStats.perPoss).length > 0)) {
       console.log('✅ Sucesso! Estatísticas detalhadas extraídas:');
       console.log(JSON.stringify(allStats, null, 2));
+      return allStats; // Adicionado: Retorna os dados em caso de sucesso
     } else {
-      throw new Error('Não foi possível encontrar nenhuma estatística detalhada.');
+      console.log('Não foi possível encontrar nenhuma estatística detalhada.'); // Alterado para console.log
+      return null; // Adicionado: Retorna null se nenhuma estatística for encontrada
     }
 
   } catch (error) {
     console.error(`❌ Ocorreu um erro: ${error.message}`);
+    return null; // Adicionado: Retorna null em caso de erro
   } finally {
     if (browser) {
       await browser.close();
@@ -141,6 +152,3 @@ async function scrapeNCAAStats(playerName) {
     }
   }
 }
-
-const playerName = process.argv.slice(2).join(' ');
-scrapeNCAAStats(playerName);

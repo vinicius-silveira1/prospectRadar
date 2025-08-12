@@ -19,13 +19,21 @@ export default function useProspect(id) {
 
         if (data) {
           // Gera dados de scouting se não existirem
-          const scoutingData = data.strengths ? {} : generateDataDrivenScoutingReport(data);
-          const baseProspect = { ...data, ...scoutingData };
+          const scoutingData = data.strengths ? { strengths: data.strengths, weaknesses: data.weaknesses } : generateDataDrivenScoutingReport(data);
+          
+          // Combina os dados originais com os dados de scouting gerados
+          const prospectWithScouting = { ...data, ...scoutingData };
+
+          // Adicionado para depuração:
+          console.log("----------------------------------------------------");
+          console.log("Objeto prospectWithScouting (input para o algoritmo) no frontend:");
+          console.log(JSON.stringify(prospectWithScouting, null, 2));
+          console.log("----------------------------------------------------");
 
           // Aplica o algoritmo de ranking para obter a avaliação
-          const evaluation = rankingAlgorithm.evaluateProspect(baseProspect);
+          const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting);
           
-          setProspect({ ...baseProspect, evaluation });
+          setProspect({ ...prospectWithScouting, evaluation });
 
         } else {
           setProspect(null);

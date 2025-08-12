@@ -32,7 +32,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-100">
+    <div className="min-h-screen flex bg-slate-100 dark:bg-super-dark-primary">
       <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
         <div className="text-center">
           <img src="/logo.svg" alt="ProspectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
@@ -44,14 +44,14 @@ const ResetPassword = () => {
         </div>
       </div>
       <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">Crie sua Nova Senha</h2>
-          {error && <p className="bg-red-100 text-red-700 p-3 rounded-md mb-4 text-sm">{error}</p>}
-          {message && <p className="bg-green-100 text-green-700 p-3 rounded-md mb-4 text-sm">{message}</p>}
+        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-lg shadow-lg dark:shadow-super-dark-primary/50">
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-super-dark-text-primary mb-6">Crie sua Nova Senha</h2>
+          {error && <p className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-md mb-4 text-sm">{error}</p>}
+          {message && <p className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-md mb-4 text-sm">{message}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Nova Senha</label>
-              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-brand-orange focus:border-brand-orange" />
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-super-dark-text-secondary">Nova Senha</label>
+              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-super-dark-border rounded-md shadow-sm focus:ring-brand-orange focus:border-brand-orange dark:bg-super-dark-secondary dark:text-super-dark-text-primary" />
             </div>
             <button type="submit" disabled={loading || !!message} className="w-full py-2 px-4 bg-brand-orange text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors">
               {loading ? 'Salvando...' : 'Salvar Nova Senha'}

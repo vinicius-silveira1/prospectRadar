@@ -39,7 +39,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
    {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 w-64 h-full bg-slate-100 dark:bg-slate-900/95 dark:border-r dark:border-slate-800 text-brand-dark p-6 transform transition-transform z-40 ${
+        className={`fixed top-0 left-0 w-64 h-full bg-slate-100 dark:bg-super-dark-secondary dark:border-r dark:border-super-dark-border text-slate-600 p-6 transform transition-transform z-40 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -47,7 +47,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="flex justify-end mb-4 md:hidden">
           <button
            onClick={onClose}
-           className="text-slate-500 dark:text-slate-400 hover:text-brand-orange"
+           className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-orange"
           ><X size={24} />
           </button>
         </div>
@@ -63,10 +63,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
                     ? 'bg-brand-orange text-white shadow-lg'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-brand-orange/10 dark:hover:bg-brand-orange/20 hover:text-brand-orange'
+                    : 'text-slate-600 dark:text-super-dark-text-primary hover:bg-brand-orange/10 dark:hover:bg-super-dark-border hover:text-brand-orange'
                 }`}
                 onClick={onClose} // Fecha o menu no mobile ao clicar
-              ><Icon className="h-5 w-5" />
+              ><Icon className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
               <span className={`font-medium ${item.isBrand && !isActive ? 'text-brand-orange' : ''}`}>
                 {item.label}
               </span>
@@ -75,8 +75,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
    {/* Draft Class Filter */}
-   <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+   <div className="mt-8 pt-6 border-t border-super-dark-border">
+    <h3 className="text-sm font-semibold text-slate-500 dark:text-super-dark-text-secondary uppercase tracking-wider mb-3">
      Classes do Draft
     </h3>
     <div className="space-y-1">
@@ -84,7 +84,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <Link
        key={year}
        to={`/prospects?class=${year}`}
-       className="block px-4 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-brand-orange hover:bg-orange-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+       className="block px-4 py-2 text-sm text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-orange hover:bg-orange-50 dark:hover:bg-super-dark-border rounded-lg transition-colors"
        onClick={onClose}
       >
        Turma de {year}

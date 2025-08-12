@@ -1,75 +1,108 @@
+import 'dotenv/config';
 import { ProspectRankingAlgorithm } from '../src/intelligence/prospectRankingAlgorithm.js';
-import fs from 'fs';/** * Script para validar o algoritmo de ranking de prospects usando dados históricos. * * Este script simula a avaliação de um prospect de uma classe de draft anterior * para verificar a precisão e o poder preditivo do Radar Score. */ // Passo 1: Coletar dados históricos de um prospect (Exemplo: Scottie Barnes, Draft 2021)// Fonte: https://www.sports-reference.com/cbb/players/scottie-barnes-1.html (Temporada 2020-21)const historicalProspectData = {  name: "Scottie Barnes",  position: "SF",  team: "Florida State",  age: 19,  draft_class: 2021,  height: { us: "6'8\"" },    // Estatísticas da temporada 2020-21 em Florida State  games_played: 24,  total_points: 248, // 10.3 ppg  total_rebounds: 97, // 4.0 rpg  total_assists: 98, // 4.1 apg  total_steals: 35,  total_blocks: 11,  turnovers: 60,  minutes_played: 596,    two_pt_makes: 80,  two_pt_attempts: 143,  three_pt_makes: 11,  three_pt_attempts: 40,  ft_makes: 35,  ft_attempts: 57,  // Métricas avançadas da temporada 2020-21  per: 19.1,  ts_percent: 0.539,  orb_percent: 6.0,  drb_percent: 12.0,  trb_percent: 9.0,  ast_percent: 27.6,  stl_percent: 3.2,  blk_percent: 2.4,  tov_percent: 24.8,  usg_percent: 22.1,  win_shares: 2.6,  bpm: 7.5,};import fs from 'fs';
+import fs from 'fs';
+// Não precisamos de supabase ou generateDataDrivenScoutingReport para este backtesting
+// import { supabase } from '../src/lib/supabaseClient.js';
+// import { generateDataDrivenScoutingReport } from '../src/services/scoutingDataGenerator.js';
 
 /**
  * Função principal para executar a validação.
  */
-function validateAlgorithm() {
-  // Passo 1: Coletar dados históricos de um prospect (Exemplo: Scottie Barnes, Draft 2021)
-  // Fonte: https://www.sports-reference.com/cbb/players/scottie-barnes-1.html (Temporada 2020-21)
-  const historicalProspectData = {
-    name: "Killian Hayes",
-    position: "PG",
-    team: "Ulm",
-    age: 18,
-    draft_class: 2020,
-    height: { us: "6'5\"" },
-    
-    // Estatísticas da temporada 2019-20 em Ulm (EuroCup)
-    games_played: 10,
-    total_points: 116, // 11.6 PPG
-    total_rebounds: 28, // 2.8 RPG
-    total_assists: 62, // 6.2 APG
-    total_steals: 15,
-    total_blocks: 2,
-    turnovers: 30,
-    minutes_played: 250,
-    
-    two_pt_makes: 40,
-    two_pt_attempts: 88,
-    three_pt_makes: 10,
-    three_pt_attempts: 34,
-    ft_makes: 26,
-    ft_attempts: 30,
+async function validateAlgorithm() {
+  const draftClassDataPath = './backtesting/2018_draft_class.json';
+  const outputFilePath = './backtesting_2018_results.json';
 
-    // Métricas avançadas da temporada 2019-20 (estimadas)
-    per: 18.0,
-    ts_percent: 0.550,
-    orb_percent: 2.0,
-    drb_percent: 10.0,
-    trb_percent: 6.0,
-    ast_percent: 30.0,
-    tov_percent: 20.0,
-    stl_percent: 2.5,
-    blk_percent: 0.5,
-    usg_percent: 25.0,
-    win_shares: 2.0,
-    bpm: 4.0,
-    ranking_espn: 7, 
-    ranking_247: 7  
-  };
+  try {
+    const rawData = fs.readFileSync(draftClassDataPath, 'utf8');
+    const players2018 = JSON.parse(rawData);
 
-  
+    const rankingAlgorithm = new ProspectRankingAlgorithm();
+    const results = [];
 
-  const rankingAlgorithm = new ProspectRankingAlgorithm();
+    console.log(`Iniciando backtesting para a classe de 2018 (${players2018.length} jogadores)...`);
+    console.log("----------------------------------------------------");
 
-  const evaluation = rankingAlgorithm.evaluateProspect(historicalProspectData);
+    for (const player of players2018) {
+      // Mapear os dados do jogador para o formato esperado pelo algoritmo
+      // O JSON já tem as chaves no formato que o algoritmo espera, mas vamos garantir
+      // que os campos de porcentagem e por jogo estejam corretos.
+      const prospectData = {
+        ...player,
+        // Garantir que as porcentagens estejam em decimal se vierem como 0.xxx
+        fg_pct: player.fg_pct,
+        three_pct: player.three_pct,
+        ft_pct: player.ft_pct,
+        ts_percent: player.ts_percent,
+        usg_percent: player.usg_rate, // Mapear usg_rate para usg_percent
+        // Mapear campos de jogo para o formato esperado pelo algoritmo
+        // O algoritmo já lida com ppg, rpg, apg, etc. diretamente
+        // Certificar que wingspan e height são strings para o parser
+        height: player.height,
+        wingspan: player.wingspan,
+        // Adicionar campos que o algoritmo espera mas podem estar ausentes no JSON
+        // e que agora são calculados ou têm valores padrão
+        athleticism: player.athleticism || null, // Permitir que o algoritmo estime
+        strength: player.strength || null,
+        speed: player.speed || null,
+        shooting: player.shooting || null,
+        ballHandling: player.ballHandling || null,
+        defense: player.defense || null,
+        basketballIQ: player.basketballIQ || null,
+        leadership: player.leadership || null,
+        improvement: player.improvement || null,
+        competition_level: player.competition_level || null,
+        coachability: player.coachability || null,
+        work_ethic: player.work_ethic || null,
+        // Adicionar campos que o algoritmo espera para flags/cálculos
+        tov_percent: player.tov_per_game ? (player.tov_per_game / (player.ppg + player.rpg + player.apg + player.stl_per_game + player.blk_per_game + player.tov_per_game)) : null, // Exemplo de cálculo se não houver tov_percent direto
+        // O JSON já tem bpm, per, win_shares, etc.
+      };
 
-  const output = {
-    prospect: historicalProspectData.name,
-    draft_class: historicalProspectData.draft_class,
-    evaluation: evaluation,
-    reality: {
-        draft_position: "Undrafted",
-        accolades: ["Solid Role Player", "NBA Finals Starter"]
+      // O JSON de 2018 tem 'tov_per_game', mas o algoritmo espera 'tov_percent' para algumas flags.
+      // Vamos adicionar uma conversão simples para tov_percent se não estiver presente.
+      // No entanto, o algoritmo já tem uma lógica para isso.
+      // Vamos confiar nos dados que já estão no JSON e no algoritmo.
+      if (player.tov_percent === undefined && player.tov_per_game !== undefined) {
+        // Isso é uma estimativa grosseira, o ideal seria ter o tov_percent real
+        // Mas para fins de teste, vamos tentar derivar algo.
+        // No entanto, o algoritmo já tem uma lógica para isso.
+        // Vamos confiar nos dados que já estão no JSON e no algoritmo.
+      }
+
+      // Para os campos que o algoritmo espera como `p.ncaa_raw_stats?.advanced?.conf_abbr`
+      // e que não estão no JSON de 2018, eles serão `undefined` e o algoritmo usará o padrão.
+      // Se quisermos simular o `competition_level` com base na conferência, precisaríamos
+      // adicionar essa informação ao JSON de 2018 ou mapeá-la aqui.
+      // Por enquanto, vamos deixar o algoritmo usar seus padrões para esses campos.
+
+      const evaluation = rankingAlgorithm.evaluateProspect(prospectData);
+
+      results.push({
+        name: player.name,
+        actual_draft_pick: player.actual_draft_pick,
+        radar_score: evaluation.totalScore,
+        draft_projection: evaluation.draftProjection.description,
+        nba_readiness: evaluation.nbaReadiness,
+        flags: evaluation.flags.map(f => f.message),
+        category_scores: evaluation.categoryScores,
+        // Incluir os valores subjetivos estimados para análise
+        estimated_shooting: evaluation.categoryScores.technicalSkills, // technicalSkills inclui shooting
+        estimated_athleticism: evaluation.categoryScores.physicalAttributes, // physicalAttributes inclui athleticism
+        // Para os outros, precisaríamos de um retorno mais granular de estimateSubjectiveScores
+        // ou adicioná-los ao objeto de avaliação.
+      });
+
+      console.log(`Avaliando ${player.name}: Score ${evaluation.totalScore}, Projeção: ${evaluation.draftProjection.description}`);
     }
-  };
 
-  fs.writeFileSync('validation_output.json', JSON.stringify(output, null, 2));
+    fs.writeFileSync(outputFilePath, JSON.stringify(results, null, 2));
+    console.log("----------------------------------------------------");
+    console.log(`Backtesting concluído. Resultados salvos em ${outputFilePath}`);
 
+  } catch (err) {
+    console.error("Erro durante o backtesting:", err);
+  }
 }
 
 // Executar o script
 validateAlgorithm();
-
-  

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import { getTierByRanking } from '@/lib/constants.js';
+import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js'; // Import the algorithm
 
 export default function useProspects() {
   const [prospects, setProspects] = useState([]);
@@ -27,12 +28,18 @@ export default function useProspects() {
 
         if (dbError) throw dbError;
 
+        const algorithm = new ProspectRankingAlgorithm(); // Instantiate the algorithm
+
         // 2. Processamento inicial e enriquecimento dos dados.
-        let processedProspects = dbProspects.map(prospect => {
+        // Use Promise.all to await all evaluations
+        const processedProspects = await Promise.all(dbProspects.map(async (prospect) => { // Make the callback async
           const tier = getTierByRanking(prospect.ranking);
           // Gera dados de scouting (pontos fortes/fracos) se não existirem no DB.
           const scoutingData = prospect.strengths ? {} : generateDataDrivenScoutingReport(prospect);
           
+          // Apply the algorithm to get the evaluation, and AWAIT it
+          const evaluation = await algorithm.evaluateProspect(prospect); // AWAIT here
+
           // Usa diretamente as estatísticas ppg, rpg, apg do banco de dados
           return { 
             ...prospect, 
@@ -41,8 +48,10 @@ export default function useProspects() {
             ppg: prospect.ppg || 0,
             rpg: prospect.rpg || 0,
             apg: prospect.apg || 0,
+            radar_score: evaluation.totalScore, // Now evaluation.totalScore should be available
+            evaluation: evaluation // Add full evaluation object
           };
-        });
+        }));
 
         setProspects(processedProspects);
 

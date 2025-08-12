@@ -12,7 +12,7 @@ const Header = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200 shadow-sm">
+    <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -70,7 +70,7 @@ const Header = ({ onMenuClick }) => {
               <input
                 type="text"
                 placeholder="🔍 Buscar prospects..."
-                className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white text-sm w-64"
+                className="pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white dark:bg-slate-800 text-sm w-64 text-slate-900 dark:text-white"
               />
             </div>
             {/* Search button for mobile */}

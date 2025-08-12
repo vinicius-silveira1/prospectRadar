@@ -24,3 +24,5 @@ export const useProspectImage = (prospect) => {
 
   return { imageUrl, isLoading };
 };
+
+export default useProspectImage;  
