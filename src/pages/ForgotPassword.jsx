@@ -31,7 +31,7 @@ const ForgotPassword = () => {
       {/* Painel Esquerdo - Branding */}
       <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
         <div className="text-center">
-          <img src="/logo.svg" alt="ProspectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
+          <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-4xl font-bold">
             <span className="text-brand-orange">prospect</span>
             <span className="text-brand-cyan">Radar</span>
@@ -42,7 +42,7 @@ const ForgotPassword = () => {
 
       {/* Painel Direito - Formulário */}
       <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50">
+        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50 animate-fade-in">
           <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-2">Esqueceu sua senha?</h2>
           <p className="text-center text-sm text-slate-600 dark:text-super-dark-text-secondary mb-6">Sem problemas. Digite seu e-mail e enviaremos um link para redefini-la.</p>
           

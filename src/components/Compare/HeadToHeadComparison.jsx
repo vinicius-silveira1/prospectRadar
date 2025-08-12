@@ -190,7 +190,7 @@ const HeadToHeadComparison = ({ prospects, onRemove }) => {
         </div>
       )}
       <div className="text-center py-2 bg-gray-100 dark:bg-super-dark-secondary text-xs text-gray-400 dark:text-super-dark-text-secondary">
-        ProspectRadar - Comparação Head-to-Head
+        prospectRadar - Comparação Head-to-Head
       </div>
     </div>
   );

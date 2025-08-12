@@ -69,7 +69,7 @@ const useMultiSourceProspects = () => {
               // Adicionar fontes usadas
               bestMatch.sources.forEach(source => sourceStats.sourcesUsed.add(source));
               
-              // Transformar para formato do ProspectRadar
+              // Transformar para formato do prospectRadar
               const prospect = this.transformToProspectFormat(bestMatch, athleteName);
               realProspects.push(prospect);
             }
@@ -127,7 +127,7 @@ const useMultiSourceProspects = () => {
   };
 
   /**
-   * Transforma dados das fontes para formato ProspectRadar
+   * Transforma dados das fontes para formato prospectRadar
    */
   transformToProspectFormat = (multiSourceData, originalName) => {
     const athleteData = multiSourceData.data;

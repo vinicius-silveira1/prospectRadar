@@ -2,16 +2,15 @@
 import { useState, useEffect } from 'react';
 import { getProspectImageUrl } from '@/services/imageService.js';
 
-export const useProspectImage = (prospect) => {
+export const useProspectImage = (prospectName, prospectImageUrl) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     const fetchImage = async () => {
-      if (!prospect) return;
       setIsLoading(true);
-      const url = await getProspectImageUrl(prospect);
+      const url = await getProspectImageUrl(prospectName, prospectImageUrl);
       if (isMounted) {
         setImageUrl(url);
         setIsLoading(false);
@@ -20,7 +19,7 @@ export const useProspectImage = (prospect) => {
 
     fetchImage();
     return () => { isMounted = false; };
-  }, [prospect]);
+  }, [prospectName, prospectImageUrl]);
 
   return { imageUrl, isLoading };
 };

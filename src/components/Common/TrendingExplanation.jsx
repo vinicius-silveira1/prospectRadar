@@ -16,7 +16,7 @@ const TrendingExplanation = () => {
 
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
-          <h3 className="font-semibold text-gray-900 mb-3">Sistema "Em Alta" - ProspectRadar</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">Sistema "Em Alta" - prospectRadar</h3>
           
           <div className="space-y-3">
             <div className="flex items-start space-x-2">

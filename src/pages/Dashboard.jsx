@@ -72,9 +72,10 @@ const Dashboard = () => {
     <div className="space-y-8">
       {/* Banner de Boas-Vindas */}
       <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-8 mb-6 overflow-hidden animate-fade-in">
+        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-extrabold mb-3 leading-tight">Bem-vindo ao <span className="text-yellow-300">ProspectRadar!</span></h1>
+            <h1 className="text-4xl font-extrabold mb-3 leading-tight">Bem-vindo ao <span className="text-yellow-300">prospectRadar!</span></h1>
             <p className="text-lg text-blue-100 max-w-2xl">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
@@ -111,7 +112,7 @@ const Dashboard = () => {
               <div className="flex items-center space-x-4">
                 <Link
                   to="/draft"
-                  className="inline-flex items-center px-6 py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors shadow-lg"
+                  className="inline-flex items-center px-6 py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors active:scale-95 shadow-lg"
                 >
                   <Shuffle className="h-5 w-5 mr-2" />
                   Começar Mock Draft

@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Logo e Missão */}
           <div>
             <div className="flex items-center justify-center md:justify-start mb-4">
-              <img src="/logo.svg" alt="ProspectRadar Logo" className="w-8 h-8 mr-2" />
+              <img src="/logo.png" alt="ProspectRadar Logo" className="w-8 h-8 mr-2" />
               <h1 className="text-lg font-bold">
                 <span className="text-brand-orange">prospect</span>
                 <span className="text-brand-cyan">Radar</span>
@@ -44,7 +44,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-6 pt-6 border-t border-slate-200 dark:border-super-dark-border text-center text-sm text-slate-500 dark:text-super-dark-text-secondary">
-          <p>&copy; {new Date().getFullYear()} ProspectRadar. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} prospectRadar. Todos os direitos reservados.</p>
           <p className="mt-1">Feito com 🏀 no Brasil.</p>
         </div>
       </div>

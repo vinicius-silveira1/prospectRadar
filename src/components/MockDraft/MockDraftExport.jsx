@@ -37,17 +37,24 @@ const teamLogos = {
 const getTeamLogo = (teamName) => teamLogos[teamName] || '/logo.svg';
 
 const ProspectImage = ({ prospect }) => {
-  const { imageUrl, isLoading } = useProspectImage(prospect);
+  const prospectName = prospect?.name || 'N/A';
+  const { imageUrl, isLoading } = useProspectImage(prospectName, prospect?.image);
   if (isLoading) {
     return <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse" />;
   }
   return (
-    <img
-      src={imageUrl}
-      alt={prospect.name}
-      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
-      crossOrigin="anonymous"
-    />
+    imageUrl ? (
+      <img
+        src={imageUrl}
+        alt={prospect?.name || 'Prospect'}
+        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
+        crossOrigin="anonymous"
+      />
+    ) : (
+      <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold border-2 border-white shadow-md" style={{ backgroundColor: getColorFromName(prospectName) }}>
+        <span>{getInitials(prospectName)}</span>
+      </div>
+    )
   );
 };
 
@@ -81,7 +88,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                   <div className="mr-3 flex-shrink-0">
                     <ProspectImage prospect={pick.prospect} />
                   </div>
-                  <div>
+                  <div className="flex-grow">
                     <p className="font-bold text-lg text-gray-900 dark:text-super-dark-text-primary">{pick.prospect.name}</p>
                     <p className="text-sm text-gray-600 dark:text-super-dark-text-secondary">{pick.prospect.position} • {pick.prospect.high_school_team}</p>
                   </div>
@@ -100,7 +107,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
     <div ref={ref} className="w-[1200px] bg-slate-50 dark:bg-super-dark-primary p-10 font-sans border-4 border-blue-600">
       <header className="flex justify-between items-center pb-6 border-b-2 border-gray-200 dark:border-super-dark-border">
         <div className="flex items-center">
-          <img src="/logo.svg" alt="ProspectRadar Logo" className="w-16 h-16 mr-4" />
+          <img src="/logo.png" alt="ProspectRadar Logo" className="w-16 h-16 mr-4" />
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-super-dark-text-primary">
               <span className="text-brand-orange">prospect</span>

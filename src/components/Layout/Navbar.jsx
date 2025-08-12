@@ -63,22 +63,22 @@ const Navbar = ({ onMenuClick }) => {
         <div className="flex items-center">
           <button 
             onClick={onMenuClick}
-            className="lg:hidden p-2 mr-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors"
+            className="lg:hidden p-2 mr-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95"
           >
             <Menu className="h-6 w-6" />
           </button>
           <Link to="/" className="flex items-center">
-            <img src="/logo.svg" alt="ProspectRadar Logo" className="w-10 h-10 mr-2" />
+            <img src="/logo.png" alt="ProspectRadar Logo" className="w-10 h-10 mr-2" />
             <h1 className="text-xl font-bold hidden sm:block">
-              <span className="text-brand-orange dark:text-orange-400">prospect</span>
-              <span className="text-brand-cyan dark:text-cyan-400">Radar</span>
+              <span className="text-brand-orange">prospect</span>
+              <span className="text-brand-cyan">Radar</span>
             </h1>
           </Link>
         </div>
 
         <div className="flex-1 flex justify-center px-4">
           <form onSubmit={handleSearch} className="relative w-full max-w-lg hidden md:block">
-            <button type="submit" className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 dark:text-super-dark-text-secondary hover:text-brand-orange dark:hover:text-orange-400 transition-colors focus:outline-none z-10" aria-label="Buscar">
+            <button type="submit" className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 dark:text-super-dark-text-secondary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 focus:outline-none z-10" aria-label="Buscar">
               <Search className="h-5 w-5" />
             </button>
             <AnimatedSearchInput 
@@ -90,16 +90,16 @@ const Navbar = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <Link to="/prospects" className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-super-dark-text-primary transition-colors md:hidden" title="Buscar">
+          <Link to="/prospects" className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary text-slate-600 dark:text-super-dark-text-primary transition-colors active:scale-95 md:hidden" title="Buscar">
             <Search size={20} />
           </Link>
           <ThemeToggle />
             {user ? (
-              <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors" title="Sair">
+              <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors active:scale-95" title="Sair">
                 <LogOut size={20} />
               </button>
             ) : (
-              <Link to="/login" className="flex items-center px-4 py-2 bg-brand-orange text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+              <Link to="/login" className="flex items-center px-4 py-2 bg-brand-orange text-white rounded-lg hover:bg-orange-600 transition-colors active:scale-95 text-sm font-medium">
                 Entrar
               </Link>
             )}

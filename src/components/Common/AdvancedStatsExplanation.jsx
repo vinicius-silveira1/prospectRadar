@@ -19,16 +19,16 @@ const AdvancedStatsExplanation = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-800/50 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mt-6">
+    <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 mt-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center text-xl font-bold text-gray-900 dark:text-white focus:outline-none"
+        className="w-full flex justify-between items-center text-xl font-bold text-gray-900 dark:text-super-dark-text-primary focus:outline-none"
       >
         <span className="flex items-center"><Info className="w-5 h-5 mr-2 text-purple-500" />Entenda as Estatísticas Avançadas</span>
-        {isOpen ? <ChevronUp className="w-5 h-5 text-gray-600 dark:text-slate-400" /> : <ChevronDown className="w-5 h-5 text-gray-600 dark:text-slate-400" />}
+        {isOpen ? <ChevronUp className="w-5 h-5 text-gray-600 dark:text-super-dark-text-secondary" /> : <ChevronDown className="w-5 h-5 text-gray-600 dark:text-super-dark-text-secondary" />}
       </button>
       {isOpen && (
-        <div className="mt-4 space-y-4 text-gray-700 dark:text-slate-300">
+        <div className="mt-4 space-y-4 text-gray-700 dark:text-super-dark-text-primary">
           {stats.map((stat, index) => (
             <div key={index}>
               <h3 className="font-semibold">{stat.name} ({stat.fullName})</h3>

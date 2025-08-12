@@ -6,7 +6,7 @@ import Badge from './Common/Badge';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 
 const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) => {
-  const { imageUrl, isLoading } = useProspectImage(prospect);
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
 
   return (
@@ -26,13 +26,13 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
       <div className="p-4">
         <div className="flex items-center space-x-4 mb-4">
           {/* Image or Skeleton */}
-          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: getColorFromName(prospect.name) }}>
+          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
-              <img src={imageUrl} alt={prospect.name} className="w-full h-full object-cover" />
+              <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(prospect.name)}</span>
+              <span>{getInitials(prospect?.name)}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -72,6 +72,9 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
             </div>
           </div>
         </div>
+      </div>
+      <div className="p-4 pt-0">
+        <Link to={`/prospects/${prospect.id}`} className="w-full flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link>
       </div>
     </div>
   );

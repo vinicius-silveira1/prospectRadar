@@ -13,6 +13,7 @@ import useProspects from '@/hooks/useProspects.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
+import { Link } from 'react-router-dom';
 
 const MockDraft = () => {
   
@@ -150,19 +151,20 @@ const MockDraft = () => {
   return (
     <div className="space-y-6">
       {/* Header com Status do Mock Draft */}
-      <div className="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="relative bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg">
+        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
+        <div className="relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center">
+            <h1 className="text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
               <Shuffle className="h-8 w-8 mr-3" />
-              Mock Draft {draftSettings.draftClass}
+              <span className="text-yellow-300">Mock Draft</span>&nbsp;{draftSettings.draftClass}
             </h1>
             <p className="text-blue-100 dark:text-super-dark-text-secondary mt-2">
               Monte seu próprio draft com {allProspects.length} prospects reais e curados
             </p>
           </div>
           <div className="text-right flex flex-col items-end">
-            <div className="text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 shadow-lg animate-pulse-once">
+            <div className="text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 shadow-lg animate-pulse-once rounded-full">
               {currentPick}
             </div>
             <div className="text-sm text-blue-100 dark:text-super-dark-text-secondary mt-1">Pick Atual</div>
@@ -245,14 +247,14 @@ const MockDraft = () => {
             </div>
             <div className="p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
               <div className="flex flex-wrap items-center gap-4">
-                <button onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"><Filter className="h-4 w-4 mr-2" /> Filtros</button>
+                <button onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors active:scale-95 flex items-center"><Filter className="h-4 w-4 mr-2" /> Filtros</button>
                 <div className="flex items-center space-x-2">
                   <Search className="h-4 w-4 text-slate-400" />
-                  <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter" />
+                  <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95" />
                 </div>
                 {showFilters && (
-                  <div className="flex flex-wrap gap-3">
-                    <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter">
+                  <div className="flex flex-wrap gap-3 animate-fade-in">
+                    <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter active:scale-95">
                       <option value="ALL">Todas Posições</option>
                       <option value="PG">Point Guard</option> <option value="SG">Shooting Guard</option> <option value="SF">Small Forward</option> <option value="PF">Power Forward</option> <option value="C">Center</option>
                     </select>
@@ -344,7 +346,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
 );
 
 const MockDraftProspectCard = ({ prospect, action }) => {
-  const { imageUrl, isLoading } = useProspectImage(prospect);
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
 
   return (
@@ -352,16 +354,16 @@ const MockDraftProspectCard = ({ prospect, action }) => {
       <div className="p-4">
         <div className="flex items-start justify-between">
           {/* Image or Skeleton */}
-          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: getColorFromName(prospect.name) }}>
+          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
-              <img src={imageUrl} alt={prospect.name} className="w-full h-full object-cover" />
+              <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(prospect.name)}</span>
+              <span>{getInitials(prospect?.name)}</span>
             )}
           </div>
-          <div>
+          <div className="flex-grow">
             <p className="font-bold text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</p>
             <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
@@ -380,16 +382,28 @@ const MockDraftProspectCard = ({ prospect, action }) => {
             <span className="text-xs">Radar Score</span>
           </div>
         )}
-        <div className="mt-3 border-t dark:border-super-dark-border pt-3 space-y-1 text-xs">
-          <div className="flex justify-between text-slate-500 dark:text-super-dark-text-secondary"><span>PPG</span> <span className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.ppg?.toFixed(1) || '-'}</span></div>
-          <div className="flex justify-between text-slate-500 dark:text-super-dark-text-secondary"><span>RPG</span> <span className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.rpg?.toFixed(1) || '-'}</span></div>
-          <div className="flex justify-between text-slate-500 dark:text-super-dark-text-secondary"><span>APG</span> <span className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.apg?.toFixed(1) || '-'}</span></div>
+        <div className="mt-3 border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="font-bold text-blue-600 dark:text-blue-400">{prospect.ppg?.toFixed(1) || '-'}</p>
+            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+          </div>
+          <div>
+            <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
+            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+          </div>
+          <div>
+            <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
+            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+          </div>
         </div>
-        {action && (
-          <button onClick={action.onClick} disabled={action.disabled} className="mt-4 w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed">
-            {action.label} {action.icon}
-          </button>
-        )}
+        <div className="mt-4 flex gap-2">
+          {action && (
+            <button onClick={action.onClick} disabled={action.disabled} className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed">
+              {action.label} {action.icon}
+            </button>
+          )}
+          <Link to={`/prospects/${prospect.id}`} className="flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link>
+        </div>
       </div>
     </div>
   );

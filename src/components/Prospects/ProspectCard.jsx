@@ -164,33 +164,33 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-2 text-center text-xs">
         <div>
-          <div className="font-semibold text-gray-900">{prospect.stats.ppg}</div>
-          <div className="text-gray-500">PPG</div>
+          <p className="font-bold text-blue-600 dark:text-blue-400">{prospect.stats.ppg}</p>
+          <p className="text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
         </div>
         <div>
-          <div className="font-semibold text-gray-900">{prospect.stats.rpg}</div>
-          <div className="text-gray-500">RPG</div>
+          <p className="font-bold text-green-600 dark:text-green-400">{prospect.stats.rpg}</p>
+          <p className="text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
         </div>
         <div>
-          <div className="font-semibold text-gray-900">{prospect.stats.apg}</div>
-          <div className="text-gray-500">APG</div>
+          <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.stats.apg}</p>
+          <p className="text-slate-500 dark:text-super-dark-text-secondary">APG</p>
         </div>
       </div>
 
       {/* Shooting Stats */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-super-dark-border">
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
           <div>
-            <div className="font-semibold text-gray-900">{(prospect.stats.fg_pct * 100).toFixed(1)}%</div>
-            <div className="text-gray-500">FG%</div>
+            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.fg_pct * 100).toFixed(1)}%</p>
+            <p className="text-slate-500 dark:text-super-dark-text-secondary">FG%</p>
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</div>
-            <div className="text-gray-500">3P%</div>
+            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</p>
+            <p className="text-slate-500 dark:text-super-dark-text-secondary">3P%</p>
           </div>
           <div>
-            <div className="font-semibold text-gray-900">{(prospect.stats.ft_pct * 100).toFixed(1)}%</div>
-            <div className="text-gray-500">FT%</div>
+            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.ft_pct * 100).toFixed(1)}%</p>
+            <p className="text-slate-500 dark:text-super-dark-text-secondary">FT%</p>
           </div>
         </div>
       </div>

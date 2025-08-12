@@ -17,7 +17,7 @@ const ExportModal = ({
     includeStats: true,
     includeProspectDetails: false, // Desabilitado para manter uma página
     title: 'Mock Draft NBA 2026',
-    subtitle: 'ProspectRadar - Análise Completa'
+    subtitle: 'prospectRadar - Análise Completa'
   });
 
   const [exportResult, setExportResult] = useState(null);
@@ -111,7 +111,7 @@ const ExportModal = ({
                 value={exportOptions.subtitle}
                 onChange={(e) => updateOption('subtitle', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="ProspectRadar - Análise Completa"
+                placeholder="prospectRadar - Análise Completa"
               />
             </div>
           </div>

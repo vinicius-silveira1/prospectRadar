@@ -4,19 +4,25 @@ import { BarChart3 } from 'lucide-react';
 
 // Componente interno para carregar a imagem de cada prospect de forma isolada
 const ProspectImage = ({ prospect }) => {
-  const { imageUrl, isLoading } = useProspectImage(prospect);
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
 
   if (isLoading) {
     return <div className="w-24 h-24 bg-gray-200 rounded-full animate-pulse mx-auto" />;
   }
 
   return (
-    <img
-      src={imageUrl}
-      alt={prospect.name}
-      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
-      crossOrigin="anonymous" // Essencial para o html2canvas
-    />
+    imageUrl ? (
+      <img
+        src={imageUrl}
+        alt={prospect?.name || 'Prospect'}
+        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
+        crossOrigin="anonymous" // Essencial para o html2canvas
+      />
+    ) : (
+      <div className="w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl font-bold border-4 border-white shadow-lg mx-auto" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+        <span>{getInitials(prospect?.name)}</span>
+      </div>
+    )
   );
 };
 
@@ -65,7 +71,7 @@ const ComparisonImage = React.forwardRef(({ prospects }, ref) => {
       {/* Header */}
       <header className="flex justify-between items-center pb-6 border-b-2 border-gray-200">
         <div className="flex items-center">
-          <img src="/logo.svg" alt="ProspectRadar Logo" className="w-12 h-12 mr-3" />
+          <img src="/logo.png" alt="prospectRadar Logo" className="w-12 h-12 mr-3" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               <span className="text-brand-orange">prospect</span>

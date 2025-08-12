@@ -27,7 +27,7 @@ const ProspectDetail = () => {
   const { prospect, loading, error } = useProspect(id);
   const { user } = useAuth();
   const { watchlist, toggleWatchlist } = useWatchlist();
-  const { imageUrl, isLoading } = useProspectImage(prospect?.id, prospect?.image_url);
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
 
   const getWeightDisplay = (weight) => {
     if (typeof weight === 'object' && weight !== null) {
@@ -38,7 +38,7 @@ const ProspectDetail = () => {
 
   const handleShare = async () => {
     if (navigator.share) {
-      await navigator.share({ title: `ProspectRadar: ${prospect.name}`, text: `Confira o perfil completo de ${prospect.name} no ProspectRadar.`, url: window.location.href });
+      await navigator.share({ title: `prospectRadar: ${prospect.name}`, text: `Confira o perfil completo de ${prospect.name} no prospectRadar.`, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link do perfil copiado para a área de transferência!');
@@ -109,13 +109,13 @@ const ProspectDetail = () => {
           </button>
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Prospect Image */}
-            <div className="flex-shrink-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-4xl font-bold" style={{ backgroundColor: prospect ? getColorFromName(prospect.name) : '#ccc' }}>
+            <div className="flex-shrink-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-4xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
               {isLoading ? (
                 <div className="w-full h-full bg-slate-300 dark:bg-slate-600 animate-pulse"></div>
               ) : imageUrl ? (
-                <img src={imageUrl} alt={prospect.name} className="w-full h-full object-cover object-top" />
+                <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover object-top" />
               ) : (
-                <span className="text-white">{prospect ? getInitials(prospect.name) : ''}</span>
+                <span className="text-white">{getInitials(prospect?.name)}</span>
               )}
             </div>
 
@@ -304,28 +304,24 @@ const ProspectDetail = () => {
                 <span className="text-xs bg-blue-100 text-blue-700 dark:bg-black/50 dark:text-blue-300 px-2 py-1 rounded-full font-medium">{prospect.scope || 'N/A'}</span>
               </div>
               <div className="space-y-4">
-                {/* Helper function for stat display with progress bar */}
                 {(() => {
-                  const renderStat = (label, value, colorClass, isPercentage = true) => (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 dark:text-super-dark-text-secondary leading-normal">{label}</span>
-                      <span className={`font-bold ${colorClass}`}>{value !== 'N/A' ? `${value}${isPercentage ? '%' : ''}` : 'N/A'}</span>
+                  const renderStat = (label, value, colorClass) => (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600 dark:text-super-dark-text-secondary">{label}</span>
+                      <span className={`font-bold ${colorClass}`}>{value ?? 'N/A'}</span>
                     </div>
                   );
 
                   return (
                     <>
-                      {renderStat('TS%', (prospect.ts_percent * 100)?.toFixed(1), 'text-cyan-500')}
-                      {renderStat('eFG%', (prospect.efg_percent * 100)?.toFixed(1), 'text-teal-500')}
-                      {renderStat('PER', prospect.per?.toFixed(2), 'text-indigo-500', false)}
-                      {renderStat('USG%', prospect.usg_percent?.toFixed(1), 'text-pink-500')}
-                      {renderStat('ORtg', prospect.ortg?.toFixed(1), 'text-lime-500', false)}
-                      {renderStat('DRtg', prospect.drtg?.toFixed(1), 'text-red-500', false)}
-                      {renderStat('TOV%', prospect.tov_percent?.toFixed(1), 'text-orange-500')}
-                      {renderStat('AST%', prospect.ast_percent?.toFixed(1), 'text-green-500')}
-                      {renderStat('TRB%', prospect.trb_percent?.toFixed(1), 'text-blue-500')}
-                      {renderStat('STL%', prospect.stl_percent?.toFixed(1), 'text-purple-500')}
-                      {renderStat('BLK%', prospect.blk_percent?.toFixed(1), 'text-yellow-500')}
+                      {renderStat('Pontos', prospect.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
+                      {renderStat('Rebotes', prospect.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
+                      {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
+                      {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
+                      {renderStat('FG%', fgPercentage, 'text-cyan-500 dark:text-cyan-400')}
+                      {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
+                      {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
                     </>
                   );
                 })()}

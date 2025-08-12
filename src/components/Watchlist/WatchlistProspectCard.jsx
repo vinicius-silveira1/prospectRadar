@@ -8,7 +8,7 @@ import { getInitials, getColorFromName } from '@/utils/imageUtils';
 
 
 const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => {
-  const { imageUrl, isLoading } = useProspectImage(prospect);
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
 
   return (
@@ -19,16 +19,16 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
       <div className="p-4">
         <div className="flex items-start justify-between">
           {/* Image or Skeleton */}
-          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: getColorFromName(prospect.name) }}>
+          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
-              <img src={imageUrl} alt={prospect.name} className="w-full h-full object-cover" />
+              <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(prospect.name)}</span>
+              <span>{getInitials(prospect?.name)}</span>
             )}
           </div>
-          <div>
+          <div className="flex-grow"> 
             <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-blue-600 dark:hover:text-blue-400">
               {prospect.name}
             </Link>
@@ -40,12 +40,11 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
               ))}
             </div>
           </div>
-          <span className="text-2xl font-bold text-slate-300 dark:text-super-dark-text-secondary">#{prospect.ranking}</span>
-        </div>
+          </div>
         {/* Radar Score - Added here */}
         {prospect.radar_score && (
-          <div className="inline-block text-center bg-slate-200/50 dark:bg-super-dark-border border border-slate-300 dark:border-super-dark-border text-slate-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-inner mt-2 mx-auto">
-            <span className="font-bold text-lg mr-1">{prospect.radar_score.toFixed(2)}</span>
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 mt-2 mx-auto">
+            <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
             <span className="text-xs">Radar Score</span>
           </div>
         )}
@@ -66,6 +65,9 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
             </div>
           </div>
         </div>
+      </div>
+      <div className="p-4 pt-0">
+        <Link to={`/prospects/${prospect.id}`} className="w-full flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link>
       </div>
     </div>
   );

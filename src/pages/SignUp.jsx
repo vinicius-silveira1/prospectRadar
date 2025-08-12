@@ -34,7 +34,7 @@ const SignUp = () => {
       {/* Painel da Marca (Esquerda) */}
       <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
         <div className="text-center">
-          <img src="/logo.svg" alt="ProspectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
+          <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-4xl font-bold">
             <span className="text-brand-orange">prospect</span>
             <span className="text-brand-cyan">Radar</span>
@@ -45,8 +45,8 @@ const SignUp = () => {
 
       {/* Painel do Formulário (Direita) */}
       <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50">
-          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Criar Conta no ProspectRadar</h2>
+        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50 animate-fade-in">
+          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Criar Conta no prospectRadar</h2>
           {error && <p className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-md mb-4 text-sm">{error}</p>}
           {message && <p className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-md mb-4 text-sm">{message}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
