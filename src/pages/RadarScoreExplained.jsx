@@ -5,7 +5,7 @@ const RadarScoreExplained = () => {
   const pillars = [
     {
       icon: <BarChart3 className="w-10 h-10 text-blue-500" />,
-      title: "Estatísticas Básicas",
+      title: "Estatísticas básicas",
       weight: "15%",
       description: "Métricas de produção bruta. Embora importantes, têm um peso menor, pois a eficiência e o contexto são mais preditivos.",
       metrics: ["PPG", "RPG", "APG", "FG%", "3PT%", "FT%"],
@@ -13,7 +13,7 @@ const RadarScoreExplained = () => {
     },
     {
       icon: <Zap className="w-10 h-10 text-purple-500" />,
-      title: "Métricas Avançadas",
+      title: "Métricas avançadas",
       weight: "30%",
       description: "Medem a eficiência e o impacto real de um jogador em quadra, ajustando sua produção por posse de bola e ritmo de jogo.",
       metrics: ["PER", "TS%", "Taxa de Uso", "Win Shares", "BPM"],
@@ -21,17 +21,17 @@ const RadarScoreExplained = () => {
     },
     {
       icon: <Ruler className="w-10 h-10 text-green-500" />,
-      title: "Atributos Físicos",
+      title: "Atributos físicos",
       weight: "20%",
-      description: "Ferramentas físicas que se traduzem diretamente para o nível da NBA. Envergadura e altura para a posição são cruciais.",
+      description: "As ferramentas físicas são importantíssimas e podem ser a diferença para que um jogador prospere no próximo nível. Envergadura e altura para a posição tem um peso grande.",
       metrics: ["Altura", "Envergadura", "Tamanho Posicional"],
       color: "green"
     },
     {
       icon: <Award className="w-10 h-10 text-red-500" />,
-      title: "Habilidades Técnicas",
+      title: "Habilidades técnicas",
       weight: "35%",
-      description: "Estimativas do impacto do jogador em áreas fundamentais. A defesa agora tem um peso maior, refletindo sua importância na NBA moderna.",
+      description: "Estimativas do impacto do jogador em áreas fundamentais. QI de basquete, controle de bola, defesa e arremesso são cruciais.",
       metrics: ["Arremesso", "Defesa", "Controle de Bola", "QI de Basquete"],
       color: "red"
     }
@@ -83,19 +83,19 @@ const RadarScoreExplained = () => {
         </div>
 
         <div className="mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-8">
-          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Ajustes Dinâmicos: O Toque de Inteligência</h2>
+          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Ajustes dinâmicos: o toque de inteligência</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
               <ShieldCheck className="w-8 h-8 text-cyan-500 mr-4 flex-shrink-0" />
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Nível de Competição</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Nível de competição</h3>
                 <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">O algoritmo ajusta as pontuações de estatísticas com base na força da liga e da conferência do jogador. Um bom desempenho em uma liga forte como a EuroLeague ou uma conferência Power 5 da NCAA é mais valorizado.</p>
               </div>
             </div>
             <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
               <Activity className="w-8 h-8 text-amber-500 mr-4 flex-shrink-0" />
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Análise de Risco e Confiança</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Análise de risco e confiança</h3>
                 <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">Para jogadores com poucos jogos (devido a lesões ou início de temporada), o sistema calcula um 'Nível de Confiança'. A projeção se torna mais conservadora até que o jogador atinja uma amostragem mínima de jogos, separando o potencial do risco.</p>
               </div>
             </div>

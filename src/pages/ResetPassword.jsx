@@ -51,9 +51,9 @@ const ResetPassword = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-super-dark-text-secondary">Nova Senha</label>
-              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-super-dark-border rounded-md shadow-sm focus:ring-brand-orange focus:border-brand-orange dark:bg-super-dark-secondary dark:text-super-dark-text-primary" />
+              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-super-dark-border rounded-md shadow-sm focus:ring-brand-orange focus:border-brand-orange dark:bg-super-dark-secondary dark:text-super-dark-text-primary" />
             </div>
-            <button type="submit" disabled={loading || !!message} className="w-full py-2 px-4 bg-brand-orange text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors">
+            <button type="submit" disabled={loading || !!message} className="w-full py-3 px-4 bg-brand-orange text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors">
               {loading ? 'Salvando...' : 'Salvar Nova Senha'}
             </button>
           </form>

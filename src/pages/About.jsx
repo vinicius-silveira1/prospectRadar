@@ -7,7 +7,7 @@ const About = () => {
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-3 leading-tight">
-            Sobre o <span className="text-yellow-300">prospect</span>Radar
+            Sobre o <span className="text-yellow-300">prospect</span>&nbsp;Radar
           </h1>
           <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
             Analisando o futuro do basquete, um prospect de cada vez.

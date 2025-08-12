@@ -30,10 +30,34 @@ const ProspectDetail = () => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
 
   const getWeightDisplay = (weight) => {
-    if (typeof weight === 'object' && weight !== null) {
-      return `${weight.us} lbs (${weight.intl} kg)`;
+    let parsedWeight = weight;
+    if (typeof weight === 'string') {
+      try {
+        parsedWeight = JSON.parse(weight);
+      } catch (e) {
+        // Not a JSON string, return as is
+        return weight || 'N/A';
+      }
+    }
+    if (typeof parsedWeight === 'object' && parsedWeight !== null) {
+      return `${parsedWeight.us} lbs (${parsedWeight.intl} kg)`;
     }
     return weight || 'N/A';
+  };
+
+  const getHeightDisplay = (height) => {
+    let parsedHeight = height;
+    if (typeof height === 'string') {
+      try {
+        parsedHeight = JSON.parse(height);
+      } catch (e) {
+        return height || 'N/A';
+      }
+    }
+    if (typeof parsedHeight === 'object' && parsedHeight !== null) {
+      return parsedHeight.us;
+    }
+    return height || 'N/A';
   };
 
   const handleShare = async () => {
@@ -130,7 +154,7 @@ const ProspectDetail = () => {
               <div className="flex items-center justify-center md:justify-start gap-4 text-blue-100 text-lg">
                 <div className="flex items-center"><MapPin className="w-5 h-5 mr-2" />{prospect.team || 'N/A'}</div>
                 <div className="flex items-center"><Calendar className="w-5 h-5 mr-2" />{prospect.age} anos</div>
-                <div className="flex items-center"><Ruler className="w-5 h-5 mr-2" />{typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}</div>
+                <div className="flex items-center"><Ruler className="w-5 h-5 mr-2" />{getHeightDisplay(prospect.height)}</div>
                 <div className="flex items-center"><Weight className="w-5 h-5 mr-2" />{getWeightDisplay(prospect.weight)}</div>
               </div>
             </div>

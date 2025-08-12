@@ -99,7 +99,7 @@ const Compare = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center">
-              <GitCompare className="h-8 w-8 text-yellow-300 mr-3" /> Comparar <span className="text-yellow-300 ml-2">Prospects</span>
+              <GitCompare className="h-8 w-8 text-yellow-300 mr-3" /> Comparar&nbsp;<span className="text-yellow-300 ml-2">Prospects</span>
             </h1>
             <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
               Compare até 4 prospects lado a lado para análise detalhada e identifique as diferenças cruciais.

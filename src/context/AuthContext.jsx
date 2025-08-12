@@ -4,36 +4,54 @@ import { supabase } from '../lib/supabaseClient';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-   useEffect(() => {
-    // Busca a sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+  useEffect(() => {
+    const fetchUserWithProfile = async () => {
+      setLoading(true);
+      // Busca a sessão e o usuário da autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        // Se há um usuário logado, busca seu perfil na tabela 'profiles'
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('subscription_tier')
+          .eq('id', session.user.id)
+          .single();
+
+        // Combina os dados do usuário (auth) com os dados do perfil (db)
+        setUser({
+          ...session.user,
+          subscription_tier: profile?.subscription_tier || 'free',
+        });
+      } else {
+        setUser(null);
+      }
       setLoading(false);
+    };
+    
+    fetchUserWithProfile();
+
+    // Escuta por mudanças no estado de autenticação para atualizar em tempo real
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+         fetchUserWithProfile();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
     });
 
-    // Escuta por mudanças no estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
     return () => {
-      subscription?.unsubscribe(); // A chamada correta é no objeto 'subscription'
+      subscription?.unsubscribe();
     };
   }, []);
 
   const value = {
-    session,
     user,
     loading,
+    // Mantém os métodos de autenticação para fácil acesso
     signIn: (data) => supabase.auth.signInWithPassword(data),
     signUp: (data) => supabase.auth.signUp(data),
     signOut: () => supabase.auth.signOut(),
@@ -41,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

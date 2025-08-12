@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext'; // Importar o useAuth
+import { supabase } from '@/lib/supabaseClient'; // Importar o supabase client
 
-// Ordem do Draft (60 picks) - pode ser substituída por uma fonte de dados real no futuro.
+// ... (o resto do seu código, como defaultDraftOrder e shuffleArray)
+
 const defaultDraftOrder = [
     // Round 1
     { pick: 1, team: 'ATL' }, { pick: 2, team: 'WAS' }, { pick: 3, team: 'HOU' }, { pick: 4, team: 'SAS' }, { pick: 5, team: 'DET' },
@@ -18,7 +21,6 @@ const defaultDraftOrder = [
     { pick: 56, team: 'DEN' }, { pick: 57, team: 'MEM' }, { pick: 58, team: 'DAL' }, { pick: 59, team: 'IND' }, { pick: 60, team: 'BOS' }
 ];
 
-// Função utilitária para embaralhar um array (Fisher-Yates shuffle)
 const shuffleArray = (array) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -28,21 +30,26 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
+const SAVE_LIMIT_FREE = 2; // Permitir que usuários free salvem 2 drafts
+
 const useMockDraft = (allProspects) => {
+  const { user } = useAuth(); // Pega o usuário do contexto de autenticação
+
   const [draftSettings, setDraftSettings] = useState({ draftClass: 2026, totalPicks: 60 });
   const [draftBoard, setDraftBoard] = useState([]);
   const [currentPick, setCurrentPick] = useState(1);
   const [draftHistory, setDraftHistory] = useState([]);
-  const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL', region: 'ALL' });
-  const [selectedProspect, setSelectedProspect] = useState(null);
+  const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL' });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Novos estados para salvar/carregar
+  const [savedDrafts, setSavedDrafts] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
 
   const availableProspects = useMemo(() => {
     const draftedProspectIds = new Set(draftBoard.filter(pick => pick.prospect).map(pick => pick.prospect.id));
-    
     let filtered = allProspects.filter(prospect => !draftedProspectIds.has(prospect.id));
-
-    // Aplicar filtro de busca
     if (filters.searchTerm) {
       const lowerCaseSearchTerm = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(prospect => 
@@ -51,15 +58,12 @@ const useMockDraft = (allProspects) => {
         (prospect.high_school_team && prospect.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
       );
     }
-
-    // Aplicar filtro de posição
     if (filters.position !== 'ALL') {
       filtered = filtered.filter(prospect => prospect.position === filters.position);
     }
-
     return filtered;
   }, [allProspects, draftBoard, filters.searchTerm, filters.position]);
-  
+
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
     const initialBoard = defaultDraftOrder.map((pickInfo) => ({
@@ -71,19 +75,127 @@ const useMockDraft = (allProspects) => {
     setCurrentPick(1);
     setDraftHistory([]);
     setIsLoading(false);
-  }, []); 
-  
+  }, []);
+
+  // Função para buscar os drafts salvos do usuário
+  const listSavedDrafts = useCallback(async () => {
+    if (!user) return;
+    setIsLoadingDrafts(true);
+    try {
+      const { data, error } = await supabase
+        .from('saved_mock_drafts')
+        .select('id, draft_name, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSavedDrafts(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar drafts salvos:", error);
+    } finally {
+      setIsLoadingDrafts(false);
+    }
+  }, [user]);
+
+  // Efeito para buscar os drafts quando o usuário é carregado
+  useEffect(() => {
+    listSavedDrafts();
+  }, [listSavedDrafts]);
+
+
+  const saveMockDraft = useCallback(async (draftName) => {
+    if (!user) throw new Error("Usuário não autenticado.");
+
+    // Regra de negócio para o plano Freemium
+    if (user.subscription_tier === 'free' && savedDrafts.length >= SAVE_LIMIT_FREE) {
+      throw new Error(`Limite de ${SAVE_LIMIT_FREE} drafts salvos atingido para usuários free. Faça o upgrade para salvar mais.`);
+    }
+
+    setIsSaving(true);
+    const draftData = {
+      draftBoard,
+      currentPick,
+      draftHistory,
+      draftSettings,
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('saved_mock_drafts')
+        .insert({
+          user_id: user.id,
+          draft_name: draftName,
+          draft_data: draftData,
+        })
+        .select();
+
+      if (error) throw error;
+      
+      // Atualiza a lista de drafts salvos localmente para refletir a adição
+      setSavedDrafts(prev => [data[0], ...prev]);
+      return { success: true, newDraft: data[0] };
+
+    } catch (error) {
+      console.error("Erro ao salvar o mock draft:", error);
+      throw error;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [user, draftBoard, currentPick, draftHistory, draftSettings, savedDrafts]);
+
+  const loadMockDraft = useCallback(async (draftId) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('saved_mock_drafts')
+        .select('draft_data')
+        .eq('id', draftId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      const { draftBoard, currentPick, draftHistory, draftSettings } = data.draft_data;
+      setDraftBoard(draftBoard);
+      setCurrentPick(currentPick);
+      setDraftHistory(draftHistory);
+      setDraftSettings(draftSettings);
+
+    } catch (error) {
+      console.error("Erro ao carregar o mock draft:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const deleteMockDraft = useCallback(async (draftId) => {
+    try {
+      const { error } = await supabase
+        .from('saved_mock_drafts')
+        .delete()
+        .eq('id', draftId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Remove o draft da lista local
+      setSavedDrafts(prev => prev.filter(d => d.id !== draftId));
+
+    } catch (error) {
+      console.error("Erro ao deletar o mock draft:", error);
+    }
+  }, [user]);
+
+  // ... (resto das suas funções como simulateLottery, getBigBoard, etc.)
   const simulateLottery = useCallback(() => {
-    const lotteryPicksCount = 14; // As primeiras 14 escolhas são da loteria
+    const lotteryPicksCount = 14;
     const lotteryTeams = defaultDraftOrder.slice(0, lotteryPicksCount).map(pick => pick.team);
     const shuffledLotteryTeams = shuffleArray(lotteryTeams);
-
     setDraftBoard(prevBoard => {
       const newBoard = [...prevBoard];
       for (let i = 0; i < lotteryPicksCount; i++) {
         newBoard[i] = { ...newBoard[i], team: shuffledLotteryTeams[i] };
       }
-      // Resetar prospects draftados se a loteria for simulada no meio do draft
       newBoard.forEach(pick => pick.prospect = null);
       return newBoard;
     });
@@ -91,14 +203,12 @@ const useMockDraft = (allProspects) => {
     setDraftHistory([]);
   }, []);
   
-  
   const getBigBoard = useCallback(() => {
     return [...allProspects].sort((a, b) => a.ranking - b.ranking);
   }, [allProspects]);
   
   const getProspectRecommendations = useCallback((pick) => {
     if (!pick || !availableProspects) return [];
-    // Recomendação simples: 3 melhores prospects disponíveis
     return availableProspects.slice(0, 3);
   }, [availableProspects]);
   
@@ -109,19 +219,10 @@ const useMockDraft = (allProspects) => {
       acc[pos] = (acc[pos] || 0) + 1;
       return acc;
     }, {});
-    const byRegion = picked.reduce((acc, p) => {
-      const nat = p.prospect.nationality;
-      if (nat === '🇧🇷') acc.BRAZIL = (acc.BRAZIL || 0) + 1;
-      else if (nat === '🇺🇸') acc.USA = (acc.USA || 0) + 1;
-      else acc.EUROPE = (acc.EUROPE || 0) + 1; // Simplificado
-      return acc;
-    }, { BRAZIL: 0, USA: 0, EUROPE: 0 });
-    
     return {
       totalPicked: picked.length,
       remaining: (allProspects?.length || 0) - picked.length,
       byPosition,
-      byRegion,
       totalPicks: draftSettings.totalPicks,
     };
   }, [draftBoard, allProspects, draftSettings.totalPicks]);
@@ -162,29 +263,36 @@ const useMockDraft = (allProspects) => {
       setCurrentPick(pickNumber);
     }
   }, [currentPick]);
-  
+
   return {
     draftBoard,
     availableProspects,
     currentPick,
     draftSettings,
     filters,
-    selectedProspect,
     isLoading,
     draftHistory,
+    isDraftComplete,
+    progress,
+    // Novas propriedades e funções
+    savedDrafts,
+    isSaving,
+    isLoadingDrafts,
+    saveMockDraft,
+    loadMockDraft,
+    deleteMockDraft,
+    listSavedDrafts,
+    // Funções existentes
     draftProspect,
     undraftProspect,
-    simulateLottery, // Adicionado
+    simulateLottery,
     setDraftSettings,
     setFilters,
-    setSelectedProspect,
     initializeDraft,
     getBigBoard,
     getProspectRecommendations,
     exportDraft,
     getDraftStats,
-    isDraftComplete,
-    progress,
   };
 };
 

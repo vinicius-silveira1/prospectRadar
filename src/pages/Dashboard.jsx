@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, ChevronRight, Heart } from 'lucide-react';
+import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, ChevronRight, Heart, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
 import useWatchlist from '../hooks/useWatchlist.js';
@@ -90,7 +90,7 @@ const Dashboard = () => {
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-3">
                 <Shuffle className="h-8 w-8 text-yellow-300" />
-                <h2 className="text-2xl font-bold">🏀 Mock Draft 2026</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-super-dark-text-primary">🏀 <span className="text-yellow-300">Mock Draft</span>&nbsp;2026</h2>
               </div>
               <p className="text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
                 Simule seu próprio draft com {nbaProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
