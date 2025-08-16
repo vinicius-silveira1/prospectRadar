@@ -7,8 +7,8 @@ import ThemeToggle from './ThemeToggle';
 
 // AnimatedSearchInput: placeholder animado
 const animatedSearchPlaceholders = [
-  '🔍 Buscar por Victor Wembanyama...',
-  '🔍 Buscar por Alexandre Sarr...',
+  '🔍 Buscar por AJ Dybantsa...',
+  '🔍 Buscar por Reynan Santos...',
   '🔍 Buscar por Duke...',
   '🔍 Buscar por armadores...'
 ];

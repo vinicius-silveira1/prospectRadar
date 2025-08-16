@@ -63,27 +63,34 @@ export class ProspectRankingAlgorithm {
     this.nbaSuccessDatabase = null; // Will be fetched on demand
   }
 
-  // Helper to parse height from JSONB or direct value to inches
+  // Helper to parse height from various formats to inches
   parseHeightToInches(heightData) {
     if (heightData === null || typeof heightData === 'undefined') return 0;
-    if (typeof heightData === 'object') {
-      // Se 'us' é uma string como "6'8\"", converte para polegadas
-      if (typeof heightData.us === 'string' && heightData.us.includes('\'')) {
-        const parts = heightData.us.split('\'');
-        const feet = parseInt(parts[0]);
-        const inches = parseFloat(parts[1].replace('""', ''));
+
+    // Handle object format from prospect: { us: "6'5\"", metric: 196 }
+    if (typeof heightData === 'object' && heightData.us) {
+        if (typeof heightData.us === 'string' && heightData.us.includes("'")) {
+            const parts = heightData.us.split("'");
+            const feet = parseInt(parts[0], 10);
+            const inches = parseFloat(parts[1].replace(/\"/g, ''));
+            return (feet * 12) + inches;
+        }
+        return parseFloat(heightData.us) || 0;
+    }
+
+    // Handle string format: "6'5\""
+    if (typeof heightData === 'string' && heightData.includes("'")) {
+        const parts = heightData.split("'");
+        const feet = parseInt(parts[0], 10);
+        const inches = parseFloat(parts[1].replace(/\"/g, ''));
         return (feet * 12) + inches;
-      }
-      // Se 'us' já é um número, usa diretamente
-      return parseFloat(heightData.us) || 0; 
     }
-    // Se heightData é uma string como "6'9\"", converte para polegadas
-    if (typeof heightData === 'string' && heightData.includes('\'')) {
-      const parts = heightData.split('\'');
-      const feet = parseInt(parts[0]);
-      const inches = parseFloat(parts[1].replace('""', ''));
-      return (feet * 12) + inches;
+
+    // Handle numeric format (assume cm from historical data) and convert to inches
+    if (typeof heightData === 'number') {
+        return heightData / 2.54;
     }
+
     return parseFloat(heightData) || 0;
   }
 
@@ -91,16 +98,16 @@ export class ProspectRankingAlgorithm {
   parseWingspanToInches(wingspanData) {
     if (wingspanData === null || typeof wingspanData === 'undefined') return 0;
     if (typeof wingspanData === 'object') {
-      if (typeof wingspanData.us === 'string' && wingspanData.us.includes('\'')) {
-        const parts = wingspanData.us.split('\'');
+      if (typeof wingspanData.us === 'string' && wingspanData.us.includes("'")) {
+        const parts = wingspanData.us.split("'");
         const feet = parseInt(parts[0]);
         const inches = parseFloat(parts[1].replace('""', ''));
         return (feet * 12) + inches;
       }
       return parseFloat(wingspanData.us) || 0;
     }
-    if (typeof wingspanData === 'string' && wingspanData.includes('\'')) {
-      const parts = wingspanData.split('\'');
+    if (typeof wingspanData === 'string' && wingspanData.includes("'")) {
+      const parts = wingspanData.split("'");
       const feet = parseInt(parts[0]);
       const inches = parseFloat(parts[1].replace('""', ''));
       return (feet * 12) + inches;
@@ -664,33 +671,45 @@ export class ProspectRankingAlgorithm {
   }
 
   async findComparablePlayers(player, physical, stats) {
-    if (!this.supabase || !player || !player.position || !physical || !stats) return [];
+    if (!this.supabase || !player || !player.position || !physical || !stats) {
+      return [];
+    }
 
-    // Fetch historical players from Supabase
     if (!this.nbaSuccessDatabase) {
       const { data, error } = await this.supabase.from('nba_players_historical').select('*');
       if (error) {
-        console.error('Error fetching historical players:', error);
+        console.error('Erro ao buscar jogadores históricos:', error);
         return [];
       }
       this.nbaSuccessDatabase = data;
     }
-    
+
     const physicalHeightInches = this.parseHeightToInches(physical.height);
 
     const similarityScores = this.nbaSuccessDatabase.map(nbaPlayer => {
-      const positionMatch = player.position === nbaPlayer.position ? 1.0 : 0.5;
-      
-      const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
-      const heightSimilarity = 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 12;
-      
-      const statSimilarity = this.calculateStatSimilarity(stats, nbaPlayer.college_stats_raw);
+        if (!nbaPlayer.college_stats_raw || Object.keys(nbaPlayer.college_stats_raw).length === 0) {
+            return { player: nbaPlayer, similarity: 0 };
+        }
 
-      return {
-        player: nbaPlayer,
-        similarity: (positionMatch + heightSimilarity + statSimilarity) / 3
-      };
-    });
+        const positionMatch = player.position === nbaPlayer.position ? 1.0 : 0.5;
+        
+        const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
+        const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0); // Penalidade mais branda
+
+        const statSimilarity = this.calculateStatSimilarity(stats, nbaPlayer.college_stats_raw);
+
+        // Se não houver similaridade de estatísticas, não podemos comparar de forma confiável
+        if (statSimilarity === 0) {
+            return { player: nbaPlayer, similarity: 0 };
+        }
+
+        const totalSimilarity = (positionMatch * 0.25) + (heightSimilarity * 0.25) + (statSimilarity * 0.50);
+
+        return {
+            player: nbaPlayer,
+            similarity: totalSimilarity
+        };
+    }).filter(item => !isNaN(item.similarity) && item.similarity > 0.35); // Limite ajustado para comparações mais relevantes
 
     return similarityScores
       .sort((a, b) => b.similarity - a.similarity)
@@ -699,32 +718,66 @@ export class ProspectRankingAlgorithm {
         name: item.player.name,
         similarity: Math.round(item.similarity * 100),
         draftPosition: item.player.draft_pick,
-        careerSuccess: item.player.college_stats_raw?.careerRating || 0
+        careerSuccess: this.calculateCareerSuccess(item.player)
       }));
   }
 
-  // Add calculateStatSimilarity helper function
+  calculateCareerSuccess(nbaPlayer) {
+    if (!nbaPlayer) return 0;
+    
+    const draftPick = nbaPlayer.draft_pick || 61;
+    let score = 0;
+
+    if (draftPick <= 14) score += 4;
+    else if (draftPick <= 30) score += 3;
+    else if (draftPick <= 60) score += 2;
+
+    const startYear = nbaPlayer.nba_career_start;
+    const endYear = nbaPlayer.nba_career_end || new Date().getFullYear();
+    if (startYear && endYear) {
+        const yearsInLeague = endYear - startYear;
+        if (yearsInLeague >= 10) score += 3;
+        else if (yearsInLeague >= 5) score += 2;
+        else if (yearsInLeague >= 3) score += 1;
+    }
+
+    const allStarSelections = nbaPlayer.nba_all_star_selections || 0;
+    score += allStarSelections * 1.5;
+
+    return Math.min(10, Math.max(0, parseFloat(score.toFixed(1))));
+  }
+
   calculateStatSimilarity(prospectStats, nbaPlayerStats) {
-    if (!prospectStats || !nbaPlayerStats) return 0;
+    if (!prospectStats || !nbaPlayerStats || Object.keys(nbaPlayerStats).length === 0) return 0;
 
-    const ppgDiff = Math.abs(prospectStats.ppg - nbaPlayerStats.ppg) / 10;
-    const rpgDiff = Math.abs(prospectStats.rpg - nbaPlayerStats.rpg) / 5;
-    const apgDiff = Math.abs(prospectStats.apg - nbaPlayerStats.apg) / 3;
-    const tsDiff = Math.abs((prospectStats.ts_percent || 0) - (nbaPlayerStats.ts_percent || 0)) / 0.1;
-    const usageDiff = Math.abs((prospectStats.usage_rate || 0) - (nbaPlayerStats.usage_rate || 0)) / 0.05;
-    const perDiff = Math.abs((prospectStats.per || 0) - (nbaPlayerStats.per || 0)) / 5;
-    const tovDiff = Math.abs((prospectStats.tov_percent || 0) - (nbaPlayerStats.tov_percent || 0)) / 0.02; // Normalizar por 0.02 (2% de diferença)
+    let totalDiff = 0;
+    let metricCount = 0;
 
-    // Aumentar o peso das diferenças de habilidades subjetivas
-    const shootingDiff = Math.abs((prospectStats.shooting || 0) - (nbaPlayerStats.shooting || 0)) / 5; // Normalizar por 5 pontos
-    const ballHandlingDiff = Math.abs((prospectStats.ballHandling || 0) - (nbaPlayerStats.ballHandling || 0)) / 5; // Normalizar por 5 pontos
-    const defenseDiff = Math.abs((prospectStats.defense || 0) - (nbaPlayerStats.defense || 0)) / 10;
-    const basketballIQDiff = Math.abs((prospectStats.basketballIQ || 0) - (nbaPlayerStats.basketballIQ || 0)) / 5; // Normalizar por 5 pontos
-    const leadershipDiff = Math.abs((prospectStats.leadership || 0) - (nbaPlayerStats.leadership || 0)) / 10;
+    const metrics = [
+      { key: 'ppg', weight: 20 },
+      { key: 'rpg', weight: 10 },
+      { key: 'apg', weight: 8 },
+      { key: 'fg_pct', weight: 0.5 },      // Peso ajustado
+      { key: 'three_pct', weight: 0.4 },  // Peso ajustado
+      { key: 'ft_pct', weight: 0.4 }       // Peso ajustado
+    ];
 
-    const totalDiff = (ppgDiff + rpgDiff + apgDiff + tsDiff + usageDiff + perDiff + tovDiff +
-                       shootingDiff + ballHandlingDiff + defenseDiff + basketballIQDiff + leadershipDiff) / 12;
-    return Math.max(0, 1 - totalDiff);
+    metrics.forEach(metric => {
+      // Compatibilidade entre fg_percentage e fg_pct
+      const prospectKey = metric.key.replace('_pct', '_percentage');
+      const prospectValue = prospectStats[prospectKey];
+      const historicalValue = nbaPlayerStats[metric.key];
+
+      if (prospectValue !== undefined && prospectValue !== null && historicalValue !== undefined && historicalValue !== null) {
+        totalDiff += Math.abs(prospectValue - historicalValue) / metric.weight;
+        metricCount++;
+      }
+    });
+
+    if (metricCount < 3) return 0;
+
+    const averageDiff = totalDiff / metricCount;
+    return Math.max(0, 1 - averageDiff);
   }
 
   

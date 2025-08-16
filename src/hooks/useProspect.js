@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
-const rankingAlgorithm = new ProspectRankingAlgorithm();
+const rankingAlgorithm = new ProspectRankingAlgorithm(supabase);
 
 export default function useProspect(id) {
   const [prospect, setProspect] = useState(null);

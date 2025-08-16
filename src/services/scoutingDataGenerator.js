@@ -178,3 +178,31 @@ export const generateDataDrivenScoutingReport = (prospect) => {
   return { strengths, weaknesses };
 };
 
+/**
+ * Gera uma análise de scouting (pontos fortes e fracos) para um prospect.
+ * @param {object} prospect - O objeto do prospect com suas estatísticas.
+ * @returns {{ strengths: string[], weaknesses: string[] }} - Um objeto com listas de pontos fortes e fracos.
+ */
+export const generateScoutingData = (prospect) => {
+  const strengths = [];
+  const weaknesses = [];
+
+  if (!prospect) return { strengths, weaknesses };
+
+  dataDrivenInsights.strengths.forEach(insight => {
+    if (insight.condition(prospect)) {
+      strengths.push(insight.text(prospect));
+    }
+  });
+
+  dataDrivenInsights.weaknesses.forEach(insight => {
+    if (insight.condition(prospect)) {
+      weaknesses.push(insight.text(prospect));
+    }
+  });
+
+  return { strengths, weaknesses };
+};
+
+export default generateScoutingData
+

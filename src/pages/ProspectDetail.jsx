@@ -1,15 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users } from 'lucide-react';
-import useProspect from '@/hooks/useProspect.js';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
+import useProspect  from '@/hooks/useProspect.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
-import useProspectImage from '@/hooks/useProspectImage.js'; // Added back
+import useProspectImage from '@/hooks/useProspectImage.js';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
-
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
@@ -21,6 +20,27 @@ const AwaitingStats = ({ prospectName }) => (
   </div>
 );
 
+// Placeholder for Pro Features
+const ProFeaturePlaceholder = ({ children, title, featureName }) => (
+  <div className="relative">
+    <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
+      <Lock className="w-10 h-10 text-orange-500" />
+      <h3 className="mt-3 text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
+        {title}
+      </h3>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
+        Tenha acesso completo a {featureName} no plano Pro.
+      </p>
+      <button className="mt-4 px-5 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+        Fazer Upgrade
+      </button>
+    </div>
+    <div className="opacity-20 blur-sm pointer-events-none">
+      {children}
+    </div>
+  </div>
+);
+
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,13 +49,15 @@ const ProspectDetail = () => {
   const { watchlist, toggleWatchlist } = useWatchlist();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
 
+  // Simulate user plan. Replace with actual user data.
+  const isPro = user?.plan === 'pro'; // This will be false for free/unauthenticated users
+
   const getWeightDisplay = (weight) => {
     let parsedWeight = weight;
     if (typeof weight === 'string') {
       try {
         parsedWeight = JSON.parse(weight);
       } catch (e) {
-        // Not a JSON string, return as is
         return weight || 'N/A';
       }
     }
@@ -98,7 +120,6 @@ const ProspectDetail = () => {
   const comparablePlayers = evaluation.comparablePlayers || [];
   const hasStats = prospect.ppg > 0;
 
-  // CORREÇÃO: Movido para o local correto
   const fgPercentage = (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
     ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) 
     : 'N/A';
@@ -210,11 +231,18 @@ const ProspectDetail = () => {
                 </div>
                 <AdvancedStatsExplanation />
 
+                {/* ANÁLISE DO RADAR SCORE */}
                 {evaluation.categoryScores && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-purple-500" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                      <div><RadarScoreChart data={evaluation.categoryScores} /></div>
+                      {isPro ? (
+                        <div><RadarScoreChart data={evaluation.categoryScores} /></div>
+                      ) : (
+                        <ProFeaturePlaceholder title="Análise Gráfica do Radar Score" featureName="a análise gráfica detalhada">
+                          <div><RadarScoreChart data={evaluation.categoryScores} /></div>
+                        </ProFeaturePlaceholder>
+                      )}
                       <div className="space-y-4">
                         <div><h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
                         <div><h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-green-600 dark:text-green-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
@@ -222,7 +250,6 @@ const ProspectDetail = () => {
                           <h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Score Total (Potencial)</h3>
                           <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{evaluation.potentialScore}</p>
                         </div>
-
                         {evaluation.confidenceScore < 1.0 && (
                           <div>
                             <h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal flex items-center">
@@ -268,57 +295,91 @@ const ProspectDetail = () => {
               </div>
             )}
 
-            {/* SEÇÃO DE COMPARAÇÕES NBA */}
-            {comparablePlayers.length > 0 && hasStats && (
-              <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-cyan-500" />Comparações NBA</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {comparablePlayers.map((player, index) => (
-                    <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
-                      <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">{player.name}</p>
-                      <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-cyan-600 dark:text-cyan-400">{player.similarity}%</span></p>
-                      <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
+            {/* SEÇÃO DE COMPARAÇÕES NBA (PRO) */}
+            {hasStats && (
+              isPro ? (
+                comparablePlayers.length > 0 && (
+                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-cyan-500" />Comparações com Jogadores da NBA</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {comparablePlayers.map((player, index) => (
+                        <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
+                          <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">{player.name}</p>
+                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-cyan-600 dark:text-cyan-400">{player.similarity}%</span></p>
+                          <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                )
+              ) : (
+                <ProFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
+                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Comparações com Jogadores da NBA</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
+                        <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">Jogador Exemplo</p>
+                        <p className="text-sm">Similaridade: 85%</p>
+                      </div>
+                    </div>
+                  </div>
+                </ProFeaturePlaceholder>
+              )
             )}
 
-            {/* Only render the analysis section if there are strengths or weaknesses */}
-            {(prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
-              <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-orange-500" />Análise do Jogador</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Conditionally render Strengths */}
-                  {prospect.strengths?.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
-                      <ul className="space-y-2">
-                        {prospect.strengths.map((strength, index) => (
-                          <li key={index} className="flex items-start">
-                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{strength}</span>
-                          </li>
-                        ))}
-                      </ul>
+            {/* ANÁLISE DO JOGADOR (PRO) */}
+            {hasStats && (
+              isPro ? (
+                (prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
+                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-orange-500" />Análise Detalhada do Jogador</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {prospect.strengths?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
+                          <ul className="space-y-2">
+                            {prospect.strengths.map((strength, index) => (
+                              <li key={index} className="flex items-start">
+                                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{strength}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {prospect.weaknesses?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
+                          <ul className="space-y-2">
+                            {prospect.weaknesses.map((weakness, index) => (
+                              <li key={index} className="flex items-start">
+                                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{weakness}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {/* Conditionally render Weaknesses */}
-                  {prospect.weaknesses?.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
-                      <ul className="space-y-2">
-                        {prospect.weaknesses.map((weakness, index) => (
-                          <li key={index} className="flex items-start">
-                            <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                            <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{weakness}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  </div>
+                )
+              ) : (
+                <ProFeaturePlaceholder title="Análise Detalhada do Jogador" featureName="a análise de pontos fortes e fracos">
+                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6">Análise Detalhada do Jogador</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
+                        <ul className="space-y-2"><li>...</li></ul>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
+                        <ul className="space-y-2"><li>...</li></ul>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </ProFeaturePlaceholder>
+              )
             )}
           </div>
           <div className="space-y-6">

@@ -100,14 +100,7 @@ const Dashboard = () => {
                   <CheckCircle className="h-4 w-4" />
                   <span>{nbaProspects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <Globe className="h-4 w-4" />
-                  <span>Dados do ESPN 100 & 247Sports</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Trophy className="h-4 w-4" />
-                  <span>Sistema de tiers profissional</span>
-                </div>
+                
               </div>
               <div className="flex items-center space-x-4">
                 <Link
@@ -176,7 +169,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-              🏆 Top <span className="text-brand-orange dark:text-orange-400 mx-1">Prospects</span> Gerais
+              🏆 Top <span className="text-brand-orange dark:text-orange-400 mx-1">Prospects</span> 
             </h2>
             <span className="text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded">
               Os melhores da classe
