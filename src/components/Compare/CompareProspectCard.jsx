@@ -36,11 +36,6 @@ const CompareProspectCard = ({ prospect, onRemove }) => {
           <ProspectImage prospect={prospect} /> {/* Re-add image component */}
           <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mt-2 leading-tight">{prospect.name}</h3>
           <p className="text-sm text-gray-600 dark:text-super-dark-text-secondary">{prospect.position} • {prospect.high_school_team}</p>
-          <div className="mt-2 flex justify-center items-center gap-2">
-            <span className="text-xs bg-gray-100 text-gray-700 dark:bg-super-dark-secondary dark:text-super-dark-text-primary px-2 py-1 rounded-full font-semibold">#{prospect.ranking || 'N/A'}</span>
-            <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 px-2 py-1 rounded-full font-semibold">Tier {prospect.tier}</span>
-          </div>
-          
         </div>
       </Link>
     </div>

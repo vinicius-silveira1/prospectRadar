@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, BarChart3 } from 'lucide-react';
+import { X, BarChart3, FileImage } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const formatUnit = (value) => {
@@ -22,7 +22,7 @@ const formatUnit = (value) => {
   return value;
 };
 
-const HeadToHeadComparison = ({ prospects, onRemove }) => {
+const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) => {
   const stats = [
     { key: 'ppg', label: 'Pontos', suffix: '' },
     { key: 'rpg', label: 'Rebotes', suffix: '' },
@@ -69,11 +69,27 @@ const HeadToHeadComparison = ({ prospects, onRemove }) => {
 
   return (
     <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border shadow-lg overflow-hidden">
-      <div className="p-4 md:p-6 bg-slate-50 dark:bg-super-dark-secondary border-b border-slate-200 dark:border-super-dark-border">
-        <h4 className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary mb-4 text-center flex items-center justify-center">
-          <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
-          Comparação de Estatísticas
-        </h4>
+      <div className="p-4 md:p-6 bg-slate-50 dark:bg-super-dark-primary border-b border-slate-200 dark:border-super-dark-border">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary flex items-center">
+            <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
+            Comparação de Estatísticas
+          </h4>
+          {onExport && (
+            <button 
+              onClick={onExport} 
+              className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md" 
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <FileImage className="h-4 w-4 mr-2" />
+              )}
+              {isExporting ? 'Exportando...' : 'Exportar Imagem'}
+            </button>
+          )}
+        </div>
         <ResponsiveContainer width="100%" height={300}>
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
             <PolarGrid stroke="#3A3A3A" />
@@ -149,20 +165,20 @@ const HeadToHeadComparison = ({ prospects, onRemove }) => {
                     {/* Player 1 Stat */}
                     <div className={`text-center text-xl font-bold p-3 rounded-lg flex items-center justify-center ${
                       winners[0].isWinner
-                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600' // Dark green border
-                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-secondary dark:text-super-dark-text-primary'
+                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600'
+                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-primary dark:text-super-dark-text-primary'
                     }`}>
                       {isPct ? `${((winners[0].value || 0) * 100).toFixed(1)}%` : (winners[0].value || 0).toFixed(1)}
                     </div>
                     {/* Stat Label */}
-                    <div className="font-semibold text-gray-700 text-center bg-gray-100 dark:bg-super-dark-secondary dark:text-super-dark-text-primary p-3 rounded-lg flex items-center justify-center h-full">
+                    <div className="font-semibold text-gray-700 text-center bg-gray-100 dark:bg-super-dark-primary dark:text-super-dark-text-primary p-3 rounded-lg flex items-center justify-center h-full">
                       {label}
                     </div>
                     {/* Player 2 Stat */}
                     <div className={`text-center text-xl font-bold p-3 rounded-lg flex items-center justify-center ${
                       winners[1].isWinner
-                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600' // Dark green border
-                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-secondary dark:text-super-dark-text-primary'
+                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600'
+                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-primary dark:text-super-dark-text-primary'
                     }`}>
                       {isPct ? `${((winners[1].value || 0) * 100).toFixed(1)}%` : (winners[1].value || 0).toFixed(1)}
                     </div>
@@ -173,12 +189,12 @@ const HeadToHeadComparison = ({ prospects, onRemove }) => {
               // Layout para 3 ou 4 jogadores (Stat - P1 - P2 - P3...)
               return (
                 <div key={key} className={`grid ${getGridLayout()} items-stretch gap-4 p-2`}>
-                  <div className="font-semibold text-gray-700 dark:text-super-dark-text-primary text-left flex items-center">{label}</div>
+                  <div className="font-semibold text-gray-700 dark:text-super-dark-text-primary text-left flex items-center bg-gray-100 dark:bg-super-dark-primary p-3 rounded-lg">{label}</div>
                   {prospects.map((prospect, index) => (
                     <div key={prospect.id} className={`text-center text-xl font-bold p-3 rounded-lg flex items-center justify-center ${
                       winners[index].isWinner
-                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600' // Dark green border
-                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-secondary dark:text-super-dark-text-primary'
+                        ? 'bg-green-100 text-green-800 ring-2 ring-green-700 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-600'
+                        : 'text-gray-800 bg-gray-50 dark:bg-super-dark-primary dark:text-super-dark-text-primary'
                     }`}>
                       {isPct ? `${((winners[index].value || 0) * 100).toFixed(1)}%` : (winners[index].value || 0).toFixed(1)}
                     </div>
@@ -189,7 +205,7 @@ const HeadToHeadComparison = ({ prospects, onRemove }) => {
           </div>
         </div>
       )}
-      <div className="text-center py-2 bg-gray-100 dark:bg-super-dark-secondary text-xs text-gray-400 dark:text-super-dark-text-secondary">
+      <div className="text-center py-2 bg-gray-100 dark:bg-super-dark-primary text-xs text-gray-400 dark:text-super-dark-text-secondary">
         prospectRadar - Comparação Head-to-Head
       </div>
     </div>

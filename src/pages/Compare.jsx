@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  GitCompare, Users, X, Plus, Search, Download, Share2, FileImage, FileText, BarChart3
+  GitCompare, Users, X, Plus, Search, Download, Share2, FileImage, FileText, BarChart3, Lock
 } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import CompareProspectCard from '@/components/Compare/CompareProspectCard.jsx';
 import HeadToHeadComparison from '@/components/Compare/HeadToHeadComparison.jsx';
 import ComparisonImage from '@/components/Compare/ComparisonImage.jsx';
 
-const Compare = () => {
+function Compare() {
   const { prospects: allProspects, loading, error } = useProspects();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const prospects = useMemo(() => allProspects.filter(p => p.scope === 'NBA_DRAFT'), [allProspects]);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +25,17 @@ const Compare = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   const imageExportRef = useRef(null);
+
+  // Limites baseados no plano
+  const getMaxComparisons = () => {
+    if (!user) return 2; // Usuário não logado
+    return user.subscription_tier === 'scout' ? 4 : 2;
+  };
+
+  const maxComparisons = getMaxComparisons();
+  
+  // Para usuários free, sempre mostramos 3 slots (2 funcionais + 1 upgrade)
+  const totalSlotsToShow = user?.subscription_tier === 'scout' ? 4 : 3;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -35,13 +49,13 @@ const Compare = () => {
 
   const addProspect = useCallback((prospect) => {
     setSelectedProspects(prev => {
-      if (prev.length < 4 && !prev.find(p => p.id === prospect.id)) {
+      if (prev.length < maxComparisons && !prev.find(p => p.id === prospect.id)) {
         return [...prev, prospect];
       }
       return prev;
     });
     setSearchTerm('');
-  }, []);
+  }, [maxComparisons]);
 
   useEffect(() => {
     const prospectIdToAdd = searchParams.get('add');
@@ -74,8 +88,11 @@ const Compare = () => {
     try {
       const html2canvas = (await import('html2canvas')).default;
       if (imageExportRef.current) {
+        const isDark = document.documentElement.classList.contains('dark');
         const canvas = await html2canvas(imageExportRef.current, {
-          backgroundColor: document.documentElement.classList.contains('dark') ? '#0A0A0A' : '#f8fafc', scale: 2, useCORS: true
+          backgroundColor: isDark ? '#0A0A0A' : '#f8fafc', 
+          scale: 2, 
+          useCORS: true
         });
         const link = document.createElement('a');
         link.download = `prospects-comparison.png`;
@@ -102,27 +119,19 @@ const Compare = () => {
               <GitCompare className="h-8 w-8 text-yellow-300 mr-3" /> Comparar&nbsp;<span className="text-yellow-300 ml-2">Prospects</span>
             </h1>
             <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
-              Compare até 4 prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
+              Compare até {maxComparisons} prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
+              {user?.subscription_tier !== 'scout' && (
+                <span className="block mt-1 text-sm text-yellow-200">
+                  <Lock className="inline h-4 w-4 mr-1" />
+                  Upgrade para Scout para comparar até 4 prospects
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center space-x-3">
             <div className="text-lg font-bold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
-              {selectedProspects.length}/4 selecionados
+              {selectedProspects.length}/{maxComparisons} selecionados
             </div>
-            {selectedProspects.length >= 2 && (
-              <div className="relative export-menu-container z-10">
-                <button onClick={() => setShowExportMenu(!showExportMenu)} className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md" disabled={isExporting}>
-                  {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Download className="h-4 w-4 mr-2" />} {isExporting ? 'Exportando...' : 'Exportar'}
-                </button>
-                {showExportMenu && !isExporting && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-super-dark-secondary rounded-lg shadow-lg border border-slate-200 dark:border-super-dark-border z-50">
-                    <div className="p-2">
-                      <button onClick={exportAsImage} className="w-full flex items-center px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-50 dark:hover:bg-super-dark-secondary rounded-md"><FileImage className="h-4 w-4 mr-3 text-blue-500" /> Exportar como Imagem</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -130,7 +139,7 @@ const Compare = () => {
       <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
-          <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled={selectedProspects.length >= 4}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
+          <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
         </div>
         {showSearch && (
           <div className="border-t dark:border-super-dark-border pt-4 space-y-4">
@@ -159,27 +168,66 @@ const Compare = () => {
 
       <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / 4)</h2>
+          <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / {maxComparisons})</h2>
           {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[6rem] ">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.subscription_tier === 'scout' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 min-h-[6rem]`}>
           {selectedProspects.map((prospect) => {
             return (
               <CompareProspectCard key={prospect.id} prospect={prospect} onRemove={removeProspect} />
             );
           })}
-          {Array.from({ length: 4 - selectedProspects.length }).map((_, index) => (
-            <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-super-dark-secondary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-400 dark:text-super-dark-text-secondary text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}>
-              <Plus size={24} className="text-blue-400" />
-              <span className="text-sm mt-2">Adicionar Prospect</span>
-            </div>
-          ))}
+          
+          {/* Renderizar slots vazios */}
+          {Array.from({ length: totalSlotsToShow - selectedProspects.length }).map((_, index) => {
+            const slotPosition = selectedProspects.length + index;
+            
+            // Para usuários não-scout, o terceiro slot (posição 2) é sempre upgrade
+            const isFreeUser = !user || user.subscription_tier !== 'scout';
+            const isUpgradeSlot = isFreeUser && slotPosition === 2;
+            
+            if (isUpgradeSlot) {
+              return (
+                <div key={`upgrade-placeholder-${index}`} className="relative flex flex-col items-center justify-center p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-dashed border-indigo-300 dark:border-indigo-600 rounded-lg text-center transition-all group">
+                  <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                    Scout
+                  </div>
+                  <Lock size={28} className="text-indigo-400 dark:text-indigo-300 mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
+                    Mais Comparações
+                  </span>
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400 leading-tight px-1">
+                    Upgrade para Scout e compare até 4 prospects
+                  </span>
+                  <button 
+                    onClick={() => navigate('/pricing')}
+                    className="mt-2 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white text-xs rounded-full transition-colors"
+                  >
+                    Upgrade
+                  </button>
+                </div>
+              );
+            }
+            
+            // Se já atingiu o limite para usuários free, não mostrar mais slots
+            if (isFreeUser && slotPosition >= 2) {
+              return null;
+            }
+            
+            // Placeholder normal para adicionar prospect
+            return (
+              <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-super-dark-secondary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-400 dark:text-super-dark-text-secondary text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}>
+                <Plus size={24} className="text-blue-400" />
+                <span className="text-sm mt-2">Adicionar Prospect</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       <div>
         {selectedProspects.length >= 2 ? (
-          <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} />
+          <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} onExport={exportAsImage} isExporting={isExporting} />
         ) : (
           <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
             <GitCompare className="mx-auto h-12 w-12 text-slate-400 dark:text-super-dark-text-secondary" />
@@ -196,6 +244,6 @@ const Compare = () => {
       )}
     </div>
   );
-};
+}
 
 export default Compare;
