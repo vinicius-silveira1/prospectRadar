@@ -34,9 +34,12 @@ const RangeSlider = ({ min, max, step, initialMin, initialMax, onChange, title, 
   };
 
   const handleMaxChange = (e) => {
-    const value = Math.max(Number(e.target.value), minValue + (step || 1));
-    setMaxValue(value);
-    onChange({ min: minValue, max: value });
+    const value = Number(e.target.value);
+    // Se o valor é o máximo possível, permitir mesmo que seja muito próximo do min
+    const finalValue = value === max ? max : Math.max(value, minValue + (step || 1));
+    const clampedValue = Math.min(finalValue, max); // Garantir que não exceda o máximo
+    setMaxValue(clampedValue);
+    onChange({ min: minValue, max: clampedValue });
   };
 
   return (
@@ -99,12 +102,13 @@ const RangeSlider = ({ min, max, step, initialMin, initialMax, onChange, title, 
           border: 2px solid #3b82f6;
           border-radius: 50%;
           cursor: pointer;
-          height: 1rem;
-          width: 1rem;
-          margin-top: -6px;
+          height: 20px;
+          width: 20px;
+          margin-top: -8px;
           pointer-events: all;
           position: relative;
           -webkit-appearance: none;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .thumb::-moz-range-thumb {
@@ -112,18 +116,22 @@ const RangeSlider = ({ min, max, step, initialMin, initialMax, onChange, title, 
           border: 2px solid #3b82f6;
           border-radius: 50%;
           cursor: pointer;
-          height: 1rem;
-          width: 1rem;
+          height: 20px;
+          width: 20px;
+          margin-top: -8px;
           pointer-events: all;
           position: relative;
+          -moz-appearance: none;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
         .slider__track,
         .slider__range {
             position: absolute;
             border-radius: 3px;
-            height: 5px;
-            top: -2px;
+            height: 4px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .slider__track {

@@ -40,7 +40,7 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
         Fazer Upgrade
       </Link>
     </div>
-    <div className="opacity-20 blur-sm pointer-events-none">
+    <div className="opacity-20 blur-sm pointer-events-none select-none">
       {children}
     </div>
   </div>
@@ -146,8 +146,26 @@ const Prospects = () => {
         const matchesWingspan = !prospectWingspan || (prospectWingspan >= wingspanRange.min && prospectWingspan <= wingspanRange.max);
         const matchesWeight = !prospectWeight || (prospectWeight >= weightRange.min && prospectWeight <= weightRange.max);
 
-        const threePtPct = prospect.evaluation?.basicStats?.three_pt_percentage || 0;
-        const matches3PTP = !min3PTP || threePtPct >= (min3PTP / 100);
+        // Verificação dos dados de 3PT% - usando o campo correto
+        const threePtPct = prospect.three_pct; // Campo direto no prospect, não no evaluation
+        
+        // Simplificando a lógica: se não há filtro ou se o prospect tem % válido e maior que o mínimo
+        let matches3PTP = true;
+        if (min3PTP && min3PTP !== '' && min3PTP !== null && min3PTP !== undefined) {
+          // Validação mais rigorosa: valor deve existir, ser número válido e maior que 0
+          const isValidThreePct = threePtPct !== null && 
+                                 threePtPct !== undefined && 
+                                 !isNaN(threePtPct) && 
+                                 threePtPct > 0 && 
+                                 threePtPct <= 1; // percentual máximo 100% = 1.0
+          
+          if (isValidThreePct) {
+            // threePtPct já vem como decimal (0.385 = 38.5%), então dividimos min3PTP por 100
+            matches3PTP = threePtPct >= (min3PTP / 100);
+          } else {
+            matches3PTP = false; // Se não tem dados válidos de 3PT%, não passa no filtro
+          }
+        }
         const matchesPPG = !minPPG || prospect.ppg >= minPPG;
         const matchesRPG = !minRPG || prospect.rpg >= minRPG;
         const matchesAPG = !minAPG || prospect.apg >= minAPG;
@@ -169,6 +187,11 @@ const Prospects = () => {
       filtered.sort((a, b) => a.position.localeCompare(b.position));
     } else {
       filtered.sort((a, b) => a.ranking - b.ranking);
+    }
+
+    // Debug: mostrar quantos prospects passaram no filtro
+    if (min3PTP) {
+      console.log(`Prospects after 3PT% filter (${min3PTP}%):`, filtered.length);
     }
 
     return filtered;
@@ -400,7 +423,7 @@ const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) 
         title="Peso"
         min={ranges.weight.min}
         max={ranges.weight.max}
-        step={5}
+        step={1}
         initialMin={values.weightRange.min}
         initialMax={values.weightRange.max}
         onChange={handlers.setWeightRange}
@@ -422,7 +445,27 @@ const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div>
           <label htmlFor="3pt-filter" className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">3PT% (min)</label>
-          <input type="number" id="3pt-filter" step="0.1" min="0" max="100" value={values.min3PTP} onChange={(e) => handlers.setMin3PTP(e.target.value ? parseFloat(e.target.value) : '')} placeholder="ex: 38" className={inputBaseClasses} />
+          <input 
+            type="number" 
+            id="3pt-filter" 
+            step="0.1" 
+            min="0" 
+            max="100" 
+            value={values.min3PTP} 
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '') {
+                handlers.setMin3PTP('');
+                return;
+              }
+              const numValue = parseFloat(value);
+              if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                handlers.setMin3PTP(numValue);
+              }
+            }} 
+            placeholder="ex: 38" 
+            className={inputBaseClasses} 
+          />
         </div>
         <div>
           <label htmlFor="ppg-filter" className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">PPG (min)</label>
