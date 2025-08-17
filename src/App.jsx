@@ -14,6 +14,8 @@ import About from './pages/About';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import RadarScoreExplained from './pages/RadarScoreExplained'; // Importe a nova página
+import Pricing from './pages/Pricing';
+import Success from './pages/Success';
 
 function App() {
   return (
@@ -30,7 +32,9 @@ function App() {
           <Route path="trending" element={<Trending />} />
           <Route path="draft-history" element={<DraftHistory />} />
           <Route path="about" element={<About />} />
-          <Route path="radar-score-explained" element={<RadarScoreExplained />} /> {/* Adicione a nova rota */}
+          <Route path="radar-score-explained" element={<RadarScoreExplained />} />
+          <Route path="pricing" element={<Pricing />} />
+          <Route path="success" element={<Success />} />
         </Route>
 
         {/* Rotas de autenticação (sem o layout principal) */}

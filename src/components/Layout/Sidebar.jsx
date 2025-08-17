@@ -9,7 +9,8 @@ import {
   Calendar,
   X,
   Info,
-  Lightbulb
+  Lightbulb,
+  CreditCard
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -24,6 +25,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/trending', icon: TrendingUp, label: 'Em Alta' },
     { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
     { path: '/radar-score-explained', icon: Lightbulb, label: 'Score do Radar' },
+    { path: '/pricing', icon: CreditCard, label: 'Planos', isSpecial: true },
     { path: '/about', icon: Info, label: 'Sobre' },
   ];
 
@@ -63,11 +65,16 @@ const Sidebar = ({ isOpen, onClose }) => {
                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive
                     ? 'bg-brand-orange text-white shadow-lg'
+                    : item.isSpecial && !isActive
+                    ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 border border-indigo-200 dark:border-indigo-800'
                     : 'text-slate-600 dark:text-super-dark-text-primary hover:bg-brand-orange/10 dark:hover:bg-super-dark-border hover:text-brand-orange'
                 }`}
                 onClick={onClose} // Fecha o menu no mobile ao clicar
-              ><Icon className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
-              <span className={`font-medium ${item.isBrand && !isActive ? 'text-brand-orange' : ''}`}>
+              ><Icon className={`h-5 w-5 ${isActive ? 'text-white' : item.isSpecial ? 'text-indigo-500' : ''}`} />
+              <span className={`font-medium ${
+                item.isBrand && !isActive ? 'text-brand-orange' : 
+                item.isSpecial && !isActive ? 'text-indigo-600 dark:text-indigo-400' : ''
+              }`}>
                 {item.label}
               </span>
              </Link>);

@@ -13,6 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^7.8.0",
     "@supabase/supabase-js": "^2.52.1",
     "@tanstack/react-query": "^5.81.5",
     "axios": "^1.10.0",
