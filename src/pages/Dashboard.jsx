@@ -75,7 +75,11 @@ const Dashboard = () => {
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-extrabold mb-3 leading-tight">Bem-vindo ao <span className="text-yellow-300">prospectRadar!</span></h1>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3 leading-tight">
+              <span className="flex items-center flex-wrap gap-1">
+                Bem-vindo ao <span className="text-yellow-300">prospectRadar!</span>
+              </span>
+            </h1>
             <p className="text-lg text-blue-100 max-w-2xl">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
@@ -167,9 +171,11 @@ const Dashboard = () => {
       {isLoaded && topProspects.length > 0 && (
         <div className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-              🏆 Top <span className="text-brand-orange dark:text-orange-400 mx-1">Prospects</span> 
+              <span className="flex items-center flex-wrap gap-1">
+                🏆 Top <span className="text-brand-orange dark:text-orange-400">Prospects</span>
+              </span>
             </h2>
             <span className="text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded">
               Os melhores da classe

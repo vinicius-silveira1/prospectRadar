@@ -105,19 +105,21 @@ const MockDraft = () => {
       {/* ... (Header não modificado) ... */}
       <div className="relative bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
-              <Shuffle className="h-8 w-8 mr-3" />
-              <span className="text-yellow-300">Mock Draft</span>&nbsp;{draftSettings.draftClass}
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
+              <Shuffle className="h-6 md:h-8 w-6 md:w-8 mr-2 md:mr-3" />
+              <span className="flex items-center flex-wrap gap-1">
+                <span className="text-yellow-300">Mock Draft</span>
+                <span>{draftSettings.draftClass}</span>
+              </span>
             </h1>
-            <p className="text-blue-100 dark:text-super-dark-text-secondary mt-2">
+            <p className="text-blue-100 dark:text-super-dark-text-secondary mt-2 text-sm md:text-base">
               Monte seu próprio draft com {allProspects.length} prospects reais e curados
             </p>
           </div>
           <div className="text-right flex flex-col items-end">
-            <div className="text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 shadow-lg animate-pulse-once rounded-full">
-              {currentPick}
+            <div className="text-3xl md:text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-2 shadow-lg animate-pulse-once rounded-full">\n              {currentPick}
             </div>
             <div className="text-sm text-blue-100 dark:text-super-dark-text-secondary mt-1">Pick Atual</div>
           </div>
@@ -250,7 +252,7 @@ const MockDraft = () => {
 // ... (Componentes de View e Card não modificados) ...
 const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-    <h3 className="text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">Draft Board</h3>
+    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">Draft Board</h3>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {draftBoard.map((pick) => (
         <div key={pick.pick} className={`p-4 border rounded-lg transition-all ${
@@ -285,7 +287,11 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
 
 const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-    <h3 className="text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">Big Board - Principais Prospects</h3>
+    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">
+      <span className="flex items-center flex-wrap gap-1">
+        Big Board - <span>Principais Prospects</span>
+      </span>
+    </h3>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {prospects.map((prospect, index) => (
         <div key={prospect.id} className="relative">
@@ -308,7 +314,11 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
       </div>
     )}
     <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-6 flex items-center"><Users className="h-5 w-5 text-blue-500 mr-2" /> <span className="text-brand-orange mr-1">Prospects</span> Disponíveis ({prospects.length})</h3>
+      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-6 flex items-center flex-wrap gap-1">
+        <Users className="h-5 w-5 text-blue-500 mr-2" /> 
+        <span className="text-brand-orange">Prospects</span> 
+        <span>Disponíveis ({prospects.length})</span>
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {prospects.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
       </div>

@@ -58,12 +58,15 @@ const Watchlist = () => {
 
   return (
     <div className="space-y-6">
-      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-8 mb-6 overflow-hidden animate-fade-in">
+      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6 overflow-hidden animate-fade-in">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-extrabold mb-3 leading-tight flex items-center">
-              <Heart className="h-8 w-8 text-yellow-300 mr-3" /> Minha&nbsp;<span className="text-yellow-300">Watchlist</span>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3 leading-tight flex items-center">
+              <Heart className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3" /> 
+              <span className="flex items-center flex-wrap gap-1">
+                Minha <span className="text-yellow-300">Watchlist</span>
+              </span>
             </h1>
             <p className="text-lg text-blue-100 max-w-2xl">
               Você está acompanhando {favoritedProspects.length} prospect(s) na sua lista de favoritos.

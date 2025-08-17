@@ -229,18 +229,20 @@ const Prospects = () => {
       {/* Header */}
       <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="max-w-7xl mx-auto px-6 py-6 relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-extrabold mb-2 leading-tight flex items-center">
-                <Users className="h-8 w-8 text-yellow-300 mr-3" />
-                Todos os&nbsp;<span className="text-yellow-300">Prospects</span>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight flex items-center">
+                <Users className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3" />
+                <span className="flex items-center flex-wrap gap-1">
+                  Todos os <span className="text-yellow-300">Prospects</span>
+                </span>
               </h1>
-              <p className="text-lg text-blue-100 dark:text-blue-200 max-w-2xl">
+              <p className="text-sm md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl">
                 Explore e analise {allProspects.length} <span className="font-semibold text-yellow-300">prospects</span> do Draft 2026
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Grid size={18} /></button>
                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><List size={18} /></button>
@@ -441,10 +443,15 @@ const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) 
       />
     </div>
     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-super-dark-border">
-      <h3 className="text-md font-semibold text-slate-800 dark:text-super-dark-text-primary mb-4 flex items-center gap-2"><Zap size={18} className="text-yellow-500" /> Filtros por Estatísticas e Badges</h3>
+      <h3 className="text-md font-semibold text-slate-800 dark:text-super-dark-text-primary mb-2 flex items-center gap-2">
+        <Zap size={18} className="text-yellow-500" /> 
+        Filtros por Estatísticas e Badges
+      </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div>
-          <label htmlFor="3pt-filter" className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">3PT% (min)</label>
+          <label htmlFor="3pt-filter" className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">
+            3PT% (min) 
+          </label>
           <input 
             type="number" 
             id="3pt-filter" 
@@ -463,7 +470,7 @@ const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) 
                 handlers.setMin3PTP(numValue);
               }
             }} 
-            placeholder="ex: 38" 
+            placeholder="ex: 35 (HS data)" 
             className={inputBaseClasses} 
           />
         </div>

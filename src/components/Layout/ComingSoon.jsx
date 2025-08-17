@@ -8,8 +8,8 @@ const ComingSoon = ({ title, message }) => {
       <div className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 p-4 rounded-full mb-6">
         <Wrench className="h-12 w-12" />
       </div>
-      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">{title}</h1>
-      <p className="text-slate-600 dark:text-slate-400 max-w-md mb-8">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">{title}</h1>
+      <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-md mb-8">
         {message}
       </p>
       <Link
