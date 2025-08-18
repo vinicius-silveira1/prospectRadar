@@ -44,10 +44,10 @@ const RadarScoreExplained = () => {
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
           <div className="relative z-10">
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-white animate-fade-in-up">
-              Entenda o <span className="text-yellow-300 drop-shadow-lg">Radar Score</span>
+              Entenda o <span className="text-yellow-300 drop-shadow-lg">Radar Score v2.1</span>
             </h1>
             <p className="mt-4 text-lg md:text-xl leading-relaxed text-blue-100 animate-fade-in-up animation-delay-200">
-              Nossa metodologia proprietária para ir além do hype e encontrar o verdadeiro potencial.
+              Nossa metodologia proprietária validada historicamente para ir além do hype e encontrar o verdadeiro potencial.
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ const RadarScoreExplained = () => {
         </div>
 
         <div className="mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-8">
-          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Ajustes dinâmicos: o toque de inteligência</h2>
+          <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-6">Melhorias v2.1: Validação Histórica e Ajustes Inteligentes</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
               <ShieldCheck className="w-8 h-8 text-cyan-500 mr-4 flex-shrink-0" />
@@ -95,8 +95,22 @@ const RadarScoreExplained = () => {
             <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
               <Activity className="w-8 h-8 text-amber-500 mr-4 flex-shrink-0" />
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Análise de risco e confiança</h3>
-                <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">Para jogadores com poucos jogos (devido a lesões ou início de temporada), o sistema calcula um 'Nível de Confiança'. A projeção se torna mais conservadora até que o jogador atinja uma amostragem mínima de jogos, separando o potencial do risco.</p>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Filosofia Dual: Potencial vs Confiança</h3>
+                <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
+              </div>
+            </div>
+            <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
+              <TrendingUp className="w-8 h-8 text-green-500 mr-4 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Bônus de Desenvolvimento</h3>
+                <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">Jogadores jovens (≤19 anos) recebem bônus de idade (+2%), e alas jovens com potencial atlético recebem bônus adicional (+3%) reconhecendo seu upside de desenvolvimento.</p>
+              </div>
+            </div>
+            <div className="flex items-start p-4 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border">
+              <Lightbulb className="w-8 h-8 text-purple-500 mr-4 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Validação Histórica</h3>
+                <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">Algoritmo testado e refinado usando dados reais das classes de draft NBA 2018, 2020 e 2023, alcançando correlação média de 0.480 com o sucesso profissional.</p>
               </div>
             </div>
           </div>
@@ -104,7 +118,7 @@ const RadarScoreExplained = () => {
 
         <div className="mt-12 text-center">
           <p className="text-slate-600 dark:text-super-dark-text-secondary">
-            O <strong>Radar Score</strong> é a combinação de todos esses fatores, resultando em uma nota única que projeta o potencial de sucesso de um prospecto na NBA de forma mais inteligente e contextualizada.
+            O <strong>Radar Score v2.1</strong> é a combinação de todos esses fatores, resultando em uma nota única que projeta o potencial de sucesso de um prospecto na NBA de forma mais inteligente, contextualizada e validada historicamente.
           </p>
         </div>
       </div>

@@ -1,0 +1,302 @@
+{
+  "draftClass": 2020,
+  "correlation": 0.3650723025583982,
+  "topRadarScores": [
+    {
+      "name": "James Wiseman",
+      "position": "C",
+      "actualPick": 2,
+      "radarScore": 0.87,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+6.0\" em relação à altura)",
+        "  Produção ofensiva extremamente eficiente (PER)"
+      ],
+      "nbaAssessment": "Major bust - injuries and development issues"
+    },
+    {
+      "name": "Onyeka Okongwu",
+      "position": "C",
+      "actualPick": 6,
+      "radarScore": 0.85,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Produção ofensiva extremamente eficiente (PER)"
+      ],
+      "nbaAssessment": "Quality backup center, good defender"
+    },
+    {
+      "name": "Tyrese Haliburton",
+      "position": "PG",
+      "actualPick": 12,
+      "radarScore": 0.85,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+7.0\" em relação à altura)",
+        "  Playmaker de poucos erros e muito impacto"
+      ],
+      "nbaAssessment": "All-Star, elite playmaker and shooter"
+    },
+    {
+      "name": "Kira Lewis Jr.",
+      "position": "PG",
+      "actualPick": 13,
+      "radarScore": 0.83,
+      "draftProjection": "Loteria",
+      "flags": [],
+      "nbaAssessment": "Bench player, injury concerns"
+    },
+    {
+      "name": "Aaron Nesmith",
+      "position": "SF",
+      "actualPick": 14,
+      "radarScore": 0.82,
+      "draftProjection": "Loteria",
+      "flags": [],
+      "nbaAssessment": "Solid role player, 3&D wing"
+    },
+    {
+      "name": "Isaac Okoro",
+      "position": "SF",
+      "actualPick": 5,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Solid defender, limited offense"
+    },
+    {
+      "name": "Jalen Smith",
+      "position": "PF",
+      "actualPick": 10,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [],
+      "nbaAssessment": "Journeyman role player"
+    },
+    {
+      "name": "Saddiq Bey",
+      "position": "SF",
+      "actualPick": 19,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+6.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Quality starter, 3&D forward"
+    },
+    {
+      "name": "Immanuel Quickley",
+      "position": "PG",
+      "actualPick": 25,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Quality starter, excellent shooter"
+    },
+    {
+      "name": "Obi Toppin",
+      "position": "PF",
+      "actualPick": 8,
+      "radarScore": 0.8,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Produção ofensiva extremamente eficiente (PER)",
+        "  Idade avançada para a classe (22.3 anos)"
+      ],
+      "nbaAssessment": "Solid bench player, limited upside due to age"
+    },
+    {
+      "name": "Devin Vassell",
+      "position": "SG",
+      "actualPick": 11,
+      "radarScore": 0.79,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Quality starter, 3&D specialist"
+    },
+    {
+      "name": "Precious Achiuwa",
+      "position": "PF",
+      "actualPick": 20,
+      "radarScore": 0.78,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+6.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Versatile role player, good energy"
+    },
+    {
+      "name": "Anthony Edwards",
+      "position": "SG",
+      "actualPick": 1,
+      "radarScore": 0.77,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "All-Star, franchise cornerstone"
+    },
+    {
+      "name": "Tyrese Maxey",
+      "position": "SG",
+      "actualPick": 21,
+      "radarScore": 0.76,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "All-Star level, explosive scorer"
+    },
+    {
+      "name": "Udoka Azubuike",
+      "position": "C",
+      "actualPick": 27,
+      "radarScore": 0.76,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+7.0\" em relação à altura)",
+        "  Produção ofensiva extremamente eficiente (PER)"
+      ],
+      "nbaAssessment": "Limited NBA role due to lack of range"
+    }
+  ],
+  "majorSteals": [
+    {
+      "name": "Saddiq Bey",
+      "position": "SF",
+      "actualPick": 19,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+6.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Quality starter, 3&D forward"
+    },
+    {
+      "name": "Immanuel Quickley",
+      "position": "PG",
+      "actualPick": 25,
+      "radarScore": 0.81,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Quality starter, excellent shooter"
+    },
+    {
+      "name": "Precious Achiuwa",
+      "position": "PF",
+      "actualPick": 20,
+      "radarScore": 0.78,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+6.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "Versatile role player, good energy"
+    },
+    {
+      "name": "Tyrese Maxey",
+      "position": "SG",
+      "actualPick": 21,
+      "radarScore": 0.76,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "All-Star level, explosive scorer"
+    },
+    {
+      "name": "Udoka Azubuike",
+      "position": "C",
+      "actualPick": 27,
+      "radarScore": 0.76,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+7.0\" em relação à altura)",
+        "  Produção ofensiva extremamente eficiente (PER)"
+      ],
+      "nbaAssessment": "Limited NBA role due to lack of range"
+    }
+  ],
+  "majorBusts": [
+    {
+      "name": "Deni Avdija",
+      "position": "SF",
+      "actualPick": 9,
+      "radarScore": 0.58,
+      "draftProjection": "Início da Segunda Rodada",
+      "flags": [
+        "  Padrão de risco: Forward jovem com baixa produção"
+      ],
+      "nbaAssessment": "Developing role player, improving steadily"
+    }
+  ],
+  "allStarValidation": [
+    {
+      "name": "Tyrese Haliburton",
+      "position": "PG",
+      "actualPick": 12,
+      "radarScore": 0.85,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+7.0\" em relação à altura)",
+        "  Playmaker de poucos erros e muito impacto"
+      ],
+      "nbaAssessment": "All-Star, elite playmaker and shooter"
+    },
+    {
+      "name": "Anthony Edwards",
+      "position": "SG",
+      "actualPick": 1,
+      "radarScore": 0.77,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "All-Star, franchise cornerstone"
+    },
+    {
+      "name": "Tyrese Maxey",
+      "position": "SG",
+      "actualPick": 21,
+      "radarScore": 0.76,
+      "draftProjection": "Loteria",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)"
+      ],
+      "nbaAssessment": "All-Star level, explosive scorer"
+    },
+    {
+      "name": "Desmond Bane",
+      "position": "SG",
+      "actualPick": 30,
+      "radarScore": 0.75,
+      "draftProjection": "Meio da Primeira Rodada",
+      "flags": [
+        "  Envergadura de elite (+5.0\" em relação à altura)",
+        "  Alto volume de rebotes para guard/ala",
+        "  Idade avançada para a classe (22.1 anos)"
+      ],
+      "nbaAssessment": "All-Star level, elite 3&D player"
+    },
+    {
+      "name": "LaMelo Ball",
+      "position": "PG",
+      "actualPick": 3,
+      "radarScore": 0.73,
+      "draftProjection": "Meio da Primeira Rodada",
+      "flags": [
+        "  Alto volume de rebotes para guard/ala"
+      ],
+      "nbaAssessment": "ROY 2021, All-Star, elite playmaker"
+    }
+  ],
+  "analysisDate": "2025-08-18T15:25:09.849Z",
+  "note": "Análise robusta - classe com 4-5 anos de carreira NBA estabelecida"
+}

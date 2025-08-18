@@ -1,0 +1,1767 @@
+{
+  "analysisDate": "2025-08-18T15:38:05.180Z",
+  "algorithmVersion": "v2.0 - With Improvements",
+  "improvements": [
+    "Athletic Upside Bonus (+3%)",
+    "Confidence-Weighted Scoring (0.85x-0.95x)",
+    "International Prospect Adjustment (+2%)",
+    "Enhanced Shooter Detection",
+    "Updated League Tiers"
+  ],
+  "classResults": {
+    "2018": {
+      "prospects": [
+        {
+          "name": "Luka Dončić",
+          "position": "PG",
+          "actualPick": 3,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Deandre Ayton",
+          "position": "C",
+          "actualPick": 1,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.5\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Mikal Bridges",
+          "position": "SF",
+          "actualPick": 10,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Motor defensivo",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Shake Milton",
+          "position": "SG",
+          "actualPick": 54,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.8\" em relação à altura)",
+            "  Playmaker de poucos erros e muito impacto",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Wendell Carter Jr.",
+          "position": "C",
+          "actualPick": 7,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.5\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Michael Porter Jr.",
+          "position": "SF",
+          "actualPick": 14,
+          "radarScore": 0.76,
+          "confidenceScore": 0.2,
+          "draftProjection": "Primeira Rodada (Alto Risco)",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "Amostra de jogos muito pequena (3 jogos) - Risco extremo."
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Aaron Holiday",
+          "position": "PG",
+          "actualPick": 23,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Collin Sexton",
+          "position": "PG",
+          "actualPick": 8,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.3\" em relação à altura)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Josh Okogie",
+          "position": "SG",
+          "actualPick": 20,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Motor defensivo",
+            "  Alto volume de rebotes para guard/ala",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Mohamed Bamba",
+          "position": "C",
+          "actualPick": 6,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+10.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Shai Gilgeous-Alexander",
+          "position": "PG",
+          "actualPick": 11,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.5\" em relação à altura)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Zhaire Smith",
+          "position": "SG",
+          "actualPick": 16,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.8\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Anfernee Simons",
+          "position": "SG",
+          "actualPick": 24,
+          "radarScore": 0.73,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Melvin Frazier",
+          "position": "SF",
+          "actualPick": 35,
+          "radarScore": 0.73,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+7.8\" em relação à altura)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Ray Spalding",
+          "position": "PF",
+          "actualPick": 56,
+          "radarScore": 0.73,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.5\" em relação à altura)",
+            "  Motor defensivo"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Miles Bridges",
+          "position": "SF",
+          "actualPick": 12,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Omari Spellman",
+          "position": "PF",
+          "actualPick": 30,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jalen Brunson",
+          "position": "PG",
+          "actualPick": 33,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Playmaker de poucos erros e muito impacto",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Keita Bates-Diop",
+          "position": "SF",
+          "actualPick": 48,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Alto volume de rebotes para guard/ala",
+            "  Alto volume de roubos/tocos para guard/ala",
+            "  Idade avançada para a classe (22 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Trae Young",
+          "position": "PG",
+          "actualPick": 5,
+          "radarScore": 0.71,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jerome Robinson",
+          "position": "SG",
+          "actualPick": 13,
+          "radarScore": 0.71,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Robert Williams III",
+          "position": "C",
+          "actualPick": 27,
+          "radarScore": 0.71,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+9.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Lonnie Walker IV",
+          "position": "SG",
+          "actualPick": 18,
+          "radarScore": 0.7,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Khyri Thomas",
+          "position": "SG",
+          "actualPick": 38,
+          "radarScore": 0.7,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.8\" em relação à altura)",
+            "  Idade avançada para a classe (22.1 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Marvin Bagley III",
+          "position": "PF",
+          "actualPick": 2,
+          "radarScore": 0.69,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Chandler Hutchison",
+          "position": "SF",
+          "actualPick": 22,
+          "radarScore": 0.69,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Idade avançada para a classe (22 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jaren Jackson Jr.",
+          "position": "PF",
+          "actualPick": 4,
+          "radarScore": 0.68,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.3\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Donte DiVincenzo",
+          "position": "SG",
+          "actualPick": 17,
+          "radarScore": 0.68,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Gary Trent Jr.",
+          "position": "SG",
+          "actualPick": 37,
+          "radarScore": 0.68,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Moritz Wagner",
+          "position": "C",
+          "actualPick": 25,
+          "radarScore": 0.67,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jacob Evans",
+          "position": "SG",
+          "actualPick": 28,
+          "radarScore": 0.67,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Rawle Alkins",
+          "position": "SG",
+          "actualPick": 33,
+          "radarScore": 0.67,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Grayson Allen",
+          "position": "SG",
+          "actualPick": 21,
+          "radarScore": 0.66,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Idade avançada para a classe (22.6 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jevon Carter",
+          "position": "PG",
+          "actualPick": 32,
+          "radarScore": 0.66,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Playmaker de poucos erros e muito impacto",
+            "  Alto volume de roubos/tocos para guard/ala",
+            "  Idade avançada para a classe (22.7 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Kevin Huerter",
+          "position": "SG",
+          "actualPick": 19,
+          "radarScore": 0.64,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Devonte' Graham",
+          "position": "PG",
+          "actualPick": 34,
+          "radarScore": 0.63,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Playmaker de poucos erros e muito impacto",
+            "  Idade avançada para a classe (23.3 anos)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Troy Brown Jr.",
+          "position": "SF",
+          "actualPick": 15,
+          "radarScore": 0.61,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Padrão de risco: Forward jovem com baixa produção"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Kevin Knox",
+          "position": "SF",
+          "actualPick": 9,
+          "radarScore": 0.59,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Padrão de risco: Forward jovem com baixa produção",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Mitchell Robinson",
+          "position": "C",
+          "actualPick": 36,
+          "radarScore": 0.59,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Motor defensivo"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Elie Okobo",
+          "position": "PG",
+          "actualPick": 31,
+          "radarScore": 0.58,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Kostas Antetokounmpo",
+          "position": "PF",
+          "actualPick": 60,
+          "radarScore": 0.56,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Isaac Bonga",
+          "position": "SF",
+          "actualPick": 39,
+          "radarScore": 0.46,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Segunda Rodada",
+          "flags": [
+            "  Padrão de risco: Forward jovem com baixa produção"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Rodions Kurucs",
+          "position": "SF",
+          "actualPick": 40,
+          "radarScore": 0.31,
+          "confidenceScore": 1,
+          "draftProjection": "Precisa de Desenvolvimento",
+          "flags": [
+            "  Potencial físico limitado (envergadura curta)"
+          ],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "correlation": 0.4258532165508909,
+      "topProspects": [
+        {
+          "name": "Luka Dončić",
+          "position": "PG",
+          "actualPick": 3,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Deandre Ayton",
+          "position": "C",
+          "actualPick": 1,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.5\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Mikal Bridges",
+          "position": "SF",
+          "actualPick": 10,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Motor defensivo",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Shake Milton",
+          "position": "SG",
+          "actualPick": 54,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.8\" em relação à altura)",
+            "  Playmaker de poucos erros e muito impacto",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Wendell Carter Jr.",
+          "position": "C",
+          "actualPick": 7,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.5\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "steals": [
+        {
+          "name": "Shake Milton",
+          "position": "SG",
+          "actualPick": 54,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.8\" em relação à altura)",
+            "  Playmaker de poucos erros e muito impacto",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Aaron Holiday",
+          "position": "PG",
+          "actualPick": 23,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "athleticBonuses": 2,
+      "confidencePenalties": 1,
+      "internationalAdjustments": 1,
+      "eliteShooters": 23,
+      "improvements": [
+        {
+          "name": "Deandre Ayton",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Marvin Bagley III",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Luka Dončić",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Trae Young",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Collin Sexton",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Kevin Knox",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Mikal Bridges",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Shai Gilgeous-Alexander",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Miles Bridges",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Jerome Robinson",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Michael Porter Jr.",
+          "improvement": "Confidence penalty applied"
+        },
+        {
+          "name": "Kevin Huerter",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Josh Okogie",
+          "improvement": "Athletic upside bonus applied"
+        },
+        {
+          "name": "Josh Okogie",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Grayson Allen",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Chandler Hutchison",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Aaron Holiday",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Anfernee Simons",
+          "improvement": "Athletic upside bonus applied"
+        },
+        {
+          "name": "Anfernee Simons",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Moritz Wagner",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Jalen Brunson",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Gary Trent Jr.",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Keita Bates-Diop",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Khyri Thomas",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Jevon Carter",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Melvin Frazier",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Shake Milton",
+          "improvement": "Elite shooter profile detected"
+        }
+      ]
+    },
+    "2020": {
+      "prospects": [
+        {
+          "name": "James Wiseman",
+          "position": "C",
+          "actualPick": 2,
+          "radarScore": 0.87,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "Major bust - injuries and development issues"
+        },
+        {
+          "name": "Onyeka Okongwu",
+          "position": "C",
+          "actualPick": 6,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Quality backup center, good defender"
+        },
+        {
+          "name": "Tyrese Haliburton",
+          "position": "PG",
+          "actualPick": 12,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Playmaker de poucos erros e muito impacto",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "All-Star, elite playmaker and shooter"
+        },
+        {
+          "name": "Kira Lewis Jr.",
+          "position": "PG",
+          "actualPick": 13,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Bench player, injury concerns"
+        },
+        {
+          "name": "Aaron Nesmith",
+          "position": "SF",
+          "actualPick": 14,
+          "radarScore": 0.82,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Solid role player, 3&D wing"
+        },
+        {
+          "name": "Isaac Okoro",
+          "position": "SF",
+          "actualPick": 5,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Solid defender, limited offense"
+        },
+        {
+          "name": "Jalen Smith",
+          "position": "PF",
+          "actualPick": 10,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "Journeyman role player"
+        },
+        {
+          "name": "Saddiq Bey",
+          "position": "SF",
+          "actualPick": 19,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Quality starter, 3&D forward"
+        },
+        {
+          "name": "Immanuel Quickley",
+          "position": "PG",
+          "actualPick": 25,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Quality starter, excellent shooter"
+        },
+        {
+          "name": "Obi Toppin",
+          "position": "PF",
+          "actualPick": 8,
+          "radarScore": 0.8,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Idade avançada para a classe (22.3 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Solid bench player, limited upside due to age"
+        },
+        {
+          "name": "LaMelo Ball",
+          "position": "PG",
+          "actualPick": 3,
+          "radarScore": 0.79,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala"
+          ],
+          "nbaAssessment": "ROY 2021, All-Star, elite playmaker"
+        },
+        {
+          "name": "Devin Vassell",
+          "position": "SG",
+          "actualPick": 11,
+          "radarScore": 0.79,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Quality starter, 3&D specialist"
+        },
+        {
+          "name": "Precious Achiuwa",
+          "position": "PF",
+          "actualPick": 20,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Versatile role player, good energy"
+        },
+        {
+          "name": "Anthony Edwards",
+          "position": "SG",
+          "actualPick": 1,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "All-Star, franchise cornerstone"
+        },
+        {
+          "name": "Tyrese Maxey",
+          "position": "SG",
+          "actualPick": 21,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "All-Star level, explosive scorer"
+        },
+        {
+          "name": "Udoka Azubuike",
+          "position": "C",
+          "actualPick": 27,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "Limited NBA role due to lack of range"
+        },
+        {
+          "name": "Isaiah Stewart",
+          "position": "C",
+          "actualPick": 16,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+8.0\" em relação à altura)",
+            "  Versatile scoring threat",
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "Solid starting center, good rebounder"
+        },
+        {
+          "name": "Zeke Nnaji",
+          "position": "PF",
+          "actualPick": 22,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Solid bench big man"
+        },
+        {
+          "name": "Desmond Bane",
+          "position": "SG",
+          "actualPick": 30,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)",
+            "  Alto volume de rebotes para guard/ala",
+            "  Idade avançada para a classe (22.1 anos)",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "All-Star level, elite 3&D player"
+        },
+        {
+          "name": "Cole Anthony",
+          "position": "PG",
+          "actualPick": 15,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "Starting caliber guard, inconsistent"
+        },
+        {
+          "name": "Payton Pritchard",
+          "position": "PG",
+          "actualPick": 26,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Idade avançada para a classe (22.6 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Solid backup guard, good shooter"
+        },
+        {
+          "name": "Aleksej Pokusevski",
+          "position": "PF",
+          "actualPick": 17,
+          "radarScore": 0.73,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "Developmental project, limited impact"
+        },
+        {
+          "name": "Killian Hayes",
+          "position": "PG",
+          "actualPick": 7,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "Major bust - poor shooting and decision making"
+        },
+        {
+          "name": "Patrick Williams",
+          "position": "PF",
+          "actualPick": 4,
+          "radarScore": 0.7,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "Solid role player, inconsistent development"
+        },
+        {
+          "name": "Malachi Flynn",
+          "position": "PG",
+          "actualPick": 29,
+          "radarScore": 0.69,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Idade avançada para a classe (22.2 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Backup guard, limited ceiling"
+        },
+        {
+          "name": "RJ Hampton",
+          "position": "SG",
+          "actualPick": 24,
+          "radarScore": 0.68,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "Bench player, limited development"
+        },
+        {
+          "name": "Josh Green",
+          "position": "SG",
+          "actualPick": 18,
+          "radarScore": 0.65,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "Role player, defensive specialist"
+        },
+        {
+          "name": "Jaden McDaniels",
+          "position": "SF",
+          "actualPick": 28,
+          "radarScore": 0.64,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "Elite defender, starting caliber"
+        },
+        {
+          "name": "Leandro Bolmaro",
+          "position": "SG",
+          "actualPick": 23,
+          "radarScore": 0.59,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [],
+          "nbaAssessment": "Limited NBA impact"
+        },
+        {
+          "name": "Deni Avdija",
+          "position": "SF",
+          "actualPick": 9,
+          "radarScore": 0.58,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Padrão de risco: Forward jovem com baixa produção"
+          ],
+          "nbaAssessment": "Developing role player, improving steadily"
+        }
+      ],
+      "correlation": 0.4353726362625139,
+      "topProspects": [
+        {
+          "name": "James Wiseman",
+          "position": "C",
+          "actualPick": 2,
+          "radarScore": 0.87,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "Major bust - injuries and development issues"
+        },
+        {
+          "name": "Onyeka Okongwu",
+          "position": "C",
+          "actualPick": 6,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Quality backup center, good defender"
+        },
+        {
+          "name": "Tyrese Haliburton",
+          "position": "PG",
+          "actualPick": 12,
+          "radarScore": 0.85,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Playmaker de poucos erros e muito impacto",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "All-Star, elite playmaker and shooter"
+        },
+        {
+          "name": "Kira Lewis Jr.",
+          "position": "PG",
+          "actualPick": 13,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Bench player, injury concerns"
+        },
+        {
+          "name": "Aaron Nesmith",
+          "position": "SF",
+          "actualPick": 14,
+          "radarScore": 0.82,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Solid role player, 3&D wing"
+        }
+      ],
+      "steals": [
+        {
+          "name": "Saddiq Bey",
+          "position": "SF",
+          "actualPick": 19,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Quality starter, 3&D forward"
+        },
+        {
+          "name": "Immanuel Quickley",
+          "position": "PG",
+          "actualPick": 25,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "Quality starter, excellent shooter"
+        },
+        {
+          "name": "Precious Achiuwa",
+          "position": "PF",
+          "actualPick": 20,
+          "radarScore": 0.78,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "Versatile role player, good energy"
+        },
+        {
+          "name": "Tyrese Maxey",
+          "position": "SG",
+          "actualPick": 21,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "All-Star level, explosive scorer"
+        },
+        {
+          "name": "Udoka Azubuike",
+          "position": "C",
+          "actualPick": 27,
+          "radarScore": 0.76,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "Limited NBA role due to lack of range"
+        }
+      ],
+      "athleticBonuses": 1,
+      "confidencePenalties": 0,
+      "internationalAdjustments": 6,
+      "eliteShooters": 11,
+      "improvements": [
+        {
+          "name": "Anthony Edwards",
+          "improvement": "Athletic upside bonus applied"
+        },
+        {
+          "name": "LaMelo Ball",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Onyeka Okongwu",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Killian Hayes",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Obi Toppin",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Deni Avdija",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Tyrese Haliburton",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Kira Lewis Jr.",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Aaron Nesmith",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Isaiah Stewart",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Aleksej Pokusevski",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Zeke Nnaji",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Leandro Bolmaro",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "RJ Hampton",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Immanuel Quickley",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Payton Pritchard",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Malachi Flynn",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Desmond Bane",
+          "improvement": "Elite shooter profile detected"
+        }
+      ]
+    },
+    "2023": {
+      "prospects": [
+        {
+          "name": "Victor Wembanyama",
+          "position": "C",
+          "actualPick": 1,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+8.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Scoot Henderson",
+          "position": "PG",
+          "actualPick": 3,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Taylor Hendricks",
+          "position": "PF",
+          "actualPick": 9,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Cason Wallace",
+          "position": "PG",
+          "actualPick": 10,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Brandin Podziemski",
+          "position": "SG",
+          "actualPick": 19,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Brandon Miller",
+          "position": "SF",
+          "actualPick": 2,
+          "radarScore": 0.8,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jarace Walker",
+          "position": "PF",
+          "actualPick": 8,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jalen Hood-Schifino",
+          "position": "PG",
+          "actualPick": 17,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Cam Whitmore",
+          "position": "SF",
+          "actualPick": 20,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Ausar Thompson",
+          "position": "SF",
+          "actualPick": 5,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Motor defensivo",
+            "  Alto volume de rebotes para guard/ala",
+            "  Alto volume de roubos/tocos para guard/ala"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Anthony Black",
+          "position": "PG",
+          "actualPick": 6,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Motor defensivo"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Bilal Coulibaly",
+          "position": "SF",
+          "actualPick": 7,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+7.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Dereck Lively II",
+          "position": "C",
+          "actualPick": 12,
+          "radarScore": 0.75,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)",
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Brice Sensabaugh",
+          "position": "SF",
+          "actualPick": 28,
+          "radarScore": 0.74,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Gradey Dick",
+          "position": "SG",
+          "actualPick": 13,
+          "radarScore": 0.72,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Amen Thompson",
+          "position": "PG",
+          "actualPick": 4,
+          "radarScore": 0.71,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Motor defensivo",
+            "  Alto volume de rebotes para guard/ala"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Trayce Jackson-Davis",
+          "position": "C",
+          "actualPick": 57,
+          "radarScore": 0.71,
+          "confidenceScore": 1,
+          "draftProjection": "Meio da Primeira Rodada",
+          "flags": [
+            "  Envergadura de elite (+5.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)",
+            "  Idade avançada para a classe (23.1 anos)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Keyonte George",
+          "position": "PG",
+          "actualPick": 16,
+          "radarScore": 0.68,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [
+            "  Baixa taxa de assistências para armador principal"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Nick Smith Jr.",
+          "position": "SG",
+          "actualPick": 27,
+          "radarScore": 0.65,
+          "confidenceScore": 1,
+          "draftProjection": "Final da Primeira Rodada",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "GG Jackson",
+          "position": "PF",
+          "actualPick": 45,
+          "radarScore": 0.54,
+          "confidenceScore": 1,
+          "draftProjection": "Início da Segunda Rodada",
+          "flags": [
+            "  Padrão de risco: Forward jovem com baixa produção",
+            "  Baixa taxa de rebotes para pivô/ala-pivô"
+          ],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "correlation": 0.5774436090225563,
+      "topProspects": [
+        {
+          "name": "Victor Wembanyama",
+          "position": "C",
+          "actualPick": 1,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+8.0\" em relação à altura)",
+            "  Produção ofensiva extremamente eficiente (PER)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Scoot Henderson",
+          "position": "PG",
+          "actualPick": 3,
+          "radarScore": 0.83,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Envergadura de elite (+6.0\" em relação à altura)"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Taylor Hendricks",
+          "position": "PF",
+          "actualPick": 9,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Cason Wallace",
+          "position": "PG",
+          "actualPick": 10,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Brandin Podziemski",
+          "position": "SG",
+          "actualPick": 19,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "steals": [
+        {
+          "name": "Brandin Podziemski",
+          "position": "SG",
+          "actualPick": 19,
+          "radarScore": 0.81,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [
+            "  Alto volume de rebotes para guard/ala",
+            "  Elite shooter profile (3PT% + FT% combination)",
+            "  Versatile scoring threat"
+          ],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Jalen Hood-Schifino",
+          "position": "PG",
+          "actualPick": 17,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        },
+        {
+          "name": "Cam Whitmore",
+          "position": "SF",
+          "actualPick": 20,
+          "radarScore": 0.77,
+          "confidenceScore": 1,
+          "draftProjection": "Loteria",
+          "flags": [],
+          "nbaAssessment": "N/A"
+        }
+      ],
+      "athleticBonuses": 0,
+      "confidencePenalties": 0,
+      "internationalAdjustments": 2,
+      "eliteShooters": 6,
+      "improvements": [
+        {
+          "name": "Victor Wembanyama",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Brandon Miller",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Bilal Coulibaly",
+          "improvement": "International adjustment applied"
+        },
+        {
+          "name": "Taylor Hendricks",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Gradey Dick",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Brandin Podziemski",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Brice Sensabaugh",
+          "improvement": "Elite shooter profile detected"
+        },
+        {
+          "name": "Trayce Jackson-Davis",
+          "improvement": "Elite shooter profile detected"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "totalProspects": 93,
+    "averageCorrelation": 0.4795564872786537,
+    "totalSteals": 10,
+    "improvementsCounted": {
+      "athleticBonuses": 3,
+      "confidencePenalties": 1,
+      "internationalAdjustments": 9,
+      "eliteShooters": 40
+    }
+  }
+}
