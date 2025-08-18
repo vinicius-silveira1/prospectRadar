@@ -130,7 +130,7 @@ const simulateUserUpgrade = async () => {
   
   try {
     // Simular chamada para atualizar status do usuário
-    const { supabase } = await import('./supabaseClient');
+    const { supabase } = await import('../lib/supabaseClient');
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {

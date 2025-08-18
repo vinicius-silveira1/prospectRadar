@@ -50,9 +50,9 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
 
   const getGridLayout = () => {
     switch (prospects.length) {
-      case 2: return 'grid-cols-1 md:grid-cols-3';
-      case 3: return 'grid-cols-3';
-      case 4: return 'grid-cols-2 md:grid-cols-4';
+      case 2: return 'grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4';
+      case 3: return 'grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4';
+      case 4: return 'grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-4';
       default: return 'grid-cols-1';
     }
   };
@@ -69,7 +69,7 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
 
   return (
     <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border shadow-lg overflow-hidden">
-      <div className="p-4 md:p-6 bg-slate-50 dark:bg-super-dark-primary border-b border-slate-200 dark:border-super-dark-border">
+      <div className="p-3 sm:p-4 md:p-6 bg-slate-50 dark:bg-super-dark-primary border-b border-slate-200 dark:border-super-dark-border">
         <div className="flex items-center justify-between mb-4">
           <h4 className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary flex items-center">
             <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
@@ -110,13 +110,13 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
         </ResponsiveContainer>
       </div>
 
-      <div className={`bg-gradient-to-r ${prospects.length === 2 ? 'from-blue-50 via-gray-50 to-green-50' : 'from-blue-50 via-purple-50 to-green-50'} dark:from-super-dark-secondary dark:via-super-dark-primary dark:to-super-dark-secondary p-4 md:p-6`}>
-        <div className={`grid ${getGridLayout()} gap-4 items-center`}>
+      <div className={`bg-gradient-to-r ${prospects.length === 2 ? 'from-blue-50 via-gray-50 to-green-50' : 'from-blue-50 via-purple-50 to-green-50'} dark:from-super-dark-secondary dark:via-super-dark-primary dark:to-super-dark-secondary p-3 sm:p-4 md:p-6`}>
+        <div className={`grid ${getGridLayout()} items-center`}>
           {prospects.map((prospect, index) => (
             <React.Fragment key={prospect.id}>
               {prospects.length === 2 && index === 1 && (
-                <div className="text-center hidden md:block">
-                  <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-bold text-sm md:text-lg shadow-lg">
+                <div className="text-center hidden sm:block">
+                  <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-3 sm:px-4 md:px-6 py-1 sm:py-2 md:py-3 rounded-full font-bold text-xs sm:text-sm md:text-lg shadow-lg">
                     VS
                   </div>
                 </div>
@@ -161,7 +161,7 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
               // Layout para 2 jogadores (P1 - Stat - P2)
               if (prospects.length === 2) {
                 return (
-                  <div key={key} className="grid grid-cols-3 items-stretch gap-4 p-2">
+                  <div key={key} className="grid grid-cols-1 sm:grid-cols-3 items-stretch gap-2 sm:gap-4 p-2">
                     {/* Player 1 Stat */}
                     <div className={`text-center text-xl font-bold p-3 rounded-lg flex items-center justify-center ${
                       winners[0].isWinner

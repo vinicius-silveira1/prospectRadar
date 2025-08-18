@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, ChevronRight, Heart, AlertTriangle, Lock, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, Heart, AlertTriangle, Lock, X, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
 import useWatchlist from '../hooks/useWatchlist.js';
@@ -8,69 +8,32 @@ import DashboardProspectCard from '@/components/DashboardProspectCard.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 import { supabase } from '@/lib/supabaseClient.js';
+import { useResponsive } from '@/hooks/useResponsive.js';
+import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
+import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [brazilianProspects, setBrazilianProspects] = useState([]);
-  const [loadingBrazilian, setLoadingBrazilian] = useState(true);
   const { user } = useAuth();
-  
-  // Only show all draft classes for authenticated Scout users
-  const showAllDraftClasses = user?.subscription_tier?.toLowerCase() === 'scout';
+  const { isMobile, isTablet, responsiveColumns } = useResponsive();
   
   const {
     prospects: allProspects,
     loading,
     error,
-    isLoaded,
-    refresh // Adicionado o método refresh
-  } = useProspects({ showAllDraftClasses }); // Filter prospects based on user subscription
+    isLoaded
+  } = useProspects(); // Carrega todos os prospects
 
   const { watchlist, toggleWatchlist } = useWatchlist();
 
-  // Buscar prospects brasileiros diretamente do banco, independente do filtro de draft class
-  useEffect(() => {
-    const fetchBrazilianProspects = async () => {
-      try {
-        setLoadingBrazilian(true);
-        setBrazilianProspects([]); // Limpar estado primeiro
-        
-        // Adicionar timestamp para quebrar cache
-        const timestamp = new Date().getTime();
-        
-        let query = supabase
-          .from('prospects')
-          .select('*')
-          .eq('nationality', '🇧🇷')
-          .order('ranking', { ascending: true });
-
-        // Para usuários não-Scout, mostrar apenas 2026. Para Scout, mostrar todos.
-        if (!showAllDraftClasses) {
-          query = query.eq('draft_class', 2026);
-        }
-
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        
-        // Filtrar explicitamente Winicius Silva como backup
-        const filteredData = (data || []).filter(p => p.name !== 'Winicius Silva Braga');
-        
-        console.log(`🇧🇷 Prospects brasileiros carregados (${timestamp}):`, filteredData?.map(p => p.name));
-        setBrazilianProspects(filteredData);
-      } catch (error) {
-        console.error('Erro ao buscar prospects brasileiros:', error);
-        setBrazilianProspects([]);
-      } finally {
-        setLoadingBrazilian(false);
-      }
-    };
-
-    fetchBrazilianProspects();
-  }, [showAllDraftClasses]);
+  // Derivar prospects brasileiros dos allProspects
+  const brazilianProspects = useMemo(() => {
+    if (!allProspects) return [];
+    return allProspects.filter(p => p.nationality === '🇧🇷');
+  }, [allProspects]);
 
   // Função para tratar o toggle da watchlist com erro
   const handleToggleWatchlist = async (prospectId) => {
@@ -85,16 +48,11 @@ const Dashboard = () => {
     }
   };
 
-  // Filtra os prospects do NBA Draft para as seções principais
-  const nbaProspects = useMemo(() => {
-    if (!allProspects) return [];
-    return allProspects.filter(p => p.scope === 'NBA_DRAFT');
-  }, [allProspects]);
-
+  // Top prospects para a seção principal (6 melhores ranqueados)
   const topProspects = useMemo(() => {
-    if (!nbaProspects) return [];
-    return nbaProspects.slice(0, 6); // A lista já vem ordenada por ranking do hook.
-  }, [nbaProspects]);
+    if (!allProspects) return [];
+    return allProspects.slice(0, 6); // A lista já vem ordenada por ranking do hook.
+  }, [allProspects]);
 
   // Estatísticas baseadas nos dados REAIS
   const dashboardStats = [
@@ -112,7 +70,7 @@ const Dashboard = () => {
     },
     { 
       label: 'Top 10 Prospects', 
-      value: nbaProspects.filter(p => p.ranking <= 10).length, 
+      value: allProspects.filter(p => p.ranking <= 10).length, 
       icon: Trophy, 
       color: 'text-purple-600' 
     }
@@ -127,18 +85,16 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Banner de Boas-Vindas */}
-      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-8 mb-6 overflow-hidden animate-fade-in">
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-4 md:mb-6 overflow-hidden animate-fade-in">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="relative z-10 flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3 leading-tight">
-              <span className="flex items-center flex-wrap gap-1">
-                Bem-vindo ao <span className="text-yellow-300">prospectRadar!</span>
-              </span>
-            </h1>
-            <p className="text-lg text-blue-100 max-w-2xl">
+                          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white">
+                👋 Bem-vindo ao <span className="text-yellow-300">ProspectRadar</span>
+              </h1>
+            <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-2xl leading-relaxed">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
@@ -147,41 +103,43 @@ const Dashboard = () => {
 
       {/* Banner do Mock Draft */}
       <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-black dark:to-black rounded-lg shadow-lg overflow-hidden">
-        <div className="px-8 py-6 text-white">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 text-white">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-3">
-                <Shuffle className="h-8 w-8 text-yellow-300" />
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-super-dark-text-primary">🏀 <span className="text-yellow-300">Mock Draft</span>&nbsp;2026</h2>
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
+                <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-300 flex-shrink-0" />
+                <h2 className="text-lg sm:text-lg md:text-xl lg:text-2xl font-bold text-white">
+                  🏀 <span className="text-yellow-300">Mock Draft</span> 2026
+                </h2>
               </div>
-              <p className="text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
-                Simule seu próprio draft com {nbaProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
+              <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
+                Simule seu próprio draft com {allProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
               </p>
               <div className="hidden md:flex items-center space-x-6 text-sm leading-normal text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>{nbaProspects.length} <span className="font-semibold">prospects</span> da classe 2025</span>
+                  <span>{allProspects.length} <span className="font-semibold">prospects</span> disponíveis</span>
                 </div>
-                
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <Link
-                  to="/draft"
-                  className="inline-flex items-center px-6 py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors active:scale-95 shadow-lg"
+                  to="/mock-draft"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors active:scale-95 shadow-lg text-sm sm:text-base"
                 >
-                  <Shuffle className="h-5 w-5 mr-2" />
+                  <Shuffle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Começar Mock Draft
-                  <ChevronRight className="h-5 w-5 ml-2" />
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                 </Link>
-                
               </div>
             </div>
-            <div className="hidden lg:block">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-yellow-300">{nbaProspects.length}</div>
-                <div className="text-sm text-blue-200"><span className="font-semibold">Prospects</span> Verificados</div>
-                <div className="mt-2 text-xs text-blue-300">
-                  Classe 2025 • Draft 2026
+            <div className="lg:block">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 text-center">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-yellow-300">
+                  {allProspects.length}
+                </div>
+                <div className="text-xs sm:text-sm text-blue-200"><span className="font-semibold">Prospects</span> Verificados</div>
+                <div className="mt-1 sm:mt-2 text-xs text-blue-300">
+                  Múltiplas Classes • Atualizado
                 </div>
               </div>
             </div>
@@ -192,31 +150,28 @@ const Dashboard = () => {
      
 
       {/* Prospects Brasileiros */}
-      {!loadingBrazilian && brazilianProspects.length > 0 && (
+      {brazilianProspects.length > 0 && (
         <div className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
-              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects Brasileiros</span>
+              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects</span>&nbsp;Brasileiros
             </h2>
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => window.location.reload()} 
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-              >
-                <RefreshCw className="h-3 w-3" />
-                Refresh
-              </button>
-              <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
+              <span className="text-xs sm:text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap">
                 {brazilianProspects.length} <span className="font-semibold">prospects</span>
               </span>
             </div>
           </div>
-          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-6 -mt-2">
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-4 md:mb-6 -mt-2">
             Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {brazilianProspects.slice(0, 8).map((prospect) => (
+          <ResponsiveGrid
+            minItemWidth="280px"
+            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+            className="gap-4 md:gap-6"
+          >
+            {brazilianProspects.slice(0, isMobile ? 4 : 8).map((prospect) => (
               <DashboardProspectCard
                 key={prospect.id}
                 prospect={prospect}
@@ -224,7 +179,7 @@ const Dashboard = () => {
                 onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
               />
             ))}
-          </div>
+          </ResponsiveGrid>
         </div>
       )}
 
@@ -236,20 +191,24 @@ const Dashboard = () => {
 
       {/* Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
-        <div className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
-              <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+        <div className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 md:mb-6 gap-3">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
+              <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 mr-2" />
               <span className="flex items-center flex-wrap gap-1">
                 🏆 Top <span className="text-brand-orange dark:text-orange-400">Prospects</span>
               </span>
             </h2>
-            <span className="text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded">
               Os melhores da classe
             </span>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <ResponsiveGrid
+            minItemWidth="280px"
+            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+            className="gap-4 md:gap-6"
+          >
             {topProspects.map((prospect) => (
               <DashboardProspectCard
                 key={prospect.id}
@@ -258,7 +217,7 @@ const Dashboard = () => {
                 onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
               />
             ))}
-          </div>
+          </ResponsiveGrid>
         </div>
       )}
 

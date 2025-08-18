@@ -1,5 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js';
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { createMockCheckoutSession, isMockMode } from './mockStripe';
 
 // Initialize Stripe (only if keys are available)

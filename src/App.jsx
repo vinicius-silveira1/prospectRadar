@@ -27,7 +27,7 @@ function App() {
           <Route path="prospects" element={<Prospects />} />
           <Route path="prospects/:id" element={<ProspectDetail />} />
           <Route path="compare" element={<Compare />} />
-          <Route path="draft" element={<MockDraft />} />
+          <Route path="mock-draft" element={<MockDraft />} />
           <Route path="watchlist" element={<Watchlist />} />
           <Route path="trending" element={<Trending />} />
           <Route path="draft-history" element={<DraftHistory />} />

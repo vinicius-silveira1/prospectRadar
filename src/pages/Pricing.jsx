@@ -70,14 +70,14 @@ const Pricing = () => {
   return (
     <div className="space-y-8">
       {/* Banner Principal */}
-      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-8 mb-6 overflow-hidden animate-fade-in">
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-6 overflow-hidden animate-fade-in">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold mb-3 leading-tight">
-              <span className="text-yellow-300">🏀 Planos ProspectRadar</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 sm:mb-3 leading-tight">
+              <span className="block sm:inline">🏀 Planos</span> <span className="text-yellow-300">prospect</span>Radar
             </h1>
-            <p className="text-lg text-blue-100 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
               Do fã casual ao analista dedicado, temos o plano perfeito para sua análise de prospects. 
               Escolha o que melhor se adapta às suas necessidades.
             </p>
@@ -107,29 +107,29 @@ const Pricing = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mt-12 space-y-8 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-x-8">
         {/* Plano Free */}
-        <div className="relative p-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm flex flex-col">
+        <div className="relative p-6 sm:p-8 bg-white dark:bg-super-dark-secondary border border-slate-200 dark:border-super-dark-border rounded-2xl shadow-lg flex flex-col hover:shadow-xl transition-all duration-300">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700">
-              <Star className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+            <div className="p-3 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-super-dark-border dark:to-super-dark-primary shadow-md">
+              <Star className="h-6 w-6 text-slate-600 dark:text-super-dark-text-secondary" />
             </div>
             <div className="ml-4">
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">Free</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Ideal para iniciantes</p>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-super-dark-text-primary">Free</h3>
+              <p className="text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary">Ideal para iniciantes</p>
             </div>
           </div>
-          <p className="mt-4 text-gray-500 dark:text-gray-400">Para começar a explorar o universo dos prospects.</p>
+          <p className="mt-4 text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">Para começar a explorar o universo dos prospects.</p>
           <div className="mt-6">
-            <p className="text-5xl font-extrabold text-gray-900 dark:text-white">R$0</p>
-            <p className="text-gray-500 dark:text-gray-400">Para sempre</p>
+            <p className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-super-dark-text-primary">R$0</p>
+            <p className="text-slate-500 dark:text-super-dark-text-secondary font-medium">Para sempre</p>
           </div>
 
           <ul className="mt-8 space-y-4">
             {freeFeatures.map((feature) => (
               <li key={feature} className="flex items-start">
                 <div className="flex-shrink-0">
-                  <Check className="h-6 w-6 text-green-500" />
+                  <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 </div>
-                <p className="ml-3 text-gray-700 dark:text-gray-300">{feature}</p>
+                <p className="ml-3 text-slate-700 dark:text-super-dark-text-secondary text-sm leading-relaxed">{feature}</p>
               </li>
             ))}
           </ul>
@@ -137,7 +137,7 @@ const Pricing = () => {
           <div className="mt-auto pt-8">
              <button
               type="button"
-              className="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white py-3 px-6 border border-transparent rounded-md text-center font-medium"
+              className="w-full bg-gradient-to-r from-slate-100 to-slate-200 dark:from-super-dark-border dark:to-super-dark-primary text-slate-700 dark:text-super-dark-text-primary py-3 px-6 border border-slate-300 dark:border-super-dark-border rounded-lg text-center font-semibold shadow-sm"
               disabled
             >
               Seu plano atual

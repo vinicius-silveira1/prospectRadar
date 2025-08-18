@@ -9,11 +9,15 @@ import { TIERS } from '@/lib/constants.js';
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import RangeSlider from '@/components/Common/RangeSlider.jsx';
+import DualInput from '../components/Common/DualInput';
+import HeightInput from '../components/Common/HeightInput';
 import { parseHeightToInches, parseWingspanToInches, formatInchesToFeet, parseWeightToLbs } from '@/utils/filterUtils.js';
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
+import { useResponsive } from '@/hooks/useResponsive.js';
+import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
 const getAllAvailableBadges = (prospects) => {
@@ -50,11 +54,10 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
 const Prospects = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); // Get user from AuthContext
+  const { isMobile, isTablet } = useResponsive();
   
-  // Only show all draft classes for authenticated Scout users
-  const showAllDraftClasses = user?.subscription_tier?.toLowerCase() === 'scout';
-  
-  const { prospects: allProspects, loading, error } = useProspects({ showAllDraftClasses });
+  const { prospects: allProspects, loading, error } = useProspects(); // Carrega todos os prospects
+
   const { watchlist, toggleWatchlist } = useWatchlist();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -253,29 +256,41 @@ const Prospects = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl">
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg rounded-xl">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="px-4 md:px-6 py-4 md:py-6 relative z-10">
+          <div className="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight flex items-center">
-                <Users className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3" />
-                <span className="flex items-center flex-wrap gap-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight flex items-center text-white">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-yellow-300 mr-2 md:mr-3 flex-shrink-0" />
+                <span className="flex items-center flex-wrap gap-2">
                   Todos os <span className="text-yellow-300">Prospects</span>
                 </span>
               </h1>
-              <p className="text-sm md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl">
+              <p className="text-sm sm:text-base md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl">
                 Explore e analise {allProspects.length} <span className="font-semibold text-yellow-300">prospects</span> do Draft 2026
               </p>
             </div>
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
               {/* Export Buttons */}
               <ExportButtons prospects={filteredProspects} source="prospects" />
               
               {/* View Mode Toggle */}
-              <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Grid size={18} /></button>
-                <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><List size={18} /></button>
+              <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 flex-shrink-0">
+                <button 
+                  onClick={() => setViewMode('grid')} 
+                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  aria-label="Visualização em grade"
+                >
+                  <Grid size={isMobile ? 16 : 18} />
+                </button>
+                <button 
+                  onClick={() => setViewMode('list')} 
+                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  aria-label="Visualização em lista"
+                >
+                  <List size={isMobile ? 16 : 18} />
+                </button>
               </div>
             </div>
           </div>
@@ -283,26 +298,72 @@ const Prospects = () => {
       </div>
 
       {/* Filtros e Alerta */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border p-6 mb-6">
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <Filter className="text-slate-400 dark:text-slate-500" size={20} />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-super-dark-text-primary">Filtros</h2>
+      <div className="py-4 md:py-6">
+        <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Filter className="text-slate-400 dark:text-slate-500 flex-shrink-0" size={20} />
+              <ResponsiveText 
+                as="h2" 
+                size="lg" 
+                className="font-semibold text-slate-900 dark:text-super-dark-text-primary"
+              >
+                Filtros
+              </ResponsiveText>
+            </div>
             <div className="flex-grow"></div>
-            <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2"
-            >
-              {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
-              <ChevronDown size={16} className={`transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
-            </button>
-            <button onClick={clearAllFilters} className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium active:scale-95">Limpar Filtros</button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+              >
+                {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
+                <ChevronDown size={16} className={`transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+              </button>
+              <button 
+                onClick={clearAllFilters} 
+                className="inline-flex items-center justify-center px-3 py-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg font-medium transition-colors active:scale-95"
+              >
+                Limpar Filtros
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-2 relative"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} /><input type="text" placeholder="Buscar por nome ou universidade..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={`${inputBaseClasses} pl-10`} /></div>
-            <select value={selectedPosition} onChange={(e) => setSelectedPosition(e.target.value)} className={inputBaseClasses}><option value="all">Todas as Posições</option>{positions.map(p => <option key={p} value={p}>{p}</option>)}</select>
-            <select value={selectedTier} onChange={(e) => setSelectedTier(e.target.value)} className={inputBaseClasses}><option value="all">Todos os Tiers</option>{Object.values(TIERS).map(t => <option key={t} value={t}>{t}</option>)}</select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={inputBaseClasses}><option value="ranking">Por Ranking</option><option value="name">Por Nome</option><option value="position">Por Posição</option></select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+            <div className="lg:col-span-2 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+              <input 
+                type="text" 
+                placeholder={isMobile ? "Buscar prospects..." : "Buscar por nome ou universidade..."} 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className={`${inputBaseClasses} pl-10`} 
+              />
+            </div>
+            <select 
+              value={selectedPosition} 
+              onChange={(e) => setSelectedPosition(e.target.value)} 
+              className={inputBaseClasses}
+            >
+              <option value="all">Todas as Posições</option>
+              {positions.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select 
+              value={selectedTier} 
+              onChange={(e) => setSelectedTier(e.target.value)} 
+              className={inputBaseClasses}
+            >
+              <option value="all">Todos os Tiers</option>
+              {Object.values(TIERS).map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)} 
+              className={inputBaseClasses}
+            >
+              <option value="ranking">Por Ranking</option>
+              <option value="name">Por Nome</option>
+              <option value="position">Por Posição</option>
+            </select>
           </div>
           
           {showAdvancedFilters && (
@@ -569,47 +630,43 @@ const Prospects = () => {
 const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses, availableBadges }) => (
   <>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <RangeSlider 
+      <HeightInput 
         title="Altura"
         min={ranges.height.min}
         max={ranges.height.max}
-        step={1}
         initialMin={values.heightRange.min}
         initialMax={values.heightRange.max}
         onChange={handlers.setHeightRange}
-        unit=" in"
-        formatLabel={formatInchesToFeet}
+        placeholder={{ min: 'Ex: 189 ou 6\'2"', max: 'Ex: 210 ou 6\'8"' }}
       />
-      <RangeSlider 
+      <HeightInput 
         title="Envergadura"
         min={ranges.wingspan.min}
         max={ranges.wingspan.max}
-        step={1}
         initialMin={values.wingspanRange.min}
         initialMax={values.wingspanRange.max}
         onChange={handlers.setWingspanRange}
-        unit=" in"
-        formatLabel={formatInchesToFeet}
+        placeholder={{ min: 'Ex: 189 ou 6\'2"', max: 'Ex: 210 ou 6\'8"' }}
       />
-      <RangeSlider 
+      <DualInput 
         title="Peso"
         min={ranges.weight.min}
         max={ranges.weight.max}
-        step={1}
         initialMin={values.weightRange.min}
         initialMax={values.weightRange.max}
         onChange={handlers.setWeightRange}
         unit=" lbs"
+        placeholder={{ min: 'Mín (lbs)', max: 'Máx (lbs)' }}
       />
-      <RangeSlider 
+      <DualInput 
         title="Idade"
         min={ranges.age.min}
         max={ranges.age.max}
-        step={1}
         initialMin={values.ageRange.min}
         initialMax={values.ageRange.max}
         onChange={handlers.setAgeRange}
         unit=" anos"
+        placeholder={{ min: 'Mín', max: 'Máx' }}
       />
     </div>
     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-super-dark-border">

@@ -12,10 +12,10 @@ import HeadToHeadComparison from '@/components/Compare/HeadToHeadComparison.jsx'
 import ComparisonImage from '@/components/Compare/ComparisonImage.jsx';
 
 function Compare() {
-  const { prospects: allProspects, loading, error } = useProspects();
+  const { prospects: allProspects, loading, error } = useProspects({ showAllDraftClasses: true });
   const { user } = useAuth();
   const navigate = useNavigate();
-  const prospects = useMemo(() => allProspects.filter(p => p.scope === 'NBA_DRAFT'), [allProspects]);
+  const prospects = useMemo(() => allProspects, [allProspects]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedProspects, setSelectedProspects] = useState([]);
@@ -111,32 +111,33 @@ function Compare() {
   if (error) return <div className="text-center py-10 text-red-500 dark:text-red-400">Ocorreu um erro: {error.message || 'Tente novamente.'}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center">
-              <GitCompare className="h-8 w-8 text-yellow-300 mr-3" /> Comparar&nbsp;<span className="text-yellow-300 ml-2">Prospects</span>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-lg animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight flex items-center">
+              <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0" /> 
+              <span className="truncate">Comparar&nbsp;<span className="text-yellow-300">Prospects</span></span>
             </h1>
-            <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
+            <p className="text-sm sm:text-base text-blue-100 dark:text-blue-200">
               Compare até {maxComparisons} prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
               {user?.subscription_tier?.toLowerCase() !== 'scout' && (
-                <span className="block mt-1 text-sm text-yellow-200">
-                  <Lock className="inline h-4 w-4 mr-1" />
+                <span className="block mt-1 text-xs sm:text-sm text-yellow-200">
+                  <Lock className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   Upgrade para Scout para comparar até 4 prospects
                 </span>
               )}
             </p>
           </div>
-          <div className="flex items-center space-x-3">
-            <div className="text-lg font-bold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md">
+          <div className="flex items-center">
+            <div className="text-sm sm:text-lg font-bold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-md whitespace-nowrap">
               {selectedProspects.length}/{maxComparisons} selecionados
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
           <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
@@ -166,12 +167,12 @@ function Compare() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-4">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / {maxComparisons})</h2>
           {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
         </div>
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.subscription_tier?.toLowerCase() === 'scout' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 min-h-[6rem]`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.subscription_tier?.toLowerCase() === 'scout' ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'} gap-3 sm:gap-4 min-h-[6rem]`}>
           {selectedProspects.map((prospect) => {
             return (
               <CompareProspectCard key={prospect.id} prospect={prospect} onRemove={removeProspect} />

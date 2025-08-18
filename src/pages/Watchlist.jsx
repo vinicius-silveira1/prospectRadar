@@ -59,7 +59,7 @@ const Watchlist = () => {
 
   return (
     <div className="space-y-6">
-      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6 overflow-hidden animate-fade-in">
+      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6 animate-fade-in">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>

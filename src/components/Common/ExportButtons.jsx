@@ -110,7 +110,7 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
           className={`
             inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200
             ${isScoutUser 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
+              ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
               : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
             }
             ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}
@@ -127,15 +127,15 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
 
         {/* Dropdown Menu */}
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50">
-            <div className="p-4">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">
+          <div className="absolute left-0 right-4 sm:left-auto sm:right-0 mt-2 w-auto min-w-72 sm:w-80 bg-white dark:bg-super-dark-secondary rounded-xl shadow-2xl border border-slate-200 dark:border-super-dark-border z-[9999]">
+            <div className="p-4 sm:p-6">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary mb-4">
                 {isScoutUser ? 'Escolha o formato de exportação' : 'Exportação - Recurso Scout'}
               </h3>
               
               {!isScoutUser && (
-                <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                <div className="mb-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+                  <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
                     A exportação de dados é um recurso exclusivo do plano Scout. 
                     Upgrade para acessar relatórios profissionais!
                   </p>
@@ -151,21 +151,21 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
                       onClick={() => handleExport(option.format)}
                       disabled={isExporting || !isScoutUser}
                       className={`
-                        w-full flex items-start p-3 rounded-lg text-left transition-colors
+                        w-full flex items-start p-3 sm:p-4 rounded-xl text-left transition-all duration-200
                         ${isScoutUser 
-                          ? 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100' 
+                          ? 'hover:bg-orange-50 dark:hover:bg-super-dark-border text-slate-900 dark:text-super-dark-text-primary hover:shadow-md hover:scale-[1.02]' 
                           : 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
                         }
                         ${isExporting ? 'opacity-50' : ''}
                       `}
                     >
-                      <IconComponent className={`w-5 h-5 mr-3 mt-0.5 ${
-                        isScoutUser ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'
+                      <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 mt-0.5 flex-shrink-0 ${
+                        isScoutUser ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400'
                       }`} />
-                      <div>
-                        <div className="font-medium">{option.label}</div>
-                        <div className={`text-sm ${
-                          isScoutUser ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm sm:text-base text-slate-900 dark:text-super-dark-text-primary">{option.label}</div>
+                        <div className={`text-xs sm:text-sm ${
+                          isScoutUser ? 'text-slate-600 dark:text-super-dark-text-secondary' : 'text-slate-400 dark:text-slate-500'
                         }`}>
                           {option.description}
                         </div>
@@ -175,10 +175,10 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
                 })}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-super-dark-border">
                 <button
                   onClick={() => setShowDropdown(false)}
-                  className="w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  className="w-full px-4 py-2 text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary hover:bg-slate-50 dark:hover:bg-super-dark-border rounded-lg transition-all duration-200"
                 >
                   Fechar
                 </button>
@@ -190,7 +190,7 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
         {/* Overlay para fechar dropdown */}
         {showDropdown && (
           <div 
-            className="fixed inset-0 z-40" 
+            className="fixed inset-0 z-[9998]" 
             onClick={() => setShowDropdown(false)}
           />
         )}

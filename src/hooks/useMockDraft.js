@@ -53,13 +53,13 @@ const useMockDraft = (allProspects) => {
     if (filters.searchTerm) {
       const lowerCaseSearchTerm = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(prospect => 
-        prospect.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        prospect.position.toLowerCase().includes(lowerCaseSearchTerm) ||
+        (prospect.name && prospect.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (prospect.position && prospect.position.toLowerCase().includes(lowerCaseSearchTerm)) ||
         (prospect.high_school_team && prospect.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
       );
     }
     if (filters.position !== 'ALL') {
-      filtered = filtered.filter(prospect => prospect.position === filters.position);
+      filtered = filtered.filter(prospect => prospect.position && prospect.position === filters.position);
     }
     return filtered;
   }, [allProspects, draftBoard, filters.searchTerm, filters.position]);

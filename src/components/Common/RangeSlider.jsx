@@ -102,13 +102,20 @@ const RangeSlider = ({ min, max, step, initialMin, initialMax, onChange, title, 
           border: 2px solid #3b82f6;
           border-radius: 50%;
           cursor: pointer;
-          height: 20px;
-          width: 20px;
-          margin-top: -8px;
+          height: 18px;
+          width: 18px;
+          margin-top: -7px;
           pointer-events: all;
           position: relative;
           -webkit-appearance: none;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+          transition: all 0.2s ease;
+        }
+
+        .thumb::-webkit-slider-thumb:hover {
+          transform: scale(1.1);
+          border-color: #2563eb;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         }
 
         .thumb::-moz-range-thumb {
@@ -116,13 +123,20 @@ const RangeSlider = ({ min, max, step, initialMin, initialMax, onChange, title, 
           border: 2px solid #3b82f6;
           border-radius: 50%;
           cursor: pointer;
-          height: 20px;
-          width: 20px;
-          margin-top: -8px;
+          height: 18px;
+          width: 18px;
+          margin-top: -7px;
           pointer-events: all;
           position: relative;
           -moz-appearance: none;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+          transition: all 0.2s ease;
+        }
+
+        .thumb::-moz-range-thumb:hover {
+          transform: scale(1.1);
+          border-color: #2563eb;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         }
         
         .slider__track,

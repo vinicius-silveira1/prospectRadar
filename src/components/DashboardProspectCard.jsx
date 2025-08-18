@@ -10,7 +10,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
   const badges = assignBadges(prospect);
 
   return (
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300">
+    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-xl hover:-translate-y-2 hover:-translate-x-1 transform transition-all duration-300 ease-out">
       {/* Watch List Button */}
       <button
         onClick={onToggleWatchlist}

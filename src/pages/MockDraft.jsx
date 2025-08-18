@@ -21,8 +21,9 @@ import { ptBR } from 'date-fns/locale';
 
 const MockDraft = () => {
   const { user } = useAuth();
-  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects();
   
+  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(); // Carrega todos os prospects
+
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters, isLoading,
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
@@ -114,52 +115,46 @@ const MockDraft = () => {
 
   return (
     <div className="space-y-6">
-      {/* ... (Header não modificado) ... */}
-      <div className="relative bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg">
-        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10">
-          <div className="flex items-start justify-between gap-4 mb-4">
+      {/* Banner Principal */}
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg overflow-hidden animate-fade-in">
+        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
+        <div className="px-4 md:px-6 py-4 md:py-6 relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
-                  <Shuffle className="h-6 md:h-8 w-6 md:w-8 mr-2 md:mr-3" />
-                  <span className="flex items-center flex-wrap gap-2">
-                    <span className="text-yellow-300">Mock Draft</span>
-                    <span>{draftSettings.draftClass}</span>
-                  </span>
-                </h1>
-                {/* Pick indicator - visible on mobile next to title */}
-                <div className="lg:hidden">
-                  <div className="text-2xl md:text-3xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-2 md:px-3 py-1 shadow-lg animate-pulse-once rounded-full">
-                    {currentPick}
-                  </div>
-                </div>
-              </div>
-              <p className="text-blue-100 dark:text-super-dark-text-secondary text-sm md:text-base">
+              <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center text-white">
+                <Shuffle className="h-8 w-8 text-yellow-300 mr-3" />
+                <span className="flex items-center flex-wrap gap-2">
+                  <span className="text-yellow-300">Mock&nbsp;Draft</span>
+                  <span>{draftSettings.draftClass}</span>
+                </span>
+              </h1>
+              <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
                 Monte seu próprio draft com {allProspects.length} prospects reais e curados
               </p>
             </div>
-            {/* Pick indicator - visible on desktop on the right */}
-            <div className="hidden lg:flex flex-col items-end text-right">
-              <div className="text-3xl md:text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-2 shadow-lg animate-pulse-once rounded-full">
-                {currentPick}
+            
+            {/* Pick Atual - Visível em todas as telas */}
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg">
+                #{currentPick}
               </div>
-              <div className="text-sm text-blue-100 dark:text-super-dark-text-secondary mt-1">Pick Atual</div>
+              <div className="text-xs text-blue-100 mt-1">Pick Atual</div>
             </div>
           </div>
         </div>
-        
-        <div className="mt-4">
-          <div className="flex justify-between text-sm text-blue-200 dark:text-super-dark-text-secondary mb-2">
-            <span>Progresso do Draft</span>
-            <span>{Math.floor(progress)}% completo</span>
-          </div>
-          <div className="w-full bg-blue-700 dark:bg-super-dark-border rounded-full h-3">
-            <div 
-              className="bg-yellow-400 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+      </div>
+
+      {/* Barra de Progresso - Separada do banner */}
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4">
+        <div className="flex justify-between text-sm text-slate-600 dark:text-super-dark-text-secondary mb-2">
+          <span>Progresso do Draft</span>
+          <span>{Math.floor(progress)}% completo</span>
+        </div>
+        <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-3">
+          <div 
+            className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
@@ -224,11 +219,15 @@ const MockDraft = () => {
               <button onClick={() => setView('prospects')} className={`px-6 py-3 font-medium transition-colors ${view === 'prospects' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}><Users className="h-4 w-4 inline mr-2" /> Prospects Disponíveis</button>
             </div>
             <div className="p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
-              <div className="flex flex-wrap items-center gap-4">
-                <button onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors active:scale-95 flex items-center"><Filter className="h-4 w-4 mr-2" /> Filtros</button>
-                <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-slate-400" />
-                  <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95" />
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <button onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 active:scale-95 flex items-center flex-shrink-0 shadow-lg hover:shadow-xl">
+                    <Filter className="h-4 w-4 mr-2" /> Filtros
+                  </button>
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                    <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95 w-full" />
+                  </div>
                 </div>
                 {showFilters && (
                   <div className="flex flex-wrap gap-3 animate-fade-in">
