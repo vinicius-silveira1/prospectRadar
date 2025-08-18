@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
 import SingleProspectExport from '@/components/Common/SingleProspectExport.jsx';
+import MobileExportActions from '@/components/Common/MobileExportActions.jsx';
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
@@ -191,9 +192,9 @@ const ProspectDetail = () => {
             </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Award className="w-5 h-5 mr-2 text-orange-500" />Informações Básicas</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -454,7 +455,17 @@ const ProspectDetail = () => {
               <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
               <div className="space-y-3">
                 <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
-                <SingleProspectExport prospect={prospect} />
+                
+                {/* Desktop Export Component - Hidden on small screens */}
+                <div className="hidden lg:block">
+                  <SingleProspectExport prospect={prospect} />
+                </div>
+                
+                {/* Mobile Export Component - Visible on small screens */}
+                <div className="block lg:hidden">
+                  <MobileExportActions prospect={prospect} />
+                </div>
+                
                 {user && <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</button>}
                 <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</button>
               </div>

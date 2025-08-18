@@ -309,16 +309,16 @@ PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato c
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+      <div className="w-full">
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex-shrink-0">
             <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
               Exportar Relatório Individual
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
               {isScoutUser ? 'Gere um relatório completo deste prospect' : 'Recurso exclusivo para usuários Scout'}
             </p>
           </div>
@@ -326,14 +326,14 @@ PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato c
 
         {!isScoutUser && (
           <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+            <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
               A exportação individual é um recurso exclusivo do plano Scout. 
               Upgrade para gerar relatórios personalizados!
             </p>
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {exportOptions.map((option) => {
             const IconComponent = option.icon;
             const colorClasses = {
@@ -356,7 +356,7 @@ PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato c
                 onClick={() => handleExport(option.format)}
                 disabled={isExporting || !isScoutUser}
                 className={`
-                  flex flex-col items-center p-3 sm:p-4 rounded-lg border-2 border-dashed transition-all duration-200 min-h-[100px] sm:min-h-[120px]
+                  flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 border-dashed transition-all duration-200 min-h-[70px] sm:min-h-[80px] w-full
                   ${isScoutUser 
                     ? colorClasses[option.color] 
                     : 'border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
@@ -365,15 +365,15 @@ PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato c
                 `}
               >
                 {isExporting ? (
-                  <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 mb-2 animate-spin text-blue-600 dark:text-blue-400" />
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 animate-spin text-blue-600 dark:text-blue-400" />
                 ) : (
-                  <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 mb-2 ${
+                  <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 ${
                     isScoutUser ? iconColorClasses[option.color] : 'text-slate-400'
                   }`} />
                 )}
                 <div className="text-center">
-                  <div className="font-medium text-xs sm:text-sm text-slate-900 dark:text-slate-100">{option.label}</div>
-                  <div className={`text-xs mt-1 hidden sm:block ${
+                  <div className="font-medium text-xs text-slate-900 dark:text-slate-100">{option.label}</div>
+                  <div className={`text-xs mt-0.5 hidden sm:block ${
                     isScoutUser ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'
                   }`}>
                     {option.description}
@@ -385,7 +385,7 @@ PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato c
         </div>
 
         {isScoutUser && (
-          <div className="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
+          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
             Os relatórios incluem estatísticas completas, anotações e métricas do prospect
           </div>
         )}
