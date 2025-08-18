@@ -39,7 +39,20 @@ const useAdvancedExport = () => {
         team: prospect.team || 'N/A',
         age: prospect.age || 'N/A',
         height: typeof prospect.height === 'object' ? prospect.height?.us : prospect.height || 'N/A',
-        weight: typeof prospect.weight === 'object' ? `${prospect.weight?.us} lbs (${prospect.weight?.intl} kg)` : prospect.weight || 'N/A',
+        weight: (() => {
+          try {
+            if (typeof prospect.weight === 'object' && prospect.weight?.us) {
+              return `${prospect.weight.us} lbs (${prospect.weight.intl} kg)`;
+            } else if (typeof prospect.weight === 'string' && prospect.weight.startsWith('{')) {
+              const weightObj = JSON.parse(prospect.weight);
+              return `${weightObj.us} lbs (${weightObj.intl} kg)`;
+            } else {
+              return prospect.weight || 'N/A';
+            }
+          } catch (e) {
+            return prospect.weight || 'N/A';
+          }
+        })(),
         nationality: prospect.nationality === '🇧🇷' ? 'Brasil' : 'Internacional'
       },
 
@@ -81,18 +94,24 @@ const useAdvancedExport = () => {
         })()
       },
 
-      // Estatísticas Avançadas - versão simplificada e segura
+      // Estatísticas Avançadas - usando os mesmos campos da página ProspectDetail
       advancedStats: {
         trueShooting: (() => {
           try {
-            return prospect.ts_percentage ? (prospect.ts_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.ts_percent !== null && prospect.ts_percent !== undefined) {
+              return (prospect.ts_percent * 100).toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
         })(),
         effectiveFG: (() => {
           try {
-            return prospect.efg_percentage ? (prospect.efg_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.efg_percent !== null && prospect.efg_percent !== undefined) {
+              return (prospect.efg_percent * 100).toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
@@ -100,7 +119,10 @@ const useAdvancedExport = () => {
         playerEfficiency: prospect.per?.toFixed(2) || 'N/A',
         usageRate: (() => {
           try {
-            return prospect.usg_percentage ? (prospect.usg_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.usg_percent !== null && prospect.usg_percent !== undefined) {
+              return prospect.usg_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
@@ -109,35 +131,50 @@ const useAdvancedExport = () => {
         defensiveRating: prospect.drtg?.toFixed(1) || 'N/A',
         turnoverRate: (() => {
           try {
-            return prospect.tov_percentage ? (prospect.tov_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.tov_percent !== null && prospect.tov_percent !== undefined) {
+              return prospect.tov_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
         })(),
         assistRate: (() => {
           try {
-            return prospect.ast_percentage ? (prospect.ast_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.ast_percent !== null && prospect.ast_percent !== undefined) {
+              return prospect.ast_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
         })(),
         totalReboundRate: (() => {
           try {
-            return prospect.trb_percentage ? (prospect.trb_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.trb_percent !== null && prospect.trb_percent !== undefined) {
+              return prospect.trb_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
         })(),
         stealRate: (() => {
           try {
-            return prospect.stl_percentage ? (prospect.stl_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.stl_percent !== null && prospect.stl_percent !== undefined) {
+              return prospect.stl_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
         })(),
         blockRate: (() => {
           try {
-            return prospect.blk_percentage ? (prospect.blk_percentage * 100).toFixed(1) + '%' : 'N/A';
+            if (prospect.blk_percent !== null && prospect.blk_percent !== undefined) {
+              return prospect.blk_percent.toFixed(1) + '%';
+            }
+            return 'N/A';
           } catch (e) {
             return 'N/A';
           }
@@ -221,29 +258,61 @@ const useAdvancedExport = () => {
         }
       })(),
 
-      // Análise Detalhada - tratamento seguro
+      // Análise Detalhada - usando os mesmos campos da página ProspectDetail
       detailedAnalysis: (() => {
         try {
-          const name = prospect?.name || 'Prospecto';
-          const projection = evaluation?.draftProjection?.description || 'N/A';
-          const positiveFlags = flags.filter(f => f?.type === 'Destaque' || f?.type === 'green').slice(0, 3);
-          const negativeFlags = flags.filter(f => f?.type === 'Alerta' || f?.type === 'red').slice(0, 2);
+          // Primeiro tenta usar a análise detalhada existente
+          if (prospect.evaluation?.detailedAnalysis) {
+            return prospect.evaluation.detailedAnalysis;
+          }
           
-          return `${name} é um prospect com perfil ${projection.toLowerCase()}.
-
-PONTOS FORTES: ${positiveFlags.length > 0 ? positiveFlags.map(f => f?.message || '').join(', ') : 'Aspectos positivos identificados'}.
-
-ÁREAS DE DESENVOLVIMENTO: ${negativeFlags.length > 0 ? negativeFlags.map(f => f?.message || '').join(', ') : 'Aspectos em desenvolvimento identificados'}.
-
-PROJEÇÃO NBA: ${projection} com potencial de crescimento a longo prazo.`;
+          // Usar prospect.strengths e prospect.weaknesses como na página ProspectDetail
+          const name = prospect?.name || 'Prospecto';
+          let analysis = `Análise Detalhada do Jogador\n\n`;
+          
+          // Pontos Fortes
+          if (prospect.strengths?.length > 0) {
+            analysis += `Pontos Fortes\n`;
+            prospect.strengths.forEach(strength => {
+              analysis += `${strength}\n`;
+            });
+            analysis += '\n';
+          }
+          
+          // Pontos a Melhorar
+          if (prospect.weaknesses?.length > 0) {
+            analysis += `Pontos a Melhorar\n`;
+            prospect.weaknesses.forEach(weakness => {
+              analysis += `${weakness}\n`;
+            });
+          }
+          
+          // Se não tiver strengths nem weaknesses, criar análise básica
+          if (!prospect.strengths?.length && !prospect.weaknesses?.length) {
+            analysis += `${name} é um prospect em desenvolvimento.\n\n`;
+            
+            const projection = evaluation?.draftProjection?.description || 'em avaliação';
+            analysis += `PROJEÇÃO: ${name} é avaliado como um prospect ${projection.toLowerCase()}.`;
+            
+            if (prospect.evaluation?.radarScore) {
+              analysis += `\n\nRADAR SCORE: ${prospect.evaluation.radarScore}/100`;
+            }
+          }
+          
+          return analysis;
         } catch (e) {
+          console.error('Erro ao gerar análise detalhada:', e);
           return `${prospect?.name || 'Prospecto'} é um jogador com potencial interessante para o próximo nível. Análise detalhada disponível na plataforma.`;
         }
       })(),
 
-      // Áreas de melhoria - tratamento seguro
+      // Áreas de melhoria - usando prospect.weaknesses como na página
       improvementAreas: (() => {
         try {
+          if (prospect.weaknesses?.length > 0) {
+            return prospect.weaknesses;
+          }
+          // Se não tiver weaknesses, usar flags como fallback
           if (!flags || !Array.isArray(flags)) return ['Inexperiência'];
           const alertas = flags.filter(f => f?.type === 'Alerta' || f?.type === 'red').map(f => f?.message || '').slice(0, 3);
           return alertas.length > 0 ? alertas : ['Inexperiência'];
@@ -665,7 +734,7 @@ PROJEÇÃO NBA: ${projection} com potencial de crescimento a longo prazo.`;
         body: [
           ['Classificação', data.radarAnalysis.draftProjection],
           ['Range Estimado', data.radarAnalysis.draftRange],
-          ['Prontidão NBA', data.radarAnalysis.nbaReadiness],
+          ['Prontidão NBA', data.radarAnalysis.readiness],
           ['Score de Potencial', data.radarAnalysis.potentialScore],
           ['Nível de Confiança', data.radarAnalysis.confidenceScore]
         ],
@@ -706,13 +775,17 @@ PROJEÇÃO NBA: ${projection} com potencial de crescimento a longo prazo.`;
         startY: currentY,
         head: [['Métrica', 'Valor']],
         body: [
-          ['TS%', data.advancedStats.ts_percent],
-          ['PER', data.advancedStats.per],
-          ['USG%', data.advancedStats.usg_percent],
-          ['ORtg', data.advancedStats.ortg],
-          ['DRtg', data.advancedStats.drtg],
-          ['AST%', data.advancedStats.ast_percent],
-          ['TRB%', data.advancedStats.trb_percent]
+          ['TS%', data.advancedStats.trueShooting],
+          ['eFG%', data.advancedStats.effectiveFG],
+          ['PER', data.advancedStats.playerEfficiency],
+          ['USG%', data.advancedStats.usageRate],
+          ['ORtg', data.advancedStats.offensiveRating],
+          ['DRtg', data.advancedStats.defensiveRating],
+          ['TOV%', data.advancedStats.turnoverRate],
+          ['AST%', data.advancedStats.assistRate],
+          ['TRB%', data.advancedStats.totalReboundRate],
+          ['STL%', data.advancedStats.stealRate],
+          ['BLK%', data.advancedStats.blockRate]
         ],
         theme: 'grid',
         headStyles: { fillColor: [245, 158, 11] },
@@ -781,28 +854,6 @@ PROJEÇÃO NBA: ${projection} com potencial de crescimento a longo prazo.`;
         
         currentY += 10;
         console.log('✅ Análise detalhada adicionada ao PDF');
-      }
-
-      // Pontos a Melhorar (se disponíveis)
-      if (data.improvementAreas.length > 0) {
-        checkPageBreak(30);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(229, 62, 62);
-        doc.text('PONTOS A MELHORAR:', margin, currentY);
-        currentY += 8;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        
-        data.improvementAreas.forEach(area => {
-          checkPageBreak(8);
-          doc.text(`⚠ ${area}`, margin, currentY);
-          currentY += 8;
-        });
-        
-        currentY += 10;
       }
 
       // Footer

@@ -234,6 +234,28 @@ const ProspectDetail = () => {
               </div>
             </div>
 
+            {/* Ações Mobile - Visível apenas em telas pequenas */}
+            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
+              <div className="space-y-3">
+                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                  <GitCompare className="w-4 h-4 mr-2" />
+                  Comparar Jogador
+                </button>
+                <MobileExportActions prospect={prospect} />
+                {user && (
+                  <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
+                    <Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />
+                    {isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}
+                  </button>
+                )}
+                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Compartilhar Perfil
+                </button>
+              </div>
+            </div>
+
             {hasStats ? (
               <>
                 <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
@@ -455,17 +477,7 @@ const ProspectDetail = () => {
               <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
               <div className="space-y-3">
                 <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
-                
-                {/* Desktop Export Component - Hidden on small screens */}
-                <div className="hidden lg:block">
-                  <SingleProspectExport prospect={prospect} />
-                </div>
-                
-                {/* Mobile Export Component - Visible on small screens */}
-                <div className="block lg:hidden">
-                  <MobileExportActions prospect={prospect} />
-                </div>
-                
+                <MobileExportActions prospect={prospect} />
                 {user && <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</button>}
                 <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</button>
               </div>

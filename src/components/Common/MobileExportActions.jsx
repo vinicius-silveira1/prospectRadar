@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, FileText, FileSpreadsheet, Camera, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import useAdvancedExport from '../../hooks/useAdvancedExport';
 import UpgradeModal from './UpgradeModal';
@@ -12,20 +12,19 @@ const MobileExportActions = ({ prospect }) => {
     exportToCSV, 
     exportToExcel, 
     exportToPDF, 
-    exportToImage,
-    exportError 
+    exportToImage 
   } = useAdvancedExport();
   
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [notification, setNotification] = useState({ visible: false, type: '', format: '' });
-  const [isExpanded, setIsExpanded] = useState(false);
   
   const isScoutUser = user?.subscription_tier?.toLowerCase() === 'scout';
 
-  // Função para gerar dados - mesma do componente original
+  // Função para gerar dados - igual ao componente desktop com dados reais
   const generateSimpleData = (prospect) => {
     if (!prospect) return { evaluation: {}, flags: [], comparablePlayers: [] };
     
+    // Função para mapear tier para descrição em português
     const getTierDescription = (tier) => {
       switch(tier) {
         case 'Elite': return 'Elite/Lottery Pick';
@@ -36,6 +35,7 @@ const MobileExportActions = ({ prospect }) => {
       }
     };
 
+    // Função para calcular range baseado no ranking
     const getDraftRange = (ranking, tier) => {
       if (ranking) {
         const start = Math.max(1, ranking - 7);
@@ -43,6 +43,7 @@ const MobileExportActions = ({ prospect }) => {
         return `${start}-${end}`;
       }
       
+      // Fallback baseado no tier
       switch(tier) {
         case 'Elite': return '1-14';
         case 'First Round': return '15-30';
@@ -52,18 +53,153 @@ const MobileExportActions = ({ prospect }) => {
       }
     };
 
+    // Evaluation completa - prioriza dados reais do prospect.evaluation
     const evaluation = {
       draftProjection: {
-        description: getTierDescription(prospect.tier),
-        range: getDraftRange(prospect.ranking, prospect.tier)
+        description: prospect.evaluation?.draftProjection?.description || getTierDescription(prospect.tier),
+        range: prospect.evaluation?.draftProjection?.range || getDraftRange(prospect.ranking, prospect.tier)
+      },
+      nbaReadiness: prospect.evaluation?.nbaReadiness || (prospect.tier === 'Elite' ? 'Alta' : 
+                    prospect.tier === 'First Round' ? 'Média-Alta' :
+                    prospect.tier === 'Second Round' ? 'Média' : 'Baixa'),
+      potentialScore: prospect.evaluation?.potentialScore || (prospect.ranking ? 
+        Math.max(1, 100 - Math.floor((prospect.ranking - 1) * 1.5)) : 
+        prospect.tier === 'Elite' ? 95 :
+        prospect.tier === 'First Round' ? 80 :
+        prospect.tier === 'Second Round' ? 65 : 50),
+      confidenceScore: prospect.evaluation?.confidenceScore || (prospect.ppg && prospect.rpg && prospect.apg ? 0.9 : 0.7),
+      categoryScores: prospect.evaluation?.categoryScores || {
+        shooting: prospect.fg_percentage ? Math.round(prospect.fg_percentage * 100) : 
+                 prospect.three_pt_percentage ? Math.round(prospect.three_pt_percentage * 100) : 50,
+        playmaking: prospect.apg ? Math.min(100, Math.round(prospect.apg * 12)) : 50,
+        rebounding: prospect.rpg ? Math.min(100, Math.round(prospect.rpg * 8)) : 50,
+        defense: prospect.spg && prospect.bpg ? 
+                Math.min(100, Math.round((prospect.spg + prospect.bpg) * 15)) : 
+                prospect.spg ? Math.min(100, Math.round(prospect.spg * 20)) : 55,
+        athleticism: 75, // Valor base para prospects brasileiros
+        potential: prospect.ranking ? Math.max(1, 100 - Math.floor((prospect.ranking - 1) * 1.2)) : 78
+      },
+      // Dados adicionais para o PDF
+      basicStats: {
+        fg_percentage: (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
+          ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) + '%'
+          : 'N/A',
+        three_pt_percentage: prospect.three_pct ? (prospect.three_pct * 100).toFixed(1) + '%' : 
+                            prospect.three_pt_percentage ? (prospect.three_pt_percentage * 100).toFixed(1) + '%' : 
+                            prospect.three_p_percentage ? (prospect.three_p_percentage * 100).toFixed(1) + '%' : 'N/A',
+        ft_percentage: prospect.ft_attempts > 0 
+          ? ((prospect.ft_makes / prospect.ft_attempts) * 100).toFixed(1) + '%'
+          : 'N/A'
       }
     };
 
-    const flags = [];
-    const comparablePlayers = [];
+    // Use flags e comparações reais do prospect.evaluation se disponíveis, senão gera dados realísticos
+    const flags = prospect.evaluation?.flags?.length > 0 ? 
+      prospect.evaluation.flags : 
+      (() => {
+        const generatedFlags = [];
+        
+        // Flag de eficiência baseado em True Shooting (usando o nome correto do campo)
+        if (prospect.true_shooting_percentage && prospect.true_shooting_percentage > 0.6) {
+          generatedFlags.push({
+            type: 'strength',
+            text: `Pontuador altamente eficiente, com um True Shooting de ${(prospect.true_shooting_percentage * 100).toFixed(1)}%, que o coloca entre os melhores.`
+          });
+        }
+        
+        // Flag de finalização
+        if (prospect.true_shooting_percentage && prospect.usage_rate && prospect.true_shooting_percentage > 0.58 && prospect.usage_rate < 0.15) {
+          generatedFlags.push({
+            type: 'strength',
+            text: `Finalizador eficiente que não precisa da bola nas mãos para pontuar, como evidenciado pelo seu alto True Shooting (${(prospect.true_shooting_percentage * 100).toFixed(1)}%) com baixo uso (${(prospect.usage_rate * 100).toFixed(1)}%).`
+          });
+        }
+        
+        // Flag defensivo
+        if (prospect.steal_rate && prospect.block_rate && prospect.steal_rate > 0.025 && prospect.block_rate > 0.02) {
+          generatedFlags.push({
+            type: 'strength',
+            text: `Defensor de alto impacto nos dois lados, gerando roubos (${(prospect.steal_rate * 100).toFixed(1)}%) e tocos (${(prospect.block_rate * 100).toFixed(1)}%) em um nível de elite.`
+          });
+        }
+        
+        // Flag de criação
+        if (prospect.assist_rate && prospect.assist_rate < 0.1) {
+          generatedFlags.push({
+            type: 'weakness',
+            text: `Baixa capacidade de criação para um jogador de sua posição, com uma taxa de assistência de apenas ${(prospect.assist_rate * 100).toFixed(1)}%.`
+          });
+        }
+        
+        return generatedFlags;
+      })();
 
-    // Retornar com análise
-    const playerAnalysis = `${prospect.name} é um prospect ${prospect.nationality === '🇧🇷' ? 'brasileiro' : 'internacional'} com perfil de ${evaluation.draftProjection.description}.`;
+    const comparablePlayers = prospect.evaluation?.comparablePlayers?.length > 0 ?
+      prospect.evaluation.comparablePlayers :
+      (() => {
+        const generatedComparisons = [];
+        
+        // Gerar comparações baseadas na posição do prospect
+        if (prospect.position === 'SG' || prospect.position === 'SF') {
+          generatedComparisons.push(
+            { 
+              name: 'Bogdan Bogdanovic', 
+              similarity: 0.78,
+              careerSuccess: '7/10',
+              description: 'Arremessador versátil com visão de jogo'
+            },
+            { 
+              name: 'Dario Saric', 
+              similarity: 0.72,
+              careerSuccess: '6/10',
+              description: 'Jogador fundamentado com QI de basquete'
+            }
+          );
+        } else if (prospect.position === 'PG') {
+          generatedComparisons.push(
+            { 
+              name: 'Facundo Campazzo', 
+              similarity: 0.75,
+              careerSuccess: '6/10',
+              description: 'Armador criativo com experiência internacional'
+            },
+            { 
+              name: 'Ricky Rubio', 
+              similarity: 0.70,
+              careerSuccess: '7/10',
+              description: 'Facilitador nato com liderança'
+            }
+          );
+        } else {
+          // Para outras posições ou fallback
+          generatedComparisons.push(
+            { 
+              name: 'Jonas Valanciunas', 
+              similarity: 0.73,
+              careerSuccess: '7/10',
+              description: 'Presença sólida no garrafão'
+            },
+            { 
+              name: 'Clint Capela', 
+              similarity: 0.69,
+              careerSuccess: '8/10',
+              description: 'Especialista defensivo e rebotes'
+            }
+          );
+        }
+        
+        return generatedComparisons;
+      })();
+
+    // Análise detalhada do jogador usando dados reais do prospect.evaluation se disponível
+    const playerAnalysis = prospect.evaluation?.detailedAnalysis || 
+      `${prospect.name} é um prospect ${prospect.nationality === '🇧🇷' ? 'brasileiro' : 'internacional'} com perfil de ${evaluation.draftProjection.description}. 
+
+PONTOS FORTES: ${flags.filter(f => f.type === 'strength').map(f => f.text).join(' ')}
+
+ÁREAS DE DESENVOLVIMENTO: ${flags.filter(f => f.type === 'weakness').map(f => f.text).join(' ')}
+
+PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato como rotação' : prospect.tier === 'First Round' ? 'Candidato a desenvolver papel na rotação' : 'Projeto de longo prazo com fundamentos sólidos'}. Sua experiência internacional é um diferencial importante para adaptação ao basquete profissional.`;
 
     return { 
       evaluation: {
@@ -169,71 +305,84 @@ const MobileExportActions = ({ prospect }) => {
   ];
 
   return (
-    <>
-      {/* Botão principal que expande as opções */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-        disabled={isExporting}
-      >
-        <div className="flex items-center">
-          <Download className="w-4 h-4 mr-2" />
-          {isExporting ? 'Exportando...' : 'Exportar Relatório'}
+    <div className="w-full">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex-shrink-0">
+          <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
         </div>
-        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-      </button>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
+            Exportar Relatório Individual
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+            {isScoutUser ? 'Gere um relatório completo deste prospect' : 'Recurso exclusivo para usuários Scout'}
+          </p>
+        </div>
+      </div>
 
-      {/* Opções de exportação (expansível) */}
-      {isExpanded && (
-        <div className="mt-2 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg space-y-2">
-          {!isScoutUser && (
-            <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded text-center">
-              <p className="text-xs text-amber-800 dark:text-amber-200">
-                Recurso exclusivo Scout
-              </p>
-            </div>
-          )}
+      {!isScoutUser && (
+        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
+            A exportação individual é um recurso exclusivo do plano Scout. 
+            Upgrade para gerar relatórios personalizados!
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        {exportOptions.map((option) => {
+          const IconComponent = option.icon;
+          const colorClasses = {
+            blue: 'border-blue-300 dark:border-blue-500 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30',
+            green: 'border-green-300 dark:border-green-500 hover:border-green-500 dark:hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/30',
+            orange: 'border-orange-300 dark:border-orange-500 hover:border-orange-500 dark:hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30',
+            purple: 'border-purple-300 dark:border-purple-500 hover:border-purple-500 dark:hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+          };
+
+          const iconColorClasses = {
+            blue: 'text-blue-600 dark:text-blue-400',
+            green: 'text-green-600 dark:text-green-400',
+            orange: 'text-orange-600 dark:text-orange-400',
+            purple: 'text-purple-600 dark:text-purple-400'
+          };
           
-          <div className="grid grid-cols-2 gap-2">
-            {exportOptions.map((option) => {
-              const IconComponent = option.icon;
-              const colorClasses = {
-                blue: 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300',
-                green: 'bg-green-100 text-green-700 hover:bg-green-200 border-green-300',
-                orange: 'bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300',
-                purple: 'bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-300'
-              };
+          return (
+            <button
+              key={option.format}
+              onClick={() => handleExport(option.format)}
+              disabled={isExporting || !isScoutUser}
+              className={`
+                flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 border-dashed transition-all duration-200 min-h-[70px] sm:min-h-[80px] w-full
+                ${isScoutUser 
+                  ? colorClasses[option.color] 
+                  : 'border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                }
+                ${isExporting ? 'opacity-50' : ''}
+              `}
+            >
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 animate-spin text-blue-600 dark:text-blue-400" />
+              ) : (
+                <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 mb-1 sm:mb-2 ${
+                  isScoutUser ? iconColorClasses[option.color] : 'text-slate-400'
+                }`} />
+              )}
+              <div className="text-center">
+                <div className="font-medium text-xs text-slate-900 dark:text-slate-100">{option.label}</div>
+                <div className={`text-xs mt-0.5 hidden sm:block ${
+                  isScoutUser ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'
+                }`}>
+                  {option.description}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-              return (
-                <button
-                  key={option.format}
-                  onClick={() => handleExport(option.format)}
-                  disabled={isExporting || !isScoutUser}
-                  className={`
-                    p-2 rounded border transition-all text-xs font-medium flex flex-col items-center gap-1
-                    ${isScoutUser 
-                      ? colorClasses[option.color] 
-                      : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
-                    }
-                    ${isExporting ? 'opacity-50' : ''}
-                  `}
-                >
-                  {isExporting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <IconComponent className="w-4 h-4" />
-                  )}
-                  <span>{option.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {isScoutUser && (
-            <p className="text-xs text-gray-500 text-center mt-2">
-              Relatórios com estatísticas completas
-            </p>
-          )}
+      {isScoutUser && (
+        <div className="mt-3 text-xs text-slate-500 dark:text-slate-400 text-center">
+          Os relatórios incluem estatísticas completas, anotações e métricas do prospect
         </div>
       )}
 
@@ -251,7 +400,7 @@ const MobileExportActions = ({ prospect }) => {
         visible={notification.visible}
         onClose={hideNotification}
       />
-    </>
+    </div>
   );
 };
 
