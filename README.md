@@ -33,7 +33,7 @@ Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos d
 
 ## 🧠 O que é o Radar Score?
 
-O **Radar Score** é uma métrica proprietária do ProspectRadar v2.1, projetada para fornecer uma avaliação holística do potencial de um prospecto. Desenvolvido e validado através de análise histórica das classes de draft NBA de 2018, 2020 e 2023, o algoritmo vai além das estatísticas tradicionais, incorporando uma variedade de fatores para criar um perfil completo do jogador.
+O **Radar Score** é uma métrica proprietária do ProspectRadar, projetada para fornecer uma avaliação holística do potencial de um prospecto. Desenvolvido e validado através de análise histórica das classes de draft NBA de 2018, 2020 e 2023, o algoritmo vai além das estatísticas tradicionais, incorporando uma variedade de fatores para criar um perfil completo do jogador.
 
 ### Como é Calculado?
 
@@ -44,7 +44,7 @@ O cálculo do Radar Score é baseado em quatro pilares principais, com pesos reb
 3.  **Atributos Físicos (Peso: 20%):** Ferramentas físicas que se traduzem diretamente para o nível da NBA. Envergadura e altura para a posição são cruciais.
 4.  **Estatísticas Básicas (Peso: 15%):** Métricas de produção bruta. Têm um peso menor, pois a eficiência e o contexto são mais preditivos.
 
-### Melhorias do Algoritmo v2.1
+### Melhorias do Algoritmo
 
 O algoritmo foi aprimorado com base em validação histórica usando dados reais de carreira NBA:
 
@@ -158,5 +158,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **ProspectRadar** - Revolucionando o scouting de basquete no Brasil 🇧🇷🏀
 
-*Versão 2.1.0 - Agosto 2025*
 *Algoritmo validado historicamente com classes de draft NBA 2018-2023*
