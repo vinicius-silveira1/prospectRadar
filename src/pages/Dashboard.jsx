@@ -1,18 +1,25 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, ChevronRight, Heart, AlertTriangle, Lock, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
 import useWatchlist from '../hooks/useWatchlist.js';
+import { useAuth } from '@/context/AuthContext.jsx';
 import DashboardProspectCard from '@/components/DashboardProspectCard.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
-import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
+import { supabase } from '@/lib/supabaseClient.js';
 
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [brazilianProspects, setBrazilianProspects] = useState([]);
+  const [loadingBrazilian, setLoadingBrazilian] = useState(true);
+  const { user } = useAuth();
+  
+  // Only show all draft classes for authenticated Scout users
+  const showAllDraftClasses = user?.subscription_tier?.toLowerCase() === 'scout';
   
   const {
     prospects: allProspects,
@@ -20,9 +27,50 @@ const Dashboard = () => {
     error,
     isLoaded,
     refresh // Adicionado o método refresh
-  } = useProspects(); // Busca todos os prospects
+  } = useProspects({ showAllDraftClasses }); // Filter prospects based on user subscription
 
   const { watchlist, toggleWatchlist } = useWatchlist();
+
+  // Buscar prospects brasileiros diretamente do banco, independente do filtro de draft class
+  useEffect(() => {
+    const fetchBrazilianProspects = async () => {
+      try {
+        setLoadingBrazilian(true);
+        setBrazilianProspects([]); // Limpar estado primeiro
+        
+        // Adicionar timestamp para quebrar cache
+        const timestamp = new Date().getTime();
+        
+        let query = supabase
+          .from('prospects')
+          .select('*')
+          .eq('nationality', '🇧🇷')
+          .order('ranking', { ascending: true });
+
+        // Para usuários não-Scout, mostrar apenas 2026. Para Scout, mostrar todos.
+        if (!showAllDraftClasses) {
+          query = query.eq('draft_class', 2026);
+        }
+
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        
+        // Filtrar explicitamente Winicius Silva como backup
+        const filteredData = (data || []).filter(p => p.name !== 'Winicius Silva Braga');
+        
+        console.log(`🇧🇷 Prospects brasileiros carregados (${timestamp}):`, filteredData?.map(p => p.name));
+        setBrazilianProspects(filteredData);
+      } catch (error) {
+        console.error('Erro ao buscar prospects brasileiros:', error);
+        setBrazilianProspects([]);
+      } finally {
+        setLoadingBrazilian(false);
+      }
+    };
+
+    fetchBrazilianProspects();
+  }, [showAllDraftClasses]);
 
   // Função para tratar o toggle da watchlist com erro
   const handleToggleWatchlist = async (prospectId) => {
@@ -41,14 +89,6 @@ const Dashboard = () => {
   const nbaProspects = useMemo(() => {
     if (!allProspects) return [];
     return allProspects.filter(p => p.scope === 'NBA_DRAFT');
-  }, [allProspects]);
-
-  // Filtra os prospects brasileiros para a seção dedicada
-  const brazilianProspects = useMemo(() => {
-    if (!allProspects) return [];
-    // A forma correta de identificar os brasileiros é pela nacionalidade,
-    // já que o 'scope' era parte da funcionalidade de scraping que foi revertida.
-    return allProspects.filter(p => p.nationality === '🇧🇷');
   }, [allProspects]);
 
   const topProspects = useMemo(() => {
@@ -149,56 +189,34 @@ const Dashboard = () => {
         </div>
       </div>
 
-      
-
-            
-
-      {/* Estatísticas e Exportação */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Estatísticas */}
-        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {dashboardStats.map((stat, index) => (
-            <div key={index} className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg p-6 text-center">
-              <stat.icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
-              <div className="text-2xl font-bold text-gray-900 dark:text-super-dark-text-primary">{stat.value}</div>
-              <div className="text-sm text-gray-600 dark:text-super-dark-text-secondary">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Botão de Exportação */}
-        <div className="lg:col-span-1 bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg p-6 flex items-center justify-center">
-          <div className="text-center w-full">
-            <div className="mb-4">
-              <h3 className="font-semibold text-slate-900 dark:text-super-dark-text-primary mb-2">
-                Exportar Dados
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary">
-                Gere relatórios profissionais
-              </p>
-            </div>
-            <ExportButtons prospects={allProspects} source="dashboard" />
-          </div>
-        </div>
-      </div>
+     
 
       {/* Prospects Brasileiros */}
-      {isLoaded && brazilianProspects.length > 0 && (
+      {!loadingBrazilian && brazilianProspects.length > 0 && (
         <div className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center">
               <Star className="h-5 w-5 text-green-600 mr-2" />
               🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2">Prospects Brasileiros</span>
             </h2>
-            <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
-              {brazilianProspects.length} <span className="font-semibold">prospects</span>
-            </span>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Refresh
+              </button>
+              <span className="text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-3 py-1 rounded-full font-medium">
+                {brazilianProspects.length} <span className="font-semibold">prospects</span>
+              </span>
+            </div>
           </div>
           <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-6 -mt-2">
             Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {brazilianProspects.slice(0, 5).map((prospect) => (
+            {brazilianProspects.slice(0, 8).map((prospect) => (
               <DashboardProspectCard
                 key={prospect.id}
                 prospect={prospect}

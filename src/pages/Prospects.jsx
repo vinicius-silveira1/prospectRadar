@@ -13,6 +13,7 @@ import { parseHeightToInches, parseWingspanToInches, formatInchesToFeet, parseWe
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
+import ExportButtons from '@/components/Common/ExportButtons.jsx';
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
 const getAllAvailableBadges = (prospects) => {
@@ -48,9 +49,13 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
 
 const Prospects = () => {
   const navigate = useNavigate();
-  const { prospects: allProspects, loading, error } = useProspects();
-  const { watchlist, toggleWatchlist } = useWatchlist();
   const { user } = useAuth(); // Get user from AuthContext
+  
+  // Only show all draft classes for authenticated Scout users
+  const showAllDraftClasses = user?.subscription_tier?.toLowerCase() === 'scout';
+  
+  const { prospects: allProspects, loading, error } = useProspects({ showAllDraftClasses });
+  const { watchlist, toggleWatchlist } = useWatchlist();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('all');
@@ -264,6 +269,10 @@ const Prospects = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 md:gap-4">
+              {/* Export Buttons */}
+              <ExportButtons prospects={filteredProspects} source="prospects" />
+              
+              {/* View Mode Toggle */}
               <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><Grid size={18} /></button>
                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-blue-600 dark:text-gray-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}><List size={18} /></button>
