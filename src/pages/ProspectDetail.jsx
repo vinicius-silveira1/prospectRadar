@@ -9,6 +9,7 @@ import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
+import SingleProspectExport from '@/components/Common/SingleProspectExport.jsx';
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
@@ -20,26 +21,33 @@ const AwaitingStats = ({ prospectName }) => (
   </div>
 );
 
-// Placeholder for Pro Features
-const ProFeaturePlaceholder = ({ children, title, featureName }) => (
-  <div className="relative">
-    <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
-      <Lock className="w-10 h-10 text-orange-500" />
-      <h3 className="mt-3 text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
-        {title}
-      </h3>
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
-        Tenha acesso completo a {featureName} no plano Pro.
-      </p>
-      <button className="mt-4 px-5 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-        Fazer Upgrade
-      </button>
+// Placeholder for Scout Features
+const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="relative">
+      <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
+        <Lock className="w-10 h-10 text-orange-500" />
+        <h3 className="mt-3 text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
+          {title}
+        </h3>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
+          Tenha acesso completo a {featureName} no plano Scout.
+        </p>
+        <button 
+          onClick={() => navigate('/pricing')}
+          className="mt-4 px-5 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors"
+        >
+          Fazer Upgrade
+        </button>
+      </div>
+      <div className="opacity-20 blur-sm pointer-events-none">
+        {children}
+      </div>
     </div>
-    <div className="opacity-20 blur-sm pointer-events-none">
-      {children}
-    </div>
-  </div>
-);
+  );
+};
 
 const ProspectDetail = () => {
   const { id } = useParams();
@@ -50,7 +58,7 @@ const ProspectDetail = () => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
 
   // Simulate user plan. Replace with actual user data.
-  const isPro = user?.plan === 'pro'; // This will be false for free/unauthenticated users
+  const isScout = user?.subscription_tier?.toLowerCase() === 'scout'; // This will be false for free/unauthenticated users
 
   const getWeightDisplay = (weight) => {
     let parsedWeight = weight;
@@ -197,6 +205,34 @@ const ProspectDetail = () => {
               </div>
             </div>
 
+            {/* Estatísticas Básicas - Mobile */}
+            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Estatísticas</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {(() => {
+                  const renderStat = (label, value, colorClass) => (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600 dark:text-super-dark-text-secondary">{label}</span>
+                      <span className={`font-bold ${colorClass}`}>{value ?? 'N/A'}</span>
+                    </div>
+                  );
+
+                  return (
+                    <>
+                      {renderStat('Pontos', prospect.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
+                      {renderStat('Rebotes', prospect.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
+                      {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
+                      {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
+                      {renderStat('FG%', fgPercentage, 'text-cyan-500 dark:text-cyan-400')}
+                      {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
+                      {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
             {hasStats ? (
               <>
                 <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
@@ -236,12 +272,12 @@ const ProspectDetail = () => {
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-purple-500" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                      {isPro ? (
+                      {isScout ? (
                         <div><RadarScoreChart data={evaluation.categoryScores} /></div>
                       ) : (
-                        <ProFeaturePlaceholder title="Análise Gráfica do Radar Score" featureName="a análise gráfica detalhada">
+                        <ScoutFeaturePlaceholder title="Análise Gráfica do Radar Score" featureName="a análise gráfica detalhada">
                           <div><RadarScoreChart data={evaluation.categoryScores} /></div>
-                        </ProFeaturePlaceholder>
+                        </ScoutFeaturePlaceholder>
                       )}
                       <div className="space-y-4">
                         <div><h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
@@ -295,9 +331,9 @@ const ProspectDetail = () => {
               </div>
             )}
 
-            {/* SEÇÃO DE COMPARAÇÕES NBA (PRO) */}
+            {/* SEÇÃO DE COMPARAÇÕES NBA (SCOUT) */}
             {hasStats && (
-              isPro ? (
+              isScout ? (
                 comparablePlayers.length > 0 && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-cyan-500" />Comparações com Jogadores da NBA</h2>
@@ -313,7 +349,7 @@ const ProspectDetail = () => {
                   </div>
                 )
               ) : (
-                <ProFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
+                <ScoutFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Comparações com Jogadores da NBA</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -323,13 +359,13 @@ const ProspectDetail = () => {
                       </div>
                     </div>
                   </div>
-                </ProFeaturePlaceholder>
+                </ScoutFeaturePlaceholder>
               )
             )}
 
-            {/* ANÁLISE DO JOGADOR (PRO) */}
+            {/* ANÁLISE DO JOGADOR (SCOUT) */}
             {hasStats && (
-              isPro ? (
+              isScout ? (
                 (prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-orange-500" />Análise Detalhada do Jogador</h2>
@@ -364,7 +400,7 @@ const ProspectDetail = () => {
                   </div>
                 )
               ) : (
-                <ProFeaturePlaceholder title="Análise Detalhada do Jogador" featureName="a análise de pontos fortes e fracos">
+                <ScoutFeaturePlaceholder title="Análise Detalhada do Jogador" featureName="a análise de pontos fortes e fracos">
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6">Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -378,16 +414,13 @@ const ProspectDetail = () => {
                       </div>
                     </div>
                   </div>
-                </ProFeaturePlaceholder>
+                </ScoutFeaturePlaceholder>
               )
             )}
           </div>
-          <div className="space-y-6">
+          <div className="hidden lg:block space-y-6">
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                <span className="text-xs bg-blue-100 text-blue-700 dark:bg-black/50 dark:text-blue-300 px-2 py-1 rounded-full font-medium">{prospect.scope || 'N/A'}</span>
-              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Estatísticas</h3>
               <div className="space-y-4">
                 {(() => {
                   const renderStat = (label, value, colorClass) => (
@@ -421,6 +454,7 @@ const ProspectDetail = () => {
               <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
               <div className="space-y-3">
                 <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
+                <SingleProspectExport prospect={prospect} />
                 {user && <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</button>}
                 <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</button>
               </div>

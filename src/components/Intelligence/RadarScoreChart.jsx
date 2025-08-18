@@ -34,7 +34,7 @@ const RadarScoreChart = ({ data }) => {
   });
 
   return (
-    <div style={{ width: '100%', height: 350 }}>
+    <div id="radar-chart-container" data-testid="radar-chart" style={{ width: '100%', height: 350 }}>
       <ResponsiveContainer>
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <defs>

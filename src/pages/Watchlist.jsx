@@ -7,6 +7,7 @@ import useWatchlist from '@/hooks/useWatchlist';
 import useProspects from '@/hooks/useProspects';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import WatchlistProspectCard from '@/components/Watchlist/WatchlistProspectCard';
+import ExportButtons from '@/components/Common/ExportButtons.jsx';
 
 const Watchlist = () => {
   const { user } = useAuth();
@@ -72,17 +73,21 @@ const Watchlist = () => {
               Você está acompanhando {favoritedProspects.length} prospect(s) na sua lista de favoritos.
             </p>
           </div>
+          <div className="mt-4 md:mt-0">
+            <ExportButtons prospects={favoritedProspects} source="watchlist" />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {favoritedProspects.map((prospect) => (
-          <WatchlistProspectCard
-            key={prospect.id}
-            prospect={prospect}
-            toggleWatchlist={toggleWatchlist}
-            isInWatchlist={watchlist.has(prospect.id)}
-          />
+          <div key={prospect.id} className="flex flex-col">
+            <WatchlistProspectCard
+              prospect={prospect}
+              toggleWatchlist={toggleWatchlist}
+              isInWatchlist={watchlist.has(prospect.id)}
+            />
+          </div>
         ))}
       </div>
     </div>

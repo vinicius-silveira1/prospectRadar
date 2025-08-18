@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, ChevronDown, Zap, Star, Lock } from 'lucide-react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, ChevronDown, Zap, Star, Lock, X } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx'; // Import useAuth
@@ -10,20 +10,19 @@ import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import RangeSlider from '@/components/Common/RangeSlider.jsx';
 import { parseHeightToInches, parseWingspanToInches, formatInchesToFeet, parseWeightToLbs } from '@/utils/filterUtils.js';
+import { assignBadges } from '@/lib/badges';
+import Badge from '@/components/Common/Badge';
+import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 
-const BADGES = [
-  'Cobrador de lance livre de elite',
-  'Arremessador de 3pt de elite',
-  'Playmaker de poucos erros e muito impacto',
-  'Produção ofensiva extremamente eficiente (PER)',
-  'Atirador de elite',
-  'Criador eficiente',
-  'Motor defensivo',
-  'Potencial "3&D"',
-  'Alto volume de rebotes para guard/ala',
-  'Alto volume de roubos/tocos para guard/ala',
-  'Melhora significativa ano a ano',
-];
+// Extrair todas as badges únicas dos prospects carregados para o filtro
+const getAllAvailableBadges = (prospects) => {
+  const badgeSet = new Set();
+  prospects.forEach(prospect => {
+    const badges = assignBadges(prospect);
+    badges.forEach(badge => badgeSet.add(badge.label));
+  });
+  return Array.from(badgeSet).sort();
+};
 
 // Placeholder for Pro Features - Styled to match ProspectDetail
 const ProFeaturePlaceholder = ({ children, title, featureName }) => (
@@ -48,6 +47,7 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
 
 
 const Prospects = () => {
+  const navigate = useNavigate();
   const { prospects: allProspects, loading, error } = useProspects();
   const { watchlist, toggleWatchlist } = useWatchlist();
   const { user } = useAuth(); // Get user from AuthContext
@@ -59,6 +59,7 @@ const Prospects = () => {
   const [sortBy, setSortBy] = useState('ranking');
   const [searchParams] = useSearchParams();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   
   // User plan is now derived from the user object
   const userPlan = user?.subscription_tier?.toLowerCase() || 'free';
@@ -83,6 +84,19 @@ const Prospects = () => {
       setSearchTerm(query);
     }
   }, [searchParams]);
+
+  // Função para tratar o toggle da watchlist com erro
+  const handleToggleWatchlist = async (prospectId) => {
+    try {
+      await toggleWatchlist(prospectId);
+    } catch (error) {
+      if (error.message.includes('Limite de') && error.message.includes('prospects na watchlist atingido')) {
+        setIsUpgradeModalOpen(true);
+      } else {
+        console.error('Erro ao adicionar à watchlist:', error);
+      }
+    }
+  };
 
   const advancedFilterRanges = useMemo(() => {
     const defaultRanges = {
@@ -119,6 +133,11 @@ const Prospects = () => {
         max: weights.length > 0 ? Math.ceil(Math.max(...weights)) : defaultRanges.weight.max 
       },
     };
+  }, [allProspects]);
+
+  // Calcular badges disponíveis dinamicamente
+  const availableBadges = useMemo(() => {
+    return getAllAvailableBadges(allProspects);
   }, [allProspects]);
 
   useEffect(() => {
@@ -170,8 +189,10 @@ const Prospects = () => {
         const matchesRPG = !minRPG || prospect.rpg >= minRPG;
         const matchesAPG = !minAPG || prospect.apg >= minAPG;
         
-        const prospectBadges = prospect.evaluation?.flags?.map(f => f.message.trim()) || [];
-        const matchesBadge = selectedBadge === 'all' || prospectBadges.includes(selectedBadge);
+        // Usar badges reais dos cards em vez das flags
+        const prospectBadges = assignBadges(prospect);
+        const prospectBadgeLabels = prospectBadges.map(badge => badge.label);
+        const matchesBadge = selectedBadge === 'all' || prospectBadgeLabels.includes(selectedBadge);
 
         return matchesSearch && matchesPosition && matchesTier && matchesAge && matchesHeight && matchesWingspan && matchesWeight &&
                matches3PTP && matchesPPG && matchesRPG && matchesAPG && matchesBadge;
@@ -279,10 +300,10 @@ const Prospects = () => {
             <div className="relative mt-6 pt-6 border-t border-slate-200 dark:border-super-dark-border">
               {userPlan === 'free' ? (
                 <ProFeaturePlaceholder title="Filtros Avançados e de Estatísticas" featureName="os filtros avançados">
-                  <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} />
+                  <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
                 </ProFeaturePlaceholder>
               ) : (
-                 <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} />
+                 <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
               )}
             </div>
           )}
@@ -306,19 +327,115 @@ const Prospects = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProspects.map((prospect) => {
               const isInWatchList = watchlist.has(prospect.id);
+              const badges = assignBadges(prospect);
+              
               return (
                 <div key={prospect.id} className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300 overflow-hidden">
-                  <div className="relative"><button onClick={() => toggleWatchlist(prospect.id)} className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 transition-all"><Heart size={16} className={`transition-colors ${isInWatchList ? 'text-red-500 fill-current' : 'text-slate-400 hover:text-red-500'}`} /></button><div className="h-48 flex items-center justify-center text-white text-5xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>{prospect.image ? <img src={prospect.image} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" /> : <span>{getInitials(prospect?.name)}</span>}</div></div>
-                  <div className="p-4"><Link to={`/prospects/${prospect.id}`} className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg mb-1 line-clamp-1 hover:text-blue-600 dark:hover:text-gray-400 transition-colors">
-              {prospect.name}
-            </Link>
-            {prospect.radar_score && (
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
-                <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
-                <span className="text-xs">Radar Score</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 mb-3 mt-1"><span className={`badge-position ${prospect.position}`}>{prospect.position}</span><span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">{prospect.tier}</span></div><div className="space-y-2 text-sm text-slate-600 dark:text-super-dark-text-secondary"><div className="flex items-center gap-2"><GraduationCap size={14} /><span className="line-clamp-1">{prospect.high_school_team || 'N/A'}</span></div><div className="flex items-center gap-2"><Globe size={14} /><span>{prospect.nationality || 'N/A'}</span></div></div><div className="border-t dark:border-super-dark-border mt-3 pt-3 grid grid-cols-3 gap-4 text-center"><div className="flex flex-col"><span>PPG</span> <span className="font-bold text-blue-600 dark:text-blue-400">{prospect.ppg?.toFixed(1) || '-'}</span></div><div className="flex flex-col"><span>RPG</span> <span className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</span></div><div className="flex flex-col"><span>APG</span> <span className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</span></div></div><div className="mt-4 flex gap-2"><Link to={`/prospects/${prospect.id}`} className="flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link><Link to={`/compare?add=${prospect.id}`} className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm">Comparar</Link></div></div>
+                  {/* Header Image */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => handleToggleWatchlist(prospect.id)} 
+                      className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 transition-all"
+                    >
+                      <Heart 
+                        size={16} 
+                        className={`transition-colors ${isInWatchList ? 'text-red-500 fill-current' : 'text-slate-400 hover:text-red-500'}`} 
+                      />
+                    </button>
+                    <div 
+                      className="h-48 flex items-center justify-center text-white text-5xl font-bold" 
+                      style={{ backgroundColor: getColorFromName(prospect?.name) }}
+                    >
+                      {prospect.image ? (
+                        <img 
+                          src={prospect.image} 
+                          alt={prospect?.name || 'Prospect'} 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <span>{getInitials(prospect?.name)}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-4 space-y-3">
+                    {/* Name and Radar Score */}
+                    <div className="space-y-2">
+                      <Link 
+                        to={`/prospects/${prospect.id}`} 
+                        className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-blue-600 dark:hover:text-gray-400 transition-colors block"
+                      >
+                        {prospect.name}
+                      </Link>
+                      
+                      {prospect.radar_score && (
+                        <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
+                          <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
+                          <span className="text-xs">Radar Score</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Position and Tier */}
+                    <div className="flex items-center gap-2">
+                      <span className={`badge-position ${prospect.position}`}>{prospect.position}</span>
+                      <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">{prospect.tier}</span>
+                    </div>
+
+                    {/* Badges */}
+                    {badges.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {badges.map((badge, index) => (
+                          <Badge key={index} badge={badge} />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Info Details */}
+                    <div className="space-y-2 text-sm text-slate-600 dark:text-super-dark-text-secondary">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap size={14} />
+                        <span className="line-clamp-1">{prospect.high_school_team || 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Globe size={14} />
+                        <span>{prospect.nationality || 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-4 text-center text-sm">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-500 dark:text-super-dark-text-secondary">PPG</span> 
+                        <span className="font-bold text-blue-600 dark:text-blue-400">{prospect.ppg?.toFixed(1) || '-'}</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-500 dark:text-super-dark-text-secondary">RPG</span> 
+                        <span className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-slate-500 dark:text-super-dark-text-secondary">APG</span> 
+                        <span className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2">
+                      <Link 
+                        to={`/prospects/${prospect.id}`} 
+                        className="flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium"
+                      >
+                        Ver Detalhes
+                      </Link>
+                      <Link 
+                        to={`/compare?add=${prospect.id}`} 
+                        className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm"
+                      >
+                        Comparar
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -327,46 +444,82 @@ const Prospects = () => {
           <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border overflow-hidden">
             <div className="hidden md:block px-6 py-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
               <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-500 dark:text-super-dark-text-secondary uppercase tracking-wider">
-                <div className="col-span-5">Nome</div>
+                <div className="col-span-3">Nome</div>
+                <div className="col-span-2">Badges</div>
+                <div className="col-span-1 text-center">Radar</div>
                 <div className="col-span-1 text-center">Pos</div>
                 <div className="col-span-1 text-center">PPG</div>
                 <div className="col-span-1 text-center">RPG</div>
                 <div className="col-span-1 text-center">APG</div>
-                <div className="col-span-2">Universidade</div>
+                <div className="col-span-1">Universidade</div>
                 <div className="col-span-1 text-center">Ações</div>
               </div>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-super-dark-border">
               {filteredProspects.map((prospect) => {
                 const isInWatchList = watchlist.has(prospect.id);
+                const badges = assignBadges(prospect);
+                
                 return (
                   <Link to={`/prospects/${prospect.id}`} key={prospect.id} className="block px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
                     <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
-                      <div className="col-span-3 md:col-span-5 flex items-center space-x-4">
-                        <div>
+                      {/* Nome (col-span-3 no desktop) */}
+                      <div className="col-span-3 md:col-span-3 flex items-center space-x-4">
+                        <div className="space-y-1">
                           <div className="font-medium text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</div>
-                          {prospect.radar_score && (
-                            <div className="inline-flex items-center space-x-1 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 text-xs">
-                              <span className="font-bold">{prospect.radar_score.toFixed(2)}</span>
-                              <span>Radar Score</span>
-                            </div>
-                          )}
                           <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
                         </div>
                       </div>
+
+                      {/* Badges (col-span-2 no desktop) */}
+                      <div className="hidden md:flex md:col-span-2 items-center">
+                        {badges.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {badges.slice(0, 3).map((badge, index) => (
+                              <Badge key={index} badge={badge} />
+                            ))}
+                            {badges.length > 3 && (
+                              <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
+                                +{badges.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 text-xs">Sem badges</span>
+                        )}
+                      </div>
+
+                      {/* Radar Score (col-span-1 no desktop) */}
+                      <div className="hidden md:flex md:col-span-1 items-center justify-center">
+                        {prospect.radar_score ? (
+                          <div className="inline-flex items-center space-x-1 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 text-xs">
+                            <span className="font-bold">{prospect.radar_score.toFixed(2)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 text-xs">-</span>
+                        )}
+                      </div>
+
+                      {/* Posição */}
                       <div className="col-span-1 flex items-center justify-center">
                         <span className={`badge-position ${prospect.position}`}>{prospect.position}</span>
                       </div>
+
+                      {/* Estatísticas */}
                       <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.ppg?.toFixed(1) ?? '-'}</div>
                       <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.rpg?.toFixed(1) ?? '-'}</div>
                       <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.apg?.toFixed(1) ?? '-'}</div>
-                      <div className="col-span-2 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1">{prospect.high_school_team || 'N/A'}</div>
+
+                      {/* Universidade */}
+                      <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.high_school_team || 'N/A'}</div>
+
+                      {/* Ações */}
                       <div className="col-span-1 flex justify-end md:justify-center">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            toggleWatchlist(prospect.id);
+                            handleToggleWatchlist(prospect.id);
                           }}
                           className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-super-dark-border transition-colors"
                         >
@@ -392,11 +545,19 @@ const Prospects = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Upgrade para Watchlist */}
+      <UpgradeModal 
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        feature="watchlist"
+        limit={5}
+      />
     </div>
   );
 };
 
-const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) => (
+const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses, availableBadges }) => (
   <>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <RangeSlider 
@@ -490,7 +651,7 @@ const AdvancedFiltersContent = ({ ranges, handlers, values, inputBaseClasses }) 
           <label htmlFor="badge-filter" className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1 flex items-center gap-1"><Star size={14} /> Badges</label>
           <select id="badge-filter" value={values.selectedBadge} onChange={(e) => handlers.setSelectedBadge(e.target.value)} className={`${inputBaseClasses} w-full`}>
             <option value="all">Todas as Badges</option>
-            {BADGES.map(badge => <option key={badge} value={badge}>{badge}</option>)}
+            {availableBadges.map(badge => <option key={badge} value={badge}>{badge}</option>)}
           </select>
         </div>
       </div>

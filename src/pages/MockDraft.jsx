@@ -1,5 +1,5 @@
 // 🏀 MockDraft.jsx - Página principal do Mock Draft
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
@@ -8,13 +8,14 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useProspectImage } from '@/hooks/useProspectImage';
 import { assignBadges } from '@/lib/badges';
+import UpgradeModal from '@/components/Common/UpgradeModal';
 import Badge from '@/components/Common/Badge';
 import useMockDraft from '../hooks/useMockDraft.js';
 import useProspects from '@/hooks/useProspects.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -39,6 +40,7 @@ const MockDraft = () => {
   // Estados para os novos modais
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
 
@@ -46,6 +48,10 @@ const MockDraft = () => {
 
   const draftStats = getDraftStats() || { totalPicked: 0, remaining: 0, byPosition: {} };
   const bigBoard = getBigBoard();
+  const availableBigBoard = useMemo(() => {
+    const draftedProspectIds = new Set(draftHistory.map(pick => pick.prospect.id));
+    return bigBoard.filter(prospect => !draftedProspectIds.has(prospect.id));
+  }, [bigBoard, draftHistory]);
   const recommendations = getProspectRecommendations(currentPick);
 
   useEffect(() => {
@@ -76,8 +82,14 @@ const MockDraft = () => {
       setNotification({ type: 'success', message: 'Draft salvo com sucesso!' });
       setIsSaveModalOpen(false);
     } catch (error) {
-      setNotification({ type: 'error', message: error.message });
-      setIsSaveModalOpen(false); // Fecha o modal de salvar para mostrar o de upgrade
+      // Se o erro for sobre limite de drafts, mostrar modal de upgrade
+      if (error.message.includes('Limite de') && error.message.includes('drafts salvos atingido')) {
+        setIsSaveModalOpen(false);
+        setIsUpgradeModalOpen(true);
+      } else {
+        setNotification({ type: 'error', message: error.message });
+        setIsSaveModalOpen(false);
+      }
     }
   };
 
@@ -105,23 +117,35 @@ const MockDraft = () => {
       {/* ... (Header não modificado) ... */}
       <div className="relative bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-lg shadow-lg">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
-              <Shuffle className="h-6 md:h-8 w-6 md:w-8 mr-2 md:mr-3" />
-              <span className="flex items-center flex-wrap gap-1">
-                <span className="text-yellow-300">Mock Draft</span>
-                <span>{draftSettings.draftClass}</span>
-              </span>
-            </h1>
-            <p className="text-blue-100 dark:text-super-dark-text-secondary mt-2 text-sm md:text-base">
-              Monte seu próprio draft com {allProspects.length} prospects reais e curados
-            </p>
-          </div>
-          <div className="text-right flex flex-col items-end">
-            <div className="text-3xl md:text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-2 shadow-lg animate-pulse-once rounded-full">\n              {currentPick}
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold flex items-center text-slate-900 dark:text-super-dark-text-primary">
+                  <Shuffle className="h-6 md:h-8 w-6 md:w-8 mr-2 md:mr-3" />
+                  <span className="flex items-center flex-wrap gap-2">
+                    <span className="text-yellow-300">Mock Draft</span>
+                    <span>{draftSettings.draftClass}</span>
+                  </span>
+                </h1>
+                {/* Pick indicator - visible on mobile next to title */}
+                <div className="lg:hidden">
+                  <div className="text-2xl md:text-3xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-2 md:px-3 py-1 shadow-lg animate-pulse-once rounded-full">
+                    {currentPick}
+                  </div>
+                </div>
+              </div>
+              <p className="text-blue-100 dark:text-super-dark-text-secondary text-sm md:text-base">
+                Monte seu próprio draft com {allProspects.length} prospects reais e curados
+              </p>
             </div>
-            <div className="text-sm text-blue-100 dark:text-super-dark-text-secondary mt-1">Pick Atual</div>
+            {/* Pick indicator - visible on desktop on the right */}
+            <div className="hidden lg:flex flex-col items-end text-right">
+              <div className="text-3xl md:text-5xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 md:px-4 py-2 shadow-lg animate-pulse-once rounded-full">
+                {currentPick}
+              </div>
+              <div className="text-sm text-blue-100 dark:text-super-dark-text-secondary mt-1">Pick Atual</div>
+            </div>
           </div>
         </div>
         
@@ -219,7 +243,7 @@ const MockDraft = () => {
           </div>
 
           {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} />}
-          {view === 'bigboard' && <BigBoardView prospects={bigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
+          {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
           {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} />}
         </div>
       </div>
@@ -240,6 +264,12 @@ const MockDraft = () => {
         onLoad={handleLoadDraft} 
         onDelete={handleDeleteDraft} 
         isLoading={isLoadingDrafts} 
+      />
+      <UpgradeModal 
+        isOpen={isUpgradeModalOpen} 
+        onClose={() => setIsUpgradeModalOpen(false)} 
+        feature="mock draft"
+        limit={2}
       />
 
       <div className="absolute left-[-9999px] top-0 z-[-10]">
@@ -446,6 +476,7 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
   );
 };
 
+// Modal de Upgrade para Mock Draft
 export default MockDraft;
 
 const teamFullNames = {

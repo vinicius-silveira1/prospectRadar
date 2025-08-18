@@ -29,13 +29,13 @@ function Compare() {
   // Limites baseados no plano
   const getMaxComparisons = () => {
     if (!user) return 2; // Usuário não logado
-    return user.subscription_tier === 'scout' ? 4 : 2;
+    return user.subscription_tier?.toLowerCase() === 'scout' ? 4 : 2;
   };
 
   const maxComparisons = getMaxComparisons();
   
   // Para usuários free, sempre mostramos 3 slots (2 funcionais + 1 upgrade)
-  const totalSlotsToShow = user?.subscription_tier === 'scout' ? 4 : 3;
+  const totalSlotsToShow = user?.subscription_tier?.toLowerCase() === 'scout' ? 4 : 3;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -120,7 +120,7 @@ function Compare() {
             </h1>
             <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
               Compare até {maxComparisons} prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
-              {user?.subscription_tier !== 'scout' && (
+              {user?.subscription_tier?.toLowerCase() !== 'scout' && (
                 <span className="block mt-1 text-sm text-yellow-200">
                   <Lock className="inline h-4 w-4 mr-1" />
                   Upgrade para Scout para comparar até 4 prospects
@@ -171,7 +171,7 @@ function Compare() {
           <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / {maxComparisons})</h2>
           {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
         </div>
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.subscription_tier === 'scout' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 min-h-[6rem]`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.subscription_tier?.toLowerCase() === 'scout' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4 min-h-[6rem]`}>
           {selectedProspects.map((prospect) => {
             return (
               <CompareProspectCard key={prospect.id} prospect={prospect} onRemove={removeProspect} />
@@ -183,7 +183,7 @@ function Compare() {
             const slotPosition = selectedProspects.length + index;
             
             // Para usuários não-scout, o terceiro slot (posição 2) é sempre upgrade
-            const isFreeUser = !user || user.subscription_tier !== 'scout';
+            const isFreeUser = !user || user.subscription_tier?.toLowerCase() !== 'scout';
             const isUpgradeSlot = isFreeUser && slotPosition === 2;
             
             if (isUpgradeSlot) {

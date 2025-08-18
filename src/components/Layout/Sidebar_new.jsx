@@ -10,7 +10,8 @@ import {
   X,
   Info,
   Lightbulb,
-  CreditCard
+  CreditCard,
+  Award
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -19,6 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/prospects', icon: Users, label: 'Prospects', isBrand: true },
+    { path: '/nba-players', icon: Award, label: 'NBA Players', isNBA: true },
     { path: '/draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
@@ -69,14 +71,17 @@ const Sidebar = ({ isOpen, onClose }) => {
                     ? 'bg-brand-orange text-white shadow-lg'
                     : item.isSpecial && !isActive
                     ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 border border-indigo-200 dark:border-indigo-800'
+                    : item.isNBA && !isActive
+                    ? 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 border border-purple-200 dark:border-purple-800'
                     : 'text-slate-600 dark:text-super-dark-text-primary hover:bg-brand-orange/10 dark:hover:bg-super-dark-border hover:text-brand-orange'
                 }`}
                 onClick={onClose} // Fecha o menu no mobile ao clicar
               >
-                <Icon className={`h-5 w-5 ${isActive ? 'text-white' : item.isSpecial ? 'text-indigo-500' : ''}`} />
+                <Icon className={`h-5 w-5 ${isActive ? 'text-white' : item.isSpecial ? 'text-indigo-500' : item.isNBA ? 'text-purple-500' : ''}`} />
                 <span className={`font-medium ${
                   item.isBrand && !isActive ? 'text-brand-orange' : 
-                  item.isSpecial && !isActive ? 'text-indigo-600 dark:text-indigo-400' : ''
+                  item.isSpecial && !isActive ? 'text-indigo-600 dark:text-indigo-400' : 
+                  item.isNBA && !isActive ? 'text-purple-600 dark:text-purple-400' : ''
                 }`}>
                   {item.label}
                 </span>

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 
+const WATCHLIST_LIMIT_FREE = 5; // Limite de prospects na watchlist para usuários free
+
 export default function useWatchlist() {
   const { user } = useAuth();
   const [watchlist, setWatchlist] = useState(new Set());
@@ -41,9 +43,17 @@ export default function useWatchlist() {
 
   const addToWatchlist = async (prospectId) => {
     if (!user || watchlist.has(prospectId)) return;
+    
+    // Verificação de limite para usuários free
+    if (user.subscription_tier === 'free' && watchlist.size >= WATCHLIST_LIMIT_FREE) {
+      throw new Error(`Limite de ${WATCHLIST_LIMIT_FREE} prospects na watchlist atingido para usuários free. Faça o upgrade para adicionar mais.`);
+    }
+    
     const { error } = await supabase.from('user_watchlists').insert({ user_id: user.id, prospect_id: prospectId });
     if (!error) {
       setWatchlist(prev => new Set(prev).add(prospectId));
+    } else {
+      throw error;
     }
   };
 
@@ -59,13 +69,23 @@ export default function useWatchlist() {
     }
   };
 
-  const toggleWatchlist = (prospectId) => {
+  const toggleWatchlist = async (prospectId) => {
     if (!user) {
       // Poderíamos redirecionar para o login aqui, se quiséssemos.
       alert("Você precisa estar logado para adicionar à watchlist.");
       return;
     }
-    watchlist.has(prospectId) ? removeFromWatchlist(prospectId) : addToWatchlist(prospectId);
+    
+    try {
+      if (watchlist.has(prospectId)) {
+        await removeFromWatchlist(prospectId);
+      } else {
+        await addToWatchlist(prospectId);
+      }
+    } catch (error) {
+      // Propagar o erro para ser tratado pelos componentes
+      throw error;
+    }
   };
 
   return { watchlist, loading, error, toggleWatchlist, fetchWatchlist };

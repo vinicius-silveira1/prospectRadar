@@ -7,31 +7,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserWithProfile = async () => {
+    setLoading(true);
+    // Busca a sessão e o usuário da autenticação
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.user) {
+      // Se há um usuário logado, busca seu perfil na tabela 'profiles'
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', session.user.id)
+        .single();
+
+      // Combina os dados do usuário (auth) com os dados do perfil (db)
+      const combinedUser = {
+        ...session.user,
+        subscription_tier: profile?.subscription_tier || 'free',
+      };
+      
+      setUser(combinedUser);
+    } else {
+      setUser(null);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchUserWithProfile = async () => {
-      setLoading(true);
-      // Busca a sessão e o usuário da autenticação
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        // Se há um usuário logado, busca seu perfil na tabela 'profiles'
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('subscription_tier')
-          .eq('id', session.user.id)
-          .single();
-
-        // Combina os dados do usuário (auth) com os dados do perfil (db)
-        setUser({
-          ...session.user,
-          subscription_tier: profile?.subscription_tier || 'free',
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    };
-    
     fetchUserWithProfile();
 
     // Escuta por mudanças no estado de autenticação para atualizar em tempo real
@@ -55,6 +57,8 @@ export const AuthProvider = ({ children }) => {
     signIn: (data) => supabase.auth.signInWithPassword(data),
     signUp: (data) => supabase.auth.signUp(data),
     signOut: () => supabase.auth.signOut(),
+    // Método para forçar atualização do perfil
+    refreshUserProfile: fetchUserWithProfile,
   };
 
   return (

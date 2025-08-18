@@ -50,6 +50,12 @@ const Header = ({ onMenuClick }) => {
               Prospects
             </Link>
             <Link 
+              to="/nba-players" 
+              className="text-slate-700 hover:text-brand-orange transition-colors font-medium"
+            >
+              🏆 NBA
+            </Link>
+            <Link 
               to="/draft" 
               className="text-slate-700 hover:text-brand-orange transition-colors font-medium"
             >
