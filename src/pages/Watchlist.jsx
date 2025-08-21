@@ -8,8 +8,12 @@ import useProspects from '@/hooks/useProspects';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import WatchlistProspectCard from '@/components/Watchlist/WatchlistProspectCard';
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
+import ProspectNotesCard from '@/components/Watchlist/ProspectNotesCard';
+import useProspectNotes from '@/hooks/useProspectNotes';
 
 const Watchlist = () => {
+  const { getNote, saveNote, deleteNote, saving } = useProspectNotes();
+  const [openNotesId, setOpenNotesId] = React.useState(null);
   const { user } = useAuth();
   const { watchlist, toggleWatchlist, loading: watchlistLoading } = useWatchlist();
   const { prospects: allProspects, loading: prospectsLoading } = useProspects();
@@ -81,12 +85,28 @@ const Watchlist = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {favoritedProspects.map((prospect) => (
-          <div key={prospect.id} className="flex flex-col">
+          <div key={prospect.id} className="relative flex flex-col">
             <WatchlistProspectCard
               prospect={prospect}
               toggleWatchlist={toggleWatchlist}
               isInWatchlist={watchlist.has(prospect.id)}
+              onOpenNotes={() => {
+                setOpenNotesId(openNotesId === prospect.id ? null : prospect.id);
+              }}
             />
+            {openNotesId === prospect.id && (
+              <div className="absolute left-0 top-full w-full z-20">
+                <ProspectNotesCard
+                  prospect={prospect}
+                  isOpen={true}
+                  onClose={() => setOpenNotesId(null)}
+                  note={getNote(prospect.id)}
+                  onSave={saveNote}
+                  onDelete={deleteNote}
+                  isSaving={saving.has(prospect.id)}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

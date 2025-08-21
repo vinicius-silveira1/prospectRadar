@@ -57,7 +57,7 @@ const ProspectNotesCard = ({
   if (!isOpen) return null;
 
   return (
-    <div className="mt-4 animate-fade-in">
+  <div className="mt-4 animate-fade-in w-full max-w-md mx-auto bg-white dark:bg-transparent shadow-2xl rounded-xl">
       {/* Bloco de Notas Realista */}
       <div 
         className="relative bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-slate-700 dark:to-slate-800 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300 border dark:border-slate-600"
@@ -160,7 +160,7 @@ const ProspectNotesCard = ({
 
           {/* Botões */}
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-300 dark:border-slate-600">
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}

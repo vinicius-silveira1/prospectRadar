@@ -156,14 +156,14 @@ const ProspectDetail = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-super-dark-primary">
       <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl">
         <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M5 0h1L0 6V5zM6 5v1H5z\'%3E%3C/path%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          <button onClick={() => navigate('/prospects')} className="flex items-center text-blue-100 hover:text-white transition-colors mb-6">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Voltar para <span className="text-yellow-300 font-semibold ml-1">Prospects</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
+          <button onClick={() => navigate('/prospects')} className="flex items-center text-blue-100 hover:text-white transition-colors mb-4 sm:mb-6">
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            <span className="text-sm sm:text-base">Voltar para <span className="text-yellow-300 font-semibold ml-1">Prospects</span></span>
           </button>
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
             {/* Prospect Image */}
-            <div className="flex-shrink-0 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-4xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+            <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl sm:text-4xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
               {isLoading ? (
                 <div className="w-full h-full bg-slate-300 dark:bg-slate-600 animate-pulse"></div>
               ) : imageUrl ? (
@@ -174,18 +174,18 @@ const ProspectDetail = () => {
             </div>
 
             {/* Prospect Info */}
-            <div className="text-center md:text-left flex-grow">
-              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-white mb-2">{prospect.name}</h1>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPositionColor(prospect.position)}`}>{prospect.position}</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || prospect.tier}</span>
+            <div className="text-center md:text-left flex-grow min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white mb-2 break-words">{prospect.name}</h1>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getPositionColor(prospect.position)}`}>{prospect.position}</span>
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || prospect.tier}</span>
                 <div className="flex items-center">{getStarRating(prospect)}</div>
               </div>
-              <div className="flex items-center justify-center md:justify-start gap-4 text-blue-100 text-lg">
-                <div className="flex items-center"><MapPin className="w-5 h-5 mr-2" />{prospect.team || 'N/A'}</div>
-                <div className="flex items-center"><Calendar className="w-5 h-5 mr-2" />{prospect.age} anos</div>
-                <div className="flex items-center"><Ruler className="w-5 h-5 mr-2" />{getHeightDisplay(prospect.height)}</div>
-                <div className="flex items-center"><Weight className="w-5 h-5 mr-2" />{getWeightDisplay(prospect.weight)}</div>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-4 text-blue-100 text-sm sm:text-base lg:text-lg">
+                <div className="flex items-center whitespace-nowrap"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" /><span className="truncate">{prospect.team || 'N/A'}</span></div>
+                <div className="flex items-center whitespace-nowrap"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{prospect.age} anos</div>
+                <div className="flex items-center whitespace-nowrap"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getHeightDisplay(prospect.height)}</div>
+                <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(prospect.weight)}</div>
               </div>
             </div>
 
@@ -193,28 +193,28 @@ const ProspectDetail = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
-            <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Award className="w-5 h-5 mr-2 text-orange-500" />Informações Básicas</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {prospect.nationality === '🇧🇷' && <div className="flex items-center"><Globe className="w-5 h-5 text-gray-400 dark:text-super-dark-text-secondary mr-3" /><div><div className="text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
-                <div className="flex items-center"><MapPin className="w-5 h-5 text-gray-400 dark:text-super-dark-text-secondary mr-3" /><div><div className="text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{prospect.team || 'N/A'}</div></div></div>
-                <div className="flex items-center"><Calendar className="w-5 h-5 text-gray-400 dark:text-super-dark-text-secondary mr-3" /><div><div className="text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Idade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{prospect.age} anos</div></div></div>
-                <div className="flex items-center"><Ruler className="w-5 h-5 text-gray-400 dark:text-super-dark-text-secondary mr-3" /><div><div className="text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}</div></div></div>
-                <div className="flex items-center"><Weight className="w-5 h-5 text-gray-400 dark:text-super-dark-text-secondary mr-3" /><div><div className="text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{getWeightDisplay(prospect.weight)}</div></div></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+            <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-500 flex-shrink-0" />Informações Básicas</h2>
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                {prospect.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
+                <div className="flex items-start"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{prospect.team || 'N/A'}</div></div></div>
+                <div className="flex items-start"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Idade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{prospect.age} anos</div></div></div>
+                <div className="flex items-start"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}</div></div></div>
+                <div className="flex items-start"><Weight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{getWeightDisplay(prospect.weight)}</div></div></div>
               </div>
             </div>
 
             {/* Estatísticas Básicas - Mobile */}
-            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Estatísticas</h3>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Estatísticas</h3>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {(() => {
                   const renderStat = (label, value, colorClass) => (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600 dark:text-super-dark-text-secondary">{label}</span>
-                      <span className={`font-bold ${colorClass}`}>{value ?? 'N/A'}</span>
+                    <div className="flex justify-between items-center text-xs sm:text-sm">
+                      <span className="text-gray-600 dark:text-super-dark-text-secondary truncate mr-2">{label}</span>
+                      <span className={`font-bold ${colorClass} flex-shrink-0`}>{value ?? 'N/A'}</span>
                     </div>
                   );
 
@@ -235,23 +235,23 @@ const ProspectDetail = () => {
             </div>
 
             {/* Ações Mobile - Visível apenas em telas pequenas */}
-            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
+            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Ações</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                  <GitCompare className="w-4 h-4 mr-2" />
-                  Comparar Jogador
+                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
+                  <GitCompare className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Comparar Jogador</span>
                 </button>
                 <MobileExportActions prospect={prospect} />
                 {user && (
-                  <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
-                    <Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />
-                    {isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}
+                  <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 sm:py-3 px-4 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
+                    <Heart className={`w-4 h-4 mr-2 flex-shrink-0 ${isInWatchlist ? 'fill-current' : ''}`} />
+                    <span className="truncate">{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</span>
                   </button>
                 )}
-                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Compartilhar Perfil
+                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors text-sm sm:text-base">
+                  <Share2 className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Compartilhar Perfil</span>
                 </button>
               </div>
             </div>

@@ -92,7 +92,7 @@ const Dashboard = () => {
         <div className="relative z-10 flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
           <div>
                           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white">
-                👋 Bem-vindo ao <span className="text-yellow-300">ProspectRadar</span>
+                👋 Bem-vindo ao <span className="text-yellow-300">prospectRadar</span>
               </h1>
             <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-2xl leading-relaxed">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
@@ -121,10 +121,10 @@ const Dashboard = () => {
                   <span>{allProspects.length} <span className="font-semibold">prospects</span> disponíveis</span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">
                 <Link
                   to="/mock-draft"
-                  className="w-full sm:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors active:scale-95 shadow-lg text-sm sm:text-base"
+                  className="w-full lg:w-auto inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-yellow-500 text-gray-900 font-bold rounded-lg hover:bg-yellow-400 transition-colors active:scale-95 shadow-lg text-sm sm:text-base"
                 >
                   <Shuffle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Começar Mock Draft

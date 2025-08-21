@@ -84,33 +84,33 @@ const RadarScoreExplained = () => {
 
         <div className="mt-12 sm:mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-4 sm:p-6 md:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Validação Histórica e Ajustes Inteligentes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col gap-6 md:gap-8 px-0 sm:px-2 md:px-4 xl:px-12">
+            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
               <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-500 self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Nível de competição</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">O algoritmo ajusta as pontuações de estatísticas com base na força da liga e da conferência do jogador. Um bom desempenho em uma liga forte como a EuroLeague ou uma conferência Power 5 da NCAA é mais valorizado.</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Nível de competição</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O algoritmo ajusta as pontuações de estatísticas com base na força da liga e da conferência do jogador. Um bom desempenho em uma liga forte como a EuroLeague ou uma conferência Power 5 da NCAA é mais valorizado.</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
               <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500 self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Potencial vs Confiança</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados com base no número de jogos. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Potencial vs Confiança</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados com base no número de jogos. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Bônus de Desenvolvimento</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">Jogadores jovens (≤19 anos) recebem bônus de idade (+2%), e alas jovens com potencial atlético recebem bônus adicional (+3%) reconhecendo seu upside de desenvolvimento.</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Bônus de Desenvolvimento</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">Jogadores jovens (≤19 anos) recebem bônus de idade (+2%), e alas jovens com potencial atlético recebem bônus adicional (+3%) reconhecendo seu upside de desenvolvimento.</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
               <Lightbulb className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary">Validação Histórica</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">Algoritmo testado e refinado usando dados reais das classes de drafts passados, alcançando correlação média de 0.480 com o sucesso profissional.</p>
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Validação Histórica</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">Algoritmo testado e refinado usando dados reais das classes de drafts passados, alcançando correlação média de 0.480 com o sucesso profissional.</p>
               </div>
             </div>
           </div>

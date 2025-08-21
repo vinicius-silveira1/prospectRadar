@@ -167,15 +167,15 @@ const MockDraft = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        <div className="lg:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
+        <div className="xl:col-span-1 order-2 xl:order-1 space-y-4 lg:space-y-6">
           {/* ... (Card de Estatísticas não modificado) ... */}
-          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
+          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 lg:p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
               <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
               Estatísticas
             </h3>
-            <div className="space-y-4 text-sm">
+            <div className="space-y-3 lg:space-y-4 text-sm">
               <div className="flex justify-between text-slate-600 dark:text-super-dark-text-secondary"><span>Draftados:</span> <span className="font-medium text-slate-900 dark:text-super-dark-text-primary">{draftStats.totalPicked}/{draftSettings.totalPicks}</span></div>
               <div className="flex justify-between text-slate-600 dark:text-super-dark-text-secondary"><span>Disponíveis:</span> <span className="font-medium text-slate-900 dark:text-super-dark-text-primary">{draftStats.remaining}</span></div>
               <div className="border-t dark:border-super-dark-border pt-3">
@@ -187,21 +187,21 @@ const MockDraft = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
+          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 lg:p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
               Controles
             </h3>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={initializeDraft} className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center text-sm"><RotateCcw className="h-4 w-4 mr-2" /> Reset</button>
-              <button onClick={simulateLottery} className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-sm"><Shuffle className="h-4 w-4 mr-2" /> Simular</button>
+              <button onClick={initializeDraft} className="w-full px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><RotateCcw className="h-4 w-4 mr-1 sm:mr-2" /> Reset</button>
+              <button onClick={simulateLottery} className="w-full px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><Shuffle className="h-4 w-4 mr-1 sm:mr-2" /> Simular</button>
               
               {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
-              <button onClick={handleSaveClick} disabled={!user || isSaving} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"><Save className="h-4 w-4 mr-2" /> {isSaving ? 'Salvando...' : 'Salvar'}</button>
-              <button onClick={() => setIsLoadModalOpen(true)} disabled={!user || isLoadingDrafts} className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center text-sm disabled:opacity-50 disabled:cursor-not-allowed"><FolderOpen className="h-4 w-4 mr-2" /> Carregar</button>
+              <button onClick={handleSaveClick} disabled={!user || isSaving} className="w-full px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><Save className="h-4 w-4 mr-1 sm:mr-2" /> {isSaving ? 'Salvando...' : 'Salvar'}</button>
+              <button onClick={() => setIsLoadModalOpen(true)} disabled={!user || isLoadingDrafts} className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><FolderOpen className="h-4 w-4 mr-1 sm:mr-2" /> Carregar</button>
               
               <div className="relative export-menu-container col-span-2">
-                 <button onClick={() => setShowExportMenu(!showExportMenu)} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm">
-                  {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div> : <Download className="h-4 w-4 mr-2" />} {isExporting ? 'Exportando...' : 'Exportar Draft'}
+                 <button onClick={() => setShowExportMenu(!showExportMenu)} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm">
+                  {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1 sm:mr-2"></div> : <Download className="h-4 w-4 mr-1 sm:mr-2" />} {isExporting ? 'Exportando...' : 'Exportar Draft'}
                 </button>
                 {/* ... (Menu de exportação não modificado) ... */}
               </div>
@@ -211,29 +211,42 @@ const MockDraft = () => {
         </div>
 
         {/* ... (Área Principal não modificada) ... */}
-        <div className="xl:col-span-3">
-          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border mb-6">
+        <div className="xl:col-span-3 order-1 xl:order-2">
+          <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border mb-4 lg:mb-6">
             <div className="flex border-b dark:border-super-dark-border overflow-x-auto whitespace-nowrap">
-              <button onClick={() => setView('draft')} className={`px-6 py-3 font-medium transition-colors ${view === 'draft' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}><Target className="h-4 w-4 inline mr-2" /> Quadro do Draft</button>
-              <button onClick={() => setView('bigboard')} className={`px-6 py-3 font-medium transition-colors ${view === 'bigboard' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}><Star className="h-4 w-4 inline mr-2" /> Big Board - Principais Prospects</button>
-              <button onClick={() => setView('prospects')} className={`px-6 py-3 font-medium transition-colors ${view === 'prospects' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}><Users className="h-4 w-4 inline mr-2" /> Prospects Disponíveis</button>
+              <button onClick={() => setView('draft')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'draft' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+                <Target className="h-4 w-4 inline mr-1 sm:mr-2" /> 
+                <span className="hidden sm:inline">Quadro do </span>Draft
+              </button>
+              <button onClick={() => setView('bigboard')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'bigboard' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+                <Star className="h-4 w-4 inline mr-1 sm:mr-2" /> 
+                Big Board<span className="hidden lg:inline"> - Principais Prospects</span>
+              </button>
+              <button onClick={() => setView('prospects')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'prospects' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+                <Users className="h-4 w-4 inline mr-1 sm:mr-2" /> 
+                Prospects<span className="hidden sm:inline"> Disponíveis</span>
+              </button>
             </div>
-            <div className="p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
-              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
+            <div className="p-3 sm:p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <button onClick={() => setShowFilters(!showFilters)} className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 active:scale-95 flex items-center flex-shrink-0 shadow-lg hover:shadow-xl">
+                  <button onClick={() => setShowFilters(!showFilters)} className="px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 active:scale-95 flex items-center flex-shrink-0 shadow-lg hover:shadow-xl text-sm">
                     <Filter className="h-4 w-4 mr-2" /> Filtros
                   </button>
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
                     <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                    <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95 w-full" />
+                    <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95 w-full text-sm" />
                   </div>
                 </div>
                 {showFilters && (
-                  <div className="flex flex-wrap gap-3 animate-fade-in">
-                    <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter active:scale-95">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 animate-fade-in">
+                    <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter active:scale-95 text-sm">
                       <option value="ALL">Todas Posições</option>
-                      <option value="PG">Point Guard</option> <option value="SG">Shooting Guard</option> <option value="SF">Small Forward</option> <option value="PF">Power Forward</option> <option value="C">Center</option>
+                      <option value="PG">Point Guard</option> 
+                      <option value="SG">Shooting Guard</option> 
+                      <option value="SF">Small Forward</option> 
+                      <option value="PF">Power Forward</option> 
+                      <option value="C">Center</option>
                     </select>
                   </div>
                 )}
@@ -280,11 +293,11 @@ const MockDraft = () => {
 
 // ... (Componentes de View e Card não modificados) ...
 const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
-  <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">Draft Board</h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
+    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Draft Board</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {draftBoard.map((pick) => (
-        <div key={pick.pick} className={`p-4 border rounded-lg transition-all ${
+        <div key={pick.pick} className={`p-3 sm:p-4 border rounded-lg transition-all ${
             pick.pick === currentPick ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-black/30 ring-2 ring-blue-200 dark:ring-blue-500/50' 
             : pick.prospect ? 'border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30' 
             : 'border-slate-200 dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary'
@@ -294,16 +307,16 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
               <div className="font-bold text-slate-900 dark:text-super-dark-text-primary">Pick #{pick.pick}</div>
               <div className="text-slate-500 dark:text-super-dark-text-secondary">Round {pick.round}</div>
             </div>
-            {pick.prospect && <button onClick={() => onUndraftPick(pick.pick)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs">Desfazer</button>}
+            {pick.prospect && <button onClick={() => onUndraftPick(pick.pick)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs flex-shrink-0">Desfazer</button>}
           </div>
-          <div className="text-xs text-slate-600 dark:text-super-dark-text-secondary mb-2">
+          <div className="text-xs text-slate-600 dark:text-super-dark-text-secondary mb-2 truncate">
             {teamFullNames[pick.team] || pick.team}
           </div>
           {pick.prospect ? (
             <div>
-              <div className="font-medium text-slate-900 dark:text-super-dark-text-primary">{pick.prospect.name}</div>
-              <div className="text-sm text-slate-600 dark:text-super-dark-text-secondary">{pick.prospect.position} • {pick.prospect.nationality || 'N/A'}</div>
-              <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary">{pick.prospect.high_school_team || 'N/A'}</div>
+              <div className="font-medium text-slate-900 dark:text-super-dark-text-primary truncate">{pick.prospect.name}</div>
+              <div className="text-sm text-slate-600 dark:text-super-dark-text-secondary truncate">{pick.prospect.position} • {pick.prospect.nationality || 'N/A'}</div>
+              <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">{pick.prospect.high_school_team || 'N/A'}</div>
             </div>
           ) : (
             <div className="text-slate-400 dark:text-super-dark-text-secondary text-sm italic">{pick.pick === currentPick ? 'Sua vez de selecionar!' : 'Disponível'}</div>
@@ -315,13 +328,13 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
 );
 
 const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
-  <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-6">
+  <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
+    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">
       <span className="flex items-center flex-wrap gap-1">
         Big Board - <span>Principais Prospects</span>
       </span>
     </h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
       {prospects.map((prospect, index) => (
         <div key={prospect.id} className="relative">
           <div className="absolute -top-2 -left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
@@ -333,22 +346,25 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
 );
 
 const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete }) => (
-  <div className="space-y-6">
+  <div className="space-y-4 sm:space-y-6">
     {recommendations.length > 0 && (
-      <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center"><TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> Recomendações para Pick #{currentPick}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
+          <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
+          <span className="truncate">Recomendações para Pick #{currentPick}</span>
+        </h3>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
           {recommendations.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
         </div>
       </div>
     )}
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-6">
-      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-6 flex items-center flex-wrap gap-1">
-        <Users className="h-5 w-5 text-blue-500 mr-2" /> 
+    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
+      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6 flex items-center flex-wrap gap-1">
+        <Users className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" /> 
         <span className="text-brand-orange">Prospects</span> 
         <span>Disponíveis ({prospects.length})</span>
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
         {prospects.map(prospect => <MockDraftProspectCard key={prospect.id} prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />)}
       </div>
     </div>
@@ -360,59 +376,75 @@ const MockDraftProspectCard = ({ prospect, action }) => {
   const badges = assignBadges(prospect);
 
   return (
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300">
-      <div className="p-4">
-        <div className="flex items-start justify-between">
+    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 min-h-[320px] flex flex-col">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col">
+        <div className="flex items-start justify-between mb-3">
           {/* Image or Skeleton */}
-          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-lg sm:text-xl font-bold mr-3" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
               <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(prospect?.name)}</span>
+              <span className="text-lg sm:text-xl">{getInitials(prospect?.name)}</span>
             )}
           </div>
-          <div className="flex-grow">
-            <p className="font-bold text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</p>
-            <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
+          <div className="flex-grow min-w-0 flex flex-col">
+            <p className="font-bold text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">{prospect.name}</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1">
-              {badges.map((badge, index) => (
+              {badges.slice(0, 2).map((badge, index) => (
                 <Badge key={index} badge={badge} />
               ))}
             </div>
           </div>
-          <span className="text-lg font-bold text-slate-300 dark:text-super-dark-text-secondary">#{prospect.ranking}</span>
+          <span className="text-base sm:text-lg font-bold text-slate-300 dark:text-super-dark-text-secondary flex-shrink-0 ml-2">#{prospect.ranking}</span>
         </div>
-        {/* Radar Score - Added here */}
+        
+        {/* Radar Score */}
         {prospect.radar_score && (
-          <div className="inline-block text-center bg-slate-200/50 dark:bg-super-dark-border border border-slate-300 dark:border-super-dark-border text-slate-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-inner mt-2 mx-auto">
-            <span className="font-bold text-lg mr-1">{prospect.radar_score.toFixed(2)}</span>
-            <span className="text-xs">Radar Score</span>
+          <div className="flex justify-center mb-3">
+            <div className="inline-block text-center bg-slate-200/50 dark:bg-super-dark-border border border-slate-300 dark:border-super-dark-border text-slate-800 dark:text-super-dark-text-primary px-2 sm:px-3 py-1 rounded-full shadow-inner">
+              <span className="font-bold text-sm sm:text-lg mr-1">{prospect.radar_score.toFixed(2)}</span>
+              <span className="text-xs">Radar Score</span>
+            </div>
           </div>
         )}
-        <div className="mt-3 border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-4 text-center">
+        
+        {/* Stats Grid */}
+        <div className="border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
           <div>
-            <p className="font-bold text-blue-600 dark:text-blue-400">{prospect.ppg?.toFixed(1) || '-'}</p>
+            <p className="font-bold text-blue-600 dark:text-blue-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
             <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
           </div>
           <div>
-            <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
+            <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
             <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
           </div>
           <div>
-            <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
+            <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
             <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
           </div>
         </div>
-        <div className="mt-4 flex gap-2">
+        
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-2 mt-auto w-full">
           {action && (
-            <button onClick={action.onClick} disabled={action.disabled} className="flex-1 flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed">
+            <button 
+              onClick={action.onClick} 
+              disabled={action.disabled} 
+              className="w-full flex items-center justify-center px-3 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed"
+            >
               {action.label} {action.icon}
             </button>
           )}
-          <Link to={`/prospects/${prospect.id}`} className="flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link>
+          <Link 
+            to={`/prospects/${prospect.id}`} 
+            className="w-full text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-xs sm:text-sm font-medium"
+          >
+            Ver Detalhes
+          </Link>
         </div>
       </div>
     </div>

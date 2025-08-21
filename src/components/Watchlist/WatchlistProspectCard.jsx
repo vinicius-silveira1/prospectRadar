@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, FileText, Lock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -9,11 +9,11 @@ import { assignBadges } from '@/lib/badges';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import ProspectNotesCard from './ProspectNotesCard';
 
-const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => {
+const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes }) => {
   const { user } = useAuth();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { getNote, hasNote, saveNote, deleteNote, saving } = useProspectNotes();
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  // Controle de notas agora é feito pelo pai (Watchlist.jsx)
   const badges = assignBadges(prospect);
 
   const isScoutUser = user?.subscription_tier?.toLowerCase() === 'scout';
@@ -21,25 +21,13 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
   const isSaving = saving.has(prospect.id);
   const hasExistingNote = hasNote(prospect.id);
 
-  const handleToggleNotes = () => {
-    setIsNotesOpen(!isNotesOpen);
-  };
+  // Estado visual do botão de notas
+  const isNotesOpen = typeof onOpenNotes === 'function' && onOpenNotes.isOpen;
 
-  const handleSaveNote = async (prospectId, noteText) => {
-    return await saveNote(prospectId, noteText);
-  };
-
-  const handleDeleteNote = async (prospectId) => {
-    const success = await deleteNote(prospectId);
-    if (success) {
-      setIsNotesOpen(false);
-    }
-    return success;
-  };
 
   return (
-    <div className="space-y-0">
-      <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transition-all duration-300 relative">
+    <div className="space-y-0 h-full relative">
+      <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transition-all duration-300 flex flex-col h-full">
         <button 
           onClick={() => toggleWatchlist(prospect.id)} 
           className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-super-dark-secondary/80 hover:bg-white dark:hover:bg-slate-600 transition-all" 
@@ -131,16 +119,16 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
             {/* Botão de Anotações */}
             {isScoutUser ? (
               <button
-                onClick={handleToggleNotes}
+                onClick={typeof onOpenNotes === 'function' ? () => onOpenNotes(prospect) : undefined}
                 className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center space-x-2 ${
-                  hasExistingNote
+                  hasExistingNote || isNotesOpen
                     ? 'bg-amber-100 hover:bg-amber-200 text-amber-700 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-super-dark-border dark:hover:bg-slate-600 dark:text-super-dark-text-primary'
                 }`}
-                title={hasExistingNote ? 'Editar anotações' : 'Adicionar anotações'}
+                title={isNotesOpen ? 'Fechar anotações' : hasExistingNote ? 'Editar anotações' : 'Adicionar anotações'}
               >
-                <FileText size={16} />
-                {hasExistingNote && <span className="w-2 h-2 bg-amber-500 rounded-full"></span>}
+                {isNotesOpen ? <X size={16} /> : <FileText size={16} />}
+                {(hasExistingNote && !isNotesOpen) && <span className="w-2 h-2 bg-amber-500 rounded-full"></span>}
               </button>
             ) : (
               <button
@@ -155,16 +143,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist }) => 
         </div>
       </div>
 
-      {/* Card de Anotações */}
-      <ProspectNotesCard
-        prospect={prospect}
-        isOpen={isNotesOpen}
-        onClose={() => setIsNotesOpen(false)}
-        note={currentNote}
-        onSave={handleSaveNote}
-        onDelete={handleDeleteNote}
-        isSaving={isSaving}
-      />
+  {/* O bloco de notas agora é renderizado pelo pai (Watchlist.jsx) como item do grid */}
     </div>
   );
 };
