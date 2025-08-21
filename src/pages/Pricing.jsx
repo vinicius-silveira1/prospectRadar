@@ -63,8 +63,8 @@ const Pricing = () => {
     'Filtros avançados por atributos físicos, estatísticas e badges',
     'Mock Drafts com saves ilimitados',
     'Notificações em tempo real sobre jogadores da sua Watchlist',
-    'Exportação de dados para CSV (em breve)',
-    'Acesso antecipado a classes de draft futuras',
+    'Exportação de dados para PDF, CSV, Excel e PNG',
+  
   ];
 
   return (

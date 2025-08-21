@@ -36,9 +36,31 @@ const MockDraft = () => {
 
   const [view, setView] = useState('draft');
   const [showFilters, setShowFilters] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const exportRef = useRef(null);
+
+  const exportAsImage = async () => {
+    setIsExporting(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      if (exportRef.current) {
+        const canvas = await html2canvas(exportRef.current, {
+          backgroundColor: imageExportBackgroundColor,
+          scale: 2,
+          useCORS: true,
+        });
+        const link = document.createElement('a');
+        link.download = `mock-draft-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+      }
+    } catch (err) {
+      console.error('Erro ao exportar imagem:', err);
+      setNotification({ type: 'error', message: 'Erro ao exportar draft como imagem.' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Estados para os novos modais
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -170,7 +192,7 @@ const MockDraft = () => {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
-        <div className="xl:col-span-1 order-2 xl:order-1 space-y-4 lg:space-y-6">
+        <div className="xl:col-span-1 order-1 xl:order-1 space-y-4 lg:space-y-6">
           {/* ... (Card de Estatísticas não modificado) ... */}
           <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 lg:p-6">
             <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
@@ -202,10 +224,9 @@ const MockDraft = () => {
               <button onClick={() => setIsLoadModalOpen(true)} disabled={!user || isLoadingDrafts} className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><FolderOpen className="h-4 w-4 mr-1 sm:mr-2" /> Carregar</button>
               
               <div className="relative export-menu-container col-span-2">
-                 <button onClick={() => setShowExportMenu(!showExportMenu)} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm">
+                 <button onClick={exportAsImage} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm">
                   {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1 sm:mr-2"></div> : <Download className="h-4 w-4 mr-1 sm:mr-2" />} {isExporting ? 'Exportando...' : 'Exportar Draft'}
                 </button>
-                {/* ... (Menu de exportação não modificado) ... */}
               </div>
             </div>
             {!user && <p className="text-xs text-center text-gray-500 mt-2">Faça login para salvar e carregar seus drafts.</p>}
@@ -349,7 +370,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
 
 const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete }) => (
   <div className="space-y-4 sm:space-y-6">
-    {recommendations.length > 0 && (
+    {recommendations.length > 0 && !isDraftComplete && (
       <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
         <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
           <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
