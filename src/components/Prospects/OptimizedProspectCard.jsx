@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import LazyProspectImage from '../Common/LazyProspectImage';
 import Badge from '../Common/Badge';
 import { assignBadges } from '../../lib/badges';
-import { formatHeight, formatWeight } from '../../utils/formatUtils';
+
 
 const OptimizedProspectCard = memo(({ 
   prospect, 
@@ -141,17 +141,7 @@ const OptimizedProspectCard = memo(({
             </div>
             
             {/* Physical Stats */}
-            {(prospect.height || prospect.weight) && (
-              <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                {prospect.height && (
-                  <span>{formatHeight(prospect.height)}</span>
-                )}
-                {prospect.height && prospect.weight && <span> • </span>}
-                {prospect.weight && (
-                  <span>{formatWeight(prospect.weight)}</span>
-                )}
-              </div>
-            )}
+            
           </div>
         </div>
 
@@ -202,14 +192,12 @@ const OptimizedProspectCard = memo(({
         {/* Badges */}
         {showBadges && badges.length > 0 && (
           <div className="flex flex-wrap gap-1">
+            {console.log('Badges:', badges)}
             {badges.slice(0, 3).map((badge, index) => (
               <Badge
                 key={`${prospect.id}-${badge.label}-${index}`}
-                variant={badge.variant}
-                size="sm"
-              >
-                {badge.label}
-              </Badge>
+                badge={badge}
+              />
             ))}
             {badges.length > 3 && (
               <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">

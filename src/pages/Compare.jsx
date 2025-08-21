@@ -12,7 +12,8 @@ import HeadToHeadComparison from '@/components/Compare/HeadToHeadComparison.jsx'
 import ComparisonImage from '@/components/Compare/ComparisonImage.jsx';
 
 function Compare() {
-  const { prospects: allProspects, loading, error } = useProspects({ showAllDraftClasses: true });
+    const prospectFilters = useMemo(() => ({ draftClass: '2026' }), []);
+  const { prospects: allProspects, loading, error } = useProspects(prospectFilters);
   const { user } = useAuth();
   const navigate = useNavigate();
   const prospects = useMemo(() => allProspects, [allProspects]);

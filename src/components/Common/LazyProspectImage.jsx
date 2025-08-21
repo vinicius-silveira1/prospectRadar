@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { User } from 'lucide-react';
-import { imageManager } from '../../utils/imageManagerV2.js';
+
 import { getInitials, getColorFromName } from '../../utils/imageUtils.js';
 
 const LazyProspectImage = ({ 
@@ -57,7 +57,7 @@ const LazyProspectImage = ({
     const loadImage = async () => {
       try {
         setImageState(prev => ({ ...prev, isLoading: true, hasError: false }));
-        const imageUrl = await imageManager.getProspectImage(prospect);
+        const imageUrl = `https://via.placeholder.com/150?text=${prospect.name}`; // Placeholder
         setImageState(prev => ({ 
           ...prev, 
           currentUrl: imageUrl, 

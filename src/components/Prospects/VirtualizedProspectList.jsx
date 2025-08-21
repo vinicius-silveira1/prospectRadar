@@ -5,7 +5,7 @@ const VirtualizedProspectList = memo(({
   prospects, 
   visibleRange, 
   onToggleWatchlist, 
-  watchlist = [] 
+  watchlist = new Set() 
 }) => {
   const startIndex = visibleRange?.start || 0;
   const endIndex = visibleRange?.end || prospects.length;
@@ -25,7 +25,7 @@ const VirtualizedProspectList = memo(({
           key={prospect.id}
           prospect={prospect}
           onToggleWatchlist={onToggleWatchlist}
-          isInWatchlist={watchlist.includes(prospect.id)}
+          isInWatchlist={watchlist.has(prospect.id)}
           compact={true}
         />
       ))}

@@ -22,7 +22,9 @@ import { ptBR } from 'date-fns/locale';
 const MockDraft = () => {
   const { user } = useAuth();
   
-  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(); // Carrega todos os prospects
+    const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
+
+  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters); // Passar o objeto memoizado
 
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters, isLoading,

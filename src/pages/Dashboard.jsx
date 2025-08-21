@@ -20,12 +20,14 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { isMobile, isTablet, responsiveColumns } = useResponsive();
   
-  const {
+    const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
+
+  const { 
     prospects: allProspects,
     loading,
     error,
     isLoaded
-  } = useProspects(); // Carrega todos os prospects
+  } = useProspects(allProspectsFilters); // Passar o objeto memoizado
 
   const { watchlist, toggleWatchlist } = useWatchlist();
 

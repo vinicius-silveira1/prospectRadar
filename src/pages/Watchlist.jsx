@@ -16,7 +16,8 @@ const Watchlist = () => {
   const [openNotesId, setOpenNotesId] = React.useState(null);
   const { user } = useAuth();
   const { watchlist, toggleWatchlist, loading: watchlistLoading } = useWatchlist();
-  const { prospects: allProspects, loading: prospectsLoading } = useProspects();
+    const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
+  const { prospects: allProspects, loading: prospectsLoading } = useProspects(allProspectsFilters);
 
   const loading = watchlistLoading || prospectsLoading;
 

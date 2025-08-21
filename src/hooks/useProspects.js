@@ -4,7 +4,7 @@ import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerat
 import { getTierByRanking } from '@/lib/constants.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js'; // Import the algorithm
 
-export default function useProspects() {
+export default function useProspects(filters = {}) {
   const [prospects, setProspects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,8 +23,14 @@ export default function useProspects() {
         // 1. Busca a lista de prospectos do nosso banco de dados.
         let query = supabase
           .from('prospects')
-          .select('*')
-          .order('ranking', { ascending: true });
+          .select('*');
+
+        // Aplica os filtros dinamicamente
+        if (filters.draftClass) {
+          query = query.eq('draftClass', filters.draftClass);
+        }
+
+        query = query.order('ranking', { ascending: true });
 
         const { data: dbProspects, error: dbError } = await query;
 
@@ -67,7 +73,7 @@ export default function useProspects() {
     };
 
     fetchData();
-  }, [refreshTrigger]); // Adicionado refreshTrigger como dependência
+  }, [refreshTrigger, filters]); // Adicionado filters como dependência
 
   return { prospects, loading, error, isLoaded, refresh };
 }

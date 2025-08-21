@@ -56,7 +56,8 @@ const Prospects = () => {
   const { user } = useAuth(); // Get user from AuthContext
   const { isMobile, isTablet } = useResponsive();
   
-  const { prospects: allProspects, loading, error } = useProspects(); // Carrega todos os prospects
+      const prospectsFilters = useMemo(() => ({ draftClass: '2026' }), []);
+  const { prospects: allProspects, loading, error } = useProspects(prospectsFilters); // Carrega todos os prospects
 
   const { watchlist, toggleWatchlist } = useWatchlist();
   

@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Lightbulb, BarChart3, Zap, Ruler, TrendingUp, Award, ShieldCheck, Activity } from 'lucide-react';
+import useProspects from '../hooks/useProspects';
+import DashboardProspectCard from '../components/DashboardProspectCard';
+import { LoadingSpinner } from "../components/Common/LoadingComponents";
 
 const RadarScoreExplained = () => {
   const pillars = [
@@ -37,11 +40,14 @@ const RadarScoreExplained = () => {
     }
   ];
 
+  const filters2018 = useMemo(() => ({ draftClass: '2018' }), []);
+  const { prospects: prospects2018, loading: loading2018, error: error2018 } = useProspects(filters2018);
+
   return (
     <div className="bg-white dark:bg-super-dark-primary py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12 relative overflow-hidden rounded-xl shadow-2xl p-6 sm:p-8 md:p-12 bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
           <div className="relative z-10">
             <h1 className="text-2xl sm:text-4xl md:text-6xl font-extrabold leading-tight text-white animate-fade-in-up">
               Entenda o <span className="text-yellow-300 drop-shadow-lg">Radar Score</span>
@@ -83,7 +89,7 @@ const RadarScoreExplained = () => {
         </div>
 
         <div className="mt-12 sm:mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-4 sm:p-6 md:p-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Validação Histórica e Ajustes Inteligentes</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Ajustes inteligentes</h2>
           <div className="flex flex-col gap-6 md:gap-8 px-0 sm:px-2 md:px-4 xl:px-12">
             <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
               <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-500 self-center sm:self-start flex-shrink-0" />
@@ -99,21 +105,26 @@ const RadarScoreExplained = () => {
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados com base no número de jogos. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 self-center sm:self-start flex-shrink-0" />
-              <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Bônus de Desenvolvimento</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">Jogadores jovens (≤19 anos) recebem bônus de idade (+2%), e alas jovens com potencial atlético recebem bônus adicional (+3%) reconhecendo seu upside de desenvolvimento.</p>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
-              <Lightbulb className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 self-center sm:self-start flex-shrink-0" />
-              <div className="space-y-2">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Validação Histórica</h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">Algoritmo testado e refinado usando dados reais das classes de drafts passados, alcançando correlação média de 0.480 com o sucesso profissional.</p>
-              </div>
-            </div>
           </div>
+        </div>
+
+        {/* Nova Seção: Prospects da Classe de 2018 */}
+        <div className="mt-12 sm:mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-4 sm:p-6 md:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-2">Cases de Teste: Classe de 2018</h2>
+          <p className="text-center text-sm text-slate-600 dark:text-super-dark-text-secondary mb-6">
+            O algoritmo foi treinado e validado com dados de classes de draft anteriores. Veja abaixo como o Radar Score avaliou alguns prospectos de 2018 e <strong className="text-blue-600 dark:text-blue-400">clique em um jogador</strong> para ver a análise completa em sua página de detalhes.
+          </p>
+          {loading2018 ? (
+            <div className="flex justify-center items-center h-32"><LoadingSpinner /></div>
+          ) : error2018 ? (
+            <div className="text-center text-red-500">Erro ao carregar prospects de 2018: {error2018.message}</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {prospects2018.map(prospect => (
+                <DashboardProspectCard key={prospect.id} prospect={prospect} />
+              ))}
+            </div>
+          ) }
         </div>
 
         <div className="mt-8 sm:mt-12 text-center">
