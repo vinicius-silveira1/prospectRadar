@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
-  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle
+  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useProspectImage } from '@/hooks/useProspectImage';
@@ -31,7 +31,7 @@ const MockDraft = () => {
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
-    saveMockDraft, loadMockDraft, deleteMockDraft
+    saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks // Added tradePicks
   } = useMockDraft(allProspects);
 
   const [view, setView] = useState('draft');
@@ -66,8 +66,21 @@ const MockDraft = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false); // New state for trade modal
+  const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
+
+  const handleTradeClick = (pick) => {
+    setSelectedPickForTrade(pick);
+    setIsTradeModalOpen(true);
+  };
+
+  const handleConfirmTrade = (pick1, pick2) => {
+    tradePicks(pick1.pick, pick2.pick);
+    setIsTradeModalOpen(false);
+    setNotification({ type: 'success', message: `Troca realizada: Pick #${pick1.pick} e Pick #${pick2.pick} trocados!` });
+  };
 
   const imageExportBackgroundColor = document.documentElement.classList.contains('dark') ? '#0A0A0A' : '#f8fafc';
 
@@ -277,7 +290,7 @@ const MockDraft = () => {
             </div>
           </div>
 
-          {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} />}
+          {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} />}
           {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
           {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} />}
         </div>
@@ -307,6 +320,14 @@ const MockDraft = () => {
         limit={2}
       />
 
+      <TradeModal
+        isOpen={isTradeModalOpen}
+        onClose={() => setIsTradeModalOpen(false)}
+        onConfirmTrade={handleConfirmTrade} // This function will be implemented next
+        selectedPick={selectedPickForTrade}
+        draftBoard={draftBoard}
+      />
+
       <div className="absolute left-[-9999px] top-0 z-[-10]">
         <MockDraftExport ref={exportRef} draftData={exportDraft()} />
       </div>
@@ -315,14 +336,14 @@ const MockDraft = () => {
 };
 
 // ... (Componentes de View e Card não modificados) ...
-const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
+const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
     <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Draft Board</h3>
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {draftBoard.map((pick) => (
-        <div key={pick.pick} className={`p-3 sm:p-4 border rounded-lg transition-all ${
-            pick.pick === currentPick ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-black/30 ring-2 ring-blue-200 dark:ring-blue-500/50' 
-            : pick.prospect ? 'border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30' 
+        <div key={pick.pick} className={`p-3 sm:p-4 border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 ${
+            pick.pick === currentPick ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-black/30 ring-2 ring-blue-200 dark:ring-blue-500/50 shadow-lg'
+            : pick.prospect ? 'border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30'
             : 'border-slate-200 dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary'
           }`}>
           <div className="flex justify-between items-start mb-2">
@@ -330,7 +351,22 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick }) => (
               <div className="font-bold text-slate-900 dark:text-super-dark-text-primary">Pick #{pick.pick}</div>
               <div className="text-slate-500 dark:text-super-dark-text-secondary">Round {pick.round}</div>
             </div>
-            {pick.prospect && <button onClick={() => onUndraftPick(pick.pick)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs flex-shrink-0">Desfazer</button>}
+            <div className="flex flex-col gap-1"> {/* Changed to flex-col for vertical buttons */}
+              {pick.prospect && (
+                <button
+                  onClick={() => onUndraftPick(pick.pick)}
+                  className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-xs flex items-center justify-center"
+                >
+                  Desfazer
+                </button>
+              )}
+              <button
+                onClick={() => onTradeClick(pick)}
+                className="px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-xs flex items-center justify-center"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" /> Trocar
+              </button>
+            </div>
           </div>
           <div className="text-xs text-slate-600 dark:text-super-dark-text-secondary mb-2 truncate">
             {teamFullNames[pick.team] || pick.team}
@@ -474,6 +510,8 @@ const MockDraftProspectCard = ({ prospect, action }) => {
   );
 };
 
+import TradeModal from '@/components/MockDraft/TradeModal.jsx';
+
 // NOVOS COMPONENTES DE MODAL
 const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving }) => {
   if (!isOpen) return null;
@@ -487,7 +525,7 @@ const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSa
           value={draftName}
           onChange={(e) => setDraftName(e.target.value)}
           placeholder="Ex: Minha versão com trocas"
-          className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg mb-4"
+          className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg mb-4 text-slate-900 dark:text-white dark:bg-gray-700"
         />
         <div className="flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 rounded-lg text-slate-700 dark:text-super-dark-text-secondary bg-slate-100 dark:bg-super-dark-border hover:bg-slate-200">Cancelar</button>

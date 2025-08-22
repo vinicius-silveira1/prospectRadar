@@ -42,10 +42,14 @@ const useAdvancedExport = () => {
         weight: (() => {
           try {
             if (typeof prospect.weight === 'object' && prospect.weight?.us) {
-              return `${prospect.weight.us} lbs (${prospect.weight.intl} kg)`;
+              const us = String(prospect.weight.us).replace('lbs', '').trim();
+              const intl = String(prospect.weight.intl).replace('kg', '').trim();
+              return `${us} lbs (${intl} kg)`;
             } else if (typeof prospect.weight === 'string' && prospect.weight.startsWith('{')) {
               const weightObj = JSON.parse(prospect.weight);
-              return `${weightObj.us} lbs (${weightObj.intl} kg)`;
+              const us = String(weightObj.us).replace('lbs', '').trim();
+              const intl = String(weightObj.intl).replace('kg', '').trim();
+              return `${us} lbs (${intl} kg)`;
             } else {
               return prospect.weight || 'N/A';
             }
@@ -895,175 +899,222 @@ const useAdvancedExport = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
-      // Configurar dimensões (formato card profissional)
+      // Configurar dimensões para social media (ex: 1200x1600 para Instagram)
       canvas.width = 1200;
-      canvas.height = 1600;
-      
-      // Fundo com gradiente
-      const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      bgGradient.addColorStop(0, '#1a202c');
-      bgGradient.addColorStop(0.5, '#2d3748');
-      bgGradient.addColorStop(1, '#4a5568');
-      ctx.fillStyle = bgGradient;
+      canvas.height = 1600; 
+
+      // Fundo branco
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Header
-      ctx.fillStyle = '#ffffff';
+      let currentY = 80;
+      const headerLeftX = 50;
+      const headerCenter = canvas.width / 2;
+
+      // "prospect" em laranja
       ctx.font = 'bold 28px Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('PROSPECT RADAR', canvas.width / 2, 50);
-      
-      ctx.font = '16px Arial, sans-serif';
-      ctx.fillStyle = '#cbd5e0';
-      ctx.fillText('Relatório de Scouting', canvas.width / 2, 75);
-      
-      // Card principal
-      const cardY = 110;
-      const cardHeight = canvas.height - 160;
-      const cardPadding = 40;
-      
-      // Sombra do card
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.fillRect(cardPadding + 5, cardY + 5, canvas.width - (cardPadding * 2), cardHeight);
-      
-      // Card branco
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cardPadding, cardY, canvas.width - (cardPadding * 2), cardHeight);
-      
-      // Nome do jogador
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#f97316'; // orange-500
+      ctx.fillText('prospect', headerLeftX, currentY);
+
+      // "Radar" em azul
+      const prospectTextWidth = ctx.measureText('prospect').width;
+      ctx.fillStyle = '#2563eb'; // blue-600
+      ctx.fillText('Radar', headerLeftX + prospectTextWidth, currentY);
+
+      // Nome do prospecto (centralizado)
       ctx.fillStyle = '#1a202c';
-      ctx.font = 'bold 36px Arial, sans-serif';
+      ctx.font = 'bold 56px Arial, sans-serif';
       ctx.textAlign = 'center';
-      let nameY = cardY + 60;
-      ctx.fillText(prospect.name || 'N/A', canvas.width / 2, nameY);
+      ctx.fillText(data.basicInfo.name || 'N/A', headerCenter, currentY + 60);
       
-      // Posição e time
-      ctx.font = '20px Arial, sans-serif';
+      ctx.font = '32px Arial, sans-serif';
       ctx.fillStyle = '#4a5568';
-      const subtitle = `${prospect.position || 'N/A'} | ${prospect.team || 'N/A'}`;
-      nameY += 35;
-      ctx.fillText(subtitle, canvas.width / 2, nameY);
-      
+      currentY += 105;
+      ctx.fillText(`${data.basicInfo.position || 'N/A'} | ${data.basicInfo.team || 'N/A'}`, headerCenter, currentY);
+
       // Linha divisória
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      nameY += 25;
-      ctx.moveTo(cardPadding + 30, nameY);
-      ctx.lineTo(canvas.width - cardPadding - 30, nameY);
+      currentY += 30;
+      ctx.moveTo(50, currentY);
+      ctx.lineTo(canvas.width - 50, currentY);
       ctx.stroke();
-      
-      // Projeção de Draft - destaque
-      nameY += 40;
-      ctx.fillStyle = '#e53e3e';
-      ctx.font = 'bold 24px Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('PROJEÇÃO DE DRAFT', canvas.width / 2, nameY);
-      
-      nameY += 35;
-      ctx.fillStyle = '#1a202c';
-      ctx.font = 'bold 32px Arial, sans-serif';
-      ctx.fillText(data.radarAnalysis.draftProjection || 'N/A', canvas.width / 2, nameY);
-      
-      nameY += 30;
-      ctx.font = '18px Arial, sans-serif';
-      ctx.fillStyle = '#4a5568';
-      ctx.fillText(`Range: ${data.radarAnalysis.draftRange || 'N/A'}`, canvas.width / 2, nameY);
-      
-      // Seção de informações (duas colunas)
-      nameY += 50;
-      const leftX = cardPadding + 30;
-      const rightX = canvas.width / 2 + 20;
-      
-      // Coluna esquerda - Informações básicas
+
+      // Radar Score Section (Two Columns)
+      currentY += 60;
+      const radarSectionY = currentY;
+      const radarLeftColumnX = 100;
+      const radarRightColumnX = canvas.width / 2 + 50;
+
+      // Initialize chart dimensions with default values
+      let chartWidth = 450;
+      let chartHeight = 337;
+
+      // Radar Chart (Left Column)
+      const radarChartImage = await captureElement('radar-chart-container');
+      if (radarChartImage) {
+        const img = new Image();
+        img.src = radarChartImage;
+        await new Promise(resolve => img.onload = resolve); 
+
+        // Update chart dimensions if captured successfully
+        // chartWidth and chartHeight are already defined above
+        ctx.drawImage(img, radarLeftColumnX, radarSectionY, chartWidth, chartHeight);
+      } else {
+        ctx.fillStyle = '#e53e3e';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Radar Score Chart indisponível', radarLeftColumnX, radarSectionY + 100);
+      }
+
+      // Radar Analysis (Right Column)
+      let radarAnalysisY = radarSectionY + 20; // Adjust starting Y for right column
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#2b6cb0';
-      ctx.font = 'bold 20px Arial, sans-serif';
-      ctx.fillText('INFORMAÇÕES BÁSICAS', leftX, nameY);
+
+      // Função para quebrar texto
+      const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
+        const words = text.split(' ');
+        let line = '';
+        let testLine;
+        let metrics;
+        let testWidth;
+        for (let n = 0; n < words.length; n++) {
+          testLine = line + words[n] + ' ';
+          metrics = context.measureText(testLine);
+          testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        context.fillText(line, x, y);
+        return y + lineHeight;
+      };
+
+      // Projeção de Draft
+      ctx.fillStyle = '#e53e3e';
+      ctx.font = 'bold 32px Arial, sans-serif';
+      ctx.fillText('PROJEÇÃO DE DRAFT', radarRightColumnX, radarAnalysisY);
       
-      nameY += 30;
+      radarAnalysisY += 45;
       ctx.fillStyle = '#1a202c';
-      ctx.font = '16px Arial, sans-serif';
+      ctx.font = 'bold 36px Arial, sans-serif'; // Reduced font size
+      const projectionText = data.radarAnalysis.draftProjection || 'N/A';
+      const projectionMaxWidth = (canvas.width / 2) - 100;
+      radarAnalysisY = wrapText(ctx, projectionText, radarRightColumnX, radarAnalysisY, projectionMaxWidth, 40); // Use wrapText
       
-      const basicInfo = [
-        `Idade: ${prospect.age || 'N/A'} anos`,
+      radarAnalysisY += 15; // Adjust space after projection
+      ctx.font = '24px Arial, sans-serif';
+      ctx.fillStyle = '#4a5568';
+      ctx.fillText(`Range: ${data.radarAnalysis.draftRange || 'N/A'}`, radarRightColumnX, radarAnalysisY);
+
+      // NBA Readiness
+      radarAnalysisY += 60;
+      ctx.fillStyle = '#2b6cb0';
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillText('PRONTIDÃO PARA NBA', radarRightColumnX, radarAnalysisY);
+      
+      radarAnalysisY += 35;
+      ctx.fillStyle = '#1a202c';
+      ctx.font = '36px Arial, sans-serif';
+      ctx.fillText(data.radarAnalysis.readiness || 'N/A', radarRightColumnX, radarAnalysisY);
+
+      // Total Potential Score
+      radarAnalysisY += 60;
+      ctx.fillStyle = '#2b6cb0';
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillText('SCORE TOTAL (POTENCIAL)', radarRightColumnX, radarAnalysisY);
+      
+      radarAnalysisY += 35;
+      ctx.fillStyle = '#1a202c';
+      ctx.font = '36px Arial, sans-serif';
+      ctx.fillText(data.radarAnalysis.potentialScore || 'N/A', radarRightColumnX, radarAnalysisY);
+
+      // Adjust currentY after radar section with more space
+      currentY = Math.max(radarSectionY + chartHeight, radarAnalysisY) + 120;
+
+      // Informações Básicas, Estatísticas Básicas, Estatísticas Avançadas, Flags
+      const column1X = 100;
+      const column2X = canvas.width / 2 + 50;
+      let columnY = currentY;
+
+      // Função auxiliar para desenhar seção
+      const drawSection = (title, items, x, y, titleColor = '#2b6cb0', itemColor = '#1a202c', titleFont = 'bold 36px Arial, sans-serif', itemFont = '28px Arial, sans-serif') => {
+        ctx.fillStyle = titleColor;
+        ctx.font = titleFont;
+        ctx.textAlign = 'left';
+        ctx.fillText(title, x, y);
+        y += 50;
+        ctx.fillStyle = itemColor;
+        ctx.font = itemFont;
+        items.forEach(item => {
+          ctx.fillText(item, x, y);
+          y += 40;
+        });
+        return y;
+      };
+
+      // Informações Básicas
+      columnY = drawSection('INFORMAÇÕES BÁSICAS', [
+        `Idade: ${data.basicInfo.age || 'N/A'} anos`,
         `Altura: ${data.basicInfo.height || 'N/A'}`,
         `Peso: ${data.basicInfo.weight || 'N/A'}`,
-        `Potencial: ${data.radarAnalysis.potentialScore || 'N/A'}`,
-        `Confiança: ${data.radarAnalysis.confidenceScore || 'N/A'}`
-      ];
-      
-      basicInfo.forEach(info => {
-        ctx.fillText(info, leftX, nameY);
-        nameY += 22;
-      });
-      
-      // Coluna direita - Estatísticas
-      let rightY = nameY - (basicInfo.length * 22) - 30;
-      ctx.fillStyle = '#2b6cb0';
-      ctx.font = 'bold 20px Arial, sans-serif';
-      ctx.fillText('ESTATÍSTICAS', rightX, rightY);
-      
-      rightY += 30;
-      ctx.fillStyle = '#1a202c';
-      ctx.font = '16px Arial, sans-serif';
-      
-      const stats = [
+        `Nacionalidade: ${data.basicInfo.nationality || 'N/A'}`,
+      ], column1X, columnY);
+
+      // Estatísticas Básicas
+      columnY += 80; // Increased spacing
+      columnY = drawSection('ESTATÍSTICAS BÁSICAS', [
         `PPG: ${data.basicStats.ppg || 'N/A'}`,
         `RPG: ${data.basicStats.rpg || 'N/A'}`,
         `APG: ${data.basicStats.apg || 'N/A'}`,
         `FG%: ${data.basicStats.fg_percentage || 'N/A'}`,
-        `3P%: ${data.basicStats.three_p_percentage || 'N/A'}`
-      ];
-      
-      stats.forEach(stat => {
-        ctx.fillText(stat, rightX, rightY);
-        rightY += 22;
-      });
-      
-      // Flags (se houver)
-      nameY = Math.max(nameY, rightY) + 30;
+        `3P%: ${data.basicStats.three_p_percentage || 'N/A'}`,
+        `FT%: ${data.basicStats.ft_percentage || 'N/A'}`,
+      ], column1X, columnY);
+
+      // Estatísticas Avançadas (segunda coluna)
+      let advancedStatsY = currentY;
+      advancedStatsY = drawSection('ESTATÍSTICAS AVANÇADAS', [
+        `TS%: ${data.advancedStats.trueShooting || 'N/A'}`,
+        `eFG%: ${data.advancedStats.effectiveFG || 'N/A'}`,
+        `PER: ${data.advancedStats.playerEfficiency || 'N/A'}`,
+        `USG%: ${data.advancedStats.usageRate || 'N/A'}`,
+        `ORtg: ${data.advancedStats.offensiveRating || 'N/A'}`,
+        `DRtg: ${data.advancedStats.defensiveRating || 'N/A'}`,
+        `TOV%: ${data.advancedStats.turnoverRate || 'N/A'}`,
+        `AST%: ${data.advancedStats.assistRate || 'N/A'}`,
+        `TRB%: ${data.advancedStats.totalReboundRate || 'N/A'}`,
+        `STL%: ${data.advancedStats.stealRate || 'N/A'}`,
+        `BLK%: ${data.advancedStats.blockRate || 'N/A'}`,
+      ], column2X, advancedStatsY);
+
+      // Flags (terceira coluna, ou abaixo das avançadas se não houver espaço)
+      let flagsY = Math.max(columnY, advancedStatsY) + 60;
       if (data.flags && data.flags.length > 0) {
         ctx.fillStyle = '#2b6cb0';
-        ctx.font = 'bold 20px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('DESTAQUES E ALERTAS', canvas.width / 2, nameY);
-        
-        nameY += 30;
+        ctx.font = 'bold 36px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.font = '14px Arial, sans-serif';
-        
-        data.flags.slice(0, 3).forEach(flag => {
+        ctx.fillText('DESTAQUES E ALERTAS', column1X, flagsY);
+        flagsY += 50;
+        ctx.font = '28px Arial, sans-serif';
+        data.flags.slice(0, 4).forEach(flag => {
           ctx.fillStyle = flag.type === 'Alerta' ? '#e53e3e' : '#38a169';
-          ctx.fillText(`• ${flag.message}`, leftX, nameY);
-          nameY += 25;
+          ctx.fillText(`• ${flag.message}`, column1X, flagsY);
+          flagsY += 40;
         });
       }
-      
-      // Comparações NBA
-      nameY += 20;
-      if (data.nbaComparisons && data.nbaComparisons.length > 0) {
-        ctx.fillStyle = '#2b6cb0';
-        ctx.font = 'bold 20px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('COMPARAÇÕES NBA', canvas.width / 2, nameY);
-        
-        nameY += 30;
-        ctx.textAlign = 'left';
-        ctx.font = '16px Arial, sans-serif';
-        ctx.fillStyle = '#1a202c';
-        
-        data.nbaComparisons.slice(0, 2).forEach((comp, index) => {
-          const compText = `${index + 1}. ${comp.name} (${comp.similarity})`;
-          ctx.fillText(compText, leftX, nameY);
-          nameY += 25;
-        });
-      }
-      
+
       // Footer
       const footerY = canvas.height - 60;
       ctx.fillStyle = '#718096';
-      ctx.font = '12px Arial, sans-serif';
+      ctx.font = '20px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} | prospectRadar.com`, canvas.width / 2, footerY);
       
@@ -1075,6 +1126,7 @@ const useAdvancedExport = () => {
 
       return { success: true };
     } catch (error) {
+      console.error('Erro detalhado na exportação de imagem:', error);
       setExportError('Erro ao exportar como imagem: ' + error.message);
       return { success: false, error: error.message };
     } finally {

@@ -25,7 +25,8 @@ const Watchlist = () => {
     if (!allProspects || watchlist.size === 0) {
       return [];
     }
-    return allProspects.filter(p => watchlist.has(p.id));
+    const filtered = allProspects.filter(p => watchlist.has(p.id));
+    return filtered;
   }, [allProspects, watchlist]);
 
   if (loading) {

@@ -9,18 +9,7 @@ export const useExport = () => {
   const [isExporting, setIsExporting] = useState(false);
   const { loadUserNotes } = useProspectNotes();
 
-  // Função auxiliar para calcular idade
-  const calculateAge = (birthDate) => {
-    if (!birthDate) return 'N/A';
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
+  
 
   // Função auxiliar para formatar dados do prospect
   const formatProspectData = async (prospect) => {
@@ -30,16 +19,16 @@ export const useExport = () => {
       
       return {
         nome: prospect.name || 'N/A',
-        idade: calculateAge(prospect.birth_date),
+        idade: prospect.age || 'N/A',
         posicao: prospect.position || 'N/A',
-        altura: prospect.height_cm ? `${prospect.height_cm} cm` : 'N/A',
-        peso: prospect.weight_kg ? `${prospect.weight_kg} kg` : 'N/A',
+        altura: prospect.height && typeof prospect.height === 'object' ? `${prospect.height.us} (${prospect.height.intl} cm)` : prospect.height || 'N/A',
+        peso: prospect.weight && typeof prospect.weight === 'object' ? `${prospect.weight.us} lb (${prospect.weight.intl} kg)` : prospect.weight || 'N/A',
         universidade: prospect.college || prospect.school || 'N/A',
         nacionalidade: prospect.nationality || 'N/A',
         radarScore: prospect.radar_score || 'N/A',
-        pontos: prospect.stats?.points || 'N/A',
-        rebotes: prospect.stats?.rebounds || 'N/A',
-        assistencias: prospect.stats?.assists || 'N/A',
+        pontos: prospect.ppg || 'N/A',
+        rebotes: prospect.rpg || 'N/A',
+        assistencias: prospect.apg || 'N/A',
         anotacoes: prospectNote?.notes || 'Sem anotações'
       };
     } catch (error) {
@@ -47,16 +36,16 @@ export const useExport = () => {
       // Fallback sem anotações se houver erro
       return {
         nome: prospect.name || 'N/A',
-        idade: calculateAge(prospect.birth_date),
+        idade: prospect.age || 'N/A',
         posicao: prospect.position || 'N/A',
-        altura: prospect.height_cm ? `${prospect.height_cm} cm` : 'N/A',
-        peso: prospect.weight_kg ? `${prospect.weight_kg} kg` : 'N/A',
+        altura: prospect.height && typeof prospect.height === 'object' ? `${prospect.height.us} (${prospect.height.intl} cm)` : prospect.height || 'N/A',
+        peso: prospect.weight && typeof prospect.weight === 'object' ? `${prospect.weight.us} lb (${prospect.weight.intl} kg)` : prospect.weight || 'N/A',
         universidade: prospect.college || prospect.school || 'N/A',
         nacionalidade: prospect.nationality || 'N/A',
         radarScore: prospect.radar_score || 'N/A',
-        pontos: prospect.stats?.points || 'N/A',
-        rebotes: prospect.stats?.rebounds || 'N/A',
-        assistencias: prospect.stats?.assists || 'N/A',
+        pontos: prospect.ppg || 'N/A',
+        rebotes: prospect.rpg || 'N/A',
+        assistencias: prospect.apg || 'N/A',
         anotacoes: 'Sem anotações'
       };
     }

@@ -264,6 +264,49 @@ const useMockDraft = (allProspects) => {
     }
   }, [currentPick]);
 
+  const tradePicks = useCallback((pick1Number, pick2Number) => {
+    setDraftBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      const pick1Index = newBoard.findIndex(pick => pick.pick === pick1Number);
+      const pick2Index = newBoard.findIndex(pick => pick.pick === pick2Number);
+
+      if (pick1Index === -1 || pick2Index === -1) {
+        console.error("One or both pick numbers not found for trade.");
+        return prevBoard;
+      }
+
+      // Get the full pick objects
+      const pick1 = newBoard[pick1Index];
+      const pick2 = newBoard[pick2Index];
+
+      // Create new pick objects with swapped properties
+      const newPick1 = { ...pick1, team: pick2.team, prospect: pick2.prospect };
+      const newPick2 = { ...pick2, team: pick1.team, prospect: pick1.prospect };
+
+      // Update the board with the new pick objects
+      newBoard[pick1Index] = newPick1;
+      newBoard[pick2Index] = newPick2;
+
+      // Update draft history to reflect the new team ownership of the picks
+      setDraftHistory(prevHistory => {
+        const updatedHistory = prevHistory.map(historyItem => {
+          if (historyItem.pick === pick1Number) {
+            // If the drafted prospect was at pick1, it now belongs to pick2's original team
+            return { ...historyItem, team: pick2.team };
+          }
+          if (historyItem.pick === pick2Number) {
+            // If the drafted prospect was at pick2, it now belongs to pick1's original team
+            return { ...historyItem, team: pick1.team };
+          }
+          return historyItem;
+        });
+        return updatedHistory;
+      });
+
+      return newBoard;
+    });
+  }, []);
+
   return {
     draftBoard,
     availableProspects,
@@ -293,6 +336,7 @@ const useMockDraft = (allProspects) => {
     getProspectRecommendations,
     exportDraft,
     getDraftStats,
+    tradePicks,
   };
 };
 
