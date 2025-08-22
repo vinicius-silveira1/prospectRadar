@@ -10,7 +10,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
   const badges = assignBadges(prospect);
 
   return (
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out">
+    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-cyan dark:hover:border-brand-cyan hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out">
       {/* Watch List Button */}
       <button
         onClick={onToggleWatchlist}
@@ -19,7 +19,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
         <Heart
           size={16}
           className={`transition-colors ${
-            isInWatchlist ? 'text-red-500 fill-current' : 'text-slate-400 hover:text-red-500'
+            isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'
           }`} 
         />
       </button>
@@ -36,7 +36,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-blue-600 dark:hover:text-blue-400 truncate">
+            <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-cyan dark:hover:text-brand-cyan truncate">
               {prospect.name}
             </Link>
             <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary truncate">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
@@ -59,7 +59,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
           <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase mb-2">Estatísticas</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{prospect.ppg?.toFixed(1) || '-'}</p>
+              <p className="text-xl font-bold text-cyan-600 dark:text-cyan-400">{prospect.ppg?.toFixed(1) || '-'}</p>
               <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
             </div>
             <div>
@@ -74,7 +74,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) =
         </div>
       </div>
       <div className="p-4 pt-0">
-        <Link to={`/prospects/${prospect.id}`} className="w-full flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium">Ver Detalhes</Link>
+        <Link to={`/prospects/${prospect.id}`} className="w-full flex-1 text-center px-3 py-2 bg-cyan-100/50 dark:bg-brand-cyan/10 text-brand-cyan dark:text-cyan-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium">Ver Detalhes</Link>
       </div>
     </div>
   );
