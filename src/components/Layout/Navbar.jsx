@@ -139,7 +139,7 @@ const Navbar = ({ onMenuClick }) => {
               className="hidden sm:block"
             >
               <span className="text-brand-orange">prospect</span>
-              <span className="text-brand-cyan">Radar</span>
+              <span className="text-brand-purple">Radar</span>
             </ResponsiveText>
           </Link>
         </div>

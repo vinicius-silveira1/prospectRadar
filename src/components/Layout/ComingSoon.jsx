@@ -14,7 +14,7 @@ const ComingSoon = ({ title, message }) => {
       </p>
       <Link
         to="/"
-        className="flex items-center px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+        className="flex items-center px-6 py-3 bg-brand-purple text-white font-bold rounded-lg hover:brightness-90 transition-colors shadow-lg"
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
         Voltar para o Início

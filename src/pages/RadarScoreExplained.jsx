@@ -7,12 +7,12 @@ import { LoadingSpinner } from "../components/Common/LoadingComponents";
 const RadarScoreExplained = () => {
   const pillars = [
     {
-      icon: <BarChart3 className="w-10 h-10 text-blue-500" />,
+      icon: <BarChart3 className="w-10 h-10 text-brand-cyan" />,
       title: "Estatísticas básicas",
       weight: "15%",
       description: "Métricas de produção bruta. Embora importantes, têm um peso menor, pois a eficiência e o contexto são mais preditivos.",
       metrics: ["PPG", "RPG", "APG", "FG%", "3PT%", "FT%"],
-      color: "blue"
+            color: "cyan"
     },
     {
       icon: <Zap className="w-10 h-10 text-purple-500" />,
@@ -62,7 +62,7 @@ const RadarScoreExplained = () => {
           {pillars.map((pillar, index) => (
             <div key={index} className={`relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-lg p-4 sm:p-6 border border-transparent hover:border-${pillar.color}-500 transition-all duration-300`}>
               <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                <div className={`flex-shrink-0 self-center sm:self-start p-3 sm:p-4 rounded-full bg-${pillar.color}-100 dark:bg-${pillar.color}-900/30 text-${pillar.color}-600 dark:text-${pillar.color}-400 shadow-md`}>
+                <div className={`flex-shrink-0 self-center sm:self-start p-3 sm:p-4 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-${pillar.color}-600 dark:text-${pillar.color}-400 shadow-md`}>
                   {pillar.icon}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -99,7 +99,7 @@ const RadarScoreExplained = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
-              <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-amber-500 self-center sm:self-start flex-shrink-0" />
+              <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-brand-orange self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Potencial vs Confiança</h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados com base no número de jogos. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
@@ -112,7 +112,7 @@ const RadarScoreExplained = () => {
         <div className="mt-12 sm:mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-4 sm:p-6 md:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-2">Cases de Teste: Classe de 2018</h2>
           <p className="text-center text-sm text-slate-600 dark:text-super-dark-text-secondary mb-6">
-            O algoritmo foi treinado e validado com dados de classes de draft anteriores. Veja abaixo como o Radar Score avaliou alguns prospectos de 2018 e <strong className="text-blue-600 dark:text-blue-400">clique em um jogador</strong> para ver a análise completa em sua página de detalhes.
+            O algoritmo foi treinado e validado com dados de classes de draft anteriores. Veja abaixo como o Radar Score avaliou alguns prospectos de 2018 e <strong className="text-brand-cyan dark:text-cyan-400">clique em um jogador</strong> para ver a análise completa em sua página de detalhes.
           </p>
           {loading2018 ? (
             <div className="flex justify-center items-center h-32"><LoadingSpinner /></div>

@@ -38,7 +38,7 @@ const ResetPassword = () => {
           <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-4xl font-bold">
             <span className="text-brand-orange">prospect</span>
-            <span className="text-brand-cyan">Radar</span>
+            <span className="text-brand-purple">Radar</span>
           </h1>
           <p className="mt-2 text-slate-300">Analisando o futuro do basquete.</p>
         </div>

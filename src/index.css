@@ -7,7 +7,6 @@
   --brand-dark: #0f172a;
   --brand-navy: #1e293b;
   --brand-orange: #ff6b35;
-  --brand-cyan: #06b6d4;
   --brand-light: #f8fafc;
 }
 
@@ -30,12 +29,12 @@
   }
   
   .prospect-card:hover {
-    @apply transform -translate-y-1 dark:shadow-brand-cyan/20;
+    @apply transform -translate-y-1 dark:shadow-brand-purple/20;
   }
   
   /* Botão principal com gradiente */
   .btn-primary {
-    @apply bg-gradient-to-r from-brand-orange to-brand-cyan text-white font-semibold py-3 px-6 rounded-lg shadow-brand hover:shadow-brand-lg transition-all duration-300 dark:shadow-brand-orange/30;
+    @apply bg-gradient-to-r from-brand-orange to-brand-purple text-white font-semibold py-3 px-6 rounded-lg shadow-brand hover:shadow-brand-lg transition-all duration-300 dark:shadow-brand-orange/30;
   }
   
   .btn-primary:hover {
@@ -49,12 +48,12 @@
   
   /* Cards com accent */
   .card-accent {
-    @apply border-l-4 border-brand-orange dark:border-brand-cyan;
+    @apply border-l-4 border-brand-orange dark:border-brand-purple;
   }
   
   /* Texto com gradiente */
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-orange to-brand-cyan bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent;
   }
   
   /* Stats highlight */
@@ -74,6 +73,7 @@
     @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200;
   }
 
+  /* Badges de Posição */
   .badge-position {
     @apply px-2 py-1 rounded-full text-xs font-medium;
   }

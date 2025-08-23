@@ -115,7 +115,7 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
         <div className="relative w-20 h-24 rounded-lg overflow-hidden bg-gray-200">
           {imageState.isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-cyan border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-brand-purple border-t-transparent"></div>
             </div>
           )}
           {!imageState.hasError ? (
@@ -129,7 +129,7 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
               onLoad={handleImageLoad}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-orange to-brand-cyan">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-orange to-brand-purple">
               <span className="text-white text-3xl font-bold select-none">
                 {prospect.name && prospect.name[0]}
               </span>
@@ -181,15 +181,15 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-super-dark-border">
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
           <div>
-            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.fg_pct * 100).toFixed(1)}%</p>
+            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.fg_pct * 100).toFixed(1)}%</p>
             <p className="text-slate-500 dark:text-super-dark-text-secondary">FG%</p>
           </div>
           <div>
-            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</p>
+            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</p>
             <p className="text-slate-500 dark:text-super-dark-text-secondary">3P%</p>
           </div>
           <div>
-            <p className="font-bold text-cyan-600 dark:text-cyan-400">{(prospect.stats.ft_pct * 100).toFixed(1)}%</p>
+            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.ft_pct * 100).toFixed(1)}%</p>
             <p className="text-slate-500 dark:text-super-dark-text-secondary">FT%</p>
           </div>
         </div>

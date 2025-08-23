@@ -33,7 +33,7 @@ const Login = () => {
           <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-4xl font-bold">
             <span className="text-brand-orange">prospect</span>
-            <span className="text-brand-cyan">Radar</span>
+            <span className="text-brand-purple">Radar</span>
           </h1>
           <p className="mt-2 text-slate-300">Analisando o futuro do basquete.</p>
         </div>
@@ -69,7 +69,7 @@ const Login = () => {
                 placeholder="••••••••"
               />
               <div className="text-right mt-2">
-                <Link to="/forgot-password" className="text-sm font-medium text-brand-cyan dark:text-blue-300 hover:text-cyan-500 transition-colors">
+                <Link to="/forgot-password" className="text-sm font-medium text-brand-purple dark:text-blue-300 hover:text-purple-500 transition-colors">
                   Esqueceu sua senha?
                 </Link>
               </div>
@@ -84,7 +84,7 @@ const Login = () => {
           </form>
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-super-dark-text-secondary">
             Não tem uma conta?{' '}
-            <Link to="/signup" className="font-medium text-brand-cyan hover:text-cyan-500 transition-colors">
+            <Link to="/signup" className="font-medium text-brand-purple hover:text-purple-500 transition-colors">
               Cadastre-se
             </Link>
           </p>

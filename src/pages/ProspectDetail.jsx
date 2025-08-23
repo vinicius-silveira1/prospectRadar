@@ -14,7 +14,7 @@ import MobileExportActions from '@/components/Common/MobileExportActions.jsx';
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
-    <Clock className="mx-auto h-10 w-10 text-blue-500 mb-4" />
+    <Clock className="mx-auto h-10 w-10 text-brand-purple mb-4" />
     <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary">Aguardando Início da Temporada</h3>
     <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mt-2">
       As estatísticas detalhadas e a análise do Radar Score para {prospectName} serão geradas assim que a temporada 2025-26 começar.
@@ -196,7 +196,7 @@ const ProspectDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-500 flex-shrink-0" />Informações Básicas</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-orange flex-shrink-0" />Informações Básicas</h2>
               <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {prospect.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
                 <div className="flex items-start"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{prospect.team || 'N/A'}</div></div></div>
@@ -208,7 +208,14 @@ const ProspectDetail = () => {
 
             {/* Estatísticas Básicas - Mobile */}
             <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Estatísticas</h3>
+              <div className="flex justify-between items-center mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
+                {(prospect.league || prospect['stats-season']) && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {(() => {
                   const renderStat = (label, value, colorClass) => (
@@ -225,7 +232,7 @@ const ProspectDetail = () => {
                       {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
                       {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
                       {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', fgPercentage, 'text-cyan-500 dark:text-cyan-400')}
+                      {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
                       {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
                       {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
                     </>
@@ -238,7 +245,7 @@ const ProspectDetail = () => {
             <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
               <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Ações</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
+                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-90 transition-colors text-sm sm:text-base">
                   <GitCompare className="w-4 h-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Comparar Jogador</span>
                 </button>
@@ -259,7 +266,14 @@ const ProspectDetail = () => {
             {hasStats ? (
               <>
                 <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-blue-500" />Estatísticas Avançadas</h2>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
+                    {(prospect.league || prospect['stats-season']) && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                        {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Helper function for stat display with progress bar */}
                     {(() => {
@@ -272,7 +286,7 @@ const ProspectDetail = () => {
 
                       return (
                         <>
-                          {renderStat('TS%', (prospect.ts_percent * 100)?.toFixed(1), 'text-cyan-500')}
+                          {renderStat('TS%', (prospect.ts_percent * 100)?.toFixed(1), 'text-purple-500')}
                           {renderStat('eFG%', (prospect.efg_percent * 100)?.toFixed(1), 'text-teal-500')}
                           {renderStat('PER', prospect.per?.toFixed(2), 'text-indigo-500', false)}
                           {renderStat('USG%', prospect.usg_percent?.toFixed(1), 'text-pink-500')}
@@ -293,7 +307,7 @@ const ProspectDetail = () => {
                 {/* ANÁLISE DO RADAR SCORE */}
                 {evaluation.categoryScores && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-purple-500" />Análise do Radar Score</Link></h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                       {isScout ? (
                         <div><RadarScoreChart data={evaluation.categoryScores} /></div>
@@ -303,23 +317,23 @@ const ProspectDetail = () => {
                         </ScoutFeaturePlaceholder>
                       )}
                       <div className="space-y-4">
-                        <div><h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-blue-600 dark:text-blue-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
-                        <div><h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-green-600 dark:text-green-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-brand-gold dark:text-yellow-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-brand-gold dark:text-yellow-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
                         <div>
-                          <h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal">Score Total (Potencial)</h3>
-                          <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400">{evaluation.potentialScore}</p>
+                          <h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Score Total (Potencial)</h3>
+                          <p className="text-2xl font-extrabold text-brand-gold dark:text-yellow-400">{evaluation.potentialScore}</p>
                         </div>
                         {evaluation.confidenceScore < 1.0 && (
                           <div>
-                            <h3 className="font-semibold text-gray-700 dark:text-super-dark-text-primary leading-normal flex items-center">
-                              <AlertTriangle className="w-4 h-4 mr-2 text-amber-500" />
+                            <h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-2 text-brand-orange" />
                               Nível de Confiança
                             </h3>
                             <div className="flex items-center gap-2">
                               <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-2.5">
-                                <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: `${evaluation.confidenceScore * 100}%` }}></div>
+                                <div className="bg-brand-orange h-2.5 rounded-full" style={{ width: `${evaluation.confidenceScore * 100}%` }}></div>
                               </div>
-                              <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                              <span className="text-sm font-bold text-brand-orange dark:text-orange-400">
                                 {Math.round(evaluation.confidenceScore * 100)}%
                               </span>
                             </div>
@@ -338,7 +352,7 @@ const ProspectDetail = () => {
             {/* SEÇÃO DE FLAGS (DESTAQUES E ALERTAS) */}
             {flags.length > 0 && hasStats && (
               <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-yellow-500" />Destaques & Alertas do Radar</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Destaques & Alertas do Radar</h2>
                 <div className="space-y-3">
                   {flags.map((flag, index) => (
                     <div key={index} className={`flex items-start p-4 rounded-lg shadow-sm ${flag.type === 'green' ? 'bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500' : 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500'}`}>
@@ -359,12 +373,12 @@ const ProspectDetail = () => {
               isScout ? (
                 comparablePlayers.length > 0 && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-cyan-500" />Comparações com Jogadores da NBA</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-gold" />Comparações com Jogadores da NBA</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {comparablePlayers.map((player, index) => (
                         <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
                           <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">{player.name}</p>
-                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-cyan-600 dark:text-cyan-400">{player.similarity}%</span></p>
+                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-gold dark:text-yellow-400">{player.similarity}%</span></p>
                           <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
                         </div>
                       ))}
@@ -391,7 +405,7 @@ const ProspectDetail = () => {
               isScout ? (
                 (prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-orange-500" />Análise Detalhada do Jogador</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {prospect.strengths?.length > 0 && (
                         <div>
@@ -443,7 +457,14 @@ const ProspectDetail = () => {
           </div>
           <div className="hidden lg:block space-y-6">
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Estatísticas</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
+                {(prospect.league || prospect['stats-season']) && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                  </span>
+                )}
+              </div>
               <div className="space-y-4">
                 {(() => {
                   const renderStat = (label, value, colorClass) => (
@@ -460,7 +481,7 @@ const ProspectDetail = () => {
                       {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
                       {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
                       {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', fgPercentage, 'text-cyan-500 dark:text-cyan-400')}
+                      {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
                       {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
                       {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
                     </>
@@ -468,7 +489,7 @@ const ProspectDetail = () => {
                 })()}
               </div>
             </div>
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-r from-brand-orange to-orange-600 rounded-xl shadow-lg p-6 text-white">
               <h3 className="text-lg font-bold mb-2">Projeção Mock Draft</h3>
               <div className="text-3xl font-bold mb-1">{evaluation.draftProjection?.description || 'N/A'}</div>
               <div className="text-orange-100 text-sm">{evaluation.draftProjection?.range ? `Range: ${evaluation.draftProjection.range}` : 'N/A'}</div>
@@ -476,7 +497,7 @@ const ProspectDetail = () => {
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
               <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
+                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 px-4 rounded-lg hover:brightness-90 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
                 <MobileExportActions prospect={prospect} />
                 {user && <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</button>}
                 <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</button>

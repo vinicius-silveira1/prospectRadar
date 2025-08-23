@@ -252,7 +252,7 @@ const Prospects = () => {
     setSelectedBadge('all');
   };
   
-  const inputBaseClasses = "w-full px-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-200 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-brand-cyan focus:border-transparent transition-colors";
+  const inputBaseClasses = "w-full px-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-200 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-colors";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
@@ -280,14 +280,14 @@ const Prospects = () => {
               <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 flex-shrink-0">
                 <button 
                   onClick={() => setViewMode('grid')} 
-                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-cyan dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-purple dark:text-purple-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
                   aria-label="Visualização em grade"
                 >
                   <Grid size={isMobile ? 16 : 18} />
                 </button>
                 <button 
                   onClick={() => setViewMode('list')} 
-                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-cyan dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-purple dark:text-purple-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
                   aria-label="Visualização em lista"
                 >
                   <List size={isMobile ? 16 : 18} />
@@ -316,14 +316,14 @@ const Prospects = () => {
             <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-cyan hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
               >
                 {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
                 <ChevronDown size={16} className={`transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
               </button>
               <button 
                 onClick={clearAllFilters} 
-                className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-cyan hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg font-medium transition-colors active:scale-95"
+                className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg font-medium transition-colors active:scale-95"
               >
                 Limpar Filtros
               </button>
@@ -435,7 +435,7 @@ const Prospects = () => {
                     <div className="space-y-2">
                       <Link 
                         to={`/prospects/${prospect.id}`} 
-                        className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-cyan dark:hover:text-cyan-400 transition-colors block"
+                        className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-purple dark:hover:text-purple-400 transition-colors block"
                       >
                         {prospect.name}
                       </Link>
@@ -479,7 +479,7 @@ const Prospects = () => {
                     <div className="border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-4 text-center text-sm">
                       <div className="flex flex-col space-y-1">
                         <span className="text-slate-500 dark:text-super-dark-text-secondary">PPG</span> 
-                        <span className="font-bold text-cyan-600 dark:text-cyan-400">{prospect.ppg?.toFixed(1) || '-'}</span>
+                        <span className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</span>
                       </div>
                       <div className="flex flex-col space-y-1">
                         <span className="text-slate-500 dark:text-super-dark-text-secondary">RPG</span> 
@@ -495,7 +495,7 @@ const Prospects = () => {
                     <div className="flex gap-2 pt-2">
                       <Link 
                         to={`/prospects/${prospect.id}`} 
-                        className="flex-1 text-center px-3 py-2 bg-cyan-100/50 dark:bg-brand-cyan/10 text-brand-cyan dark:text-cyan-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium"
+                        className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-sm font-medium"
                       >
                         Ver Detalhes
                       </Link>
@@ -611,7 +611,7 @@ const Prospects = () => {
               <Search className="mx-auto text-slate-400 dark:text-super-dark-text-secondary mb-4" size={48} />
               <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">Nenhum prospect encontrado</h3>
               <p className="text-slate-600 dark:text-super-dark-text-secondary mb-4">Tente ajustar os filtros ou termos de busca</p>
-              <button onClick={clearAllFilters} className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-cyan hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg font-medium transition-colors active:scale-95">
+              <button onClick={clearAllFilters}                 className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg font-medium transition-colors active:scale-95">
                 Limpar Filtros
               </button>
             </div>

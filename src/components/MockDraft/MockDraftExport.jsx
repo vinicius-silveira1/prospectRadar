@@ -111,7 +111,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-super-dark-text-primary">
               <span className="text-brand-orange">prospect</span>
-              <span className="text-brand-cyan">Radar</span>
+              <span className="font-bold text-brand-purple">Radar</span>
             </h1>
             <p className="text-gray-500 dark:text-super-dark-text-secondary text-lg">Seu Mock Draft Personalizado</p>
           </div>
@@ -129,7 +129,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
 
       {/* Footer */}
       <footer className="text-center pt-6 mt-6 border-t-2 border-gray-200 dark:border-super-dark-border">
-        <p className="text-gray-500 dark:text-super-dark-text-secondary">Relatório gerado por <span className="font-bold text-brand-orange">prospect</span><span className="font-bold text-brand-cyan">Radar</span></p>
+        <p className="text-gray-500 dark:text-super-dark-text-secondary">Relatório gerado por <span className="font-bold text-brand-orange">prospect</span><span className="font-bold text-brand-purple">Radar</span></p>
         <p className="text-sm text-gray-400 dark:text-super-dark-text-secondary">prospectradar.com</p>
       </footer>
     </div>

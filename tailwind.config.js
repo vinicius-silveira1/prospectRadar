@@ -12,8 +12,9 @@ export default {
         'brand': {
           'dark': '#0f172a',      // Azul escuro do fundo do logo
           'navy': '#1e293b',      // Azul navy
-          'orange': '#ff6b35',    // Laranja vibrante da bola
-          'cyan': '#06b6d4',      // Ciano do radar
+          'orange': '#ff6b35',    // Laranja vibrante da bola (mantido)
+          'purple': '#6b21a8',    // Novo roxo da marca (substitui ciano)
+          'yellow': '#facc15',    // Novo amarelo da marca
           'light': '#f8fafc',     // Branco/cinza claro
         },
         // Cores NBA (mantidas para compatibilidade)

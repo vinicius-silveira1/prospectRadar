@@ -229,11 +229,11 @@ const MockDraft = () => {
               Controles
             </h3>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={initializeDraft} className="w-full px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><RotateCcw className="h-4 w-4 mr-1 sm:mr-2" /> Reset</button>
+              <button onClick={initializeDraft} className="w-full px-3 sm:px-4 py-2 bg-brand-orange text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><RotateCcw className="h-4 w-4 mr-1 sm:mr-2" /> Reset</button>
               <button onClick={simulateLottery} className="w-full px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><Shuffle className="h-4 w-4 mr-1 sm:mr-2" /> Simular</button>
               
               {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
-              <button onClick={handleSaveClick} disabled={!user || isSaving} className="w-full px-3 sm:px-4 py-2 bg-brand-cyan text-white rounded-lg hover:brightness-90 transition-all flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><Save className="h-4 w-4 mr-1 sm:mr-2" /> {isSaving ? 'Salvando...' : 'Salvar'}</button>
+              <button onClick={handleSaveClick} disabled={!user || isSaving} className="w-full px-3 sm:px-4 py-2 bg-brand-purple text-white rounded-lg hover:brightness-90 transition-all flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><Save className="h-4 w-4 mr-1 sm:mr-2" /> {isSaving ? 'Salvando...' : 'Salvar'}</button>
               <button onClick={() => setIsLoadModalOpen(true)} disabled={!user || isLoadingDrafts} className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><FolderOpen className="h-4 w-4 mr-1 sm:mr-2" /> Carregar</button>
               
               <div className="relative export-menu-container col-span-2">
@@ -250,15 +250,15 @@ const MockDraft = () => {
         <div className="xl:col-span-3 order-1 xl:order-2">
           <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border mb-4 lg:mb-6">
             <div className="flex border-b dark:border-super-dark-border overflow-x-auto whitespace-nowrap">
-              <button onClick={() => setView('draft')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'draft' ? 'text-brand-cyan dark:text-brand-cyan border-b-2 border-brand-cyan' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+              <button onClick={() => setView('draft')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'draft' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
                 <Target className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                 <span className="hidden sm:inline">Quadro do </span>Draft
               </button>
-              <button onClick={() => setView('bigboard')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'bigboard' ? 'text-brand-cyan dark:text-brand-cyan border-b-2 border-brand-cyan' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+              <button onClick={() => setView('bigboard')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'bigboard' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
                 <Star className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                 Big Board<span className="hidden lg:inline"> - Principais Prospects</span>
               </button>
-              <button onClick={() => setView('prospects')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'prospects' ? 'text-brand-cyan dark:text-brand-cyan border-b-2 border-brand-cyan' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+              <button onClick={() => setView('prospects')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'prospects' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
                 <Users className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                 Prospects<span className="hidden sm:inline"> Disponíveis</span>
               </button>
@@ -343,7 +343,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
       {draftBoard.map((pick) => (
         <div key={pick.pick} className={`p-3 sm:p-4 border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 ${
             pick.pick === currentPick ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-black/30 ring-2 ring-blue-200 dark:ring-blue-500/50 shadow-lg'
-            : pick.prospect ? 'border-brand-cyan bg-cyan-50 dark:bg-brand-navy'
+            : pick.prospect ? 'border-brand-purple bg-purple-50 dark:bg-brand-navy'
             : 'border-slate-200 dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary'
           }`}>
           <div className="flex justify-between items-start mb-2">
@@ -362,7 +362,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
               )}
               <button
                 onClick={() => onTradeClick(pick)}
-                className="px-2 py-1 bg-brand-cyan text-white rounded-md hover:brightness-90 transition-all text-xs flex items-center justify-center"
+                className="px-2 py-1 bg-brand-purple text-white rounded-md hover:brightness-90 transition-all text-xs flex items-center justify-center"
               >
                 <RefreshCw className="h-3 w-3 mr-1" /> Trocar
               </button>
@@ -396,7 +396,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
       {prospects.map((prospect, index) => (
         <div key={prospect.id} className="relative">
-          <div className="absolute -top-2 -left-2 bg-brand-cyan text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
+          <div className="absolute -top-2 -left-2 bg-brand-purple text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
           <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
         </div>
       ))}
@@ -419,7 +419,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
     )}
     <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
       <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6 flex items-center flex-wrap gap-1">
-        <Users className="h-5 w-5 text-brand-cyan mr-2 flex-shrink-0" /> 
+        <Users className="h-5 w-5 text-brand-purple mr-2 flex-shrink-0" /> 
         <span className="text-brand-orange">Prospects</span> 
         <span>Disponíveis ({prospects.length})</span>
       </h3>
@@ -435,7 +435,7 @@ const MockDraftProspectCard = ({ prospect, action }) => {
   const badges = assignBadges(prospect);
 
   return (
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-cyan dark:hover:border-brand-cyan hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 min-h-[320px] flex flex-col">
+    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-300 min-h-[320px] flex flex-col">
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-3">
           {/* Image or Skeleton */}
@@ -472,18 +472,28 @@ const MockDraftProspectCard = ({ prospect, action }) => {
         )}
         
         {/* Stats Grid */}
-        <div className="border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
-          <div>
-            <p className="font-bold text-cyan-600 dark:text-cyan-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
-            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+        <div className="border-t dark:border-super-dark-border pt-3">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
+            {(prospect.league || prospect['stats-season']) && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                </span>
+            )}
           </div>
-          <div>
-            <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
-            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-          </div>
-          <div>
-            <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
-            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
+            <div>
+              <p className="font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+            </div>
+            <div>
+              <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+            </div>
+            <div>
+              <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
+              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+            </div>
           </div>
         </div>
         
@@ -493,14 +503,14 @@ const MockDraftProspectCard = ({ prospect, action }) => {
             <button 
               onClick={action.onClick} 
               disabled={action.disabled} 
-              className="w-full flex items-center justify-center px-3 py-2 bg-brand-cyan text-white font-semibold rounded-lg hover:brightness-90 transition-all text-xs sm:text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center px-3 py-2 bg-brand-purple text-white font-semibold rounded-lg hover:brightness-90 transition-all text-xs sm:text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed"
             >
               {action.label} {action.icon}
             </button>
           )}
           <Link 
             to={`/prospects/${prospect.id}`} 
-            className="w-full text-center px-3 py-2 bg-cyan-100/50 dark:bg-brand-cyan/10 text-brand-cyan dark:text-cyan-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-xs sm:text-sm font-medium"
+            className="w-full text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-xs sm:text-sm font-medium"
           >
             Ver Detalhes
           </Link>
@@ -529,7 +539,7 @@ const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSa
         />
         <div className="flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 rounded-lg text-slate-700 dark:text-super-dark-text-secondary bg-slate-100 dark:bg-super-dark-border hover:bg-slate-200">Cancelar</button>
-          <button onClick={onSave} disabled={isSaving} className="px-4 py-2 rounded-lg bg-brand-cyan text-white hover:brightness-90 transition-all disabled:opacity-50">
+          <button onClick={onSave} disabled={isSaving} className="px-4 py-2 rounded-lg bg-brand-purple text-white hover:brightness-90 transition-all disabled:opacity-50">
             {isSaving ? 'Salvando...' : 'Salvar'}
           </button>
         </div>
@@ -557,7 +567,7 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
                 <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">Salvo {formatDistanceToNow(new Date(draft.created_at), { addSuffix: true, locale: ptBR })}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => onLoad(draft.id)} className="px-3 py-1 text-sm bg-brand-cyan text-white rounded hover:brightness-90 transition-all">Carregar</button>
+                <button onClick={() => onLoad(draft.id)} className="px-3 py-1 text-sm bg-brand-purple text-white rounded hover:brightness-90 transition-all">Carregar</button>
                 <button onClick={() => onDelete(draft.id)} className="px-3 py-1 text-sm bg-brand-orange text-white rounded hover:brightness-90 transition-all">Excluir</button>
               </div>
             </div>

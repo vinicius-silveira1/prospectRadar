@@ -33,7 +33,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
           className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-super-dark-secondary/80 hover:bg-white dark:hover:bg-slate-600 transition-all" 
           title="Remover da Watchlist"
         >
-          <Heart size={16} className={`text-red-500 ${isInWatchlist ? 'fill-current' : ''}`} />
+          <Heart size={16} className={`transition-colors ${isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} />
         </button>
         
         <div className="p-4">
@@ -55,7 +55,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
             <div className="flex-grow"> 
               <Link 
                 to={`/prospects/${prospect.id}`} 
-                className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-blue-600 dark:hover:text-blue-400"
+                className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple"
               >
                 {prospect.name}
               </Link>
@@ -81,12 +81,17 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
           )}
           
           <div className="mt-4 border-t dark:border-super-dark-border pt-3">
-            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase mb-2">
-              Estatísticas
-            </h4>
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
+              {(prospect.league || prospect['stats-season']) && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                  {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                   {prospect.ppg?.toFixed(1) || '-'}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
@@ -111,7 +116,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
           <div className="flex space-x-2">
             <Link 
               to={`/prospects/${prospect.id}`} 
-              className="flex-1 text-center px-3 py-2 bg-blue-50 dark:bg-super-dark-border text-blue-600 dark:text-super-dark-text-primary rounded-lg hover:bg-blue-100 dark:hover:bg-super-dark-secondary transition-colors text-sm font-medium"
+              className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium"
             >
               Ver Detalhes
             </Link>

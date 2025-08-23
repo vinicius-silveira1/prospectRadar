@@ -33,7 +33,7 @@ const ImageSystemStatus = () => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Image className="h-5 w-5 text-brand-cyan" />
+          <Image className="h-5 w-5 text-brand-purple" />
           <h3 className="text-lg font-semibold text-gray-900">Sistema de Imagens</h3>
         </div>
         <button

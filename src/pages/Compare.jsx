@@ -65,7 +65,7 @@ function Compare() {
   useEffect(() => {
     const prospectIdToAdd = searchParams.get('add');
     if (prospectIdToAdd && prospects.length > 0) {
-      const prospectToAdd = prospects.find(p => p.id === prospectIdToAdd);
+      const prospectToAdd = allProspects.find(p => p.id === prospectIdToAdd);
       if (prospectToAdd) {
         addProspect(prospectToAdd);
         if (selectedProspects.length === 0) setShowSearch(true);
@@ -145,7 +145,7 @@ function Compare() {
           <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4 mb-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
-              <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
+              <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-brand-purple text-white rounded-lg hover:brightness-90 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
             </div>
             {showSearch && (
               <div className="border-t dark:border-super-dark-border pt-4 space-y-4">
@@ -177,7 +177,7 @@ function Compare() {
           <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / {maxComparisons})</h2>
-              {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
+              {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-brand-purple dark:text-purple-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
             </div>
             <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-${maxComparisons} gap-3 sm:gap-4 min-h-[6rem] w-full`}>
               {selectedProspects.map((prospect) => (
@@ -193,14 +193,14 @@ function Compare() {
                   return (
                     <div
                       key={`upgrade-placeholder-${index}`}
-                      className="relative flex flex-col items-center justify-center p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-dashed border-indigo-300 dark:border-indigo-600 rounded-lg text-center transition-all group col-span-2"
+                      className="relative flex flex-col items-center justify-center p-4 bg-orange-50/70 dark:bg-brand-orange/10 border-2 border-dashed border-brand-orange dark:border-brand-orange rounded-lg text-center transition-all group col-span-2"
                       style={{ gridColumn: 'span 2' }}
                     >
                       <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded-full font-semibold">Scout</div>
-                      <Lock size={28} className="text-indigo-400 dark:text-indigo-300 mb-2 group-hover:scale-110 transition-transform" />
-                      <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-1">Mais Comparações</span>
-                      <span className="text-xs text-indigo-600 dark:text-indigo-400 leading-tight px-1">Upgrade para Scout e compare até 4 prospects</span>
-                      <button onClick={() => navigate('/pricing')} className="mt-2 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white text-xs rounded-full transition-colors">Upgrade</button>
+                      <Lock size={28} className="text-brand-orange mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-sm font-semibold text-brand-orange dark:text-orange-400 mb-1">Mais Comparações</span>
+                      <span className="text-xs text-orange-600 dark:text-orange-400 leading-tight px-1">Upgrade para Scout e compare até 4 prospects</span>
+                      <button onClick={() => navigate('/pricing')} className="mt-2 px-3 py-1 bg-brand-orange hover:bg-orange-600 text-white text-xs rounded-full transition-colors">Upgrade</button>
                     </div>
                   );
                 }
@@ -209,8 +209,8 @@ function Compare() {
                 }
                 return (
                   <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-super-dark-secondary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-400 dark:text-super-dark-text-secondary text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}>
-                    <Plus size={24} className="text-blue-400" />
-                    <span className="text-sm mt-2">Adicionar Prospect</span>
+                    <Plus size={24} className="text-brand-purple" />
+                    <span className="text-sm mt-2 text-brand-purple">Adicionar Prospect</span>
                   </div>
                 );
               })}
@@ -222,7 +222,7 @@ function Compare() {
               <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} onExport={exportAsImage} isExporting={isExporting} />
             ) : (
               <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
-                <GitCompare className="mx-auto h-12 w-12 text-slate-400 dark:text-super-dark-text-secondary" />
+                <GitCompare className="mx-auto h-12 w-12 text-brand-cyan" />
                 <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Comece a Comparar</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
               </div>

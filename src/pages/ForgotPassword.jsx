@@ -34,7 +34,7 @@ const ForgotPassword = () => {
           <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
           <h1 className="text-4xl font-bold">
             <span className="text-brand-orange">prospect</span>
-            <span className="text-brand-cyan">Radar</span>
+            <span className="text-brand-purple">Radar</span>
           </h1>
           <p className="mt-2 text-slate-300">Analisando o futuro do basquete.</p>
         </div>
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
           </form>
           <p className="mt-8 text-center text-sm text-slate-600 dark:text-super-dark-text-secondary">
             Lembrou a senha?{' '}
-            <Link to="/login" className="font-medium text-brand-cyan hover:text-cyan-500 transition-colors">Voltar para o Login</Link>
+            <Link to="/login" className="font-medium text-brand-purple hover:text-purple-500 transition-colors">Voltar para o Login</Link>
           </p>
         </div>
       </div>

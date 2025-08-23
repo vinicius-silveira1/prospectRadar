@@ -22,7 +22,7 @@ const About = () => {
           <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md p-4 sm:p-6 border dark:border-super-dark-border">
             <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
               <div className="flex-shrink-0">
-                <div className="bg-blue-100 dark:bg-black/50 text-blue-600 dark:text-blue-300 rounded-full p-3 sm:p-4">
+                <div className="bg-purple-100 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-full p-3 sm:p-4">
                   <Target size={32} className="sm:w-10 sm:h-10" />
                 </div>
               </div>

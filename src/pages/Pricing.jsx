@@ -110,7 +110,7 @@ const Pricing = () => {
         <div className="relative p-6 sm:p-8 bg-white dark:bg-super-dark-secondary border border-slate-200 dark:border-super-dark-border rounded-2xl shadow-lg flex flex-col hover:shadow-xl transition-all duration-300">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-super-dark-border dark:to-super-dark-primary shadow-md">
-              <Star className="h-6 w-6 text-slate-600 dark:text-super-dark-text-secondary" />
+              <Star className="h-6 w-6 text-brand-purple" />
             </div>
             <div className="ml-4">
               <h3 className="text-2xl font-bold text-slate-900 dark:text-super-dark-text-primary">Free</h3>
@@ -146,20 +146,20 @@ const Pricing = () => {
         </div>
 
         {/* Plano Scout */}
-        <div className="relative p-8 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-2 border-indigo-200 dark:border-indigo-700 rounded-2xl shadow-lg flex flex-col">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform px-4 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold tracking-wide rounded-full shadow-md">
-            ⭐ Mais Popular
+        <div className="relative p-8 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-brand-purple/10 dark:to-brand-purple/20 border-2 border-brand-purple dark:border-brand-purple rounded-2xl shadow-lg flex flex-col">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform px-4 py-1 bg-gradient-to-r from-brand-purple to-purple-600 text-white text-sm font-semibold tracking-wide rounded-full shadow-md">
+                        ⭐ Mais Popular
           </div>
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600">
+            <div className="p-3 rounded-full bg-gradient-to-r from-brand-purple to-purple-600">
               <Star className="h-6 w-6 text-white" />
             </div>
             <div className="ml-4">
               <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">Plano Scout</h3>
-              <p className="text-sm text-indigo-600 dark:text-indigo-400">Para analistas dedicados</p>
+              <p className="text-sm text-brand-purple dark:text-purple-400">Para analistas dedicados</p>
             </div>
           </div>
-          <p className="mt-4 text-indigo-600 dark:text-indigo-400 font-medium">Desbloqueie todo o potencial da análise de prospects.</p>
+          <p className="mt-4 text-brand-purple dark:text-purple-400 font-medium">Desbloqueie todo o potencial da análise de prospects.</p>
           <div className="mt-6">
             <p className="text-5xl font-extrabold text-gray-900 dark:text-white">R$19,90</p>
             <p className="text-gray-500 dark:text-gray-400">/mês</p>
@@ -169,7 +169,7 @@ const Pricing = () => {
              {scoutFeatures.map((feature) => (
               <li key={feature} className="flex items-start">
                 <div className="flex-shrink-0">
-                  <Star className="h-6 w-6 text-indigo-500" />
+                  <Star className="h-6 w-6 text-brand-purple" />
                 </div>
                 <p className="ml-3 text-gray-700 dark:text-gray-300">{feature}</p>
               </li>
@@ -190,7 +190,7 @@ const Pricing = () => {
                 type="button"
                 onClick={handleUpgrade}
                 disabled={processingUpgrade || loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white py-3 px-6 border border-transparent rounded-md text-center font-medium transition flex items-center justify-center"
+                className="w-full bg-brand-purple hover:brightness-90 disabled:bg-gray-400 text-white py-3 px-6 border border-transparent rounded-md text-center font-medium transition flex items-center justify-center"
               >
                 {processingUpgrade ? (
                   <>

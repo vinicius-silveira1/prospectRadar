@@ -13,7 +13,7 @@ const Footer = () => {
               <img src="/logo.png" alt="ProspectRadar Logo" className="w-8 h-8 mr-2 flex-shrink-0" />
               <h1 className="text-base sm:text-lg font-bold">
                 <span className="text-brand-orange">prospect</span>
-                <span className="text-brand-cyan">Radar</span>
+                <span className="text-brand-purple">Radar</span>
               </h1>
             </div>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed">
@@ -36,9 +36,9 @@ const Footer = () => {
           <div>
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-super-dark-text-primary uppercase tracking-wider mb-3 sm:mb-4">Conecte-se</h3>
             <div className="flex space-x-3 sm:space-x-4 justify-center sm:justify-start">
-              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-cyan transition-colors"><span className="sr-only">GitHub</span><Github size={18} className="sm:w-5 sm:h-5" /></a>
-              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-cyan transition-colors"><span className="sr-only">Twitter</span><Twitter size={18} className="sm:w-5 sm:h-5" /></a>
-              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-cyan transition-colors"><span className="sr-only">LinkedIn</span><Linkedin size={18} className="sm:w-5 sm:h-5" /></a>
+              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-purple transition-colors"><span className="sr-only">GitHub</span><Github size={18} className="sm:w-5 sm:h-5" /></a>
+              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-purple transition-colors"><span className="sr-only">Twitter</span><Twitter size={18} className="sm:w-5 sm:h-5" /></a>
+              <a href="#" className="text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-purple transition-colors"><span className="sr-only">LinkedIn</span><Linkedin size={18} className="sm:w-5 sm:h-5" /></a>
             </div>
           </div>
         </div>

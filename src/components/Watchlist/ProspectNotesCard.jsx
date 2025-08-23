@@ -60,11 +60,11 @@ const ProspectNotesCard = ({
   <div className="mt-4 animate-fade-in w-full max-w-md mx-auto bg-white dark:bg-transparent shadow-2xl rounded-xl">
       {/* Bloco de Notas Realista */}
       <div 
-        className="relative bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-slate-700 dark:to-slate-800 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300 border dark:border-slate-600"
+        className="relative bg-purple-50 dark:bg-purple-100/50 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300 border dark:border-slate-600"
         style={{
           backgroundImage: `
-            linear-gradient(transparent 23px, #e5e7eb 24px),
-            linear-gradient(90deg, #ef4444 0, #ef4444 2px, transparent 2px)
+            linear-gradient(transparent 23px, #E0F7FA 24px),
+            linear-gradient(90deg, #ff6b35 0, #ff6b35 2px, transparent 2px)
           `,
           backgroundSize: '100% 24px, 100% 24px',
           backgroundPosition: '0 24px, 0 0'
@@ -75,8 +75,8 @@ const ProspectNotesCard = ({
           className="absolute inset-0 dark:opacity-90 dark:bg-slate-800 rounded-sm"
           style={{
             backgroundImage: `
-              linear-gradient(transparent 23px, rgb(71 85 105) 24px),
-              linear-gradient(90deg, #ef4444 0, #ef4444 2px, transparent 2px)
+              linear-gradient(transparent 23px, rgb(55 65 81) 24px),
+              linear-gradient(90deg, #ff6b35 0, #ff6b35 2px, transparent 2px)
             `,
             backgroundSize: '100% 24px, 100% 24px',
             backgroundPosition: '0 24px, 0 0'
@@ -95,14 +95,14 @@ const ProspectNotesCard = ({
         </div>
 
         {/* Margem vermelha */}
-        <div className="absolute left-8 top-0 bottom-0 w-1 bg-red-400 dark:bg-red-500 z-10"></div>
+        <div className="absolute left-8 top-0 bottom-0 w-1 bg-brand-orange z-10"></div>
 
         {/* Conteúdo do bloco */}
         <div className="pl-12 pr-6 py-6 relative z-20">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded-lg shadow-lg">
+              <div className="p-2 bg-brand-purple rounded-lg shadow-lg">
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -152,7 +152,7 @@ const ProspectNotesCard = ({
             
             {hasChanges && (
               <span className="text-blue-600 dark:text-blue-400 font-medium flex items-center" style={{ fontFamily: 'Kalam, cursive' }}>
-                <span className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mr-2 animate-pulse"></span>
+                <span className="w-2 h-2 bg-brand-purple dark:bg-purple-400 rounded-full mr-2 animate-pulse"></span>
                 Não salvo
               </span>
             )}
@@ -164,7 +164,7 @@ const ProspectNotesCard = ({
               <button
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-blue-300 dark:disabled:bg-blue-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
+                className="inline-flex items-center px-4 py-2 bg-brand-orange hover:brightness-90 disabled:bg-orange-300 text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
                 style={{ fontFamily: 'Kalam, cursive' }}
               >
                 {isSaving ? (
@@ -179,7 +179,7 @@ const ProspectNotesCard = ({
                 <button
                   onClick={handleDelete}
                   disabled={isSaving}
-                  className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 disabled:bg-red-300 dark:disabled:bg-red-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
+                  className="inline-flex items-center px-4 py-2 bg-brand-orange hover:brightness-90 dark:bg-brand-orange dark:hover:brightness-90 disabled:bg-orange-300 dark:disabled:bg-orange-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
                   style={{ fontFamily: 'Kalam, cursive' }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
