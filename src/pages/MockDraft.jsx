@@ -153,9 +153,9 @@ const MockDraft = () => {
   return (
     <div className="space-y-6">
       {/* Banner Principal */}
-      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg overflow-hidden animate-fade-in">
+      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg animate-fade-in">
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="px-4 md:px-6 py-4 md:py-6 relative z-10">
+        <div className="px-4 md:px-6 py-4 md:py-6 relative">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
               <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center text-white">
@@ -197,10 +197,19 @@ const MockDraft = () => {
 
       {/* Notification Area */}
       {notification.message && (
-        <div className={`p-4 rounded-md flex items-center gap-3 ${notification.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-          {notification.type === 'error' ? <AlertCircle /> : <CheckCircle />}
-          <span>{notification.message}</span>
-          {notification.message.includes('Limite') && <Link to="/pricing" className="font-bold underline hover:text-red-900">Faça o upgrade!</Link>}
+        <div 
+          className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 p-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md w-11/12 transition-all duration-300 animate-fade-in-down ${
+            notification.type === 'error' 
+              ? 'bg-red-100 text-red-900 dark:bg-red-900/80 dark:text-red-100 backdrop-blur-md' 
+              : 'bg-green-100 text-green-900 dark:bg-green-900/80 dark:text-green-100 backdrop-blur-md'
+          }`}
+        >
+          {notification.type === 'error' ? <AlertCircle className="h-5 w-5" /> : <CheckCircle className="h-5 w-5" />}
+          <span className="flex-grow">{notification.message}</span>
+          {notification.message.includes('Limite') && <Link to="/pricing" className="font-bold underline hover:opacity-80 flex-shrink-0">Faça o upgrade!</Link>}
+          <button onClick={() => setNotification({ type: '', message: '' })} className="p-1 -mr-2 rounded-full hover:bg-black/10">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 

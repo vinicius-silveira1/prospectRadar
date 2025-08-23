@@ -28,10 +28,10 @@ const TradeModal = ({ isOpen, onClose, onConfirmTrade, selectedPick, draftBoard 
 
         <div className="mb-4">
           <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mb-2">Você está propondo uma troca para a escolha:</p>
-          <div className="p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
-            <p className="font-bold text-blue-800 dark:text-blue-200">Pick #{selectedPick.pick} - {selectedPick.team}</p>
+          <div className="p-3 border rounded-lg bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700">
+            <p className="font-bold text-purple-800 dark:text-purple-200">Pick #{selectedPick.pick} - {selectedPick.team}</p>
             {selectedPick.prospect && (
-              <p className="text-sm text-blue-700 dark:text-blue-300">{selectedPick.prospect.name}</p>
+              <p className="text-sm text-purple-700 dark:text-purple-300">{selectedPick.prospect.name}</p>
             )}
           </div>
         </div>
@@ -42,7 +42,7 @@ const TradeModal = ({ isOpen, onClose, onConfirmTrade, selectedPick, draftBoard 
           </label>
           <select
             id="targetPickSelect"
-            className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg bg-white dark:bg-super-dark-primary text-slate-900 dark:text-super-dark-text-primary"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg bg-white dark:bg-super-dark-secondary text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-brand-purple focus:border-brand-purple transition-all duration-200"
             onChange={(e) => setTargetPick(draftBoard.find(pick => pick.pick === parseInt(e.target.value)))} 
             value={targetPick ? targetPick.pick : ''}
           >
@@ -65,7 +65,7 @@ const TradeModal = ({ isOpen, onClose, onConfirmTrade, selectedPick, draftBoard 
           <button
             onClick={handleConfirm}
             disabled={!targetPick}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 rounded-lg bg-brand-purple text-white hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             <RefreshCw className="h-4 w-4 mr-2" /> Confirmar Troca
           </button>

@@ -373,12 +373,12 @@ const ProspectDetail = () => {
               isScout ? (
                 comparablePlayers.length > 0 && (
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-gold" />Comparações com Jogadores da NBA</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {comparablePlayers.map((player, index) => (
                         <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
-                          <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">{player.name}</p>
-                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-gold dark:text-yellow-400">{player.similarity}%</span></p>
+                          <p className="font-bold text-brand-purple dark:text-brand-purple">{player.name}</p>
+                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-purple dark:text-purple-400">{player.similarity}%</span></p>
                           <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
                         </div>
                       ))}
