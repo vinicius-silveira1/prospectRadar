@@ -104,7 +104,7 @@ const Dashboard = () => {
       </div>
 
       {/* Banner do Mock Draft */}
-      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-black dark:to-black rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 dark:from-purple-800 dark:via-black dark:to-black rounded-lg shadow-lg overflow-hidden animate-fade-in">
         <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 text-white">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
@@ -173,12 +173,14 @@ const Dashboard = () => {
             maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
             className="gap-4 md:gap-6"
           >
-            {brazilianProspects.slice(0, isMobile ? 4 : 8).map((prospect) => (
+            {brazilianProspects.slice(0, isMobile ? 4 : 8).map((prospect, index) => (
               <DashboardProspectCard
                 key={prospect.id}
                 prospect={prospect}
                 isInWatchlist={watchlist.has(prospect.id)}
                 onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                className="opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
               />
             ))}
           </ResponsiveGrid>
@@ -211,12 +213,14 @@ const Dashboard = () => {
             maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
             className="gap-4 md:gap-6"
           >
-            {topProspects.map((prospect) => (
+            {topProspects.map((prospect, index) => (
               <DashboardProspectCard
                 key={prospect.id}
                 prospect={prospect}
                 isInWatchlist={watchlist.has(prospect.id)}
                 onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                className="opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
               />
             ))}
           </ResponsiveGrid>

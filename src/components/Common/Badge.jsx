@@ -31,13 +31,13 @@ const Badge = ({ badge }) => {
       onClick={handleToggleTooltip}
     >
       <span className="text-base">{badge.icon}</span>
-      {showTooltip && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 max-w-xl min-w-[120px] p-3 text-sm text-gray-900 bg-white dark:text-white dark:bg-gray-600 rounded-md shadow-lg z-[999] border border-brand-purple">
-          <p className="font-bold text-brand-purple dark:text-yellow-300">{badge.label}</p>
-          <p>{badge.description}</p>
-          <div className="absolute left-1/2 transform -translate-x-1/2 top-[-4px] w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-white dark:border-b-gray-600"></div>
-        </div>
-      )}
+      {/* Always render the tooltip, but control visibility with CSS */}
+      <div className={`fixed p-3 text-sm text-gray-900 bg-white dark:text-white dark:bg-gray-600 rounded-md shadow-lg z-[9999] border border-brand-purple top-auto bottom-4 left-1/2 -translate-x-1/2 max-w-[calc(100vw-2rem)] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl text-center transition-opacity duration-300 ease-in-out ${showTooltip ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+      `}>
+        <p className="font-bold text-brand-purple dark:text-yellow-300">{badge.label}</p>
+        <p>{badge.description}</p>
+        {/* No arrow needed for fixed bottom positioning */}
+      </div>
     </div>
   );
 };

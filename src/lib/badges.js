@@ -62,6 +62,22 @@ export const badges = {
     description: 'Jogador de alta energia que está sempre ativo, especialmente nos rebotes ofensivos e linhas de passe.',
     icon: '🔋',
   },
+  // New Badges
+  SWISS_ARMY_KNIFE: {
+    label: 'Canivete Suíço',
+    description: 'Jogador versátil que contribui de forma sólida em múltiplas categorias estatísticas.',
+    icon: '🛠️',
+  },
+  MICROWAVE_SCORER: {
+    label: 'Micro-ondas',
+    description: 'Capaz de marcar muitos pontos em pouco tempo de quadra.',
+    icon: '♨️',
+  },
+  IRON_MAN: {
+    label: 'Pilar do Time',
+    description: 'Jogador durável e confiável, com alto número de jogos e minutos jogados na temporada.',
+    icon: '🦾',
+  },
 };
 
 /**
@@ -92,6 +108,14 @@ export const assignBadges = (prospect) => {
     dbpm: Number(prospect.dbpm || 0),
     speed: Number(prospect.speed || 0),
     strength: Number(prospect.strength || 0),
+    ppg: Number(prospect.ppg || 0),
+    rpg: Number(prospect.rpg || 0),
+    apg: Number(prospect.apg || 0),
+    spg: Number(prospect.spg || 0),
+    bpg: Number(prospect.bpg || 0),
+    total_points: Number(prospect.total_points || 0),
+    minutes_played: Number(prospect.minutes_played || 0),
+    games_played: Number(prospect.games_played || 0),
   };
 
   const assignedBadges = new Set();
@@ -146,6 +170,33 @@ export const assignBadges = (prospect) => {
   // HIGH_MOTOR (Keep as is, seems reasonable) - Reynan should get this if his stats support
   if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) {
     assignedBadges.add(badges.HIGH_MOTOR);
+  }
+
+  // --- NEW BADGES ---
+
+  // 1. Swiss Army Knife
+  const contributions = [
+    p.ppg >= 15,
+    p.rpg >= 6,
+    p.apg >= 4,
+    p.spg >= 1.2,
+    p.bpg >= 1.2,
+  ];
+  const contributionCount = contributions.filter(Boolean).length;
+  if (contributionCount >= 3) {
+    assignedBadges.add(badges.SWISS_ARMY_KNIFE);
+  }
+
+  // 2. Microwave Scorer
+  const pointsPer36 = p.minutes_played > 0 ? (p.total_points / p.minutes_played) * 36 : 0;
+  if (pointsPer36 >= 25 && p.minutes_played > 100) {
+    assignedBadges.add(badges.MICROWAVE_SCORER);
+  }
+
+  // 3. Iron Man
+  const minutesPerGame = p.games_played > 0 ? p.minutes_played / p.games_played : 0;
+  if (p.games_played >= 28 && minutesPerGame >= 30) {
+    assignedBadges.add(badges.IRON_MAN);
   }
 
   return Array.from(assignedBadges);

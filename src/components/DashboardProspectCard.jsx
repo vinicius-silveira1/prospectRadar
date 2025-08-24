@@ -4,23 +4,33 @@ import { useProspectImage } from '@/hooks/useProspectImage';
 import { assignBadges } from '@/lib/badges';
 import Badge from './Common/Badge';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import { useState } from 'react';
 
-const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist }) => {
+const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
+  const [isAnimatingHeart, setIsAnimatingHeart] = useState(false); // New state for animation
+
+  const handleToggle = async () => {
+    setIsAnimatingHeart(true); // Start animation
+    await onToggleWatchlist(); // Perform the actual watchlist toggle
+    setTimeout(() => {
+      setIsAnimatingHeart(false); // End animation after a short delay
+    }, 500); // Match this duration with your animation duration
+  };
 
   return (
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out">
+    <div className={`bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out ${className}`} style={style}>
       {/* Watch List Button */}
       <button
-        onClick={onToggleWatchlist}
+        onClick={handleToggle}
         className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-super-dark-secondary/80 hover:bg-white dark:hover:bg-slate-600 transition-all"
       >
         <Heart
           size={16}
           className={`transition-colors ${
             isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'
-          }`} 
+          } ${isAnimatingHeart ? 'animate-pulse-once' : ''}`} 
         />
       </button>
       <div className="p-4">

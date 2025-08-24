@@ -401,7 +401,7 @@ const Prospects = () => {
               const badges = assignBadges(prospect);
               
               return (
-                <div key={prospect.id} className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300 overflow-hidden">
+                <div key={prospect.id} className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300">
                   {/* Header Image */}
                   <div className="relative">
                     <button 

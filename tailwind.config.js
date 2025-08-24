@@ -44,6 +44,41 @@ export default {
         'brand-lg': '0 10px 25px -3px rgba(15, 23, 42, 0.3)',
       },
     },
+    keyframes: {
+      'fade-in-up': {
+        '0%': {
+          opacity: '0',
+          transform: 'translateY(10px)',
+        },
+        '100%': {
+          opacity: '1',
+          transform: 'translateY(0)',
+        },
+      },
+      'fade-in': {
+        '0%': {
+          opacity: '0',
+        },
+        '100%': {
+          opacity: '1',
+        },
+      },
+      'pulse': {
+        '0%, 100%': {
+          transform: 'scale(1)',
+          opacity: '1',
+        },
+        '50%': {
+          transform: 'scale(1.2)',
+          opacity: '0.7',
+        },
+      },
+    },
+    animation: {
+      'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+      'fade-in': 'fade-in 0.5s ease-out forwards',
+      'pulse-once': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+    },
   },
   plugins: [],
 }
