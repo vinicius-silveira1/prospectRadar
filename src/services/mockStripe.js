@@ -155,7 +155,14 @@ const simulateUserUpgrade = async () => {
 };
 
 export const isMockMode = () => {
-  // Verificar se estamos em modo mock (sem chaves Stripe válidas ou com problemas de conectividade)
+  console.log('DEBUG: isMockMode - VITE_STRIPE_PUBLISHABLE_KEY:', import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  console.log('DEBUG: isMockMode - VITE_MOCK_STRIPE:', import.meta.env.VITE_MOCK_STRIPE);
   const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-  return !stripeKey || stripeKey.includes('mock') || window.location.hostname === 'localhost';
+  const forceMock = import.meta.env.VITE_MOCK_STRIPE === 'true';
+
+  // Ativar modo mock se:
+  // 1. A variável VITE_MOCK_STRIPE estiver explicitamente definida como 'true'
+  // 2. Não houver chave Stripe ou a chave contiver 'mock' (para chaves de teste inválidas)
+  // 3. Houver problemas de conectividade (tratado em stripe.js)
+  return forceMock || !stripeKey || stripeKey.includes('mock');
 };

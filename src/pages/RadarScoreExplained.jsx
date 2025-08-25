@@ -80,16 +80,21 @@ const RadarScoreExplained = () => {
                 visible: { opacity: 1, y: 0 }
               }}
               whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-              className={`relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-lg p-4 sm:p-6 border border-transparent hover:border-${pillar.color}-500 transition-all duration-300`}
+              className={`relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-lg p-4 sm:p-6 border border-transparent ${ 
+                pillar.color === 'cyan' ? 'hover:border-cyan-500' :
+                pillar.color === 'purple' ? 'hover:border-purple-500' :
+                pillar.color === 'green' ? 'hover:border-green-500' :
+                'hover:border-red-500'
+              } transition-all duration-300`}
             >
               <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                <div className={`flex-shrink-0 self-center sm:self-start p-3 sm:p-4 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-${pillar.color}-600 dark:text-${pillar.color}-400 shadow-md`}>
+                <div className={`flex-shrink-0 self-center sm:self-start p-3 sm:p-4 rounded-full bg-${pillar.color}-100 dark:bg-${pillar.color}-900/30 text-${pillar.color}-600 dark:text-${pillar.color}-400 shadow-md`}>
                   {pillar.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-super-dark-text-primary flex-1 min-w-0 pr-3">{pillar.title}</h2>
-                    <span className={`flex-shrink-0 px-3 sm:px-4 py-1 text-xs sm:text-sm font-extrabold rounded-full bg-${pillar.color}-500 text-white shadow-md`}>
+                    <span className={`flex-shrink-0 px-3 sm:px-4 py-1 text-xs sm:text-sm font-extrabold rounded-full ${pillar.color === 'cyan' ? 'bg-cyan-600' : `bg-${pillar.color}-500`} text-white shadow-md`}>
                       {pillar.weight}
                     </span>
                   </div>
@@ -111,22 +116,42 @@ const RadarScoreExplained = () => {
 
         <div className="mt-12 sm:mt-16 bg-slate-50 dark:bg-super-dark-secondary rounded-xl p-4 sm:p-6 md:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Ajustes inteligentes</h2>
-          <div className="flex flex-col gap-6 md:gap-8 px-0 sm:px-2 md:px-4 xl:px-12">
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.2 } }
+            }}
+            className="flex flex-col gap-6 md:gap-8 px-0 sm:px-2 md:px-4 xl:px-12"
+          >
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full"
+            >
               <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-500 self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Nível de competição</h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O algoritmo ajusta as pontuações de estatísticas com base na força da liga e da conferência do jogador. Um bom desempenho em uma liga forte como a EuroLeague ou uma conferência Power 5 da NCAA é mais valorizado.</p>
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full">
+            </motion.div>
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="flex flex-col sm:flex-row sm:items-start p-4 sm:p-5 md:p-6 rounded-lg bg-white dark:bg-super-dark-secondary shadow-md border dark:border-super-dark-border space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-full"
+            >
               <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-brand-orange self-center sm:self-start flex-shrink-0" />
               <div className="space-y-2">
                 <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-super-dark-text-primary break-words">Potencial vs Confiança</h3>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed break-words max-w-full">O <strong>Radar Score</strong> representa o potencial máximo do jogador, enquanto o <strong>Confidence Score</strong> indica a confiabilidade dos dados com base no número de jogos. Essa separação permite avaliações mais precisas de risco vs recompensa.</p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Nova Seção: Prospects da Classe de 2018 */}

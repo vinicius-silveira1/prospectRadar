@@ -216,7 +216,7 @@ const MockDraft = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.9 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 p-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md w-11/12 ${ 
+              className={`fixed top-24 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto z-50 p-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-md ${ 
                 notification.type === 'error' 
                   ? 'bg-red-100 text-red-900 dark:bg-red-900/80 dark:text-red-100 backdrop-blur-md' 
                   : 'bg-green-100 text-green-900 dark:bg-green-900/80 dark:text-green-100 backdrop-blur-md'

@@ -35,7 +35,7 @@ const Pricing = () => {
 
       console.log('🔄 Criando sessão de checkout...');
       await createCheckoutSession(
-        'price_1RwxRDFJmuW3ONRGfteiZXoz', // Substitua pelo seu Price ID do Stripe
+        import.meta.env.VITE_STRIPE_PRICE_ID,
         user.id
       );
       console.log('✅ Sessão criada com sucesso');
@@ -174,13 +174,15 @@ const Pricing = () => {
               whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
               className="relative p-8 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-brand-purple/10 dark:to-brand-purple/20 border-2 border-brand-purple dark:border-brand-purple rounded-2xl shadow-lg flex flex-col"
             >
-              <motion.div
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 transform px-4 py-1 bg-gradient-to-r from-brand-purple to-purple-600 text-white text-sm font-semibold tracking-wide rounded-full shadow-md"
-              >
-                ⭐ Mais Popular
-              </motion.div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="px-4 py-1 bg-gradient-to-r from-brand-purple to-purple-600 text-white text-sm font-semibold tracking-wide rounded-full shadow-md"
+                >
+                  ⭐ Mais Popular
+                </motion.div>
+              </div>
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-gradient-to-r from-brand-purple to-purple-600">
                   <Star className="h-6 w-6 text-white" />

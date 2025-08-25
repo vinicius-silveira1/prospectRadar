@@ -102,6 +102,11 @@ ORDER BY column_name;
 
 # Falha
 4000 0000 0000 0002 (Declined)
+
+# Detalhes Adicionais para Teste:
+# Data de Vencimento: Qualquer data futura (ex: 12/30)
+# CVC/CVV: Qualquer número de 3 dígitos (ex: 123). Para Amex, 4 dígitos (ex: 1234).
+# Nome do Titular: Qualquer nome (ex: "Test User")
 ```
 
 ## 🎯 **Próximos Passos**

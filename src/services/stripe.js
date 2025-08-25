@@ -16,8 +16,6 @@ if (stripePublishableKey && !isMockMode()) {
   stripePromise = loadStripe(stripePublishableKey, {
     stripeAccount: undefined,
     locale: 'pt-BR', // Força localização brasileira
-    // Evita algumas requisições problemáticas
-    apiVersion: '2020-08-27'
   }).catch(error => {
     console.error('❌ Erro ao carregar Stripe:', error);
     console.warn('🚧 Ativando modo mock devido a erro de conectividade');
@@ -64,7 +62,7 @@ export const createCheckoutSession = async (priceId, userId) => {
       body: {
         priceId,
         userId,
-        successUrl: `${window.location.origin}/dashboard?success=true`,
+        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/pricing?canceled=true`,
       },
     });

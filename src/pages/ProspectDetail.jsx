@@ -266,21 +266,21 @@ const ProspectDetail = () => {
             >
               <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Ações</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-90 transition-colors text-sm sm:text-base">
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-90 transition-colors text-sm sm:text-base">
                   <GitCompare className="w-4 h-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Comparar Jogador</span>
-                </button>
+                </motion.button>
                 <MobileExportActions prospect={prospect} />
                 {user && (
-                  <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 sm:py-3 px-4 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 sm:py-3 px-4 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
                     <Heart className={`w-4 h-4 mr-2 flex-shrink-0 ${isInWatchlist ? 'fill-current' : ''}`} />
                     <span className="truncate">{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</span>
-                  </button>
+                  </motion.button>
                 )}
-                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors text-sm sm:text-base">
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors text-sm sm:text-base">
                   <Share2 className="w-4 h-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Compartilhar Perfil</span>
-                </button>
+                </motion.button>
               </div>
             </motion.div>
 
@@ -415,15 +415,29 @@ const ProspectDetail = () => {
                     className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                   >
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <motion.div
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                      variants={{
+                        visible: { transition: { staggerChildren: 0.1 } }
+                      }}
+                      initial="hidden"
+                      animate="visible"
+                    >
                       {comparablePlayers.map((player, index) => (
-                        <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
+                        <motion.div
+                          key={index}
+                          variants={{
+                            hidden: { opacity: 0, y: 20 },
+                            visible: { opacity: 1, y: 0 }
+                          }}
+                          className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border"
+                        >
                           <p className="font-bold text-brand-purple dark:text-brand-orange">{player.name}</p>
                           <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-purple dark:text-purple-400">{player.similarity}%</span></p>
                           <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
-                        </div>
+                        </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
                   </motion.div>
                 )
               ) : (
@@ -456,27 +470,53 @@ const ProspectDetail = () => {
                       {prospect.strengths?.length > 0 && (
                         <div>
                           <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
-                          <ul className="space-y-2">
+                          <motion.ul 
+                            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-2"
+                          >
                             {prospect.strengths.map((strength, index) => (
-                              <li key={index} className="flex items-start">
+                              <motion.li 
+                                key={index}
+                                variants={{
+                                  hidden: { opacity: 0, x: -20 },
+                                  visible: { opacity: 1, x: 0 }
+                                }}
+                                className="flex items-start"
+                              >
                                 <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                                 <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{strength}</span>
-                              </li>
+                              </motion.li>
                             ))}
-                          </ul>
+                          </motion.ul>
                         </div>
                       )}
                       {prospect.weaknesses?.length > 0 && (
                         <div>
                           <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
-                          <ul className="space-y-2">
+                          <motion.ul
+                            variants={{
+                              visible: { transition: { staggerChildren: 0.1 } }
+                            }}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-2"
+                          >
                             {prospect.weaknesses.map((weakness, index) => (
-                              <li key={index} className="flex items-start">
+                              <motion.li
+                                key={index}
+                                variants={{
+                                  hidden: { opacity: 0, x: -20 },
+                                  visible: { opacity: 1, x: 0 }
+                                }}
+                                className="flex items-start"
+                              >
                                 <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                                 <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{weakness}</span>
-                              </li>
+                              </motion.li>
                             ))}
-                          </ul>
+                          </motion.ul>
                         </div>
                       )}
                     </div>
@@ -543,10 +583,10 @@ const ProspectDetail = () => {
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
               <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
               <div className="space-y-3">
-                <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 px-4 rounded-lg hover:brightness-90 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</button>
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 px-4 rounded-lg hover:brightness-90 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</motion.button>
                 <MobileExportActions prospect={prospect} />
-                {user && <button onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</button>}
-                <button onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</button>
+                {user && <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</motion.button>}
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</motion.button>
               </div>
             </div>
           </div>
