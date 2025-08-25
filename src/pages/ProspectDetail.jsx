@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
 import useProspect  from '@/hooks/useProspect.js';
@@ -154,7 +155,12 @@ const ProspectDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-super-dark-primary">
-      <div className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl"
+      >
         <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M5 0h1L0 6V5zM6 5v1H5z\'%3E%3C/path%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
           <button onClick={() => navigate('/prospects')} className="flex items-center text-blue-100 hover:text-white transition-colors mb-4 sm:mb-6">
@@ -191,11 +197,16 @@ const ProspectDetail = () => {
 
             </div>
         </div>
-      </div>
+      </motion.div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
-            <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+              className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+            >
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-orange flex-shrink-0" />Informações Básicas</h2>
               <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {prospect.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
@@ -204,10 +215,15 @@ const ProspectDetail = () => {
                 <div className="flex items-start"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}</div></div></div>
                 <div className="flex items-start"><Weight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{getWeightDisplay(prospect.weight)}</div></div></div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Estatísticas Básicas - Mobile */}
-            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+              className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+            >
               <div className="flex justify-between items-center mb-3 sm:mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
                 {(prospect.league || prospect['stats-season']) && (
@@ -239,10 +255,15 @@ const ProspectDetail = () => {
                   );
                 })()}
               </div>
-            </div>
+            </motion.div>
 
             {/* Ações Mobile - Visível apenas em telas pequenas */}
-            <div className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+              className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+            >
               <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Ações</h3>
               <div className="space-y-3">
                 <button onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-90 transition-colors text-sm sm:text-base">
@@ -261,11 +282,16 @@ const ProspectDetail = () => {
                   <span className="truncate">Compartilhar Perfil</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {hasStats ? (
               <>
-                <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
+                  className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+                >
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
                     {(prospect.league || prospect['stats-season']) && (
@@ -301,12 +327,17 @@ const ProspectDetail = () => {
                       );
                     })()}
                   </div>
-                </div>
+                </motion.div>
                 <AdvancedStatsExplanation />
 
                 {/* ANÁLISE DO RADAR SCORE */}
                 {evaluation.categoryScores && (
-                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+                    className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+                  >
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                       {isScout ? (
@@ -317,23 +348,23 @@ const ProspectDetail = () => {
                         </ScoutFeaturePlaceholder>
                       )}
                       <div className="space-y-4">
-                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-brand-gold dark:text-yellow-400">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
-                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-brand-gold dark:text-yellow-400">{evaluation.nbaReadiness || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-brand-gold dark:text-super-dark-text-primary">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
+                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-brand-gold dark:text-super-dark-text-primary">{evaluation.nbaReadiness || 'N/A'}</p></div>
                         <div>
-                          <h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal">Score Total (Potencial)</h3>
-                          <p className="text-2xl font-extrabold text-brand-gold dark:text-yellow-400">{evaluation.potentialScore}</p>
+                          <h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Score Total (Potencial)</h3>
+                          <p className="text-2xl font-extrabold text-brand-gold dark:text-super-dark-text-primary">{evaluation.potentialScore}</p>
                         </div>
                         {evaluation.confidenceScore < 1.0 && (
                           <div>
-                            <h3 className="font-semibold text-brand-purple dark:text-brand-purple leading-normal flex items-center">
-                              <AlertTriangle className="w-4 h-4 mr-2 text-brand-orange" />
+                            <h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-2 text-brand-yellow" />
                               Nível de Confiança
                             </h3>
                             <div className="flex items-center gap-2">
                               <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-2.5">
-                                <div className="bg-brand-orange h-2.5 rounded-full" style={{ width: `${evaluation.confidenceScore * 100}%` }}></div>
+                                <div className="bg-brand-yellow h-2.5 rounded-full" style={{ width: `${evaluation.confidenceScore * 100}%` }}></div>
                               </div>
-                              <span className="text-sm font-bold text-brand-orange dark:text-orange-400">
+                              <span className="text-sm font-bold text-brand-yellow dark:text-yellow-400">
                                 {Math.round(evaluation.confidenceScore * 100)}%
                               </span>
                             </div>
@@ -342,7 +373,7 @@ const ProspectDetail = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </>
             ) : (
@@ -351,7 +382,12 @@ const ProspectDetail = () => {
 
             {/* SEÇÃO DE FLAGS (DESTAQUES E ALERTAS) */}
             {flags.length > 0 && hasStats && (
-              <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
+                className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+              >
                 <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Destaques & Alertas do Radar</h2>
                 <div className="space-y-3">
                   {flags.map((flag, index) => (
@@ -365,25 +401,30 @@ const ProspectDetail = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* SEÇÃO DE COMPARAÇÕES NBA (SCOUT) */}
             {hasStats && (
               isScout ? (
                 comparablePlayers.length > 0 && (
-                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
+                    className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+                  >
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {comparablePlayers.map((player, index) => (
                         <div key={index} className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
-                          <p className="font-bold text-brand-purple dark:text-brand-purple">{player.name}</p>
+                          <p className="font-bold text-brand-purple dark:text-brand-orange">{player.name}</p>
                           <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-purple dark:text-purple-400">{player.similarity}%</span></p>
                           <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 )
               ) : (
                 <ScoutFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
@@ -404,7 +445,12 @@ const ProspectDetail = () => {
             {hasStats && (
               isScout ? (
                 (prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
-                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.9, ease: "easeOut" }}
+                    className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+                  >
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {prospect.strengths?.length > 0 && (
@@ -434,7 +480,7 @@ const ProspectDetail = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 )
               ) : (
                 <ScoutFeaturePlaceholder title="Análise Detalhada do Jogador" featureName="a análise de pontos fortes e fracos">

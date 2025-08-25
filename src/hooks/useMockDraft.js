@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext'; // Importar o useAuth
 import { supabase } from '@/lib/supabaseClient'; // Importar o supabase client
 
-// ... (o resto do seu código, como defaultDraftOrder e shuffleArray)
 
+// Definição da ordem do draft padrão
 const defaultDraftOrder = [
     // Round 1
     { pick: 1, team: 'ATL' }, { pick: 2, team: 'WAS' }, { pick: 3, team: 'HOU' }, { pick: 4, team: 'SAS' }, { pick: 5, team: 'DET' },
@@ -21,6 +21,7 @@ const defaultDraftOrder = [
     { pick: 56, team: 'DEN' }, { pick: 57, team: 'MEM' }, { pick: 58, team: 'DAL' }, { pick: 59, team: 'IND' }, { pick: 60, team: 'BOS' }
 ];
 
+// Função para embaralhar a ordem do draft
 const shuffleArray = (array) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -30,7 +31,7 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
-const SAVE_LIMIT_FREE = 2; // Permitir que usuários free salvem 2 drafts
+const SAVE_LIMIT_FREE = 2; // Permite que usuários free salvem 2 drafts
 
 const useMockDraft = (allProspects) => {
   const { user } = useAuth(); // Pega o usuário do contexto de autenticação
@@ -186,7 +187,7 @@ const useMockDraft = (allProspects) => {
     }
   }, [user]);
 
-  // ... (resto das suas funções como simulateLottery, getBigBoard, etc.)
+  
   const simulateLottery = useCallback(() => {
     const lotteryPicksCount = 14;
     const lotteryTeams = defaultDraftOrder.slice(0, lotteryPicksCount).map(pick => pick.team);
@@ -266,7 +267,8 @@ const useMockDraft = (allProspects) => {
 
   const tradePicks = useCallback((pick1Number, pick2Number) => {
     setDraftBoard(prevBoard => {
-      const newBoard = [...prevBoard];
+      const newBoard = [...prevBoard]; // Cria uma cópia rasa do array.
+
       const pick1Index = newBoard.findIndex(pick => pick.pick === pick1Number);
       const pick2Index = newBoard.findIndex(pick => pick.pick === pick2Number);
 
@@ -275,33 +277,27 @@ const useMockDraft = (allProspects) => {
         return prevBoard;
       }
 
-      // Get the full pick objects
-      const pick1 = newBoard[pick1Index];
-      const pick2 = newBoard[pick2Index];
+      // Obtém os objetos pick (do estado anterior)
+      const pick1 = prevBoard[pick1Index];
+      const pick2 = prevBoard[pick2Index];
 
-      // Create new pick objects with swapped properties
-      const newPick1 = { ...pick1, team: pick2.team, prospect: pick2.prospect };
-      const newPick2 = { ...pick2, team: pick1.team, prospect: pick1.prospect };
+      // Cria novos objetos pick com as propriedades trocadas
+      let newPick1;
+      let newPick2;
 
-      // Update the board with the new pick objects
+      if (pick1.prospect === null && pick2.prospect === null) {
+        // If both picks are empty, swap both prospect and team
+        newPick1 = { ...pick1, prospect: pick2.prospect, team: pick2.team };
+        newPick2 = { ...pick2, prospect: pick1.prospect, team: pick1.team };
+      } else {
+        // Otherwise, only swap prospect
+        newPick1 = { ...pick1, prospect: pick2.prospect };
+        newPick2 = { ...pick2, prospect: pick1.prospect };
+      }
+
+      // Atualiza o board com os novos objetos pick
       newBoard[pick1Index] = newPick1;
       newBoard[pick2Index] = newPick2;
-
-      // Update draft history to reflect the new team ownership of the picks
-      setDraftHistory(prevHistory => {
-        const updatedHistory = prevHistory.map(historyItem => {
-          if (historyItem.pick === pick1Number) {
-            // If the drafted prospect was at pick1, it now belongs to pick2's original team
-            return { ...historyItem, team: pick2.team };
-          }
-          if (historyItem.pick === pick2Number) {
-            // If the drafted prospect was at pick2, it now belongs to pick1's original team
-            return { ...historyItem, team: pick1.team };
-          }
-          return historyItem;
-        });
-        return updatedHistory;
-      });
 
       return newBoard;
     });

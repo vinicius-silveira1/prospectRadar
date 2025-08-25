@@ -22,6 +22,7 @@
     "dotenv": "^17.2.1",
     "file-saver": "^2.0.5",
     "firebase": "^12.0.0",
+    "framer-motion": "^12.23.12",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",

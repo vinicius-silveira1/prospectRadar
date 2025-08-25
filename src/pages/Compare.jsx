@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   GitCompare, Users, X, Plus, Search, Download, Share2, FileImage, FileText, BarChart3, Lock
@@ -118,8 +119,13 @@ function Compare() {
   return (
     <div className="space-y-4 sm:space-y-6 w-full">
       {/* Banner sempre no topo */}
-      <div className="w-full">
-        <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-lg animate-fade-in mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full"
+      >
+        <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-lg mb-4">
           <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight flex items-center">
             <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0" />
             <span className="truncate">Comparar&nbsp;<span className="text-yellow-300">Prospects</span></span>
@@ -137,7 +143,7 @@ function Compare() {
             {selectedProspects.length}/{maxComparisons} selecionados
           </div>
         </div>
-      </div>
+      </motion.div>
       {/* Blocos em coluna (vertical) */}
       <div className="w-full">
         {/* Adicionar prospects */}
@@ -147,29 +153,36 @@ function Compare() {
               <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
               <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-brand-purple text-white rounded-lg hover:brightness-90 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
             </div>
-            {showSearch && (
-              <div className="border-t dark:border-super-dark-border pt-4 space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                  <input type="text" placeholder="Buscar por nome ou time..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-300 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                </div>
-                <div className="max-h-60 overflow-y-auto border dark:border-super-dark-border rounded-lg divide-y dark:divide-super-dark-border">
-                  {filteredProspects.length > 0 ? (
-                    filteredProspects.map(prospect => (
-                      <div key={prospect.id} onClick={() => addProspect(prospect)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-super-dark-secondary cursor-pointer">
-                        <div>
-                          <p className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.name}</p>
-                          <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} - {prospect.high_school_team}</p>
+            <AnimatePresence>
+              {showSearch && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border-t dark:border-super-dark-border pt-4 space-y-4 overflow-hidden"
+                >
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                    <input type="text" placeholder="Buscar por nome ou time..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-300 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  </div>
+                  <div className="max-h-60 overflow-y-auto border dark:border-super-dark-border rounded-lg divide-y dark:divide-super-dark-border">
+                    {filteredProspects.length > 0 ? (
+                      filteredProspects.map(prospect => (
+                        <div key={prospect.id} onClick={() => addProspect(prospect)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-super-dark-secondary cursor-pointer">
+                          <div>
+                            <p className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.name}</p>
+                            <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} - {prospect.high_school_team}</p>
+                          </div>
+                          <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"><Plus className="h-5 w-5" /></button>
                         </div>
-                        <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"><Plus className="h-5 w-5" /></button>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="p-4 text-center text-slate-500 dark:text-super-dark-text-secondary">Nenhum prospect encontrado.</p>
-                  )}
-                </div>
-              </div>
-            )}
+                      ))
+                    ) : (
+                      <p className="p-4 text-center text-slate-500 dark:text-super-dark-text-secondary">Nenhum prospect encontrado.</p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
         {/* Slots de comparação */}
@@ -180,9 +193,20 @@ function Compare() {
               {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-brand-purple dark:text-purple-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
             </div>
             <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-${maxComparisons} gap-3 sm:gap-4 min-h-[6rem] w-full`}>
-              {selectedProspects.map((prospect) => (
-                <CompareProspectCard key={prospect.id} prospect={prospect} onRemove={removeProspect} />
-              ))}
+              <AnimatePresence>
+                {selectedProspects.map((prospect) => (
+                  <motion.div
+                    key={prospect.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    <CompareProspectCard prospect={prospect} onRemove={removeProspect} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {/* Renderizar slots vazios */}
               {Array.from({ length: totalSlotsToShow - selectedProspects.length }).map((_, index) => {
                 const slotPosition = selectedProspects.length + index;
@@ -218,15 +242,24 @@ function Compare() {
           </div>
           {/* Comparação HeadToHead */}
           <div>
-            {selectedProspects.length >= 2 ? (
-              <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} onExport={exportAsImage} isExporting={isExporting} />
-            ) : (
-              <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
-                <GitCompare className="mx-auto h-12 w-12 text-brand-cyan" />
-                <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Comece a Comparar</h3>
-                <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
-              </div>
-            )}
+            <AnimatePresence>
+              {selectedProspects.length >= 2 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} onExport={exportAsImage} isExporting={isExporting} />
+                </motion.div>
+              ) : (
+                <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
+                  <GitCompare className="mx-auto h-12 w-12 text-brand-cyan" />
+                  <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Comece a Comparar</h3>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
+                </div>
+              )}
+            </AnimatePresence>
           </div>
           {/* Exportação oculta */}
           {selectedProspects.length >= 2 && (

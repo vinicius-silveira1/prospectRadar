@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, UserX, Search } from 'lucide-react';
 
@@ -65,8 +66,13 @@ const Watchlist = () => {
 
   return (
     <div className="space-y-6">
-      <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6 animate-fade-in">
-        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")' }}></div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6"
+      >
+        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3 leading-tight flex items-center">
@@ -83,35 +89,61 @@ const Watchlist = () => {
             <ExportButtons prospects={favoritedProspects} source="watchlist" />
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {favoritedProspects.map((prospect) => (
-          <div key={prospect.id} className="relative flex flex-col">
-            <WatchlistProspectCard
-              prospect={prospect}
-              toggleWatchlist={toggleWatchlist}
-              isInWatchlist={watchlist.has(prospect.id)}
-              onOpenNotes={() => {
-                setOpenNotesId(openNotesId === prospect.id ? null : prospect.id);
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{ 
+          visible: { transition: { staggerChildren: 0.1 } }
+        }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <AnimatePresence>
+          {favoritedProspects.map((prospect) => (
+            <motion.div
+              key={prospect.id}
+              variants={{ 
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
               }}
-            />
-            {openNotesId === prospect.id && (
-              <div className="absolute left-0 top-full w-full z-20">
-                <ProspectNotesCard
-                  prospect={prospect}
-                  isOpen={true}
-                  onClose={() => setOpenNotesId(null)}
-                  note={getNote(prospect.id)}
-                  onSave={saveNote}
-                  onDelete={deleteNote}
-                  isSaving={saving.has(prospect.id)}
-                />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+              exit={{ opacity: 0, scale: 0.9 }}
+              layout
+              className="relative flex flex-col"
+            >
+              <WatchlistProspectCard
+                prospect={prospect}
+                toggleWatchlist={toggleWatchlist}
+                isInWatchlist={watchlist.has(prospect.id)}
+                onOpenNotes={() => {
+                  setOpenNotesId(openNotesId === prospect.id ? null : prospect.id);
+                }}
+              />
+              <AnimatePresence>
+                {openNotesId === prospect.id && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="absolute left-0 top-full w-full z-20"
+                  >
+                    <ProspectNotesCard
+                      prospect={prospect}
+                      isOpen={true}
+                      onClose={() => setOpenNotesId(null)}
+                      note={getNote(prospect.id)}
+                      onSave={saveNote}
+                      onDelete={deleteNote}
+                      isSaving={saving.has(prospect.id)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
