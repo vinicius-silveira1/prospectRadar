@@ -250,7 +250,7 @@ const ProspectDetail = () => {
                       {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
                       {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
                       {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('3P%', (prospect.three_pct * 100)?.toFixed(1), 'text-teal-500 dark:text-teal-400')}
                     </>
                   );
                 })()}
@@ -569,7 +569,7 @@ const ProspectDetail = () => {
                       {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
                       {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
                       {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', prospect.three_p_percentage ? prospect.three_p_percentage.toFixed(1) : 'N/A', 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('3P%', (prospect.three_pct * 100)?.toFixed(1), 'text-teal-500 dark:text-teal-400')}
                     </>
                   );
                 })()}

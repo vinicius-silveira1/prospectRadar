@@ -194,8 +194,8 @@ const Pricing = () => {
               </div>
               <p className="mt-4 text-brand-purple dark:text-purple-400 font-medium">Desbloqueie todo o potencial da análise de prospects.</p>
               <div className="mt-6">
-                <p className="text-5xl font-extrabold text-gray-900 dark:text-white">R$19,90</p>
-                <p className="text-gray-500 dark:text-gray-400">/mês</p>
+                <p className="text-5xl font-extrabold text-gray-900 dark:text-white">R$9,99 <span className="text-xl font-normal text-gray-400 dark:text-gray-500 line-through ml-2">R$19,90</span></p>
+                <p className="text-gray-500 dark:text-gray-400">/mês <span className="text-brand-orange text-sm font-semibold ml-2"> (Preço Promocional Beta!)</span></p>
               </div>
 
               <ul className="mt-8 space-y-4">
