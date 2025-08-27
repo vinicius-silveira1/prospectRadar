@@ -115,7 +115,7 @@ const Dashboard = () => {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white">
-              👋 Bem-vindo, {user?.full_name || 'Prospector'}!
+              👋 Bem-vindo ao <span className="text-yellow-300">prospectRadar</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-2xl leading-relaxed">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
