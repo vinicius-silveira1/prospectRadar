@@ -1,53 +1,25 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getSubscriptionStatus } from '@/services/stripe';
 
+// This hook is now a simple wrapper around useAuth to provide
+// a consistent API for checking subscription status.
 export const useSubscription = () => {
-  const { user } = useAuth();
-  const [subscription, setSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isScout, setIsScout] = useState(false);
+  const { user, loading, refreshUserProfile } = useAuth();
 
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Get subscription data from profiles table
-        const subscriptionData = await getSubscriptionStatus(user.id);
-        setSubscription(subscriptionData);
-        
-        // Check if user has active Scout subscription
-        const hasActiveSubscription = subscriptionData && 
-          subscriptionData.subscription_tier === 'scout' &&
-          (subscriptionData.subscription_status === 'active' || !subscriptionData.subscription_status);
-        
-        setIsScout(hasActiveSubscription);
-      } catch (error) {
-        console.error('Error fetching subscription:', error);
-        // Gracefully fail - assume free tier
-        setIsScout(false);
-        setSubscription(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubscription();
-  }, [user]);
+  // A user is considered a "Scout" if their tier is 'scout' AND
+  // the subscription status from Stripe is 'active'.
+  const isScout = user?.subscription_tier === 'scout' && user?.subscription_status === 'active';
 
   return {
-    subscription,
-    loading,
+    // The entire user object can represent the subscription context
+    subscription: user, 
+    
+    // Pass through the loading state from useAuth
+    loading, 
+    
+    // The calculated boolean for convenience
     isScout,
-    refreshSubscription: () => {
-      if (user) {
-        setLoading(true);
-        fetchSubscription();
-      }
-    }
+    
+    // Pass through the refresh function from AuthContext, aliased for compatibility
+    refreshSubscription: refreshUserProfile
   };
 };

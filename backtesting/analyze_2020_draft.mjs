@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Importar o algoritmo de ranking
-import ProspectRankingAlgorithm from './src/intelligence/prospectRankingAlgorithm.js';
+import ProspectRankingAlgorithm from '../src/intelligence/prospectRankingAlgorithm.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

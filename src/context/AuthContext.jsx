@@ -16,14 +16,14 @@ export const AuthProvider = ({ children }) => {
       // Se há um usuário logado, busca seu perfil na tabela 'profiles'
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('subscription_tier')
+        .select('*') // MODIFICADO: Buscar todas as colunas do perfil
         .eq('id', session.user.id)
         .single();
 
       // Combina os dados do usuário (auth) com os dados do perfil (db)
       const combinedUser = {
         ...session.user,
-        subscription_tier: profile?.subscription_tier || 'free',
+        ...profile, // MODIFICADO: Mesclar todo o objeto de perfil
       };
       
       setUser(combinedUser);

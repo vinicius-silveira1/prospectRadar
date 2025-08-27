@@ -14,12 +14,27 @@ import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/component
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
 import AlertBox from '@/components/Layout/AlertBox.jsx';
+import { createPortalSession } from '@/services/stripe';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const { user } = useAuth();
   const { isMobile, isTablet, responsiveColumns } = useResponsive();
+
+  const isScoutUser = user?.subscription_tier === 'scout';
+
+  const handleManageSubscription = async () => {
+    if (!user?.id) {
+      console.error('User not available to manage subscription.');
+      return;
+    }
+    try {
+      await createPortalSession(user.id);
+    } catch (error) {
+      console.error('Error creating portal session:', error);
+    }
+  };
   
     const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
 
@@ -96,16 +111,24 @@ const Dashboard = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-4 md:mb-6 overflow-hidden"
       >
-        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10 flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
+        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%2F%3E%3C/g%3E%3C/svg%3E")' }}></div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-                          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white">
-                👋 Bem-vindo ao <span className="text-yellow-300">prospectRadar</span>
-              </h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white">
+              👋 Bem-vindo, {user?.full_name || 'Prospector'}!
+            </h1>
             <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-2xl leading-relaxed">
               Sua plataforma completa para análise de jovens talentos do basquete. Explore dados, compare atributos e simule o futuro do esporte.
             </p>
           </div>
+          {isScoutUser && (
+            <button
+              onClick={handleManageSubscription}
+              className="mt-4 md:mt-0 md:ml-6 bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
+            >
+              Gerenciar Assinatura
+            </button>
+          )}
         </div>
       </motion.div>
 

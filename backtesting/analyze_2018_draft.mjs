@@ -1,4 +1,4 @@
-import { ProspectRankingAlgorithm } from './src/intelligence/prospectRankingAlgorithm.js';
+import { ProspectRankingAlgorithm } from '../src/intelligence/prospectRankingAlgorithm.js';
 import fs from 'fs';
 
 const algorithm = new ProspectRankingAlgorithm();

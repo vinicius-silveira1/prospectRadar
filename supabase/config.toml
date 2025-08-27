@@ -5,3 +5,7 @@
 # Aponta para o mapa de importação. O caminho é relativo à raiz do projeto.
 # O caminho deve ser relativo à pasta 'supabase', onde este config.toml está.
 import_map = "import_map.json"
+
+# Configuration for the Stripe webhook function
+[functions.webhook-stripe]
+verify_jwt = false

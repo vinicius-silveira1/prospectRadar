@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 
 const Success = () => {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -16,10 +16,12 @@ const Success = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      // Call refreshUserProfile after loading is complete
+      refreshUserProfile(); 
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [refreshUserProfile]);
 
   const handleContinue = () => {
     navigate('/');
