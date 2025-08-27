@@ -5,6 +5,7 @@ import ResponsiveSidebar from './ResponsiveSidebar.jsx';
 import Footer from './Footer';
 import { useBreakpoint, useIsMobile } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer } from '@/components/Common/ResponsiveComponents.jsx';
+import FeedbackWidget from '@/components/Feedback/FeedbackWidget'; // Importe o widget
 
 const MainLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -59,6 +60,9 @@ const MainLayout = () => {
           <Footer />
         </div>
       </div>
+      
+      {/* Adicione o widget de feedback aqui */}
+      <FeedbackWidget />
     </div>
   );
 };
