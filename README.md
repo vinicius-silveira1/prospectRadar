@@ -4,7 +4,8 @@
 
 Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, construída com a comunidade brasileira de basquete em mente.
 
-<img width="1896" height="864" alt="image" src="https://github.com/user-attachments/assets/b014c521-84af-4ddf-8a60-d031e9bfa462" />
+<img width="1890" height="863" alt="image" src="https://github.com/user-attachments/assets/1286b717-622a-45ea-b89c-76ae3e729355" />
+
 
 ## ✨ Badges
 
