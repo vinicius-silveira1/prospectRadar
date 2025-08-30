@@ -40,24 +40,113 @@ export default function useProspects(filters = {}) {
 
         // 2. Processamento inicial e enriquecimento dos dados.
         // Use Promise.all to await all evaluations
-        const processedProspects = await Promise.all(dbProspects.map(async (prospect) => { // Make the callback async
+        const processedProspects = await Promise.all(dbProspects.map(async (prospect) => {
           const tier = getTierByRanking(prospect.ranking);
-          // Gera dados de scouting (pontos fortes/fracos) se não existirem no DB.
           const scoutingData = prospect.strengths ? {} : generateDataDrivenScoutingReport(prospect);
-          
-          // Apply the algorithm to get the evaluation, and AWAIT it
-          const evaluation = await algorithm.evaluateProspect(prospect); // AWAIT here
+          const evaluation = await algorithm.evaluateProspect(prospect);
 
-          // Usa diretamente as estatísticas ppg, rpg, apg do banco de dados
-          return { 
-            ...prospect, 
-            ...scoutingData, 
-            tier,
+          // Define stats base e a fonte padrão
+          let finalStats = {
             ppg: prospect.ppg || 0,
             rpg: prospect.rpg || 0,
             apg: prospect.apg || 0,
-            radar_score: evaluation.totalScore, // Now evaluation.totalScore should be available
-            evaluation: evaluation // Add full evaluation object
+            bpg: prospect.bpg || 0,
+            spg: prospect.spg || 0,
+            fg_pct: prospect.fg_pct || 0,
+            three_pct: prospect.three_pct || 0,
+            ft_pct: prospect.ft_pct || 0,
+            stats_source: prospect.ppg ? 'ncaa_professional' : null
+          };
+
+          // Lógica de Fallback para estatísticas de High School
+          if (!finalStats.ppg && prospect.high_school_stats) {
+            let hsStats = prospect.high_school_stats;
+
+            // Handle stringified JSON
+            if (typeof hsStats === 'string') {
+              try {
+                hsStats = JSON.parse(hsStats.replace(/""/g, '"'));
+              } catch (e) {
+                console.error("Failed to parse high_school_stats", e);
+                hsStats = {};
+              }
+            }
+
+            let league = '';
+            let season = '';
+
+            if (hsStats.season_summary) {
+              league = hsStats.season_summary.league_name;
+              season = hsStats.season_summary.season;
+            } else if (hsStats.season_total) {
+              league = hsStats.season_total.league_name;
+              season = hsStats.season_total.season;
+            } else if (hsStats.totals) { // Check for college stats format
+              league = hsStats.totals.conf_abbr;
+              season = hsStats.totals.class; // Using class as season for now
+            }
+
+            if (hsStats.season_total) {
+              const totals = hsStats.season_total;
+              const gp = totals.games_played;
+              if (gp > 0) {
+                finalStats = {
+                  ...finalStats,
+                  ppg: parseFloat((totals.pts / gp).toFixed(1)),
+                  rpg: parseFloat((totals.reb / gp).toFixed(1)),
+                  apg: parseFloat((totals.ast / gp).toFixed(1)),
+                  bpg: parseFloat((totals.blk / gp).toFixed(1)),
+                  spg: parseFloat((totals.stl / gp).toFixed(1)),
+                  fg_pct: totals.fg_pct,
+                  three_pct: totals['3p_pct'],
+                  ft_pct: totals.ft_pct,
+                  stats_source: 'high_school_total',
+                  league: league,
+                  'stats-season': season
+                };
+              }
+            } else if (hsStats.season_summary) {
+              const summary = hsStats.season_summary;
+              finalStats = {
+                ...finalStats,
+                ppg: summary.ppg || 0,
+                rpg: summary.rpg || 0,
+                apg: summary.apg || 0,
+                fg_pct: summary.fg_pct || 0,
+                three_pct: summary['3p_pct'] || 0,
+                stats_source: 'high_school_summary',
+                league: league,
+                'stats-season': season
+              };
+            } else if (hsStats.totals) { // Handle college stats format
+              const totals = hsStats.totals;
+              const gp = totals.games;
+              if (gp > 0) {
+                finalStats = {
+                  ...finalStats,
+                  ppg: parseFloat((totals.pts / gp).toFixed(1)),
+                  rpg: parseFloat((totals.trb / gp).toFixed(1)),
+                  apg: parseFloat((totals.ast / gp).toFixed(1)),
+                  bpg: parseFloat((totals.blk / gp).toFixed(1)),
+                  spg: parseFloat((totals.stl / gp).toFixed(1)),
+                  fg_pct: totals.fg_pct,
+                  three_pct: totals.fg3_pct,
+                  ft_pct: totals.ft_pct,
+                  stats_source: 'high_school_total', // Keep this to show (HS)
+                  league: league,
+                  'stats-season': season
+                };
+              }
+            }
+          }
+
+          return {
+            ...prospect,
+            ...scoutingData,
+            tier,
+            ...finalStats,
+            radar_score: evaluation.totalScore,
+            evaluation: evaluation
           };
         }));
 

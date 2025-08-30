@@ -5,6 +5,59 @@
  * baseado em estatísticas, desenvolvimento e potencial NBA.
  */
 
+// Define positional groups for stricter matching
+const POSITIONAL_GROUPS = {
+    'PG': 'Guard',
+    'SG': 'Guard',
+    'SF': 'Forward',
+    'PF': 'Forward',
+    'C': 'Center',
+    'Guard': 'Guard', // For NBA players with general 'Guard' position
+    'Forward': 'Forward', // For NBA players with general 'Forward' position
+    'Center': 'Center', // For NBA players with general 'Center' position
+    'Guard-Forward': 'Forward', // Treat as Forward for comparison
+    'Forward-Guard': 'Forward', // Treat as Forward for comparison
+    'Forward-Center': 'Center', // Treat as Center for comparison
+};
+
+// Configurações de Normalização: Mapeia uma estatística para uma escala de 0 a 10
+const STAT_NORMALIZATION_CONFIG = {
+  // Contexto: College/Pré-NBA
+  college: {
+    ppg: { max: 25.0 }, // Um prospect pontuando 25+ é elite
+    rpg: { max: 12.0 }, // 12+ rebotes é elite para um prospect
+    apg: { max: 8.0 },  // 8+ assistências é elite
+    spg: { max: 2.5 },  // 2.5+ roubos
+    bpg: { max: 3.0 },  // 3.0+ tocos
+    fg_pct: { max: 0.600 },
+    three_pct: { max: 0.450 },
+    ft_pct: { max: 0.900 }
+  },
+  // Contexto: Carreira na NBA
+  nba: {
+    ppg: { max: 28.0 }, // 28+ PPG é elite na NBA
+    rpg: { max: 13.0 },
+    apg: { max: 10.0 },
+    spg: { max: 2.2 },
+    bpg: { max: 2.5 },
+    fg_pct: { max: 0.650 },
+    three_pct: { max: 0.480 },
+    ft_pct: { max: 0.950 }
+  }
+};
+
+
+const ARCHETYPE_WEIGHTS = {
+  ppg: 15,
+  rpg: 10,
+  apg: 15,
+  spg: 10,
+  bpg: 8,
+  fg_pct: 20,       // Eficiência é muito importante
+  three_pct: 12,    // Arremesso de 3 é um diferencial
+  ft_pct: 10        // Bom indicador de mecânica de arremesso
+};
+
 // Métricas principais para avaliação de prospects
 export const prospectEvaluationMetrics = {
   
@@ -15,9 +68,9 @@ export const prospectEvaluationMetrics = {
       ppg: { weight: 0.22, nbaThreshold: 15 },
       rpg: { weight: 0.18, nbaThreshold: 8 },
       apg: { weight: 0.25, nbaThreshold: 5 }, // Aumentado de 0.20 para valorizar playmaking
-      fg_percentage: { weight: 0.15, nbaThreshold: 0.45 },
-      three_pt_percentage: { weight: 0.12, nbaThreshold: 0.35 },
-      ft_percentage: { weight: 0.08, nbaThreshold: 0.75 }
+      fg_pct: { weight: 0.15, nbaThreshold: 0.45 },
+      three_pct: { weight: 0.12, nbaThreshold: 0.35 },
+      ft_pct: { weight: 0.08, nbaThreshold: 0.75 }
     }
   },
 
@@ -26,7 +79,7 @@ export const prospectEvaluationMetrics = {
     weight: 0.30,
     metrics: {
       per: { weight: 0.25, nbaThreshold: 20 },
-      ts_percentage: { weight: 0.20, nbaThreshold: 0.55 },
+      ts_percent: { weight: 0.20, nbaThreshold: 0.55 },
       usage_rate: { weight: 0.15, nbaThreshold: 0.25 },
       win_shares: { weight: 0.15, nbaThreshold: 2 },
       vorp: { weight: 0.15, nbaThreshold: 0.5 },
@@ -63,11 +116,27 @@ export class ProspectRankingAlgorithm {
     this.nbaSuccessDatabase = null; // Will be fetched on demand
   }
 
+  /**
+   * Normaliza uma estatística para uma escala de 0 a 10.
+   * @param {number} value - O valor da estatística (ex: 15.5 ppg).
+   * @param {string} context - 'college' ou 'nba'.
+   * @param {string} statName - O nome da estatística (ex: 'ppg').
+   * @returns {number} - A estatística normalizada (0-10).
+   */
+  normalizeStat(value, context, statName) {
+    if (value === null || typeof value === 'undefined') return 0;
+    const config = STAT_NORMALIZATION_CONFIG[context]?.[statName];
+    if (!config) return 0;
+
+    const score = (value / config.max) * 10;
+    return Math.min(Math.max(score, 0), 10); // Garante que o score fique entre 0 e 10
+  }
+
   // Helper to parse height from various formats to inches
   parseHeightToInches(heightData) {
     if (heightData === null || typeof heightData === 'undefined') return null;
 
-    // Handle object format from prospect: { us: "6'5\"", intl: 196 }
+    // Handle object format from prospect: { us: "6'5"", intl: 196 }
     if (typeof heightData === 'object' && heightData.us) {
         if (typeof heightData.us === 'string' && heightData.us.includes("'")) {
             const parts = heightData.us.split("'");
@@ -78,7 +147,7 @@ export class ProspectRankingAlgorithm {
         return parseFloat(heightData.us) || null;
     }
 
-    // Handle string format: "6'5\"" or "6-5"
+    // Handle string format: "6'5"" or "6-5"
     if (typeof heightData === 'string') {
       if (heightData.includes("'")) {
         const parts = heightData.split("'");
@@ -104,7 +173,7 @@ export class ProspectRankingAlgorithm {
     return isNaN(numericValue) ? null : numericValue;
   }
 
-  // Helper to parse wingspan from text (e.g., "7'0\"") to inches
+  // Helper to parse wingspan from text (e.g., "7'0"") to inches
   parseWingspanToInches(wingspanData) {
     if (wingspanData === null || typeof wingspanData === 'undefined') return null;
     
@@ -119,7 +188,7 @@ export class ProspectRankingAlgorithm {
       return parseFloat(wingspanData.us) || null;
     }
     
-    // Handle string format with feet/inches: "7'0" or "7'0\""
+    // Handle string format with feet/inches: "7'0" or "7'0""
     if (typeof wingspanData === 'string' && wingspanData.includes("'")) {
       const parts = wingspanData.split("'");
       const feet = parseInt(parts[0]);
@@ -201,59 +270,102 @@ export class ProspectRankingAlgorithm {
   async evaluateProspect(player) {
     try {
       const p = player || {};
-      const statsData = p.stats || {};
+      let currentWeights = this.weights; // Padrão
+      let basicStats = {};
+      let advancedStats = {};
+      let gamesPlayed = p.games_played || 0;
+      let competitionMultiplier = 1.0;
 
-      // --- NOVO: Definições de Risco ---
+      // --- DETECÇÃO DA FONTE DE DADOS (HIGH SCHOOL VS COLLEGE/PRO) ---
+      const hasCollegeStats = p.ppg > 0;
+      const hasHighSchoolStats = p.high_school_stats && typeof p.high_school_stats === 'object' && Object.keys(p.high_school_stats).length > 0;
+      const isHighSchoolData = !hasCollegeStats && hasHighSchoolStats;
+
+      if (isHighSchoolData) {
+        // --- LÓGICA PARA DADOS DE HIGH SCHOOL ---
+        const hsStats = p.high_school_stats.season_total || {};
+        gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
+
+        // 1. Rebalancear pesos para High School
+        currentWeights = {
+          basicStats: { weight: 0.25, metrics: this.weights.basicStats.metrics },
+          advancedStats: { weight: 0.10, metrics: this.weights.advancedStats.metrics },
+          physicalAttributes: { weight: 0.30, metrics: this.weights.physicalAttributes.metrics },
+          technicalSkills: { weight: 0.35, metrics: this.weights.technicalSkills.metrics }
+        };
+
+        // 2. Calcular estatísticas básicas a partir dos totais
+        basicStats = {
+          ppg: hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0,
+          rpg: hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0,
+          apg: hsStats.ast && gamesPlayed > 0 ? (hsStats.ast / gamesPlayed) : 0,
+          spg: hsStats.stl && gamesPlayed > 0 ? (hsStats.stl / gamesPlayed) : 0,
+          bpg: hsStats.blk && gamesPlayed > 0 ? (hsStats.blk / gamesPlayed) : 0,
+          fg_pct: hsStats.fga > 0 ? (hsStats.fgm / hsStats.fga) : 0,
+          three_pct: hsStats['3pa'] > 0 ? (hsStats['3pm'] / hsStats['3pa']) : 0,
+          ft_pct: hsStats.fta > 0 ? (hsStats.ftm / hsStats.fta) : 0,
+          ft_attempts: hsStats.fta || 0,
+          three_pt_attempts: hsStats['3pa'] || 0,
+        };
+        
+        // 3. Calcular as métricas avançadas possíveis (TS%, eFG%)
+        const ts_denominator = 2 * (hsStats.fga + 0.44 * hsStats.fta);
+        advancedStats.ts_percent = ts_denominator > 0 ? (hsStats.pts / ts_denominator) : 0;
+        
+        const efg_denominator = hsStats.fga;
+        advancedStats.efg_percent = efg_denominator > 0 ? ((hsStats.fgm + 0.5 * hsStats['3pm']) / efg_denominator) : 0;
+
+        competitionMultiplier = 0.9; // Aplicar um multiplicador padrão para High School
+
+      } else {
+        // --- LÓGICA EXISTENTE PARA DADOS DE COLLEGE/PRO ---
+        gamesPlayed = p.games_played || 30;
+        const totalMakes = (p.two_pt_makes || 0) + (p.three_pt_makes || 0);
+        const totalAttempts = (p.two_pt_attempts || 0) + (p.three_pt_attempts || 0);
+
+        basicStats = {
+          ppg: p.total_points ? (p.total_points / gamesPlayed) : (p.ppg || 0),
+          rpg: p.total_rebounds ? (p.total_rebounds / gamesPlayed) : (p.rpg || 0),
+          apg: p.total_assists ? (p.total_assists / gamesPlayed) : (p.apg || 0),
+          fg_pct: totalAttempts > 0 ? (totalMakes / totalAttempts) : (p.fg_pct || 0),
+          three_pct: (p.three_pt_attempts > 0 && p.three_pt_makes !== undefined) ? (p.three_pt_makes / p.three_pt_attempts) : (p.three_pct || 0),
+          ft_pct: p.ft_attempts > 0 ? (p.ft_makes / p.ft_attempts) : (p.ft_pct || 0),
+          tov_per_game: p.tov_per_game || 0,
+          stl_per_game: p.stl_per_game || 0,
+          blk_per_game: p.blk_per_game || 0,
+          ft_attempts: p.ft_attempts || 0,
+          three_pt_attempts: p.three_pt_attempts || 0,
+        };
+        
+        const statsData = p.stats || {};
+        advancedStats = {
+          per: (statsData.advanced?.PER || p.per),
+          ts_percent: (statsData.advanced?.['TS%'] || p.ts_percent),
+          usage_rate: (statsData.advanced?.['USG%'] || p.usage_rate),
+          win_shares: (statsData.advanced?.win_shares || p.win_shares),
+          vorp: (statsData.advanced?.vorp || p.vorp),
+          bpm: (statsData.advanced?.bpm || p.bpm),
+        };
+        competitionMultiplier = this.getCompetitionMultiplier(p.league, p.conference);
+      }
+
+      // --- LÓGICA COMUM DE AVALIAÇÃO ---
+
       const MIN_GAMES_THRESHOLD = 15;
       let confidenceScore = 1.0;
       let lowGamesRisk = false;
-
-      // Parse height and wingspan to inches
-      const parsedHeight = this.parseHeightToInches(p.height);
-      const parsedWingspan = this.parseWingspanToInches(p.wingspan);
-      
-      // Calculate per-game stats if total stats and games_played are available
-      const gamesPlayed = p.games_played || 30; // Assumir temporada completa se não especificado
-
       if (gamesPlayed < MIN_GAMES_THRESHOLD) {
         lowGamesRisk = true;
-        // A confiança escala linearmente de 0 a 1 até o threshold de jogos
         confidenceScore = parseFloat((gamesPlayed / MIN_GAMES_THRESHOLD).toFixed(2));
       }
 
-      const ppg = p.total_points ? (p.total_points / gamesPlayed) : (p.ppg || 0);
-      const rpg = p.total_rebounds ? (p.total_rebounds / gamesPlayed) : (p.rpg || 0);
-      const apg = p.total_assists ? (p.total_assists / gamesPlayed) : (p.apg || 0);
-
-      // Calculate FG% from 2P and 3P attempts/makes
-      const totalMakes = (p.two_pt_makes || 0) + (p.three_pt_makes || 0);
-      const totalAttempts = (p.two_pt_attempts || 0) + (p.three_pt_attempts || 0);
-      const fg_percentage = totalAttempts > 0 ? (totalMakes / totalAttempts) : (p.fg_pct || 0);
-
-      const three_pt_percentage = (p.three_pt_attempts > 0 && p.three_pt_makes !== undefined) ? (p.three_pt_makes / p.three_pt_attempts) : (p.three_pct || 0);
-      const ft_percentage = p.ft_attempts > 0 ? (p.ft_makes / p.ft_attempts) : (p.ft_pct || 0);
-
-      const basicStats = {
-        ppg, rpg, apg, fg_percentage, three_pt_percentage, ft_percentage,
-        tov_per_game: p.tov_per_game || 0,
-        stl_per_game: p.stl_per_game || 0,
-        blk_per_game: p.blk_per_game || 0,
-      };
-
-      const advancedStats = {
-        per: (statsData.advanced?.PER || p.per),
-        ts_percentage: (statsData.advanced?.['TS%'] || p.ts_percent),
-        usage_rate: (statsData.advanced?.['USG%'] || p.usage_rate),
-        win_shares: (statsData.advanced?.win_shares || p.win_shares),
-        vorp: (statsData.advanced?.vorp || p.vorp),
-        bpm: (statsData.advanced?.bpm || p.bpm),
-      };
-
-      const estimatedSkills = this.estimateSubjectiveScores(p);
+      const parsedHeight = this.parseHeightToInches(p.height);
+      const parsedWingspan = this.parseWingspanToInches(p.wingspan);
       const physical = {
         height: parsedHeight,
         wingspan: parsedWingspan === null ? (parsedHeight + 2.5) : parsedWingspan,
       };
+      const estimatedSkills = this.estimateSubjectiveScores(p, basicStats);
       const skills = {
           shooting: p.shooting || estimatedSkills.shooting,
           ballHandling: p.ballHandling || estimatedSkills.ballHandling,
@@ -261,139 +373,65 @@ export class ProspectRankingAlgorithm {
           basketballIQ: p.basketballIQ || estimatedSkills.basketballIQ,
       };
 
-      // NOVO: Aplicar o multiplicador de competição diretamente nas pontuações de estatísticas
-      const competitionMultiplier = this.getCompetitionMultiplier(p.league, p.conference);
-
-      let basicScore = this.evaluateBasicStats(basicStats);
+      let basicScore = this.evaluateBasicStats(basicStats, currentWeights);
       if (basicScore !== undefined) {
-        basicScore = Math.min(1.0, basicScore * competitionMultiplier); // Garante que não passe de 1.0
+        basicScore = Math.min(1.0, basicScore * competitionMultiplier);
       }
 
-      let advancedScore = this.evaluateAdvancedStats(advancedStats);
+      let advancedScore = this.evaluateAdvancedStats(advancedStats, currentWeights);
       if (advancedScore !== undefined) {
-        advancedScore = Math.min(1.0, advancedScore * competitionMultiplier); // Garante que não passe de 1.0
+        advancedScore = Math.min(1.0, advancedScore * competitionMultiplier);
       }
 
       const scores = {
         basicStats: basicScore,
         advancedStats: advancedScore,
-        physicalAttributes: this.evaluatePhysicalAttributes(physical, p.position),
-        technicalSkills: this.evaluateTechnicalSkills(skills),
+        physicalAttributes: this.evaluatePhysicalAttributes(physical, p.position, currentWeights),
+        technicalSkills: this.evaluateTechnicalSkills(skills, currentWeights),
       };
 
       let externalRankingInfluence = 0;
-      if (p.ranking_espn) {
-        externalRankingInfluence += (100 - p.ranking_espn) / 100;
+      const hasEspnRank = p.ranking_espn && p.ranking_espn > 0;
+      const has247Rank = p.ranking_247 && p.ranking_247 > 0;
+      if (hasEspnRank) externalRankingInfluence += (100 - p.ranking_espn) / 100;
+      if (has247Rank) externalRankingInfluence += (100 - p.ranking_247) / 100;
+      if (hasEspnRank && has247Rank) externalRankingInfluence /= 2;
+
+      // Fallback de Ranking baseado no Tier para prospects de elite sem dados de ranking
+      if (externalRankingInfluence === 0 && p.tier === 'Elite') {
+        externalRankingInfluence = (100 - 5) / 100; // Simula um ranking de top 5
       }
-      if (p.ranking_247) {
-        externalRankingInfluence += (100 - p.ranking_247) / 100;
-      }
-      externalRankingInfluence = Math.min(externalRankingInfluence / 2, 1.0);
 
       let totalWeightedScore = 0;
       let totalAvailableWeight = 0;
-
       Object.keys(scores).forEach(category => {
         const categoryScore = scores[category];
-        const categoryWeight = this.weights[category]?.weight;
-
+        const categoryWeight = currentWeights[category]?.weight;
         if (categoryScore !== undefined && categoryScore !== null && categoryWeight !== undefined) {
           totalWeightedScore += categoryScore * categoryWeight;
           totalAvailableWeight += categoryWeight;
         }
       });
 
-      // O multiplicador foi removido daqui
       const potentialScore = totalAvailableWeight > 0 ? (totalWeightedScore / totalAvailableWeight) : 0;
-      // console.log(`- potentialScore (before external influence): ${potentialScore}`);
 
       const flags = this.generateProspectFlags(p, basicStats, advancedStats, physical);
-      
       if (lowGamesRisk) {
-        flags.push({ type: 'red', message: `Amostra de jogos muito pequena (${p.games_played} jogos) - Risco extremo.` });
+        flags.push({ type: 'red', message: `Amostra de jogos pequena (${gamesPlayed} jogos) - Risco considerado.` });
       }
-
       let redFlagPenalty = flags.some(flag => flag.type === 'red') ? 0.05 : 0;
-      
-      // NOVA: Penalidade adicional para padrões de bust identificados na análise 2018
-      const bustPatternFlags = flags.filter(flag => 
-        flag.message.includes('Padrão de risco') || 
-        flag.message.includes('limitações ofensivas')
-      );
-      
-      if (bustPatternFlags.length > 0) {
-        redFlagPenalty += 0.03; // Penalidade adicional para padrões de bust
-      }
-      
-      // NOVA: Athletic Upside Bonus (baseado na análise de Anthony Edwards)
-      let athleticUpsideBonus = 0;
-      if (p.position === 'SG' || p.position === 'SF') {
-        const hasAthleticProfile = (
-          physical.wingspan_inches && physical.height_inches && 
-          (physical.wingspan_inches - physical.height_inches) >= 4 && // Boa envergadura
-          basicStats.ppg >= 18 && // High scorer
-          p.age <= 20 // Young
-        );
-        
-        if (hasAthleticProfile && potentialScore >= 0.70) {
-          athleticUpsideBonus = 0.03; // Boost para athletic wings jovens
-        }
-      }
-      
-      // NOVA: International Prospect Adjustment (baseado na análise de LaMelo)
-      let internationalAdjustment = 0;
-      if (p.league && (p.league.includes('NBL') || p.league.includes('EuroLeague') || p.league.includes('Liga ACB'))) {
-        // Para prospects internacionais, reduzir dependência de rankings externos
-        if (potentialScore >= 0.70) {
-          internationalAdjustment = 0.02; // Pequeno boost para bons prospects internacionais
-        }
-      }
-      
-      // NOVA: Age Bonus (prospects muito jovens têm mais tempo para desenvolvimento)
-      let ageBonusAdjustment = 0;
-      if (p.age && p.age <= 19.0 && potentialScore >= 0.60) {
-        ageBonusAdjustment = 0.02; // Bonus para prospects muito jovens com potencial
-      }
-      
-      // NOVA: Confidence-Weighted Scoring (baseado no caso Wiseman)
-      // Nota: Removido multiplier - confidence score já indica confiabilidade adequadamente
-      let confidenceMultiplier = 1.0; // Manter score como potencial puro
-      
-      // Bonus para guards criativos (baseado em Trae Young, SGA success)
       const creativeGuardBonus = flags.some(flag => flag.message.includes('Guard criativo elite')) ? 0.02 : 0;
+      let ageBonusAdjustment = (p.age && p.age <= 19.0 && potentialScore >= 0.60) ? 0.02 : 0;
 
       const hasSufficientStats = gamesPlayed >= MIN_GAMES_THRESHOLD;
-      const hasExternalRankings = (p.ranking_espn != null || p.ranking_247 != null);
-      
-      let statWeight = 0.8;
-      let rankingWeight = 0.2;
+      const hasExternalRankings = externalRankingInfluence > 0;
+      let statWeight = 0.8, rankingWeight = 0.2;
+      if (!hasSufficientStats && hasExternalRankings) { statWeight = 0.05; rankingWeight = 0.95; }
+      else if (hasSufficientStats && !hasExternalRankings) { statWeight = 0.9; rankingWeight = 0.1; }
+      else if (!hasSufficientStats && !hasExternalRankings) { statWeight = 0.5; rankingWeight = 0.5; }
 
-      if (!hasSufficientStats && hasExternalRankings) {
-        statWeight = 0.05;
-        rankingWeight = 0.95;
-      } else if (hasSufficientStats && !hasExternalRankings) {
-        statWeight = 0.9;
-        rankingWeight = 0.1;
-      } else if (!hasSufficientStats && !hasExternalRankings) {
-        statWeight = 0.5;
-        rankingWeight = 0.5;
-      }
-
-      const baseScore = (potentialScore * statWeight) + (externalRankingInfluence * rankingWeight) - redFlagPenalty + creativeGuardBonus + athleticUpsideBonus + internationalAdjustment + ageBonusAdjustment;
-      
-      // Aplicar confidence multiplier no final (mantido como 1.0 - score representa potencial)
-      const finalTotalScore = Math.max(0, Math.min(1, baseScore * confidenceMultiplier));
-      
-      // Debug logs (commented for cleaner output)
-      // console.log(`- externalRankingInfluence: ${externalRankingInfluence}`);
-      // console.log(`- statWeight: ${statWeight}, rankingWeight: ${rankingWeight}`);
-      // console.log(`- redFlagPenalty: ${redFlagPenalty}`);
-      // console.log(`- athleticUpsideBonus: ${athleticUpsideBonus}`);
-      // console.log(`- internationalAdjustment: ${internationalAdjustment}`);
-      // console.log(`- ageBonusAdjustment: ${ageBonusAdjustment}`);
-      // console.log(`- confidenceMultiplier: ${confidenceMultiplier}`);
-      // console.log(`- finalTotalScore: ${finalTotalScore}`);
-      // console.log(`----------------------------------`);
+      const baseScore = (potentialScore * statWeight) + (externalRankingInfluence * rankingWeight) - redFlagPenalty + creativeGuardBonus + ageBonusAdjustment;
+      const finalTotalScore = Math.max(0, Math.min(1, baseScore));
 
       const draftProjection = this.calculateDraftProjection(finalTotalScore, p, lowGamesRisk);
       const tier = this.calculateTier(finalTotalScore);
@@ -407,7 +445,11 @@ export class ProspectRankingAlgorithm {
         draftProjection,
         nbaReadiness: this.assessNBAReadiness(finalTotalScore, flags, lowGamesRisk),
         comparablePlayers: await this.findComparablePlayers(p, physical, basicStats),
-        flags: flags
+        flags: flags,
+        calculatedStats: {
+          basic: basicStats,
+          advanced: advancedStats
+        }
       };
     } catch (error) {
       console.error(`Error evaluating prospect ${player?.name}:`, error);
@@ -419,7 +461,8 @@ export class ProspectRankingAlgorithm {
         draftProjection: { round: 'Error', range: '', description: 'Evaluation Error' },
         nbaReadiness: 'Error',
         comparablePlayers: [],
-        flags: [{ type: 'red', message: 'Erro durante avaliação' }]
+        flags: [{ type: 'red', message: 'Erro durante avaliação' }],
+        calculatedStats: { basic: {}, advanced: {} }
       };
     }
   }
@@ -437,132 +480,130 @@ export class ProspectRankingAlgorithm {
     // --- Green Flags (Pontos Positivos Notáveis) ---
     const wingspanAdvantage = this.parseWingspanToInches(p.wingspan) - this.parseHeightToInches(p.height);
     if (wingspanAdvantage >= 5) {
-      flags.push({ type: 'green', message: `  Envergadura de elite (+${wingspanAdvantage.toFixed(1)}\" em relação à altura)` });
+      flags.push({ type: 'green', message: `Envergadura de elite (+${wingspanAdvantage.toFixed(1)}" em relação à altura)` });
     }
 
-    if (basicStats.ft_percentage >= 0.90 && p.ft_attempts >= 50) {
-      flags.push({ type: 'green', message: '  Cobrador de lance livre de elite' });
+    if (basicStats.ft_pct >= 0.90 && basicStats.ft_attempts >= 50) {
+      flags.push({ type: 'green', message: 'Cobrador de lance livre de elite' });
     }
 
-    if (basicStats.three_pt_percentage >= 0.40 && p.three_pt_attempts >= 80) {
-      flags.push({ type: 'green', message: '  Arremessador de 3pt de elite' });
+    if (basicStats.three_pct >= 0.40 && basicStats.three_pt_attempts >= 80) {
+      flags.push({ type: 'green', message: 'Arremessador de 3pt de elite' });
     }
 
     const assistToTurnoverRatio = this.calculateAssistToTurnoverRatio(p);
     if (assistToTurnoverRatio >= 2.5 && safeAccess(p.apg) > 4) { // Usando apg para volume de assistências
-      flags.push({ type: 'green', message: '  Playmaker de poucos erros e muito impacto' });
+      flags.push({ type: 'green', message: 'Playmaker de poucos erros e muito impacto' });
     }
 
     if (advancedStats.per >= 25) {
-      flags.push({ type: 'green', message: '  Produção ofensiva extremamente eficiente (PER)' });
+      flags.push({ type: 'green', message: 'Produção ofensiva extremamente eficiente (PER)' });
     }
 
     // New Green Flags
-    if (basicStats.three_pt_percentage >= 0.38 && basicStats.ft_percentage >= 0.85 && p.three_pt_attempts >= 100) {
-      flags.push({ type: 'green', message: '  Atirador de elite' });
+    if (basicStats.three_pct >= 0.38 && basicStats.ft_pct >= 0.85 && basicStats.three_pt_attempts >= 100) {
+      flags.push({ type: 'green', message: 'Perfil de atirador elite (3PT% + FT%)' });
     }
 
     if (assistToTurnoverRatio >= 2.0 && basicStats.apg >= 4.0 && safeAccess(p.tov_percent) < 0.10) { // Added apg threshold for meaningful playmaking
-      flags.push({ type: 'green', message: '  Criador eficiente' });
+      flags.push({ type: 'green', message: 'Criador eficiente' });
     }
 
     if (safeAccess(p.stl_per_game) >= 1.5 && safeAccess(p.blk_per_game) >= 1.0) {
-      flags.push({ type: 'green', message: '  Motor defensivo' });
+      flags.push({ type: 'green', message: 'Motor defensivo' });
     }
 
-    if (basicStats.three_pt_percentage >= 0.36 && advancedStats.dbpm > 3.0) {
-      flags.push({ type: 'green', message: '  Potencial \"3&D\"' });
+    if (basicStats.three_pct >= 0.36 && advancedStats.dbpm > 3.0) {
+      flags.push({ type: 'green', message: 'Potencial "3&D"' });
     }
 
     if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && basicStats.rpg >= 6) {
-      flags.push({ type: 'green', message: '  Alto volume de rebotes para guard/ala' });
+      flags.push({ type: 'green', message: 'Alto volume de rebotes para guard/ala' });
     }
 
     if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && (safeAccess(p.stl_per_game) > 2.5 || safeAccess(p.blk_per_game) > 1.5)) {
-      flags.push({ type: 'green', message: '  Alto volume de roubos/tocos para guard/ala' });
+      flags.push({ type: 'green', message: 'Alto volume de roubos/tocos para guard/ala' });
     }
 
     if (p.improvement >= 8) { // Assuming 8 is a high subjective score for improvement
-      flags.push({ type: 'green', message: '  Melhora significativa ano a ano' });
+      flags.push({ type: 'green', message: 'Melhora significativa ano a ano' });
     }
 
     // NOVA FLAG baseada em análise 2018: Guards criativos elite (Trae Young, SGA pattern)
     if ((p.position === 'PG' || p.position === 'SG') && basicStats.apg >= 7.0 && advancedStats.usage_rate >= 30) {
-      flags.push({ type: 'green', message: '  Guard criativo elite (alta assistência + uso)' });
+      flags.push({ type: 'green', message: 'Guard criativo elite (alta assistência + uso)' });
     }
 
     // --- Red Flags (Pontos de Atenção) ---
     if (p.age >= 22) {
-      flags.push({ type: 'red', message: `  Idade avançada para a classe (${p.age} anos)` });
+      flags.push({ type: 'red', message: `Idade avançada para a classe (${p.age} anos)` });
     }
 
     // NOVA FLAG baseada em análise 2018: Padrão de bust para forwards jovens com baixa produção (Knox, Jerome Robinson pattern)
-    if ((p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < 16 && basicStats.fg_percentage < 0.45) {
-      flags.push({ type: 'red', message: '  Padrão de risco: Forward jovem com baixa produção' });
+    if ((p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < 16 && basicStats.fg_pct < 0.45) {
+      flags.push({ type: 'red', message: 'Padrão de risco: Forward jovem com baixa produção' });
     }
 
     // NOVA FLAG: Grandes com limitações ofensivas (Mohamed Bamba pattern)
     if ((p.position === 'C' || p.position === 'PF') && basicStats.ppg < 13 && advancedStats.usage_rate < 20) {
-      flags.push({ type: 'red', message: '  Grande com limitações ofensivas' });
+      flags.push({ type: 'red', message: 'Grande com limitações ofensivas' });
     }
     
-    if (basicStats.ft_percentage < 0.65 && p.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: '  Mecânica de arremesso questionável (Baixo FT%)' });
+    if (basicStats.ft_pct < 0.65 && basicStats.ft_attempts >= 50) {
+      flags.push({ type: 'red', message: 'Mecânica de arremesso questionável (Baixo FT%)' });
     }
 
-    if (advancedStats.ts_percentage < 0.50 && advancedStats.usage_rate > 25) {
-      flags.push({ type: 'red', message: '  Alto volume com baixa eficiência ofensiva' });
+    if (advancedStats.ts_percent < 0.50 && advancedStats.usage_rate > 25) {
+      flags.push({ type: 'red', message: 'Alto volume com baixa eficiência ofensiva' });
     }
 
     if (assistToTurnoverRatio < 1.0 && advancedStats.usage_rate > 20) {
-      flags.push({ type: 'red', message: '  Alto volume de erros (mais turnovers que assistências)' });
+      flags.push({ type: 'red', message: 'Alto volume de erros (mais turnovers que assistências)' });
     }
 
     // NOVA: Shooting Upside Detection (ajustado para Desmond Bane: 43.7% 3PT, 76% FT)
-    if (basicStats.three_pt_percentage >= 0.37 && basicStats.ft_percentage >= 0.75 && (p.three_point_attempts >= 80 || basicStats.three_pt_percentage >= 0.40)) {
-      flags.push({ type: 'green', message: '  Perfil de atirador elite (3PT% + FT%)' });
+    if (basicStats.three_pct >= 0.37 && basicStats.ft_pct >= 0.75 && (basicStats.three_pt_attempts >= 80 || basicStats.three_pct >= 0.40)) {
+      flags.push({ type: 'green', message: 'Perfil de atirador elite (3PT% + FT%)' });
     }
     
     // NOVA: Versatile Scorer Detection (baseado em Maxey)
-    if (basicStats.ppg >= 14 && basicStats.three_pt_percentage >= 0.33 && advancedStats.ts_percentage >= 0.54) {
-      flags.push({ type: 'green', message: '  Pontuador versátil e eficiente' });
+    if (basicStats.ppg >= 14 && basicStats.three_pct >= 0.33 && advancedStats.ts_percent >= 0.54) {
+      flags.push({ type: 'green', message: 'Pontuador versátil e eficiente' });
     }
 
     // New Red Flags
-    if (advancedStats.usage_rate >= 0.28 && advancedStats.ts_percentage < 0.53) {
-      flags.push({ type: 'red', message: '  Pontuador ineficiente (alto volume, baixa eficiência)' });
+    if (advancedStats.usage_rate >= 0.28 && advancedStats.ts_percent < 0.53) {
+      flags.push({ type: 'red', message: 'Pontuador ineficiente (alto volume, baixa eficiência)' });
     }
 
     if (safeAccess(p.tov_percent) >= 0.18) { flags.push({ type: 'red', message: 'Muitos turnovers (alta taxa de erros)' }); }
 
-    if ((p.position === 'PG' || p.position === 'SG') && basicStats.ft_percentage < 0.70 && p.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: '  Arremesso questionável (baixo FT% para guard)' });
-    } else if ((p.position === 'SF' || p.position === 'PF' || p.position === 'C') && basicStats.ft_percentage < 0.65 && p.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: '  Arremesso questionável (baixo FT% para big)' });
+    if ((p.position === 'PG' || p.position === 'SG') && basicStats.ft_pct < 0.70 && basicStats.ft_attempts >= 50) {
+      flags.push({ type: 'red', message: 'Arremesso questionável (baixo FT% para guard)' });
+    } else if ((p.position === 'SF' || p.position === 'PF' || p.position === 'C') && basicStats.ft_pct < 0.65 && basicStats.ft_attempts >= 50) {
+      flags.push({ type: 'red', message: 'Arremesso questionável (baixo FT% para big)' });
     }
 
-    const parsedHeight = this.parseHeightToInches(p.height);
-    const parsedWingspan = this.parseWingspanToInches(p.wingspan);
     if (physical.wingspan <= physical.height) {
-      flags.push({ type: 'red', message: '  Potencial físico limitado (envergadura curta)' });
+      flags.push({ type: 'red', message: 'Potencial físico limitado (envergadura curta)' });
     }
 
     if ((p.position === 'PF' || p.position === 'C') && basicStats.rpg < 7) {
-      flags.push({ type: 'red', message: '  Baixa taxa de rebotes para pivô/ala-pivô' });
+      flags.push({ type: 'red', message: 'Baixa taxa de rebotes para pivô/ala-pivô' });
     }
 
     if (p.fouls_per_game > 3.5) {
-      flags.push({ type: 'red', message: '  Alta taxa de faltas' });
+      flags.push({ type: 'red', message: 'Alta taxa de faltas' });
     }
 
     if (p.position === 'PG' && basicStats.apg < 3.5) {
-      flags.push({ type: 'red', message: '  Baixa taxa de assistências para armador principal' });
+      flags.push({ type: 'red', message: 'Baixa taxa de assistências para armador principal' });
     }
 
     return flags;
   }
 
-  estimateSubjectiveScores(prospect) {
+  estimateSubjectiveScores(prospect, basicStats) {
     const p = prospect || {};
 
     const safeAccess = (value, treatZeroAsUndefined = false) => {
@@ -579,19 +620,23 @@ export class ProspectRankingAlgorithm {
         defenseScore = 5.0;
 
     // --- 1. Shooting Score ---
-    const ft_pct = safeAccess(p.ft_pct, true) || safeAccess(p.ft_percentage, true);
-    const three_pt_pct = safeAccess(p.three_pct, true) || safeAccess(p.three_pt_percentage, true);
-    const three_pt_attempts = safeAccess(p.three_pt_attempts);
+    const ft_pct = safeAccess(basicStats.ft_pct, true);
+    const three_pct = safeAccess(basicStats.three_pct, true);
+    const three_pt_attempts = safeAccess(basicStats.three_pt_attempts);
+    const ft_attempts = safeAccess(basicStats.ft_attempts);
 
-    if (ft_pct !== undefined && three_pt_pct !== undefined) {
-        const ftWeight = 0.6;
-        const threePtWeight = 0.4;
+    if (ft_pct !== undefined && three_pct !== undefined) {
+        let ftWeight = 0.6;
+        // Reduz o peso do FT% se a amostra for pequena
+        if (ft_attempts < 50) ftWeight = 0.4;
+        const threePtWeight = 1.0 - ftWeight;
+
         const volumeBonus = Math.min((three_pt_attempts || 0) / 150, 1.0) * 0.2; // Bonus up to 20% for high volume
-        shootingScore = (ft_pct * ftWeight + three_pt_pct * threePtWeight) * 10 * (1 + volumeBonus);
+        shootingScore = (ft_pct * ftWeight + three_pct * threePtWeight) * 10 * (1 + volumeBonus);
     } else if (ft_pct !== undefined) {
         shootingScore = ft_pct * 10;
-    } else if (three_pt_pct !== undefined) {
-        shootingScore = three_pt_pct * 9; // Slightly penalize if only 3pt% is available
+    } else if (three_pct !== undefined) {
+        shootingScore = three_pct * 9; // Slightly penalize if only 3pt% is available
     }
 
     // --- 2. Ball Handling & Playmaking ---
@@ -630,26 +675,23 @@ export class ProspectRankingAlgorithm {
   evaluateHeightByPosition(height, position) {
     if (!height || !position) return 0.5; // Neutral score if data is missing
 
-    // Example logic: Adjust score based on ideal height for position
-    // This is a simplified example, you'd need more detailed logic
     let idealHeight = 75; // Default for guards (6'3")
     if (position === 'SF') idealHeight = 79; // 6'7"
     if (position === 'PF') idealHeight = 81; // 6'9"
     if (position === 'C') idealHeight = 83; // 6'11"
 
     const heightDifference = Math.abs(height - idealHeight);
-    // Score decreases as difference increases, capped at 0.
-    return Math.max(0, 1 - (heightDifference / 10)); // 10 inches difference = 0 score
+    return Math.max(0, 1 - (heightDifference / 10));
   }
 
-  evaluateBasicStats(stats) {
-    if (!stats || Object.values(stats).every(v => v === undefined || v === null)) return undefined; // Retorna undefined se não há dados
-    const metrics = this.weights.basicStats.metrics;
+  evaluateBasicStats(stats, weights) {
+    if (!stats || Object.values(stats).every(v => v === undefined || v === null)) return undefined;
+    const metrics = weights.basicStats.metrics;
     let score = 0;
     let totalWeight = 0;
 
     Object.keys(metrics).forEach(stat => {
-      const value = stats[stat];
+      const value = stats[stat.replace('_percentage', '_pct')];
       const threshold = metrics[stat].nbaThreshold;
       const weight = metrics[stat].weight;
 
@@ -660,25 +702,25 @@ export class ProspectRankingAlgorithm {
       }
     });
 
-    if (totalWeight === 0) return undefined; // Retorna undefined se nenhuma métrica contribuiu
+    if (totalWeight === 0) return undefined;
     return Math.max(0.0, Math.min(score / totalWeight, 1.0));
   }
 
-  evaluateAdvancedStats(advancedStats) {
-    if (!advancedStats || Object.values(advancedStats).every(v => v === undefined || v === null)) return undefined; // Retorna undefined se não há dados
-    const metrics = this.weights.advancedStats.metrics;
+  evaluateAdvancedStats(advancedStats, weights) {
+    if (!advancedStats || Object.values(advancedStats).every(v => v === undefined || v === null)) return undefined;
+    const metrics = weights.advancedStats.metrics;
     let score = 0;
     let totalWeight = 0;
 
     Object.keys(metrics).forEach(stat => {
-      const value = advancedStats[stat];
+      const value = advancedStats[stat.replace('_percentage', '_percent')];
       const threshold = metrics[stat].nbaThreshold;
       const weight = metrics[stat].weight;
 
       if (value !== undefined && value !== null) {
         let normalizedScore;
         if (stat === 'bpm' || stat === 'vorp') {
-          normalizedScore = (value >= 0) ? (value / threshold) : 0; // BPM e VORP negativos não contribuem positivamente
+          normalizedScore = (value >= 0) ? (value / threshold) : 0;
         } else {
           normalizedScore = Math.min(value / threshold, 3.0);
         }
@@ -688,49 +730,44 @@ export class ProspectRankingAlgorithm {
       }
     });
 
-    if (totalWeight === 0) return undefined; // Retorna undefined se nenhuma métrica contribuiu
+    if (totalWeight === 0) return undefined;
     const finalScore = score / totalWeight;
 
-    return Math.max(0.0, Math.min(1.0, finalScore)); // NOVO: Adicionado teto de 1.0
+    return Math.max(0.0, Math.min(1.0, finalScore));
   }
 
-  evaluatePhysicalAttributes(physical, position) {
+  evaluatePhysicalAttributes(physical, position, weights) {
     if (!physical || Object.values(physical).every(v => v === undefined || v === null)) return undefined;
     
-    const metrics = this.weights.physicalAttributes.metrics;
+    const metrics = weights.physicalAttributes.metrics;
     let score = 0;
     let totalWeight = 0;
 
-    // Avaliar altura
     const heightScore = this.evaluateHeightByPosition(physical.height, position);
     if (heightScore !== undefined && heightScore !== null && !isNaN(heightScore)) {
       score += heightScore * metrics.height.weight;
       totalWeight += metrics.height.weight;
     }
 
-    // Avaliar envergadura (apenas se disponível)
     if (physical.wingspan !== undefined && physical.wingspan !== null && !isNaN(physical.wingspan) && 
         physical.height !== undefined && physical.height !== null && !isNaN(physical.height)) {
       
       const wingspanAdvantage = physical.wingspan - physical.height;
-      // Normalizar o bonus de envergadura (0 a 6 polegadas = score de 0 a 1)
       const wingspanScore = Math.max(0, Math.min(wingspanAdvantage / 6.0, 1.0));
       
       score += wingspanScore * metrics.wingspan.weight;
       totalWeight += metrics.wingspan.weight;
     }
 
-    // Se não há dados físicos suficientes, retornar undefined
     if (totalWeight === 0) return undefined;
     
-    // Calcular score final baseado nos dados disponíveis
     const finalScore = score / totalWeight;
     return Math.max(0.0, Math.min(finalScore, 1.0));
   }
 
-  evaluateTechnicalSkills(skills) {
-    if (!skills || Object.values(skills).every(v => v === undefined || v === null)) return undefined; // Retorna undefined se não há dados
-    const metrics = this.weights.technicalSkills.metrics;
+  evaluateTechnicalSkills(skills, weights) {
+    if (!skills || Object.values(skills).every(v => v === undefined || v === null)) return undefined;
+    const metrics = weights.technicalSkills.metrics;
     let score = 0;
     let totalWeight = 0;
 
@@ -743,11 +780,46 @@ export class ProspectRankingAlgorithm {
       }
     });
 
-    if (totalWeight === 0) return undefined; // Retorna undefined se nenhuma métrica contribuiu
+    if (totalWeight === 0) return undefined;
     return Math.max(0.0, Math.min(score / totalWeight, 1.0));
   }
 
-  
+  /**
+   * Calcula a similaridade de arquétipo entre um prospecto e um jogador da NBA.
+   * Usa estatísticas normalizadas e pesos de arquétipo.
+   * @param {object} prospectStats - Estatísticas do prospecto (college).
+   * @param {object} nbaPlayerCareerStats - Estatísticas de carreira do jogador da NBA.
+   * @returns {number} - Score de similaridade (0-1).
+   */
+  calculateArchetypeSimilarity(prospectStats, nbaPlayerCareerStats) {
+    if (!prospectStats || !nbaPlayerCareerStats || Object.keys(nbaPlayerCareerStats).length === 0) return 0;
+
+    let totalWeightedDifference = 0;
+    let totalWeight = 0;
+
+    for (const statName in ARCHETYPE_WEIGHTS) {
+      const weight = ARCHETYPE_WEIGHTS[statName];
+      
+      const prospectValue = prospectStats[statName];
+      const nbaValue = nbaPlayerCareerStats[statName];
+
+      if (prospectValue !== undefined && prospectValue !== null && nbaValue !== undefined && nbaValue !== null) {
+        const normalizedProspect = this.normalizeStat(prospectValue, 'college', statName);
+        const normalizedNba = this.normalizeStat(nbaValue, 'nba', statName);
+
+        const difference = Math.abs(normalizedProspect - normalizedNba);
+        totalWeightedDifference += difference * weight;
+        totalWeight += weight;
+      }
+    }
+
+    if (totalWeight === 0) return 0;
+
+    const averageWeightedDifference = totalWeightedDifference / totalWeight;
+    const finalSimilarityScore = Math.max(0, 1 - (averageWeightedDifference / 10));
+    
+    return finalSimilarityScore;
+  }
 
   calculateDraftProjection(totalScore, prospect, lowGamesRisk = false) {
     // Se o risco for alto, a projeção é mais conservadora
@@ -812,29 +884,53 @@ export class ProspectRankingAlgorithm {
     const physicalHeightInches = this.parseHeightToInches(physical.height);
 
     const similarityScores = this.nbaSuccessDatabase.map(nbaPlayer => {
-        if (!nbaPlayer.college_stats_raw || Object.keys(nbaPlayer.college_stats_raw).length === 0) {
+        if (!nbaPlayer.nba_career_ppg) {
             return { player: nbaPlayer, similarity: 0 };
         }
 
-        const positionMatch = player.position === nbaPlayer.position ? 1.0 : 0.5;
-        
+        const nbaCareerStats = {
+            ppg: parseFloat(nbaPlayer.nba_career_ppg),
+            rpg: parseFloat(nbaPlayer.nba_career_rpg),
+            apg: parseFloat(nbaPlayer.nba_career_apg),
+            spg: parseFloat(nbaPlayer.nba_career_spg),
+            bpg: parseFloat(nbaPlayer.nba_career_bpg),
+            fg_pct: parseFloat(nbaPlayer.nba_career_fg_pct),
+            three_pct: parseFloat(nbaPlayer.nba_career_three_pct),
+            ft_pct: parseFloat(nbaPlayer.nba_career_ft_pct),
+        };
+
+        const nbaGamesPlayed = parseInt(nbaPlayer.nba_games_played);
+        if (isNaN(nbaGamesPlayed) || nbaGamesPlayed < 50) {
+            return { player: nbaPlayer, similarity: 0 };
+        }
+
+        const prospectGroup = POSITIONAL_GROUPS[player.position];
+        const nbaPlayerGroup = POSITIONAL_GROUPS[nbaPlayer.position];
+        let positionMatch = 0;
+        if (prospectGroup === nbaPlayerGroup) {
+            positionMatch = 1.0;
+        } else if (player.position === nbaPlayer.position) {
+            positionMatch = 1.0;
+        } else {
+            positionMatch = 0.01;
+        }
+
         const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
-        const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0); // Penalidade mais branda
+        const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0);
 
-        const statSimilarity = this.calculateStatSimilarity(stats, nbaPlayer.college_stats_raw);
+        const archetypeSimilarity = this.calculateArchetypeSimilarity(stats, nbaCareerStats);
 
-        // Se não houver similaridade de estatísticas, não podemos comparar de forma confiável
-        if (statSimilarity === 0) {
+        if (archetypeSimilarity === 0) {
             return { player: nbaPlayer, similarity: 0 };
         }
 
-        const totalSimilarity = (positionMatch * 0.25) + (heightSimilarity * 0.25) + (statSimilarity * 0.50);
+        const totalSimilarity = (positionMatch * 0.25) + (heightSimilarity * 0.35) + (archetypeSimilarity * 0.40);
 
         return {
             player: nbaPlayer,
             similarity: totalSimilarity
         };
-    }).filter(item => !isNaN(item.similarity) && item.similarity > 0.35); // Limite ajustado para comparações mais relevantes
+    }).filter(item => !isNaN(item.similarity) && item.similarity > 0.35);
 
     return similarityScores
       .sort((a, b) => b.similarity - a.similarity)
@@ -871,43 +967,6 @@ export class ProspectRankingAlgorithm {
 
     return Math.min(10, Math.max(0, parseFloat(score.toFixed(1))));
   }
-
-  calculateStatSimilarity(prospectStats, nbaPlayerStats) {
-    if (!prospectStats || !nbaPlayerStats || Object.keys(nbaPlayerStats).length === 0) return 0;
-
-    let totalDiff = 0;
-    let metricCount = 0;
-
-    const metrics = [
-      { key: 'ppg', weight: 20 },
-      { key: 'rpg', weight: 10 },
-      { key: 'apg', weight: 8 },
-      { key: 'fg_pct', weight: 0.5 },      // Peso ajustado
-      { key: 'three_pct', weight: 0.4 },  // Peso ajustado
-      { key: 'ft_pct', weight: 0.4 }       // Peso ajustado
-    ];
-
-    metrics.forEach(metric => {
-      // Compatibilidade entre fg_percentage e fg_pct
-      const prospectKey = metric.key.replace('_pct', '_percentage');
-      const prospectValue = prospectStats[prospectKey];
-      const historicalValue = nbaPlayerStats[metric.key];
-
-      if (prospectValue !== undefined && prospectValue !== null && historicalValue !== undefined && historicalValue !== null) {
-        totalDiff += Math.abs(prospectValue - historicalValue) / metric.weight;
-        metricCount++;
-      }
-    });
-
-    if (metricCount < 3) return 0;
-
-    const averageDiff = totalDiff / metricCount;
-    return Math.max(0, 1 - averageDiff);
-  }
-
-  
 }
-
-
 
 export default ProspectRankingAlgorithm;

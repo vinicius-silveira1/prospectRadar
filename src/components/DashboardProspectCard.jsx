@@ -10,15 +10,19 @@ import { motion } from 'framer-motion';
 const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
-  const [isAnimatingHeart, setIsAnimatingHeart] = useState(false); // New state for animation
+  const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
 
   const handleToggle = async () => {
-    setIsAnimatingHeart(true); // Start animation
-    await onToggleWatchlist(); // Perform the actual watchlist toggle
+    setIsAnimatingHeart(true);
+    await onToggleWatchlist();
     setTimeout(() => {
-      setIsAnimatingHeart(false); // End animation after a short delay
-    }, 500); // Match this duration with your animation duration
+      setIsAnimatingHeart(false);
+    }, 500);
   };
+
+  const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
+  const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
+  const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
   return (
     <div className={`bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out ${className}`} style={style}>
@@ -78,15 +82,22 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
           )}
         </div>
         <div className="mt-4 border-t dark:border-super-dark-border pt-3">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
-            {(prospect.league || prospect['stats-season']) && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+          <div className="flex justify-between items-center">
+            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
+              Estatísticas
+              {isHighSchool && (
+                <span className="ml-1.5 font-semibold text-brand-orange">
+                  (High School)
+                </span>
+              )}
+            </h4>
+            {(league || season) && (
+              <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
               </span>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-4 text-center mt-2">
             <div>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
               <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
@@ -103,7 +114,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
         </div>
       </div>
       <div className="p-4 pt-0">
-        <Link to={`/prospects/${prospect.id}`} className="w-full flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium">Ver Detalhes</Link>
+        <Link to={`/prospects/${prospect.id}`} className="w-full block text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium">Ver Detalhes</Link>
       </div>
     </div>
   );

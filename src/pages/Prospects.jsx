@@ -422,6 +422,9 @@ const Prospects = () => {
             {filteredProspects.map((prospect, index) => {
               const isInWatchList = watchlist.has(prospect.id);
               const badges = assignBadges(prospect);
+              const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
+              const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
+              const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
               
               return (
                 <motion.div 
@@ -431,7 +434,7 @@ const Prospects = () => {
                     visible: { opacity: 1, y: 0 }
                   }}
                   whileHover={{ scale: 1.03, y: -5, transition: { duration: 0.2 } }}
-                  className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transform transition-all duration-300"
+                  className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transform transition-all duration-300 flex flex-col"
                 >
                   {/* Header Image */}
                   <div className="relative">
@@ -461,7 +464,7 @@ const Prospects = () => {
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 space-y-3 flex-grow flex flex-col">
                     {/* Name and Radar Score */}
                     <div className="space-y-2">
                       <Link 
@@ -506,19 +509,39 @@ const Prospects = () => {
                       </div>
                     </div>
 
+                    {/* Spacer to push stats and actions to the bottom */}
+                    <div className="flex-grow"></div>
+
                     {/* Stats */}
-                    <div className="border-t dark:border-super-dark-border pt-3 grid grid-cols-3 gap-4 text-center text-sm">
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-slate-500 dark:text-super-dark-text-secondary">PPG</span> 
-                        <span className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</span>
+                    <div className="border-t dark:border-super-dark-border pt-3">
+                      <div>
+                        <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
                       </div>
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-slate-500 dark:text-super-dark-text-secondary">RPG</span> 
-                        <span className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</span>
+                      <div className="flex items-center space-x-2 text-xs mt-1">
+                        {isHighSchool && (
+                          <span className="font-semibold text-brand-orange">
+                            High School
+                          </span>
+                        )}
+                        {(league || season) && (
+                          <span className="text-slate-500 dark:text-super-dark-text-secondary">
+                            {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex flex-col space-y-1">
-                        <span className="text-slate-500 dark:text-super-dark-text-secondary">APG</span> 
-                        <span className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</span>
+                      <div className="grid grid-cols-3 gap-4 text-center text-sm mt-2">
+                        <div>
+                          <p className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
+                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
+                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+                        </div>
+                        <div>
+                          <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
+                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+                        </div>
                       </div>
                     </div>
 

@@ -1,29 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, FileText, Lock } from 'lucide-react';
+import { Heart, FileText, Lock, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import useProspectImage from '@/hooks/useProspectImage';
 import useProspectNotes from '@/hooks/useProspectNotes';
 import Badge from '@/components/Common/Badge';
 import { assignBadges } from '@/lib/badges';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
-import ProspectNotesCard from './ProspectNotesCard';
 
-const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes }) => {
+const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes, isNotesOpen }) => {
   const { user } = useAuth();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
-  const { getNote, hasNote, saveNote, deleteNote, saving } = useProspectNotes();
-  // Controle de notas agora é feito pelo pai (Watchlist.jsx)
+  const { hasNote } = useProspectNotes();
   const badges = assignBadges(prospect);
 
   const isScoutUser = user?.subscription_tier?.toLowerCase() === 'scout';
-  const currentNote = getNote(prospect.id);
-  const isSaving = saving.has(prospect.id);
   const hasExistingNote = hasNote(prospect.id);
 
-  // Estado visual do botão de notas
-  const isNotesOpen = typeof onOpenNotes === 'function' && onOpenNotes.isOpen;
-
+  const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
+  const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
+  const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
   return (
     <div className="space-y-0 h-full relative">
@@ -36,9 +32,8 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
           <Heart size={16} className={`transition-colors ${isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} />
         </button>
         
-        <div className="p-4">
+        <div className="p-4 flex-grow flex flex-col">
           <div className="flex items-start justify-between">
-            {/* Image or Skeleton */}
             <div 
               className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4" 
               style={{ backgroundColor: getColorFromName(prospect?.name) }}
@@ -63,7 +58,6 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
                 {prospect.position} • {prospect.high_school_team || 'N/A'}
               </p>
               
-              {/* Badges */}
               <div className="mt-1 flex flex-wrap gap-1">
                 {badges.map((badge, index) => (
                   <Badge key={index} badge={badge} />
@@ -72,24 +66,34 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
             </div>
           </div>
           
-          {/* Radar Score */}
-          {prospect.radar_score && (
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 mt-2 mx-auto">
-              <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
-              <span className="text-xs">Radar Score</span>
-            </div>
-          )}
+          <div className="flex justify-center mt-2">
+            {prospect.radar_score && (
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
+                <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
+                <span className="text-xs">Radar Score</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-grow"></div>
           
           <div className="mt-4 border-t dark:border-super-dark-border pt-3">
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
-              {(prospect.league || prospect['stats-season']) && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                  {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+            <div className="flex justify-between items-center">
+              <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
+                Estatísticas
+                {isHighSchool && (
+                  <span className="ml-1.5 font-semibold text-brand-orange">
+                    (High School)
+                  </span>
+                )}
+              </h4>
+              {(league || season) && (
+                <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                  {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
                 </span>
               )}
             </div>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center mt-2">
               <div>
                 <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                   {prospect.ppg?.toFixed(1) || '-'}
@@ -121,10 +125,9 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
               Ver Detalhes
             </Link>
             
-            {/* Botão de Anotações */}
             {isScoutUser ? (
               <button
-                onClick={typeof onOpenNotes === 'function' ? () => onOpenNotes(prospect) : undefined}
+                onClick={onOpenNotes}
                 className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center space-x-2 ${
                   hasExistingNote || isNotesOpen
                     ? 'bg-amber-100 hover:bg-amber-200 text-amber-700 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400'
@@ -147,8 +150,6 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
           </div>
         </div>
       </div>
-
-  {/* O bloco de notas agora é renderizado pelo pai (Watchlist.jsx) como item do grid */}
     </div>
   );
 };

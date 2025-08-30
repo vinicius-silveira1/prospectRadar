@@ -85,24 +85,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Draft Class Filter */}
-        <div className="mt-8 pt-6 border-t border-super-dark-border">
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-super-dark-text-secondary uppercase tracking-wider mb-3">
-            Classes do Draft
-          </h3>
-          <div className="space-y-1">
-            {['2025', '2026', '2027'].map((year) => (
-              <Link
-                key={year}
-                to={`/prospects?class=${year}`}
-                className="block px-4 py-2 text-sm text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-orange hover:bg-orange-50 dark:hover:bg-super-dark-border rounded-lg transition-colors"
-                onClick={onClose}
-              >
-                Turma de {year}
-              </Link>
-            ))}
-          </div>
-        </div>
+     
       </aside>
     </>
   );

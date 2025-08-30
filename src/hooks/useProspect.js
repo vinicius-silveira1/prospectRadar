@@ -24,16 +24,19 @@ export default function useProspect(id) {
           // Combina os dados originais com os dados de scouting gerados
           const prospectWithScouting = { ...data, ...scoutingData };
 
-          // Adicionado para depuração:
-          console.log("----------------------------------------------------");
-          console.log("Objeto prospectWithScouting (input para o algoritmo) no frontend:");
-          console.log(JSON.stringify(prospectWithScouting, null, 2));
-          console.log("----------------------------------------------------");
-
           // Aplica o algoritmo de ranking para obter a avaliação
           const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting);
           
-          setProspect({ ...prospectWithScouting, evaluation });
+          // **NOVO**: Combina o prospecto com a avaliação E as estatísticas calculadas
+          const finalProspect = { 
+            ...prospectWithScouting, 
+            evaluation,
+            // Mescla as estatísticas básicas e avançadas calculadas para o nível superior do objeto
+            ...(evaluation.calculatedStats?.basic || {}),
+            ...(evaluation.calculatedStats?.advanced || {})
+          };
+
+          setProspect(finalProspect);
 
         } else {
           setProspect(null);

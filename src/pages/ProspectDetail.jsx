@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
-import useProspect  from '@/hooks/useProspect.js';
+import useProspect from '@/hooks/useProspect.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
 import useProspectImage from '@/hooks/useProspectImage.js';
@@ -59,8 +59,51 @@ const ProspectDetail = () => {
   const { watchlist, toggleWatchlist } = useWatchlist();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
 
-  // Simulate user plan. Replace with actual user data.
-  const isScout = user?.subscription_tier?.toLowerCase() === 'scout'; // This will be false for free/unauthenticated users
+  const isScout = user?.subscription_tier?.toLowerCase() === 'scout';
+
+  // Data Unification Layer
+  const displayStats = useMemo(() => {
+    if (!prospect) return {};
+
+    const isHighSchool = prospect.stats_source === 'high_school_total';
+
+    if (isHighSchool && prospect.high_school_stats?.season_total) {
+      const hs = prospect.high_school_stats.season_total;
+      const gp = Number(hs.games_played || 0);
+      if (gp === 0) return { ...prospect, ppg: 0, hasStats: false };
+
+      const fg_pct = Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0;
+      const ft_pct = Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0;
+      const three_pct = Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0;
+      const ts_denominator = 2 * (Number(hs.fga || 0) + 0.44 * Number(hs.fta || 0));
+      const ts_percent = ts_denominator > 0 ? (Number(hs.pts || 0) / ts_denominator) : 0;
+
+      return {
+        ...prospect,
+        is_hs: true,
+        hasStats: true,
+        ppg: (Number(hs.pts || 0) / gp),
+        rpg: (Number(hs.reb || 0) / gp),
+        apg: (Number(hs.ast || 0) / gp),
+        spg: (Number(hs.stl || 0) / gp),
+        bpg: (Number(hs.blk || 0) / gp),
+        fg_pct,
+        ft_pct,
+        three_pct,
+        ts_percent,
+        efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
+      };
+    }
+
+    // For Pro players or players without HS stats
+    return {
+      ...prospect,
+      is_hs: false,
+      hasStats: prospect.ppg > 0,
+      fg_pct: (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 ? ((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) : 0,
+      ft_pct: prospect.ft_attempts > 0 ? (prospect.ft_makes / prospect.ft_attempts) : 0,
+    };
+  }, [prospect]);
 
   const getWeightDisplay = (weight) => {
     let parsedWeight = weight;
@@ -68,13 +111,13 @@ const ProspectDetail = () => {
       try {
         parsedWeight = JSON.parse(weight);
       } catch (e) {
-        return weight || 'N/A';
+        return weight || '—';
       }
     }
     if (typeof parsedWeight === 'object' && parsedWeight !== null) {
       return `${parsedWeight.us} lbs (${parsedWeight.intl} kg)`;
     }
-    return weight || 'N/A';
+    return weight || '—';
   };
 
   const getHeightDisplay = (height) => {
@@ -83,18 +126,18 @@ const ProspectDetail = () => {
       try {
         parsedHeight = JSON.parse(height);
       } catch (e) {
-        return height || 'N/A';
+        return height || '—';
       }
     }
     if (typeof parsedHeight === 'object' && parsedHeight !== null) {
       return parsedHeight.us;
     }
-    return height || 'N/A';
+    return height || '—';
   };
 
   const handleShare = async () => {
     if (navigator.share) {
-      await navigator.share({ title: `prospectRadar: ${prospect.name}`, text: `Confira o perfil completo de ${prospect.name} no prospectRadar.`, url: window.location.href });
+      await navigator.share({ title: `prospectRadar: ${displayStats.name}`, text: `Confira o perfil completo de ${displayStats.name} no prospectRadar.`, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link do perfil copiado para a área de transferência!');
@@ -128,15 +171,6 @@ const ProspectDetail = () => {
   const evaluation = prospect.evaluation || {};
   const flags = evaluation.flags || [];
   const comparablePlayers = evaluation.comparablePlayers || [];
-  const hasStats = prospect.ppg > 0;
-
-  const fgPercentage = (prospect.two_pt_attempts + prospect.three_pt_attempts) > 0 
-    ? (((prospect.two_pt_makes + prospect.three_pt_makes) / (prospect.two_pt_attempts + prospect.three_pt_attempts)) * 100).toFixed(1) 
-    : 'N/A';
-
-  const ftPercentage = prospect.ft_attempts > 0 
-    ? ((prospect.ft_makes / prospect.ft_attempts) * 100).toFixed(1) 
-    : 'N/A';
 
   const getPositionColor = (position) => {
     const colors = { 'PG': 'bg-blue-100 text-blue-800 dark:bg-black/50 dark:text-blue-300', 'SG': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 'SF': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', 'PF': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300', 'C': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' };
@@ -169,29 +203,29 @@ const ProspectDetail = () => {
           </button>
           <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
             {/* Prospect Image */}
-            <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl sm:text-4xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+            <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl sm:text-4xl font-bold" style={{ backgroundColor: getColorFromName(displayStats.name) }}>
               {isLoading ? (
                 <div className="w-full h-full bg-slate-300 dark:bg-slate-600 animate-pulse"></div>
               ) : imageUrl ? (
-                <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover object-top" />
+                <img src={imageUrl} alt={displayStats.name || 'Prospect'} className="w-full h-full object-cover object-top" />
               ) : (
-                <span className="text-white">{getInitials(prospect?.name)}</span>
+                <span className="text-white">{getInitials(displayStats.name)}</span>
               )}
             </div>
 
             {/* Prospect Info */}
             <div className="text-center md:text-left flex-grow min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white mb-2 break-words">{prospect.name}</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white mb-2 break-words">{displayStats.name}</h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getPositionColor(prospect.position)}`}>{prospect.position}</span>
-                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || prospect.tier}</span>
-                <div className="flex items-center">{getStarRating(prospect)}</div>
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getPositionColor(displayStats.position)}`}>{displayStats.position}</span>
+                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || displayStats.tier}</span>
+                <div className="flex items-center">{getStarRating(displayStats)}</div>
               </div>
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-4 text-blue-100 text-sm sm:text-base lg:text-lg">
-                <div className="flex items-center whitespace-nowrap"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" /><span className="truncate">{prospect.team || 'N/A'}</span></div>
-                <div className="flex items-center whitespace-nowrap"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{prospect.age} anos</div>
-                <div className="flex items-center whitespace-nowrap"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getHeightDisplay(prospect.height)}</div>
-                <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(prospect.weight)}</div>
+                <div className="flex items-center whitespace-nowrap"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" /><span className="truncate">{displayStats.team || 'N/A'}</span></div>
+                <div className="flex items-center whitespace-nowrap"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{displayStats.age} anos</div>
+                <div className="flex items-center whitespace-nowrap"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getHeightDisplay(displayStats.height)}</div>
+                <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(displayStats.weight)}</div>
               </div>
             </div>
 
@@ -209,11 +243,11 @@ const ProspectDetail = () => {
             >
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-orange flex-shrink-0" />Informações Básicas</h2>
               <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                {prospect.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
-                <div className="flex items-start"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{prospect.team || 'N/A'}</div></div></div>
-                <div className="flex items-start"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Idade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{prospect.age} anos</div></div></div>
-                <div className="flex items-start"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{typeof prospect.height === 'object' && prospect.height !== null ? prospect.height.us : prospect.height || 'N/A'}</div></div></div>
-                <div className="flex items-start"><Weight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{getWeightDisplay(prospect.weight)}</div></div></div>
+                {displayStats.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
+                <div className="flex items-start"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{displayStats.team || 'N/A'}</div></div></div>
+                <div className="flex items-start"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Idade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{displayStats.age} anos</div></div></div>
+                <div className="flex items-start"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{getHeightDisplay(displayStats.height)}</div></div></div>
+                <div className="flex items-start"><Weight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{getWeightDisplay(displayStats.weight)}</div></div></div>
               </div>
             </motion.div>
 
@@ -226,31 +260,31 @@ const ProspectDetail = () => {
             >
               <div className="flex justify-between items-center mb-3 sm:mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                {(prospect.league || prospect['stats-season']) && (
+                {(displayStats.league || displayStats['stats-season']) && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                    {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
                   </span>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {(() => {
-                  const renderStat = (label, value, colorClass) => (
+                  const renderStat = (label, value, colorClass, isPercentage = false) => (
                     <div className="flex justify-between items-center text-xs sm:text-sm">
                       <span className="text-gray-600 dark:text-super-dark-text-secondary truncate mr-2">{label}</span>
-                      <span className={`font-bold ${colorClass} flex-shrink-0`}>{value ?? 'N/A'}</span>
+                      <span className={`font-bold ${colorClass}`}>{value ?? '—'}</span>
                     </div>
                   );
 
                   return (
                     <>
-                      {renderStat('Pontos', prospect.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
-                      {renderStat('Rebotes', prospect.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
-                      {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
-                      {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', (prospect.three_pct * 100)?.toFixed(1), 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('Pontos', displayStats.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
+                      {renderStat('Rebotes', displayStats.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
+                      {renderStat('Assistências', displayStats.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
+                      {renderStat('Roubos', displayStats.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('Tocos', displayStats.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
+                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-indigo-500 dark:text-indigo-400')}
+                      {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-500 dark:text-teal-400')}
                     </>
                   );
                 })()}
@@ -284,7 +318,7 @@ const ProspectDetail = () => {
               </div>
             </motion.div>
 
-            {hasStats ? (
+            {displayStats.hasStats ? (
               <>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -294,35 +328,34 @@ const ProspectDetail = () => {
                 >
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
-                    {(prospect.league || prospect['stats-season']) && (
+                    {(displayStats.league || displayStats['stats-season']) && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                        {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                        {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Helper function for stat display with progress bar */}
                     {(() => {
                       const renderStat = (label, value, colorClass, isPercentage = true) => (
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600 dark:text-super-dark-text-secondary leading-normal">{label}</span>
-                          <span className={`font-bold ${colorClass}`}>{value !== 'N/A' ? `${value}${isPercentage ? '%' : ''}` : 'N/A'}</span>
+                          <span className={`font-bold ${colorClass}`}>{value != null ? `${value}${isPercentage ? '%' : ''}` : '—'}</span>
                         </div>
                       );
 
                       return (
                         <>
-                          {renderStat('TS%', (prospect.ts_percent * 100)?.toFixed(1), 'text-purple-500')}
-                          {renderStat('eFG%', (prospect.efg_percent * 100)?.toFixed(1), 'text-teal-500')}
-                          {renderStat('PER', prospect.per?.toFixed(2), 'text-indigo-500', false)}
-                          {renderStat('USG%', prospect.usg_percent?.toFixed(1), 'text-pink-500')}
-                          {renderStat('ORtg', prospect.ortg?.toFixed(1), 'text-lime-500', false)}
-                          {renderStat('DRtg', prospect.drtg?.toFixed(1), 'text-red-500', false)}
-                          {renderStat('TOV%', prospect.tov_percent?.toFixed(1), 'text-orange-500')}
-                          {renderStat('AST%', prospect.ast_percent?.toFixed(1), 'text-green-500')}
-                          {renderStat('TRB%', prospect.trb_percent?.toFixed(1), 'text-blue-500')}
-                          {renderStat('STL%', prospect.stl_percent?.toFixed(1), 'text-purple-500')}
-                          {renderStat('BLK%', prospect.blk_percent?.toFixed(1), 'text-yellow-500')}
+                          {renderStat('TS%', (displayStats.ts_percent * 100)?.toFixed(1), 'text-purple-500')}
+                          {renderStat('eFG%', (displayStats.efg_percent * 100)?.toFixed(1), 'text-teal-500')}
+                          {renderStat('PER', displayStats.per?.toFixed(2), 'text-indigo-500', false)}
+                          {renderStat('USG%', displayStats.usg_percent?.toFixed(1), 'text-pink-500')}
+                          {renderStat('ORtg', displayStats.ortg?.toFixed(1), 'text-lime-500', false)}
+                          {renderStat('DRtg', displayStats.drtg?.toFixed(1), 'text-red-500', false)}
+                          {renderStat('TOV%', displayStats.tov_percent?.toFixed(1), 'text-orange-500')}
+                          {renderStat('AST%', displayStats.ast_percent?.toFixed(1), 'text-green-500')}
+                          {renderStat('TRB%', displayStats.trb_percent?.toFixed(1), 'text-blue-500')}
+                          {renderStat('STL%', displayStats.stl_percent?.toFixed(1), 'text-purple-500')}
+                          {renderStat('BLK%', displayStats.blk_percent?.toFixed(1), 'text-yellow-500')}
                         </>
                       );
                     })()}
@@ -377,11 +410,11 @@ const ProspectDetail = () => {
                 )}
               </>
             ) : (
-              <AwaitingStats prospectName={prospect.name} />
+              <AwaitingStats prospectName={displayStats.name} />
             )}
 
             {/* SEÇÃO DE FLAGS (DESTAQUES E ALERTAS) */}
-            {flags.length > 0 && hasStats && (
+            {flags.length > 0 && displayStats.hasStats && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -405,7 +438,7 @@ const ProspectDetail = () => {
             )}
 
             {/* SEÇÃO DE COMPARAÇÕES NBA (SCOUT) */}
-            {hasStats && (
+            {displayStats.hasStats && (
               isScout ? (
                 comparablePlayers.length > 0 && (
                   <motion.div
@@ -456,9 +489,9 @@ const ProspectDetail = () => {
             )}
 
             {/* ANÁLISE DO JOGADOR (SCOUT) */}
-            {hasStats && (
+            {displayStats.hasStats && (
               isScout ? (
-                (prospect.strengths?.length > 0 || prospect.weaknesses?.length > 0) && (
+                (displayStats.strengths?.length > 0 || displayStats.weaknesses?.length > 0) && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -467,7 +500,7 @@ const ProspectDetail = () => {
                   >
                     <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {prospect.strengths?.length > 0 && (
+                      {displayStats.strengths?.length > 0 && (
                         <div>
                           <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
                           <motion.ul 
@@ -476,7 +509,7 @@ const ProspectDetail = () => {
                             animate="visible"
                             className="space-y-2"
                           >
-                            {prospect.strengths.map((strength, index) => (
+                            {displayStats.strengths.map((strength, index) => (
                               <motion.li 
                                 key={index}
                                 variants={{
@@ -492,7 +525,7 @@ const ProspectDetail = () => {
                           </motion.ul>
                         </div>
                       )}
-                      {prospect.weaknesses?.length > 0 && (
+                      {displayStats.weaknesses?.length > 0 && (
                         <div>
                           <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
                           <motion.ul
@@ -503,7 +536,7 @@ const ProspectDetail = () => {
                             animate="visible"
                             className="space-y-2"
                           >
-                            {prospect.weaknesses.map((weakness, index) => (
+                            {displayStats.weaknesses.map((weakness, index) => (
                               <motion.li
                                 key={index}
                                 variants={{
@@ -545,31 +578,31 @@ const ProspectDetail = () => {
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                {(prospect.league || prospect['stats-season']) && (
+                {(displayStats.league || displayStats['stats-season']) && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+                    {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
                   </span>
                 )}
               </div>
               <div className="space-y-4">
                 {(() => {
-                  const renderStat = (label, value, colorClass) => (
+                  const renderStat = (label, value, colorClass, isPercentage = false) => (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600 dark:text-super-dark-text-secondary">{label}</span>
-                      <span className={`font-bold ${colorClass}`}>{value ?? 'N/A'}</span>
+                      <span className={`font-bold ${colorClass}`}>{value != null ? value : '—'}</span>
                     </div>
                   );
 
                   return (
                     <>
-                      {renderStat('Pontos', prospect.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
-                      {renderStat('Rebotes', prospect.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
-                      {renderStat('Assistências', prospect.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
-                      {renderStat('Roubos', prospect.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('Tocos', prospect.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', fgPercentage, 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('FT%', ftPercentage, 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', (prospect.three_pct * 100)?.toFixed(1), 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('Pontos', displayStats.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
+                      {renderStat('Rebotes', displayStats.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
+                      {renderStat('Assistências', displayStats.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
+                      {renderStat('Roubos', displayStats.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('Tocos', displayStats.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
+                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-purple-500 dark:text-purple-400')}
+                      {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-indigo-500 dark:text-indigo-400')}
+                      {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-500 dark:text-teal-400')}
                     </>
                   );
                 })()}
