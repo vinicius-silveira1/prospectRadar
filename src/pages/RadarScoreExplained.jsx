@@ -1,11 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lightbulb, BarChart3, Zap, Ruler, TrendingUp, Award, ShieldCheck, Activity } from 'lucide-react';
 import useProspects from '../hooks/useProspects';
 import DashboardProspectCard from '../components/DashboardProspectCard';
 import { LoadingSpinner } from "../components/Common/LoadingComponents";
+import BadgeBottomSheet from '../components/Common/BadgeBottomSheet.jsx';
 
 const RadarScoreExplained = () => {
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
+
   const pillars = [
     {
       icon: <BarChart3 className="w-10 h-10 text-brand-cyan" />,
@@ -167,7 +180,7 @@ const RadarScoreExplained = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {prospects2018.map(prospect => (
-                <DashboardProspectCard key={prospect.id} prospect={prospect} />
+                <DashboardProspectCard key={prospect.id} prospect={prospect} onBadgeClick={handleBadgeClick} />
               ))}
             </div>
           ) }
@@ -179,6 +192,11 @@ const RadarScoreExplained = () => {
           </p>
         </div>
       </div>
+      <BadgeBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={handleCloseBottomSheet}
+        badge={selectedBadgeData}
+      />
     </div>
   );
 };

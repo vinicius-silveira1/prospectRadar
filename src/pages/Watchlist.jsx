@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Heart, UserX, Search } from 'lucide-react';
@@ -11,10 +11,22 @@ import WatchlistProspectCard from '@/components/Watchlist/WatchlistProspectCard'
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import ProspectNotesCard from '@/components/Watchlist/ProspectNotesCard';
 import useProspectNotes from '@/hooks/useProspectNotes';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const Watchlist = () => {
   const { getNote, saveNote, deleteNote, saving } = useProspectNotes();
-  const [openNotesId, setOpenNotesId] = React.useState(null);
+  const [openNotesId, setOpenNotesId] = useState(null);
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
   const { user } = useAuth();
   const { watchlist, toggleWatchlist, loading: watchlistLoading } = useWatchlist();
     const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
@@ -118,6 +130,7 @@ const Watchlist = () => {
                 onOpenNotes={() => {
                   setOpenNotesId(openNotesId === prospect.id ? null : prospect.id);
                 }}
+                onBadgeClick={handleBadgeClick}
               />
               <AnimatePresence>
                 {openNotesId === prospect.id && (
@@ -144,6 +157,12 @@ const Watchlist = () => {
           ))}
         </AnimatePresence>
       </motion.div>
+
+      <BadgeBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={handleCloseBottomSheet}
+        badge={selectedBadgeData}
+      />
     </div>
   );
 };

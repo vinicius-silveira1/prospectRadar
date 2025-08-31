@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
@@ -12,6 +12,9 @@ import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
 import SingleProspectExport from '@/components/Common/SingleProspectExport.jsx';
 import MobileExportActions from '@/components/Common/MobileExportActions.jsx';
+import { assignBadges } from '@/lib/badges';
+import Badge from '@/components/Common/Badge';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
@@ -54,6 +57,18 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
+
   const { prospect, loading, error } = useProspect(id);
   const { user } = useAuth();
   const { watchlist, toggleWatchlist } = useWatchlist();
@@ -171,6 +186,8 @@ const ProspectDetail = () => {
   const evaluation = prospect.evaluation || {};
   const flags = evaluation.flags || [];
   const comparablePlayers = evaluation.comparablePlayers || [];
+  console.log('Prospect object in ProspectDetail:', prospect);
+  const badges = assignBadges(prospect);
 
   const getPositionColor = (position) => {
     const colors = { 'PG': 'bg-blue-100 text-blue-800 dark:bg-black/50 dark:text-blue-300', 'SG': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 'SF': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', 'PF': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300', 'C': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' };
@@ -220,6 +237,14 @@ const ProspectDetail = () => {
                 <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getPositionColor(displayStats.position)}`}>{displayStats.position}</span>
                 <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || displayStats.tier}</span>
                 <div className="flex items-center">{getStarRating(displayStats)}</div>
+                {/* Badges */}
+                {badges.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {badges.map((badge, index) => (
+                      <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-4 text-blue-100 text-sm sm:text-base lg:text-lg">
                 <div className="flex items-center whitespace-nowrap"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" /><span className="truncate">{displayStats.team || 'N/A'}</span></div>
@@ -260,11 +285,18 @@ const ProspectDetail = () => {
             >
               <div className="flex justify-between items-center mb-3 sm:mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                {(displayStats.league || displayStats['stats-season']) && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                    {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {displayStats.is_hs && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                      High School
+                    </span>
+                  )}
+                  {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                      {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {(() => {
@@ -578,11 +610,18 @@ const ProspectDetail = () => {
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                {(displayStats.league || displayStats['stats-season']) && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                    {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {displayStats.is_hs && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                      High School
+                    </span>
+                  )}
+                  {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                      {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="space-y-4">
                 {(() => {
@@ -625,6 +664,11 @@ const ProspectDetail = () => {
           </div>
         </div>
       </div>
+      <BadgeBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={handleCloseBottomSheet}
+        badge={selectedBadgeData}
+      />
     </div>
   );
 };

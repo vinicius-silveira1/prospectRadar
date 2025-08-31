@@ -19,6 +19,7 @@ import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import { useResponsive } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
 const getAllAvailableBadges = (prospects) => {
@@ -70,6 +71,19 @@ const Prospects = () => {
   const [searchParams] = useSearchParams();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  // State and handlers for mobile badge bottom sheet
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
   
   // User plan is now derived from the user object
   const userPlan = user?.subscription_tier?.toLowerCase() || 'free';
@@ -492,7 +506,7 @@ const Prospects = () => {
                     {badges.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {badges.map((badge, index) => (
-                          <Badge key={index} badge={badge} />
+                          <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
                         ))}
                       </div>
                     )}
@@ -514,20 +528,20 @@ const Prospects = () => {
 
                     {/* Stats */}
                     <div className="border-t dark:border-super-dark-border pt-3">
-                      <div>
+                      <div className="flex justify-between items-center">
                         <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs mt-1">
-                        {isHighSchool && (
-                          <span className="font-semibold text-brand-orange">
-                            High School
-                          </span>
-                        )}
-                        {(league || season) && (
-                          <span className="text-slate-500 dark:text-super-dark-text-secondary">
-                            {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {isHighSchool && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                              High School
+                            </span>
+                          )}
+                          {(league || season) && !isHighSchool && (
+                            <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                              {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-4 text-center text-sm mt-2">
                         <div>
@@ -618,7 +632,7 @@ const Prospects = () => {
                             {badges.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {badges.slice(0, 3).map((badge, index) => (
-                                  <Badge key={index} badge={badge} />
+                                  <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
                                 ))}
                                 {badges.length > 3 && (
                                   <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
@@ -698,6 +712,12 @@ const Prospects = () => {
         onClose={() => setIsUpgradeModalOpen(false)}
         feature="watchlist"
         limit={5}
+      />
+
+      <BadgeBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={handleCloseBottomSheet}
+        badge={selectedBadgeData}
       />
     </div>
   );

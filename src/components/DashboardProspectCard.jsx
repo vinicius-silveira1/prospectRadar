@@ -7,7 +7,7 @@ import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style }) => {
+const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
   const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
@@ -58,7 +58,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1">
               {badges.map((badge, index) => (
-                <Badge key={index} badge={badge} />
+                <Badge key={index} badge={badge} onBadgeClick={onBadgeClick} />
               ))}
             </div>
           </div>
@@ -85,17 +85,19 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
           <div className="flex justify-between items-center">
             <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
               Estatísticas
+            </h4>
+            <div className="flex items-center gap-2">
               {isHighSchool && (
-                <span className="ml-1.5 font-semibold text-brand-orange">
-                  (High School)
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                  High School
                 </span>
               )}
-            </h4>
-            {(league || season) && (
-              <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
-              </span>
-            )}
+              {(league || season) && !isHighSchool && (
+                <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                  {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                </span>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center mt-2">
             <div>

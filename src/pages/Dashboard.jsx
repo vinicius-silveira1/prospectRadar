@@ -15,10 +15,22 @@ import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js
 
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { createPortalSession } from '@/services/stripe';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
   const { user } = useAuth();
   const { isMobile, isTablet, responsiveColumns } = useResponsive();
 
@@ -223,6 +235,7 @@ const Dashboard = () => {
                   prospect={prospect}
                   isInWatchlist={watchlist.has(prospect.id)}
                   onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                  onBadgeClick={handleBadgeClick}
                 />
               </motion.div>
             ))}
@@ -272,6 +285,7 @@ const Dashboard = () => {
                   prospect={prospect}
                   isInWatchlist={watchlist.has(prospect.id)}
                   onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                  onBadgeClick={handleBadgeClick}
                 />
               </motion.div>
             ))}
@@ -308,6 +322,12 @@ const Dashboard = () => {
         onClose={() => setIsUpgradeModalOpen(false)}
         feature="watchlist"
         limit={5}
+      />
+
+      <BadgeBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={handleCloseBottomSheet}
+        badge={selectedBadgeData}
       />
     </div>
   );

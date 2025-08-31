@@ -28,13 +28,19 @@ export default function useProspect(id) {
           const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting);
           
           // **NOVO**: Combina o prospecto com a avaliação E as estatísticas calculadas
-          const finalProspect = { 
+          let finalProspect = { 
             ...prospectWithScouting, 
             evaluation,
             // Mescla as estatísticas básicas e avançadas calculadas para o nível superior do objeto
             ...(evaluation.calculatedStats?.basic || {}),
             ...(evaluation.calculatedStats?.advanced || {})
           };
+
+          // Special handling for High School prospects to ensure assignBadges works
+          if (prospectWithScouting.high_school_stats && prospectWithScouting.high_school_stats.season_total) {
+            finalProspect.stats_source = 'high_school_total';
+            finalProspect.games_played = Number(prospectWithScouting.high_school_stats.season_total.games_played || 0);
+          }
 
           setProspect(finalProspect);
 

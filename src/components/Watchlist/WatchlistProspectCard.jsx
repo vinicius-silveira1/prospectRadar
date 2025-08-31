@@ -8,7 +8,7 @@ import Badge from '@/components/Common/Badge';
 import { assignBadges } from '@/lib/badges';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 
-const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes, isNotesOpen }) => {
+const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes, isNotesOpen, onBadgeClick }) => {
   const { user } = useAuth();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { hasNote } = useProspectNotes();
@@ -60,13 +60,13 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
               
               <div className="mt-1 flex flex-wrap gap-1">
                 {badges.map((badge, index) => (
-                  <Badge key={index} badge={badge} />
+                  <Badge key={index} badge={badge} onBadgeClick={onBadgeClick} />
                 ))}
               </div>
             </div>
           </div>
           
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-start mt-2">
             {prospect.radar_score && (
               <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
                 <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
@@ -81,17 +81,19 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
             <div className="flex justify-between items-center">
               <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
                 Estatísticas
+              </h4>
+              <div className="flex items-center gap-2">
                 {isHighSchool && (
-                  <span className="ml-1.5 font-semibold text-brand-orange">
-                    (High School)
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                    High School
                   </span>
                 )}
-              </h4>
-              {(league || season) && (
-                <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                  {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
-                </span>
-              )}
+                {(league || season) && !isHighSchool && (
+                  <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                    {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-3 gap-4 text-center mt-2">
               <div>

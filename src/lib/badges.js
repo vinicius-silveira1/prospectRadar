@@ -26,7 +26,7 @@ export const badges = {
   // Defense
   ELITE_DEFENDER: {
     label: 'Defensor de Elite',
-    description: 'Impacto defensivo de elite nos dois lados, combinando roubos e tocos em alto nível.',
+    description: 'Impacto defensivo de elite, combinando roubos e tocos em alto nível.',
     icon: '🔒',
   },
   RIM_PROTECTOR: {
@@ -42,7 +42,7 @@ export const badges = {
   // Scoring & Efficiency
   EFFICIENT_SCORER: {
     label: 'Pontuador Eficiente',
-    description: 'Consegue pontuar em alto volume sem comprometer a eficiência (alto True Shooting %).',
+    description: 'Consegue pontuar em alto volume sem comprometer a eficiência.',
     icon: '🔥',
   },
   ELITE_FINISHER: {
@@ -53,7 +53,7 @@ export const badges = {
   // Rebounding
   REBOUNDING_FORCE: {
     label: 'Força nos Rebotes',
-    description: 'Domina a tábua de rebotes, garantindo posses de bola para sua equipe.',
+    description: 'Domina os rebotes, garantindo posses de bola para sua equipe.',
     icon: '💪',
   },
   // Intangibles & Archetypes
@@ -73,13 +73,13 @@ export const badges = {
     icon: '🛠️',
   },
   THE_CONNECTOR: {
-    label: 'O Conector',
-    description: 'Jogador de baixo uso que otimiza o ataque com alta eficiência e baixo número de erros, conectando o time.',
+    label: 'Conector',
+    description: 'Jogador de baixo uso que otimiza o ataque com alta eficiência e baixo número de erros.',
     icon: '🔗',
   },
   MICROWAVE_SCORER: {
     label: 'Micro-ondas',
-    description: 'Capaz de marcar muitos pontos em pouco tempo de quadra.',
+    description: 'Capaz de marcar muitos pontos em poucos minutos.',
     icon: '♨️',
   },
   IRON_MAN: {

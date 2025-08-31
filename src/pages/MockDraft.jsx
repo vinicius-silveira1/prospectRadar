@@ -19,6 +19,7 @@ import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const MockDraft = () => {
   const { user } = useAuth();
@@ -39,6 +40,17 @@ const MockDraft = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const exportRef = useRef(null);
+  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleBadgeClick = (badge) => {
+    setSelectedBadgeData(badge);
+    setIsBottomSheetOpen(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setIsBottomSheetOpen(false);
+  };
 
   const exportAsImage = async () => {
     setIsExporting(true);
@@ -328,7 +340,7 @@ const MockDraft = () => {
               >
                 {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} />}
                 {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
-                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} />}
+                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -369,6 +381,12 @@ const MockDraft = () => {
         <div className="absolute left-[-9999px] top-0 z-[-10">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
         </div>
+
+        <BadgeBottomSheet
+          isOpen={isBottomSheetOpen}
+          onClose={handleCloseBottomSheet}
+          badge={selectedBadgeData}
+        />
       </div>
     </LayoutGroup>
   );
@@ -493,14 +511,14 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
           transition={{ delay: index * 0.05 }}
         >
           <div className="absolute -top-2 -left-2 bg-brand-purple text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
-          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
+          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={handleBadgeClick} />
         </motion.div>
       ))}
     </div>
   </div>
 );
 
-const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete }) => {
+const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick }) => {
   const recommendationIds = new Set(recommendations.map(p => p.id));
   const nonRecommendedProspects = prospects.filter(p => !recommendationIds.has(p.id));
 
@@ -521,7 +539,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
+              <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
             </motion.div>
           )}
         </div>
@@ -542,7 +560,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} />
+            <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
           </motion.div>
         )}
       </div>
@@ -551,9 +569,13 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
   )
 };
 
-const MockDraftProspectCard = ({ prospect, action }) => {
+const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
+
+  const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
+  const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
+  const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
   return (
     <motion.div 
@@ -577,17 +599,22 @@ const MockDraftProspectCard = ({ prospect, action }) => {
             <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1">
-              {badges.slice(0, 2).map((badge, index) => (
-                <Badge key={index} badge={badge} />
+              {badges.slice(0, 4).map((badge, index) => (
+                <Badge key={index} badge={badge} onBadgeClick={onBadgeClick} />
               ))}
+              {badges.length > 4 && (
+                <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 4} mais badges`}>
+                  +{badges.length - 4}
+                </div>
+              )}
             </div>
           </div>
-          <span className="text-base sm:text-lg font-bold text-slate-300 dark:text-super-dark-text-secondary flex-shrink-0 ml-2">#{prospect.ranking}</span>
+          
         </div>
         
         {/* Radar Score */}
         {prospect.radar_score && (
-          <div className="flex justify-center mb-3">
+          <div className="flex justify-start mb-3">
             <div className="inline-block text-center bg-slate-200/50 dark:bg-super-dark-border border border-slate-300 dark:border-super-dark-border text-slate-800 dark:text-super-dark-text-primary px-2 sm:px-3 py-1 rounded-full shadow-inner">
               <span className="font-bold text-sm sm:text-lg mr-1">{prospect.radar_score.toFixed(2)}</span>
               <span className="text-xs">Radar Score</span>
@@ -598,12 +625,21 @@ const MockDraftProspectCard = ({ prospect, action }) => {
         {/* Stats Grid */}
         <div className="border-t dark:border-super-dark-border pt-3">
           <div className="flex justify-between items-center mb-2">
-            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
-            {(prospect.league || prospect['stats-season']) && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                    {prospect.league || ''}{prospect.league && prospect['stats-season'] ? ' ' : ''}{(prospect['stats-season'] || '').replace(/"/g, '')}
+            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
+              Estatísticas
+            </h4>
+            <div className="flex items-center gap-2">
+              {isHighSchool && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                  High School
                 </span>
-            )}
+              )}
+              {(league || season) && !isHighSchool && (
+                <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                  {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                </span>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
             <div>
