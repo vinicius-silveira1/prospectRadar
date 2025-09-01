@@ -43,6 +43,10 @@ const useMockDraft = (allProspects) => {
   const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL' });
   const [isLoading, setIsLoading] = useState(true);
 
+  // Novos estados para ordem customizada dos times
+  const [customDraftOrder, setCustomDraftOrder] = useState(null);
+  const [isOrderCustomized, setIsOrderCustomized] = useState(false);
+
   // Novos estados para salvar/carregar
   const [savedDrafts, setSavedDrafts] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -67,7 +71,8 @@ const useMockDraft = (allProspects) => {
 
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
-    const initialBoard = defaultDraftOrder.map((pickInfo) => ({
+    const orderToUse = customDraftOrder || defaultDraftOrder;
+    const initialBoard = orderToUse.map((pickInfo) => ({
       ...pickInfo,
       round: pickInfo.pick <= 30 ? 1 : 2,
       prospect: null,
@@ -76,7 +81,7 @@ const useMockDraft = (allProspects) => {
     setCurrentPick(1);
     setDraftHistory([]);
     setIsLoading(false);
-  }, []);
+  }, [customDraftOrder]);
 
   // Função para buscar os drafts salvos do usuário
   const listSavedDrafts = useCallback(async () => {
@@ -303,6 +308,30 @@ const useMockDraft = (allProspects) => {
     });
   }, []);
 
+  // Função para customizar a ordem dos times
+  const setCustomTeamOrder = useCallback((newOrder) => {
+    setCustomDraftOrder(newOrder);
+    setIsOrderCustomized(true);
+  }, []);
+
+  // Função para resetar para ordem padrão
+  const resetToDefaultOrder = useCallback(() => {
+    setCustomDraftOrder(null);
+    setIsOrderCustomized(false);
+  }, []);
+
+  // Função para embaralhar a ordem dos times
+  const shuffleTeamOrder = useCallback(() => {
+    const shuffledOrder = shuffleArray(defaultDraftOrder);
+    setCustomDraftOrder(shuffledOrder);
+    setIsOrderCustomized(true);
+  }, []);
+
+  // Função para obter a ordem atual (customizada ou padrão)
+  const getCurrentDraftOrder = useCallback(() => {
+    return customDraftOrder || defaultDraftOrder;
+  }, [customDraftOrder]);
+
   return {
     draftBoard,
     availableProspects,
@@ -313,6 +342,9 @@ const useMockDraft = (allProspects) => {
     draftHistory,
     isDraftComplete,
     progress,
+    // Novas propriedades para ordem customizada
+    customDraftOrder,
+    isOrderCustomized,
     // Novas propriedades e funções
     savedDrafts,
     isSaving,
@@ -321,6 +353,11 @@ const useMockDraft = (allProspects) => {
     loadMockDraft,
     deleteMockDraft,
     listSavedDrafts,
+    // Funções de ordem dos times
+    setCustomTeamOrder,
+    resetToDefaultOrder,
+    shuffleTeamOrder,
+    getCurrentDraftOrder,
     // Funções existentes
     draftProspect,
     undraftProspect,

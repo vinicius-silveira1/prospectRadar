@@ -60,7 +60,7 @@ const ExportModal = ({
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-3">
             <FileText className="h-6 w-6 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">Exportar Mock Draft</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white font-mono tracking-wide">Exportar Mock Draft</h2>
           </div>
           <button
             onClick={onClose}

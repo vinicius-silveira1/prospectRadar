@@ -23,22 +23,22 @@ const MainLayout = () => {
   }[breakpoint] || 'md:ml-64';
 
   const mainPadding = {
-    xs: 'px-3',
-    sm: 'px-4',
-    md: 'px-4',
-    lg: 'px-4',
-    xl: 'px-6',
-    '2xl': 'px-6'
-  }[breakpoint] || 'px-4';
+    xs: 'p-1',
+    sm: 'p-2',
+    md: 'p-3',
+    lg: 'p-3',
+    xl: 'p-3',
+    '2xl': 'p-4'
+  }[breakpoint] || 'p-3';
 
   const topPadding = {
-    xs: 'px-3 pt-2',
-    sm: 'px-4 pt-2', 
-    md: 'px-4 pt-3',
-    lg: 'px-4 pt-3',
-    xl: 'px-6 pt-3',
-    '2xl': 'px-6 pt-3'
-  }[breakpoint] || 'px-4 pt-3';
+    xs: 'pt-1',
+    sm: 'pt-1', 
+    md: 'pt-1',
+    lg: 'pt-1',
+    xl: 'pt-1',
+    '2xl': 'pt-1'
+  }[breakpoint] || 'pt-1';
 
   return (
     <div className="flex bg-slate-50 dark:bg-super-dark-primary min-h-screen">

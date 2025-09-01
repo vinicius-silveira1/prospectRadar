@@ -33,9 +33,11 @@ const MockDraft = () => {
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters, isLoading,
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
+    customDraftOrder, isOrderCustomized,
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
-    saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks // Added tradePicks
+    saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
+    setCustomTeamOrder, resetToDefaultOrder, shuffleTeamOrder, getCurrentDraftOrder
   } = useMockDraft(allProspects);
 
   const [view, setView] = useState('draft');
@@ -82,6 +84,7 @@ const MockDraft = () => {
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false); // New state for trade modal
+  const [isTeamOrderModalOpen, setIsTeamOrderModalOpen] = useState(false); // New state for team order modal
   const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
@@ -95,6 +98,12 @@ const MockDraft = () => {
     tradePicks(pick1.pick, pick2.pick);
     setIsTradeModalOpen(false);
     setNotification({ type: 'success', message: `Troca realizada: Pick #${pick1.pick} e Pick #${pick2.pick} trocados!` });
+  };
+
+  const handleTeamOrderConfirm = (newOrder) => {
+    setCustomTeamOrder(newOrder);
+    setIsTeamOrderModalOpen(false);
+    setNotification({ type: 'success', message: 'Ordem dos times atualizada com sucesso!' });
   };
 
   const imageExportBackgroundColor = document.documentElement.classList.contains('dark') ? '#0A0A0A' : '#f8fafc';
@@ -172,55 +181,99 @@ const MockDraft = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-4 md:mb-6 overflow-hidden group"
+          whileHover={{
+            boxShadow: "0 0 40px rgba(59, 130, 246, 0.3), 0 0 80px rgba(168, 85, 247, 0.2)"
+          }}
         >
-          <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%2F%3E%3C/g%3E%3C/svg%3E")' }}></div>
-          <div className="px-4 md:px-6 py-4 md:py-6 relative">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-extrabold mb-2 leading-tight flex items-center text-white">
-                  <Shuffle className="h-8 w-8 text-yellow-300 mr-3" />
-                  <span className="flex items-center flex-wrap gap-2">
-                    <span className="text-yellow-300">Mock&nbsp;Draft</span>
-                    <span>{draftSettings.draftClass}</span>
-                  </span>
-                </h1>
-                <p className="text-blue-100 dark:text-blue-200 max-w-2xl">
-                  Monte seu próprio draft com {allProspects.length} prospects reais e curados
-                </p>
-              </div>
-              
-              {/* Pick Atual - Visível em todas as telas */}
-              <motion.div 
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="text-center"
+          {/* Hexagonal pattern background */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <pattern id="hexPattern-mockdraft" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+                <polygon points="7.5,1 13,4.5 13,10.5 7.5,14 2,10.5 2,4.5" fill="currentColor" className="text-white/10" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#hexPattern-mockdraft)" />
+            </svg>
+          </div>
+
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+
+          {/* Original dotted pattern (keeping for layering) */}
+          <div className="absolute inset-0 z-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%2F%3E%3C/g%3E%3C/svg%3E")' }}></div>
+          
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1">
+              <motion.h1 
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight text-white text-glow flex items-center"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <div className="text-2xl md:text-3xl font-extrabold text-yellow-300 bg-white/20 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg">
-                  #{currentPick}
-                </div>
-                <div className="text-xs text-blue-100 mt-1">Pick Atual</div>
-              </motion.div>
+                <Shuffle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-3 drop-shadow-lg" />
+                <span className="flex items-center flex-wrap gap-2">
+                  <span className="text-yellow-300 drop-shadow-lg">Mock&nbsp;Draft</span>
+                  <span className="text-white drop-shadow-lg">{draftSettings.draftClass}</span>
+                </span>
+              </motion.h1>
+              <motion.p 
+                className="text-sm sm:text-base md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl leading-relaxed"
+                initial={{ opacity: 0.8 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                🎯 Monte seu próprio draft com {allProspects.length} prospects reais e curados. Simule estratégias e descubra os futuros astros.
+              </motion.p>
             </div>
+              
+            {/* Pick Atual - Visível em todas as telas */}
+            <motion.div 
+              animate={{ 
+                scale: [1, 1.05, 1],
+                textShadow: [
+                  "0 0 20px rgba(255, 215, 0, 0.3)",
+                  "0 0 30px rgba(255, 215, 0, 0.5)",
+                  "0 0 20px rgba(255, 215, 0, 0.3)"
+                ]
+              }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="text-center"
+            >
+              <div className="text-2xl md:text-3xl font-mono font-bold tracking-wide bg-gradient-to-r from-yellow-300 via-yellow-200 to-orange-300 bg-clip-text text-transparent">
+                #{currentPick}
+              </div>
+              <div className="text-xs text-blue-100 mt-1 font-mono tracking-wider uppercase opacity-90">Pick Atual</div>
+            </motion.div>
           </div>
         </motion.div>
 
         {/* Barra de Progresso - Separada do banner */}
-        <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4">
-          <div className="flex justify-between text-sm text-slate-600 dark:text-super-dark-text-secondary mb-2">
-            <span>Progresso do Draft</span>
-            <span>{Math.floor(progress)}% completo</span>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-super-dark-secondary dark:to-indigo-900/10 rounded-xl shadow-lg border border-indigo-200/50 dark:border-indigo-700/30 p-4 backdrop-blur-sm"
+        >
+          <div className="flex justify-between text-sm mb-2">
+            <span className="font-semibold text-black dark:text-white font-mono tracking-wide">
+              Progresso do Draft
+            </span>
+            <span className="font-bold text-indigo-700 dark:text-indigo-300">
+              {Math.floor(progress)}% completo
+            </span>
           </div>
-          <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-3">
+          <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-3 overflow-hidden shadow-inner">
             <motion.div 
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full"
+              className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-3 rounded-full shadow-lg relative overflow-hidden"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-            />
+            >
+              {/* Shimmer effect on progress bar */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Notification Area */}
         <AnimatePresence>
@@ -248,62 +301,224 @@ const MockDraft = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
           <div className="xl:col-span-1 order-1 xl:order-1 space-y-4 lg:space-y-6">
-            {/* ... (Card de Estatísticas não modificado) ... */}
-            <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 lg:p-6">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
-                <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-                Estatísticas
+            {/* ... (Card de Estatísticas) ... */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 lg:p-6 backdrop-blur-sm group hover:shadow-2xl transition-all duration-300"
+            >
+              <h3 className="text-lg font-bold text-black dark:text-white font-mono tracking-wide mb-4 flex items-center">
+                <Trophy className="h-5 w-5 text-yellow-500 mr-2 drop-shadow-sm" />
+                Estatísticas do Draft
               </h3>
               <div className="space-y-3 lg:space-y-4 text-sm">
-                <div className="flex justify-between text-slate-600 dark:text-super-dark-text-secondary"><span>Draftados:</span> <span className="font-medium text-slate-900 dark:text-super-dark-text-primary">{draftStats.totalPicked}/{draftSettings.totalPicks}</span></div>
-                <div className="flex justify-between text-slate-600 dark:text-super-dark-text-secondary"><span>Disponíveis:</span> <span className="font-medium text-slate-900 dark:text-super-dark-text-primary">{draftStats.remaining}</span></div>
-                <div className="border-t dark:border-super-dark-border pt-3">
-                  <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary mb-2">Por Posição:</div>
-                  {Object.entries(draftStats.byPosition).map(([pos, count]) => (
-                    <div key={pos} className="flex justify-between text-slate-600 dark:text-super-dark-text-secondary"><span>{pos}:</span> <span className="font-medium text-slate-900 dark:text-super-dark-text-primary">{count}</span></div>
-                  ))}
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  className="flex justify-between p-2 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200/50 dark:border-green-700/50"
+                >
+                  <span className="text-green-700 dark:text-green-300 font-medium">Draftados:</span> 
+                  <span className="font-bold text-green-800 dark:text-green-200">{draftStats.totalPicked}/{draftSettings.totalPicks}</span>
+                </motion.div>
+                <motion.div 
+                  whileHover={{ scale: 1.02 }}
+                  className="flex justify-between p-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50"
+                >
+                  <span className="text-blue-700 dark:text-blue-300 font-medium">Disponíveis:</span> 
+                  <span className="font-bold text-blue-800 dark:text-blue-200">{draftStats.remaining}</span>
+                </motion.div>
+                <div className="border-t border-purple-200/50 dark:border-purple-700/50 pt-3">
+                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2 uppercase tracking-wide">Por Posição:</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(draftStats.byPosition).map(([pos, count]) => (
+                      <motion.div 
+                        key={pos} 
+                        whileHover={{ scale: 1.05 }}
+                        className="flex justify-between p-2 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 rounded-lg border border-slate-200/50 dark:border-slate-700/50"
+                      >
+                        <span className="text-slate-600 dark:text-slate-300 font-medium text-xs">{pos}:</span> 
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{count}</span>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 lg:p-6">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
+            <div className="bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-lg border border-gray-200/50 dark:border-super-dark-border hover:border-purple-300/50 dark:hover:border-purple-700/50 backdrop-blur-sm p-4 lg:p-6 relative overflow-hidden group">
+              {/* Gaming glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <h3 className="text-lg font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide relative z-10">
+                <Target className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
                 Controles
               </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={initializeDraft} className="w-full px-3 sm:px-4 py-2 bg-brand-orange text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><RotateCcw className="h-4 w-4 mr-1 sm:mr-2" /> Reset</motion.button>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={simulateLottery} className="w-full px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center text-xs sm:text-sm"><Shuffle className="h-4 w-4 mr-1 sm:mr-2" /> Simular</motion.button>
+              <div className="grid grid-cols-2 gap-2 relative z-10">
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(249, 115, 22, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={initializeDraft} 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <RotateCcw className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">Reset</span>
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={simulateLottery} 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Shuffle className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">Simular</span>
+                </motion.button>
+                
+                {/* NOVO BOTÃO PARA CUSTOMIZAR ORDEM DOS TIMES */}
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={() => setIsTeamOrderModalOpen(true)} 
+                  className={`w-full px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group ${
+                    isOrderCustomized 
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700' 
+                      : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700'
+                  }`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Users className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">{isOrderCustomized ? 'Ordem Custom' : 'Ordem Times'}</span>
+                </motion.button>
                 
                 {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleSaveClick} disabled={!user || isSaving} className="w-full px-3 sm:px-4 py-2 bg-brand-purple text-white rounded-lg hover:brightness-90 transition-all flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><Save className="h-4 w-4 mr-1 sm:mr-2" /> {isSaving ? 'Salvando...' : 'Salvar'}</motion.button>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setIsLoadModalOpen(true)} disabled={!user || isLoadingDrafts} className="w-full px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"><FolderOpen className="h-4 w-4 mr-1 sm:mr-2" /> Carregar</motion.button>
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(168, 85, 247, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={handleSaveClick} 
+                  disabled={!user || isSaving} 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Save className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">{isSaving ? 'Salvando...' : 'Salvar'}</span>
+                </motion.button>
                 
-                <div className="relative export-menu-container col-span-2">
-                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={exportAsImage} disabled={draftStats.totalPicked === 0 || isExporting} className="w-full px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm">
-                    {isExporting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1 sm:mr-2"></div> : <Download className="h-4 w-4 mr-1 sm:mr-2" />} {isExporting ? 'Exportando...' : 'Exportar Draft'}
-                  </motion.button>
-                </div>
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(75, 85, 99, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={() => setIsLoadModalOpen(true)} 
+                  disabled={!user || isLoadingDrafts} 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 to-gray-700/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <FolderOpen className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">Carregar</span>
+                </motion.button>
+                
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={exportAsImage} 
+                  disabled={draftStats.totalPicked === 0 || isExporting} 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm font-medium relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {isExporting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1 sm:mr-2 relative z-10"></div>
+                  ) : (
+                    <Download className="h-4 w-4 mr-1 sm:mr-2 relative z-10" />
+                  )} 
+                  <span className="relative z-10">{isExporting ? 'Exportando...' : 'Exportar'}</span>
+                </motion.button>
               </div>
               {!user && <p className="text-xs text-center text-gray-500 mt-2">Faça login para salvar e carregar seus drafts.</p>}
             </div>
           </div>
 
-          {/* ... (Área Principal não modificado) ... */}
+          {/* ... (Área Principal) ... */}
           <div className="xl:col-span-3 order-1 xl:order-2">
-            <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border mb-4 lg:mb-6">
-              <div className="flex border-b dark:border-super-dark-border overflow-x-auto whitespace-nowrap">
-                <button onClick={() => setView('draft')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'draft' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+            <div className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 mb-4 lg:mb-6 backdrop-blur-sm">
+              <div className="flex border-b border-purple-200/50 dark:border-purple-700/50 overflow-x-auto whitespace-nowrap bg-gradient-to-r from-purple-50/50 to-indigo-50/50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-t-xl">
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setView('draft')} 
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                    view === 'draft' 
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
+                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                  }`}
+                >
                   <Target className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                   <span className="hidden sm:inline">Quadro do </span>Draft
-                </button>
-                <button onClick={() => setView('bigboard')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'bigboard' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+                  {view === 'draft' && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-300 rounded-t-full"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setView('bigboard')} 
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                    view === 'bigboard' 
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
+                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                  }`}
+                >
                   <Star className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                   Big Board<span className="hidden lg:inline"> - Principais Prospects</span>
-                </button>
-                <button onClick={() => setView('prospects')} className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-colors text-sm sm:text-base flex-shrink-0 ${view === 'prospects' ? 'text-brand-purple dark:text-brand-purple border-b-2 border-brand-purple' : 'text-slate-500 dark:text-super-dark-text-secondary hover:text-slate-700 dark:hover:text-super-dark-text-primary'}`}>
+                  {view === 'bigboard' && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-300 rounded-t-full"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setView('prospects')} 
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                    view === 'prospects' 
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
+                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
+                  }`}
+                >
                   <Users className="h-4 w-4 inline mr-1 sm:mr-2" /> 
                   Prospects<span className="hidden sm:inline"> Disponíveis</span>
-                </button>
+                  {view === 'prospects' && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-300 rounded-t-full"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </motion.button>
               </div>
               <div className="p-3 sm:p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
@@ -341,7 +556,7 @@ const MockDraft = () => {
                 transition={{ duration: 0.3 }}
               >
                 {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} />}
-                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
+                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
                 {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
               </motion.div>
             </AnimatePresence>
@@ -380,6 +595,13 @@ const MockDraft = () => {
           draftBoard={draftBoard}
         />
 
+        <TeamOrderModal
+          isOpen={isTeamOrderModalOpen}
+          onClose={() => setIsTeamOrderModalOpen(false)}
+          onConfirmOrder={handleTeamOrderConfirm}
+          currentDraftOrder={draftBoard.map(pick => pick.team)}
+        />
+
         <div className="absolute left-[-9999px] top-0 z-[-10">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
         </div>
@@ -415,9 +637,11 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6"
+      className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm"
     >
-      <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">Draft Board</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
+        Draft Board
+      </h3>
       <motion.div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {draftBoard.map((pick) => (
           <motion.div
@@ -425,14 +649,18 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
             // REMOVIDO: layout (não queremos animar o slot em si, mas o conteúdo dele)
             transition={{ duration: 1.5, type: "spring"}}
             variants={itemVariants}
-            whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: "0 8px 25px rgba(99, 102, 241, 0.15)",
+              transition: { duration: 0.2 } 
+            }}
             whileTap={{ scale: 0.98 }}
-            className={`p-3 sm:p-4 border rounded-lg shadow-sm ${ 
+            className={`p-3 sm:p-4 rounded-lg shadow-lg backdrop-blur-sm border group transition-all duration-300 ${ 
               pick.pick === currentPick
-                ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-black/30 ring-2 ring-blue-200 dark:ring-blue-500/50 shadow-lg'
+                ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100/80 dark:from-blue-900/30 dark:to-blue-800/20 ring-2 ring-blue-300/50 dark:ring-blue-500/50 shadow-xl'
                 : pick.prospect
-                ? 'border-brand-purple bg-purple-50 dark:bg-brand-navy'
-                : 'border-slate-200 dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary'
+                ? 'border-purple-300/50 dark:border-purple-600/50 bg-gradient-to-br from-purple-50/80 to-indigo-50/60 dark:from-purple-900/20 dark:to-indigo-900/20'
+                : 'border-slate-200 dark:border-super-dark-border bg-gradient-to-br from-slate-50/80 to-slate-100/60 dark:from-super-dark-secondary dark:to-super-dark-secondary'
             }`}
           >
             <div className="flex justify-between items-start mb-2">
@@ -442,26 +670,30 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
               </div>
               <div className="flex flex-col gap-1"> {/* Changed to flex-col for vertical buttons */}
                 {pick.prospect && (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => onUndraftPick(pick.pick)}
-                    className="px-2 py-1 bg-brand-orange text-white rounded-md hover:brightness-90 transition-all text-xs flex items-center justify-center"
+                    className="px-2 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium"
                   >
                     Desfazer
-                  </button>
+                  </motion.button>
                 )}
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => onTradeClick(pick)}
-                  className="px-2 py-1 bg-brand-purple text-white rounded-md hover:brightness-90 transition-all text-xs flex items-center justify-center"
+                  className="px-2 py-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium"
                 >
                   <RefreshCw className="h-3 w-3 mr-1" /> Trocar
-                </button>
+                </motion.button>
               </div>
             </div>
             
             {/* AnimatePresence para animar a troca de conteúdo */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={pick.team + (pick.prospect ? pick.prospect.id : "empty")} // Key muda quando o conteúdo muda
+                key={pick.pick + "-" + (pick.prospect ? pick.prospect.id : "empty")} // Key única usando o número do pick
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -472,13 +704,19 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
                 </div>
                 {pick.prospect ? (
                   <motion.div layoutId={`prospect-card-${pick.prospect.id}`}>
-                    <div className="font-medium text-slate-900 dark:text-super-dark-text-primary truncate">{pick.prospect.name}</div>
-                    <div className="text-sm text-slate-600 dark:text-super-dark-text-secondary truncate">{pick.prospect.position} • {pick.prospect.nationality || 'N/A'}</div>
-                    <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">{pick.prospect.high_school_team || 'N/A'}</div>
+                    <div className="font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary truncate text-sm">
+                      {pick.prospect.name}
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-super-dark-text-secondary truncate font-medium">
+                      {pick.prospect.position} • {pick.prospect.nationality || 'N/A'}
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">
+                      {pick.prospect.high_school_team || 'N/A'}
+                    </div>
                   </motion.div>
                 ) : (
                   <div className="text-slate-400 dark:text-super-dark-text-secondary text-sm italic">
-                    {pick.pick === currentPick ? 'Sua vez de selecionar!' : 'Disponível'}
+                    {pick.pick === currentPick ? '🎯 Sua vez de selecionar!' : 'Disponível'}
                   </div>
                 )}
               </motion.div>
@@ -491,11 +729,12 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
 };
 
 
-const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
-  <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
-    <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6">
-      <span className="flex items-center flex-wrap gap-1">
-        Big Board - <span>Principais Prospects</span>
+const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick }) => (
+  <div className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm">
+    <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
+      <span className="flex items-center flex-wrap gap-2">
+        <Trophy className="h-5 w-5 text-purple-600" />
+        Big Board - Principais Prospects
       </span>
     </h3>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -506,10 +745,13 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete }) => (
           className="relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02 }}
           transition={{ delay: index * 0.05 }}
         >
-          <div className="absolute -top-2 -left-2 bg-brand-purple text-white text-xs font-bold px-2 py-1 rounded-full z-10">#{index + 1}</div>
-          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={handleBadgeClick} />
+          <div className="absolute -top-2 -left-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-lg border-2 border-white dark:border-super-dark-secondary">
+            #{index + 1}
+          </div>
+          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
         </motion.div>
       ))}
     </div>
@@ -523,10 +765,12 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
   return (
   <div className="space-y-4 sm:space-y-6">
     {recommendations.length > 0 && !isDraftComplete && (
-      <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 flex items-center">
+      <div className="bg-gradient-to-br from-yellow-50/80 to-orange-50/80 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl shadow-xl border border-yellow-200/50 dark:border-yellow-700/30 p-4 sm:p-6 backdrop-blur-sm">
+        <h3 className="text-lg font-bold mb-4 flex items-center">
           <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
-          <span className="truncate">Recomendações para Pick #{currentPick}</span>
+          <span className="text-black dark:text-white font-mono tracking-wide truncate">
+            🎯 Recomendações para Pick #{currentPick}
+          </span>
         </h3>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
           {recommendations.map((prospect, index) => 
@@ -535,6 +779,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
               layoutId={`prospect-card-${prospect.id}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02 }}
               transition={{ delay: index * 0.05 }}
             >
               <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
@@ -543,11 +788,11 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
         </div>
       </div>
     )}
-    <div className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border p-4 sm:p-6">
-      <h3 className="text-base md:text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4 sm:mb-6 flex items-center flex-wrap gap-1">
-        <Users className="h-5 w-5 text-brand-purple mr-2 flex-shrink-0" /> 
-        <span className="text-brand-orange">Prospects</span> 
-        <span>Disponíveis ({nonRecommendedProspects.length})</span>
+    <div className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm">
+      <h3 className="text-base md:text-lg font-bold mb-4 sm:mb-6 flex items-center flex-wrap gap-2">
+        <Users className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0" /> 
+        <span className="text-black dark:text-white font-mono tracking-wide">Prospects</span> 
+        <span className="text-black dark:text-white font-mono tracking-wide">Disponíveis ({nonRecommendedProspects.length})</span>
       </h3>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
         {nonRecommendedProspects.map((prospect, index) => 
@@ -556,6 +801,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
             layoutId={`prospect-card-${prospect.id}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.02 }}
             transition={{ delay: index * 0.05 }}
           >
             <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
@@ -600,14 +846,19 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-      className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple min-h-[320px] flex flex-col"
+      whileHover={{ 
+        y: -5, 
+        boxShadow: "0px 20px 40px rgba(99, 102, 241, 0.15)", 
+        scale: 1.02 
+      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-lg border border-purple-200/50 dark:border-purple-700/30 hover:border-purple-400/60 dark:hover:border-purple-500/60 min-h-[320px] flex flex-col backdrop-blur-sm group"
       onClick={handleCardClick}
     >
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-3">
           {/* Image or Skeleton */}
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-lg sm:text-xl font-bold mr-3" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-lg sm:text-xl font-bold mr-3 ring-2 ring-purple-200/50 dark:ring-purple-700/50 group-hover:ring-purple-400/70 transition-all" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
@@ -617,7 +868,9 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
             )}
           </div>
           <div className="flex-grow min-w-0 flex flex-col">
-            <p className="font-bold text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">{prospect.name}</p>
+            <p className="font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">
+              {prospect.name}
+            </p>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1 badge-container">
@@ -642,10 +895,15 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
         {/* Radar Score */}
         {prospect.radar_score && (
           <div className="flex justify-start mb-3">
-            <div className="inline-block text-center bg-slate-200/50 dark:bg-super-dark-border border border-slate-300 dark:border-super-dark-border text-slate-800 dark:text-super-dark-text-primary px-2 sm:px-3 py-1 rounded-full shadow-inner">
-              <span className="font-bold text-sm sm:text-lg mr-1">{prospect.radar_score.toFixed(2)}</span>
-              <span className="text-xs">Radar Score</span>
-            </div>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="inline-block text-center bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-400/20 dark:to-indigo-400/20 border border-purple-300/50 dark:border-purple-600/50 px-2 sm:px-3 py-1 rounded-full shadow-lg backdrop-blur-sm group"
+            >
+              <span className="font-mono font-bold text-sm sm:text-lg mr-1 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                {prospect.radar_score.toFixed(2)}
+              </span>
+              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">Radar Score</span>
+            </motion.div>
           </div>
         )}
         
@@ -677,9 +935,22 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
                   </h4>
                   <div className="flex items-center gap-2">
                     {isHighSchool && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                        High School
-                      </span>
+                      <motion.span 
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg relative overflow-hidden group cursor-default"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        {/* Subtle shimmer */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <span className="relative z-10 font-semibold">High School</span>
+                      </motion.span>
                     )}
                     {(league || season) && !isHighSchool && (
                       <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
@@ -689,18 +960,18 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
-                  <div>
-                    <p className="font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-                  </div>
-                  <div>
-                    <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-                  </div>
+                  <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-purple-50 to-purple-100/80 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200/50 dark:border-purple-700/50">
+                    <p className="font-mono font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-purple-500 dark:text-purple-400 font-medium">PPG</p>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-green-50 to-emerald-100/80 dark:from-green-900/30 dark:to-emerald-800/30 rounded-lg border border-green-200/50 dark:border-green-700/50">
+                    <p className="font-mono font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-green-500 dark:text-green-400 font-medium">RPG</p>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-orange-50 to-amber-100/80 dark:from-orange-900/30 dark:to-amber-800/30 rounded-lg border border-orange-200/50 dark:border-orange-700/50">
+                    <p className="font-mono font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-orange-500 dark:text-orange-400 font-medium">APG</p>
+                  </motion.div>
                 </div>
               </motion.div>
             )}
@@ -711,13 +982,19 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
         <div className="flex flex-col gap-2 mt-auto w-full">
           {action && (
             <motion.button 
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
+              }}
               whileTap={{ scale: 0.95 }}
               onClick={action.onClick} 
               disabled={action.disabled} 
-              className="w-full flex items-center justify-center px-3 py-2 bg-brand-purple text-white font-semibold rounded-lg transition-all text-xs sm:text-sm disabled:bg-slate-400 dark:disabled:bg-super-dark-border disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-super-dark-border dark:disabled:to-super-dark-border disabled:cursor-not-allowed relative overflow-hidden group"
             >
-              {action.label} {action.icon}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative z-10 flex items-center">
+                {action.label} {action.icon}
+              </span>
             </motion.button>
           )}
           <Link 
@@ -733,6 +1010,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
 };
 
 import TradeModal from '@/components/MockDraft/TradeModal.jsx';
+import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
 
 // NOVOS COMPONENTES DE MODAL
 const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving }) => {
@@ -753,7 +1031,7 @@ const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSa
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-xl p-6 w-full max-w-md"
           >
-            <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary mb-4">Salvar Mock Draft</h3>
+            <h3 className="text-lg font-bold text-black dark:text-white mb-4 font-mono tracking-wide">Salvar Mock Draft</h3>
             <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mb-4">Dê um nome para o seu mock draft para poder carregá-lo mais tarde.</p>
             <input 
               type="text"
@@ -794,7 +1072,7 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
             className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-xl p-6 w-full max-w-lg"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary">Carregar Mock Draft</h3>
+              <h3 className="text-lg font-bold text-black dark:text-white font-mono tracking-wide">Carregar Mock Draft</h3>
               <button onClick={onClose}><X className="h-5 w-5 text-slate-500" /></button>
             </div>
             <div className="max-h-96 overflow-y-auto space-y-3">

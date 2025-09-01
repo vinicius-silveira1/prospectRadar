@@ -72,7 +72,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
 
   const renderRound = (round, title) => (
     <div key={title}>
-      <h3 className="text-2xl font-bold text-gray-800 dark:text-super-dark-text-primary my-6 text-center bg-gray-100 dark:bg-super-dark-secondary py-2 rounded-lg">{title}</h3>
+      <h3 className="text-2xl font-bold text-black dark:text-white my-6 text-center bg-gray-100 dark:bg-super-dark-secondary py-2 rounded-lg font-mono tracking-wide">{title}</h3>
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         {round.map((pick) => (
           <div key={pick.pick} className="flex items-center bg-white dark:bg-super-dark-secondary p-3 rounded-lg shadow-sm border border-gray-200 dark:border-super-dark-border">
@@ -89,7 +89,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                     <ProspectImage prospect={pick.prospect} />
                   </div>
                   <div className="flex-grow">
-                    <p className="font-bold text-lg text-gray-900 dark:text-super-dark-text-primary">{pick.prospect.name}</p>
+                    <p className="font-mono font-bold tracking-wide text-lg text-gray-900 dark:text-super-dark-text-primary">{pick.prospect.name}</p>
                     <p className="text-sm text-gray-600 dark:text-super-dark-text-secondary">{pick.prospect.position} • {pick.prospect.high_school_team}</p>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
           </div>
         </div>
         <div className="text-right">
-          <h2 className="text-3xl font-bold text-blue-700">Mock Draft {settings.draftClass}</h2>
+          <h2 className="text-3xl font-bold text-blue-700 font-mono tracking-wide">Mock Draft {settings.draftClass}</h2>
           <p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Gerado em: {new Date().toLocaleDateString('pt-BR')}</p>
         </div>
       </header>
