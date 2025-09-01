@@ -89,6 +89,23 @@ const Prospects = () => {
   const [selectedBadge, setSelectedBadge] = useState('all');
   const [hoveredBadgeByProspect, setHoveredBadgeByProspect] = useState({});
 
+  // Função para gerenciar conquistas na visualização em lista
+  const handleBadgeHover = (prospectId, badge) => {
+    if (isMobile) {
+      // No mobile, clique para alternar
+      setHoveredBadgeByProspect(prev => ({
+        ...prev,
+        [prospectId]: prev[prospectId]?.label === badge?.label ? null : badge
+      }));
+    } else {
+      // No desktop, hover
+      setHoveredBadgeByProspect(prev => ({
+        ...prev,
+        [prospectId]: badge
+      }));
+    }
+  };
+
 
   useEffect(() => {
     const query = searchParams.get('q');
@@ -107,22 +124,6 @@ const Prospects = () => {
       } else {
         console.error('Erro ao adicionar à watchlist:', error);
       }
-    }
-  };
-
-  // Funções para gerenciar badges hover
-  const handleBadgeHover = (prospectId, badge) => {
-    if (isMobile) {
-      // No mobile, toggle: se o mesmo badge for clicado, fecha
-      const currentBadge = hoveredBadgeByProspect[prospectId];
-      if (currentBadge && currentBadge?.label === badge?.label) {
-        setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: null }));
-      } else {
-        setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: badge }));
-      }
-    } else {
-      // No desktop, comportamento normal de hover
-      setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: badge }));
     }
   };
 
@@ -278,7 +279,7 @@ const Prospects = () => {
     setSelectedBadge('all');
   };
   
-  const inputBaseClasses = "w-full px-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-200 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-brand-purple focus:border-transparent transition-colors";
+  const inputBaseClasses = "w-full px-4 py-2 bg-gradient-to-r from-slate-50 to-white dark:from-super-dark-secondary dark:to-slate-800 border-2 border-slate-200 dark:border-super-dark-border hover:border-purple-300 dark:hover:border-purple-600 rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
@@ -287,115 +288,244 @@ const Prospects = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg rounded-xl"
+        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg rounded-xl overflow-hidden group"
+        whileHover={{
+          boxShadow: "0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(168, 85, 247, 0.2)"
+        }}
       >
+        {/* Hexagonal pattern background */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="hexPattern-prospects" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+              <polygon points="7.5,1.5 13,5 13,12 7.5,15.5 2,12 2,5" fill="currentColor" className="text-white/20" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hexPattern-prospects)" />
+          </svg>
+        </div>
+
+        {/* Gaming shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1200 ease-out" />
+
         <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
         <div className="px-4 md:px-6 py-4 md:py-6 relative z-10">
           <div className="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight flex items-center text-white">
-                <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-yellow-300 mr-2 md:mr-3 flex-shrink-0" />
+              <motion.h1 
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight flex items-center text-white text-glow tracking-wide"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.2, 
+                    rotate: 15,
+                    boxShadow: "0 0 20px rgba(253, 224, 71, 0.5)"
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-yellow-300 mr-2 md:mr-3 flex-shrink-0 drop-shadow-lg" />
+                </motion.div>
                 <span className="flex items-center flex-wrap gap-2">
-                  Todos os <span className="text-yellow-300">Prospects</span>
+                  Todos os <span className="text-yellow-300 drop-shadow-lg">Prospects</span>
                 </span>
-              </h1>
+              </motion.h1>
               <p className="text-sm sm:text-base md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl">
                 Explore e analise {allProspects.length} <span className="font-semibold text-yellow-300">prospects</span> do Draft 2026
               </p>
             </div>
             <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
-              {/* Export Buttons */}
-              <ExportButtons prospects={filteredProspects} source="prospects" />
+              {/* Export Buttons - Gaming Style */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-sm"></div>
+                <div className="relative">
+                  <ExportButtons prospects={filteredProspects} source="prospects" />
+                </div>
+              </motion.div>
               
-              {/* View Mode Toggle */}
-              <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 flex-shrink-0">
-                <button 
+              {/* View Mode Toggle - Gaming Enhanced */}
+              <motion.div 
+                className="flex bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-lg p-1 flex-shrink-0 border border-slate-200 dark:border-slate-600 shadow-lg"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.button 
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-purple dark:text-purple-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all relative overflow-hidden ${viewMode === 'grid' ? 'bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 shadow-lg text-brand-purple dark:text-purple-400 border border-purple-200 dark:border-purple-800' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                   aria-label="Visualização em grade"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Grid size={isMobile ? 16 : 18} />
-                </button>
-                <button 
+                  {viewMode === 'grid' && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                  <Grid size={isMobile ? 16 : 18} className="relative z-10" />
+                </motion.button>
+                <motion.button 
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-800 shadow-sm text-brand-purple dark:text-purple-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all relative overflow-hidden ${viewMode === 'list' ? 'bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 shadow-lg text-brand-purple dark:text-purple-400 border border-purple-200 dark:border-purple-800' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600'}`}
                   aria-label="Visualização em lista"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <List size={isMobile ? 16 : 18} />
-                </button>
-              </div>
+                  {viewMode === 'list' && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
+                  <List size={isMobile ? 16 : 18} className="relative z-10" />
+                </motion.button>
+              </motion.div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Filtros e Alerta */}
+      {/* Filtros e Alerta - Gaming Enhanced */}
       <div className="py-4 md:py-6">
-        <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border p-4 md:p-6 mb-4 md:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Filter className="text-slate-400 dark:text-slate-500 flex-shrink-0" size={20} />
-              <ResponsiveText 
-                as="h2" 
-                size="lg" 
-                className="font-semibold text-slate-900 dark:text-super-dark-text-primary"
+        <motion.div 
+          className="bg-gradient-to-br from-white via-slate-50 to-white dark:from-super-dark-secondary dark:via-slate-900 dark:to-super-dark-secondary rounded-xl shadow-lg border-2 border-slate-200 dark:border-super-dark-border p-4 md:p-6 mb-4 md:mb-6 relative overflow-hidden"
+          whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(147, 51, 234, 0.1)" }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          {/* Gaming Background Pattern */}
+          <div className="absolute inset-0 opacity-5 dark:opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage: `radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
+                               radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                               radial-gradient(circle at 40% 60%, rgba(168, 85, 247, 0.2) 0%, transparent 50%)`
+            }}></div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 relative z-10">
+              <motion.div 
+                className="flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                Filtros
-              </ResponsiveText>
-            </div>
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.2, 
+                    rotate: 15,
+                    boxShadow: "0 0 15px rgba(147, 51, 234, 0.4)"
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Filter className="text-purple-500 dark:text-purple-400 flex-shrink-0 drop-shadow-sm" size={20} />
+                </motion.div>
+                <motion.h2 
+                  className="font-gaming font-semibold text-slate-900 dark:text-super-dark-text-primary tracking-wide text-lg md:text-xl text-glow"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
+                    Filtros
+                  </span>
+                </motion.h2>
+              </motion.div>
             <div className="flex-grow"></div>
             <div className="flex flex-col sm:flex-row gap-2">
-              <button
+              <motion.button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-gaming font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 dark:from-purple-500 dark:to-blue-500 dark:hover:from-purple-600 dark:hover:to-blue-600 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border border-purple-500/50 dark:border-purple-400/50 relative overflow-hidden"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.4)" }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
-                <ChevronDown size={16} className={`transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
-              </button>
-              <button 
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+                <span className="relative z-10">
+                  {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
+                </span>
+                <motion.div
+                  animate={{ rotate: showAdvancedFilters ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative z-10"
+                >
+                  <ChevronDown size={16} />
+                </motion.div>
+              </motion.button>
+              <motion.button 
                 onClick={clearAllFilters} 
-                className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg font-medium transition-colors active:scale-95"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-gaming font-medium text-purple-600 dark:text-purple-400 hover:text-white bg-purple-50 dark:bg-purple-900/20 hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-600 dark:hover:from-purple-500 dark:hover:to-blue-500 rounded-lg border border-purple-200 dark:border-purple-700 hover:border-transparent transition-all duration-200 shadow-sm hover:shadow-lg relative overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                Limpar Filtros
-              </button>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0"
+                  whileHover={{ opacity: 1, x: ['-100%', '100%'] }}
+                  transition={{ duration: 0.6 }}
+                />
+                <X size={14} className="mr-1 relative z-10" />
+                <span className="relative z-10">Limpar Filtros</span>
+              </motion.button>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-            <div className="lg:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+            <motion.div 
+              className="lg:col-span-2 relative"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 dark:text-purple-500 z-10" size={18} />
               <input 
                 type="text" 
                 placeholder={isMobile ? "Buscar prospects..." : "Buscar por nome ou universidade..."} 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
-                className={`${inputBaseClasses} pl-10`} 
+                className={`${inputBaseClasses} pl-10 relative z-0`} 
               />
-            </div>
-            <select 
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-lg pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
+            </motion.div>
+            <motion.select 
               value={selectedPosition} 
               onChange={(e) => setSelectedPosition(e.target.value)} 
               className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <option value="all">Todas as Posições</option>
               {positions.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
-            <select 
+            </motion.select>
+            <motion.select 
               value={selectedTier} 
               onChange={(e) => setSelectedTier(e.target.value)} 
               className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <option value="all">Todos os Tiers</option>
               {Object.values(TIERS).map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select 
+            </motion.select>
+            <motion.select 
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value)} 
               className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <option value="ranking">Por Ranking</option>
               <option value="name">Por Nome</option>
               <option value="position">Por Posição</option>
-            </select>
+            </motion.select>
           </div>
           
           <AnimatePresence>
@@ -424,7 +554,7 @@ const Prospects = () => {
             <span className="flex items-center gap-1.5"><Users size={16} /><strong>{filteredProspects.length}</strong> <span className="font-semibold text-brand-orange">prospects</span> encontrados</span>
             {watchlist.size > 0 && (<span className="flex items-center gap-1.5"><Heart size={16} className="text-brand-orange" /><strong>{watchlist.size}</strong> na sua watchlist</span>)}
           </div>
-        </div>
+        </motion.div>
 
         <div className="mb-6">
           <AlertBox 
@@ -645,6 +775,7 @@ const Prospects = () => {
                 {filteredProspects.map((prospect, index) => {
                   const isInWatchList = watchlist.has(prospect.id);
                   const badges = assignBadges(prospect);
+                  const hoveredBadge = hoveredBadgeByProspect[prospect.id];
                   
                   return (
                     <motion.div
@@ -656,33 +787,45 @@ const Prospects = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Link to={`/prospects/${prospect.id}`} className="block px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
-                        <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
-                          {/* Nome (col-span-3 no desktop) */}
-                          <div className="col-span-3 md:col-span-3 flex items-center space-x-4">
-                            <div className="space-y-1">
-                              <div className="font-medium text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</div>
-                              <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
-                            </div>
-                          </div>
-
-                          {/* Badges (col-span-2 no desktop) */}
-                          <div className="hidden md:flex md:col-span-2 items-center">
-                            {badges.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {badges.slice(0, 3).map((badge, index) => (
-                                  <Badge key={index} badge={badge} />
-                                ))}
-                                {badges.length > 3 && (
-                                  <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
-                                    +{badges.length - 3}
-                                  </div>
-                                )}
+                      <div className="px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
+                        <Link to={`/prospects/${prospect.id}`} className="block">
+                          <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
+                            {/* Nome (col-span-3 no desktop) */}
+                            <div className="col-span-3 md:col-span-3 flex items-center space-x-4">
+                              <div className="space-y-1">
+                                <div className="font-medium text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</div>
+                                <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
                               </div>
-                            ) : (
-                              <span className="text-slate-400 dark:text-slate-500 text-xs">Sem badges</span>
-                            )}
-                          </div>
+                            </div>
+
+                            {/* Badges (col-span-2 no desktop) */}
+                            <div className="hidden md:flex md:col-span-2 items-center">
+                              {badges.length > 0 ? (
+                                <div className="flex flex-wrap gap-1 badge-container">
+                                  {badges.slice(0, 3).map((badge, index) => (
+                                    <div
+                                      key={index}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleBadgeHover(prospect.id, badge);
+                                      }}
+                                      onMouseEnter={() => !isMobile && handleBadgeHover(prospect.id, badge)}
+                                      onMouseLeave={() => !isMobile && handleBadgeHover(prospect.id, null)}
+                                    >
+                                      <Badge badge={badge} />
+                                    </div>
+                                  ))}
+                                  {badges.length > 3 && (
+                                    <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
+                                      +{badges.length - 3}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 dark:text-slate-500 text-xs">Sem badges</span>
+                              )}
+                            </div>
 
                           {/* Radar Score (col-span-1 no desktop) */}
                           <div className="hidden md:flex md:col-span-1 items-center justify-center">
@@ -700,29 +843,46 @@ const Prospects = () => {
                             <span className={`badge-position ${prospect.position}`}>{prospect.position}</span>
                           </div>
 
-                          {/* Estatísticas */}
-                          <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.ppg?.toFixed(1) ?? '-'}</div>
-                          <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.rpg?.toFixed(1) ?? '-'}</div>
-                          <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-medium">{prospect.apg?.toFixed(1) ?? '-'}</div>
+                            {/* Estatísticas */}
+                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.ppg?.toFixed(1) ?? '-'}</div>
+                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.rpg?.toFixed(1) ?? '-'}</div>
+                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.apg?.toFixed(1) ?? '-'}</div>
 
-                          {/* Universidade */}
-                          <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.high_school_team || 'N/A'}</div>
+                            {/* Universidade */}
+                            <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.high_school_team || 'N/A'}</div>
 
-                          {/* Ações */}
-                          <div className="col-span-1 flex justify-end md:justify-center">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleToggleWatchlist(prospect.id);
-                              }}
-                              className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-super-dark-border transition-colors"
-                            >
-                              <Heart size={18} className={`transition-colors ${isInWatchList ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} />
-                            </button>
+                            {/* Ações */}
+                            <div className="col-span-1 flex justify-end md:justify-center">
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleToggleWatchlist(prospect.id);
+                                }}
+                                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-super-dark-border transition-colors"
+                              >
+                                <Heart size={18} className={`transition-colors ${isInWatchList ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+
+                        {/* Seção de Conquistas (expansível) */}
+                        <AnimatePresence>
+                          {hoveredBadge && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="mt-3 pt-3 border-t border-slate-100 dark:border-super-dark-border"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              <AchievementUnlock badge={hoveredBadge} />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </motion.div>
                   );
                 })}
@@ -737,7 +897,10 @@ const Prospects = () => {
               <Search className="mx-auto text-slate-400 dark:text-super-dark-text-secondary mb-4" size={48} />
               <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">Nenhum prospect encontrado</h3>
               <p className="text-slate-600 dark:text-super-dark-text-secondary mb-4">Tente ajustar os filtros ou termos de busca</p>
-              <button onClick={clearAllFilters}                 className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg font-medium transition-colors active:scale-95">
+              <button 
+                onClick={clearAllFilters}
+                className="inline-flex items-center justify-center px-3 py-2 text-sm text-brand-purple hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg font-medium transition-colors active:scale-95"
+              >
                 Limpar Filtros
               </button>
             </div>

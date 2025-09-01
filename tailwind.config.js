@@ -33,6 +33,8 @@ export default {
       fontFamily: {
         'basketball': ['Inter', 'Arial', 'sans-serif'],
         'display': ['Inter', 'sans-serif'],
+        'gaming': ['Rajdhani', 'Orbitron', 'Inter', 'sans-serif'], // Nova fonte gaming
+        'mono': ['JetBrains Mono', 'Fira Code', 'monospace'], // Para stats/números
       },
       backgroundImage: {
         'brand-gradient': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',

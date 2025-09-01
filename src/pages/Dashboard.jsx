@@ -144,7 +144,7 @@ const Dashboard = () => {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <motion.h1 
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 leading-tight text-white"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight text-white text-glow"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
@@ -294,7 +294,7 @@ const Dashboard = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <motion.h2 
-              className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group"
+              className="text-base sm:text-lg font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
@@ -369,7 +369,7 @@ const Dashboard = () => {
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 md:mb-6 gap-3">
             <motion.h2 
-              className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group"
+              className="text-base sm:text-lg md:text-xl font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >

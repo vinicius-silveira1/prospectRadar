@@ -270,7 +270,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <motion.p 
-                      className="text-xl font-bold text-purple-600 dark:text-purple-400 relative z-10"
+                      className="text-xl font-mono font-bold text-purple-600 dark:text-purple-400 relative z-10 tracking-wide"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
@@ -288,7 +288,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <motion.p 
-                      className="text-xl font-bold text-green-600 dark:text-green-400 relative z-10"
+                      className="text-xl font-mono font-bold text-green-600 dark:text-green-400 relative z-10 tracking-wide"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
@@ -306,7 +306,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <motion.p 
-                      className="text-xl font-bold text-orange-600 dark:text-orange-400 relative z-10"
+                      className="text-xl font-mono font-bold text-orange-600 dark:text-orange-400 relative z-10 tracking-wide"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >

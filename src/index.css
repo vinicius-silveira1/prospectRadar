@@ -56,6 +56,23 @@
     @apply bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent;
   }
   
+  /* Gaming text styles */
+  .text-gaming-title {
+    @apply font-gaming font-bold tracking-wider text-shadow-lg;
+  }
+  
+  .text-gaming-stats {
+    @apply font-mono font-semibold tracking-wide;
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
   /* Stats highlight */
   .stat-highlight {
     @apply text-brand-orange font-bold;
