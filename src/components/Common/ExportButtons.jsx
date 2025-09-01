@@ -138,21 +138,24 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
           onClick={() => setShowDropdown(!showDropdown)}
           disabled={isExporting}
           className={`
-            inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200
+            inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 relative overflow-hidden group
             ${isScoutUser 
-              ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
-              : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+              ? 'bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-700 hover:via-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-2xl transform hover:scale-105 border border-purple-400/30' 
+              : 'bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-600 hover:from-purple-600 hover:via-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-2xl transform hover:scale-105 border border-purple-400/30'
             }
             ${isExporting ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
+          {/* Gaming glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 via-indigo-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
           {isExporting ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-4 h-4 mr-2 animate-spin relative z-10" />
           ) : (
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2 relative z-10" />
           )}
-          {isExporting ? 'Exportando...' : 'Exportar'}
-          <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+          <span className="relative z-10 font-mono tracking-wide">{isExporting ? 'Exportando...' : 'Exportar'}</span>
+          <ChevronDown className={`w-4 h-4 ml-2 transition-transform relative z-10 ${showDropdown ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Overlay para fechar dropdown */}
@@ -167,7 +170,7 @@ const ExportButtons = ({ prospects, source = 'dashboard' }) => {
       {/* Dropdown Menu via Portal */}
       {showDropdown && createPortal(
         <div 
-          className="fixed w-auto min-w-72 sm:w-80 bg-white dark:bg-super-dark-secondary rounded-xl shadow-2xl border border-slate-200 dark:border-super-dark-border z-[99999] transform-gpu"
+          className="fixed w-auto min-w-72 sm:w-80 bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-2xl border border-purple-200/50 dark:border-super-dark-border z-[99999] transform-gpu backdrop-blur-sm"
           style={{
             top: dropdownPosition.top,
             left: dropdownPosition.left !== 'auto' ? dropdownPosition.left : undefined,

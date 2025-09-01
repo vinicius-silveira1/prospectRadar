@@ -123,7 +123,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
             >
               <Link 
                 to={`/prospects/${prospect.id}`} 
-                className="relative font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate block group"
+                className="relative font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate block group font-mono tracking-wide"
               >
                 <span className="relative z-10">{prospect.name}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-purple/10 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
@@ -154,22 +154,22 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
         <div className="flex items-center gap-2 mt-2">
           {prospect.radar_score && (
             <motion.div 
-              className="relative inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 overflow-hidden group"
+              className="relative inline-flex items-center space-x-2 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-3 py-1.5 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 overflow-hidden group"
               whileHover={{ 
                 scale: 1.05,
-                boxShadow: "0 0 25px rgba(59, 130, 246, 0.4), 0 0 50px rgba(168, 85, 247, 0.2)"
+                boxShadow: "0 0 20px rgba(147, 51, 234, 0.4)"
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/15 via-indigo-600/15 to-purple-600/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <motion.span 
-                className="font-bold text-lg relative z-10"
+                className="font-bold text-lg relative z-10 font-mono tracking-wide"
                 whileHover={{ scale: 1.1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 {prospect.radar_score.toFixed(2)}
               </motion.span>
-              <span className="text-xs relative z-10">Radar Score</span>
+              <span className="text-xs relative z-10 text-purple-700 dark:text-slate-400">Radar Score</span>
             </motion.div>
           )}
           {prospect.name === 'Lucas Atauri' && (

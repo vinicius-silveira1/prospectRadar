@@ -588,10 +588,18 @@ const Prospects = () => {
                     hidden: { opacity: 0, y: 20 },
                     visible: { opacity: 1, y: 0 }
                   }}
-                  whileHover={{ scale: 1.03, y: -5, transition: { duration: 0.2 } }}
-                  className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transform transition-all duration-300 flex flex-col"
+                  whileHover={{ 
+                    scale: 1.03, 
+                    y: -8, 
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(139, 92, 246, 0.15)",
+                    transition: { duration: 0.3, type: "spring", stiffness: 300 } 
+                  }}
+                  className="bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-lg border border-gray-200/50 dark:border-super-dark-border hover:border-purple-300/50 dark:hover:border-purple-700/50 backdrop-blur-sm transform transition-all duration-300 flex flex-col relative overflow-hidden group"
                   onClick={(e) => handleCardClick(prospect.id, e)}
                 >
+                  {/* Gaming glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-purple-600/20 rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500 -z-10" />
                   {/* Header Image */}
                   <div className="relative">
                     <button 
@@ -625,16 +633,24 @@ const Prospects = () => {
                     <div className="space-y-2">
                       <Link 
                         to={`/prospects/${prospect.id}`} 
-                        className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-purple dark:hover:text-purple-400 transition-colors block"
+                        className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-purple dark:hover:text-purple-400 transition-colors block font-mono tracking-wide"
                       >
                         {prospect.name}
                       </Link>
                       
                       {prospect.radar_score && (
-                        <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
-                          <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
-                          <span className="text-xs">Radar Score</span>
-                        </div>
+                        <motion.div 
+                          className="inline-flex items-center space-x-2 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-3 py-1.5 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 relative overflow-hidden group"
+                          whileHover={{ 
+                            scale: 1.05,
+                            boxShadow: "0 0 20px rgba(147, 51, 234, 0.4)"
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/15 via-indigo-600/15 to-purple-600/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <span className="font-bold text-lg relative z-10 font-mono tracking-wide">{prospect.radar_score.toFixed(2)}</span>
+                          <span className="text-xs relative z-10 text-purple-700 dark:text-slate-400">Radar Score</span>
+                        </motion.div>
                       )}
                     </div>
 
@@ -698,9 +714,22 @@ const Prospects = () => {
                               <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
                               <div className="flex items-center gap-2">
                                 {isHighSchool && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                                    High School
-                                  </span>
+                                  <motion.span 
+                                    className="relative inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white border border-orange-300 dark:border-orange-400 shadow-md shadow-orange-500/30 dark:shadow-orange-400/20 overflow-hidden group"
+                                    whileHover={{ 
+                                      scale: 1.05,
+                                      boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
+                                    }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                  >
+                                    {/* Subtle shimmer */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                                    
+                                    {/* Glow effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    
+                                    <span className="relative z-10 font-semibold">High School</span>
+                                  </motion.span>
                                 )}
                                 {(league || season) && !isHighSchool && (
                                   <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
@@ -709,19 +738,61 @@ const Prospects = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 text-center text-sm mt-2">
-                              <div>
-                                <p className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
-                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-                              </div>
-                              <div>
-                                <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
-                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-                              </div>
-                              <div>
-                                <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
-                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-                              </div>
+                            <div className="grid grid-cols-3 gap-4 text-center mt-2">
+                              <motion.div
+                                className="relative p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group"
+                                whileHover={{ 
+                                  scale: 1.05,
+                                  boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)"
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <motion.p 
+                                  className="text-xl font-mono font-bold text-purple-600 dark:text-purple-400 relative z-10 tracking-wide"
+                                  whileHover={{ scale: 1.1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  {prospect.ppg?.toFixed(1) || '-'}
+                                </motion.p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">PPG</p>
+                              </motion.div>
+                              <motion.div
+                                className="relative p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30 overflow-hidden group"
+                                whileHover={{ 
+                                  scale: 1.05,
+                                  boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)"
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <motion.p 
+                                  className="text-xl font-mono font-bold text-green-600 dark:text-green-400 relative z-10 tracking-wide"
+                                  whileHover={{ scale: 1.1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  {prospect.rpg?.toFixed(1) || '-'}
+                                </motion.p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">RPG</p>
+                              </motion.div>
+                              <motion.div
+                                className="relative p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30 overflow-hidden group"
+                                whileHover={{ 
+                                  scale: 1.05,
+                                  boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)"
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <motion.p 
+                                  className="text-xl font-mono font-bold text-orange-600 dark:text-orange-400 relative z-10 tracking-wide"
+                                  whileHover={{ scale: 1.1 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                >
+                                  {prospect.apg?.toFixed(1) || '-'}
+                                </motion.p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">APG</p>
+                              </motion.div>
                             </div>
                           </motion.div>
                         )}
@@ -759,8 +830,8 @@ const Prospects = () => {
           >
             <div className="hidden md:block px-6 py-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
               <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-slate-500 dark:text-super-dark-text-secondary uppercase tracking-wider">
-                <div className="col-span-3">Nome</div>
-                <div className="col-span-2">Badges</div>
+                <div className="col-span-2">Nome</div>
+                <div className="col-span-3">Badges</div>
                 <div className="col-span-1 text-center">Radar</div>
                 <div className="col-span-1 text-center">Pos</div>
                 <div className="col-span-1 text-center">PPG</div>
@@ -790,19 +861,20 @@ const Prospects = () => {
                       <div className="px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
                         <Link to={`/prospects/${prospect.id}`} className="block">
                           <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
-                            {/* Nome (col-span-3 no desktop) */}
-                            <div className="col-span-3 md:col-span-3 flex items-center space-x-4">
+                            {/* Nome (col-span-2 no desktop) */}
+                            <div className="col-span-3 md:col-span-2 flex items-center space-x-4">
                               <div className="space-y-1">
-                                <div className="font-medium text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</div>
+                                <div className="font-medium text-slate-900 dark:text-super-dark-text-primary font-mono tracking-wide">{prospect.name}</div>
                                 <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
                               </div>
                             </div>
 
-                            {/* Badges (col-span-2 no desktop) */}
-                            <div className="hidden md:flex md:col-span-2 items-center">
+                            {/* Badges (col-span-3 no desktop, visível também no mobile) */}
+                            <div className="col-span-1 md:col-span-3 flex items-center">
                               {badges.length > 0 ? (
                                 <div className="flex flex-wrap gap-1 badge-container">
-                                  {badges.slice(0, 3).map((badge, index) => (
+                                  {/* No desktop, mostrar todas as badges */}
+                                  {(isMobile ? badges.slice(0, 2) : badges).map((badge, index) => (
                                     <div
                                       key={index}
                                       onClick={(e) => {
@@ -816,9 +888,10 @@ const Prospects = () => {
                                       <Badge badge={badge} />
                                     </div>
                                   ))}
-                                  {badges.length > 3 && (
-                                    <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
-                                      +{badges.length - 3}
+                                  {/* Indicador de badges extras apenas no mobile */}
+                                  {isMobile && badges.length > 2 && (
+                                    <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 2} mais badges`}>
+                                      +{badges.length - 2}
                                     </div>
                                   )}
                                 </div>
@@ -827,12 +900,19 @@ const Prospects = () => {
                               )}
                             </div>
 
-                          {/* Radar Score (col-span-1 no desktop) */}
                           <div className="hidden md:flex md:col-span-1 items-center justify-center">
                             {prospect.radar_score ? (
-                              <div className="inline-flex items-center space-x-1 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 text-xs">
-                                <span className="font-bold">{prospect.radar_score.toFixed(2)}</span>
-                              </div>
+                              <motion.div 
+                                className="inline-flex items-center space-x-1 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-2 py-1 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 text-xs relative overflow-hidden group"
+                                whileHover={{ 
+                                  scale: 1.05,
+                                  boxShadow: "0 0 15px rgba(147, 51, 234, 0.3)"
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/15 via-indigo-600/15 to-purple-600/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <span className="font-bold relative z-10 font-mono tracking-wide">{prospect.radar_score.toFixed(2)}</span>
+                              </motion.div>
                             ) : (
                               <span className="text-slate-400 dark:text-slate-500 text-xs">-</span>
                             )}
@@ -844,9 +924,33 @@ const Prospects = () => {
                           </div>
 
                             {/* Estatísticas */}
-                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.ppg?.toFixed(1) ?? '-'}</div>
-                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.rpg?.toFixed(1) ?? '-'}</div>
-                            <div className="col-span-1 text-center text-slate-800 dark:text-super-dark-text-primary font-mono font-medium tracking-wide">{prospect.apg?.toFixed(1) ?? '-'}</div>
+                            <motion.div 
+                              className="col-span-1 text-center relative p-1 rounded bg-gradient-to-br from-purple-50 to-purple-100/30 dark:from-purple-900/15 dark:to-purple-800/5 border border-purple-200/30 dark:border-purple-700/20"
+                              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(147, 51, 234, 0.2)" }}
+                              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            >
+                              <span className="text-slate-800 dark:text-purple-400 font-mono font-bold tracking-wide text-sm">
+                                {prospect.ppg?.toFixed(1) ?? '-'}
+                              </span>
+                            </motion.div>
+                            <motion.div 
+                              className="col-span-1 text-center relative p-1 rounded bg-gradient-to-br from-green-50 to-green-100/30 dark:from-green-900/15 dark:to-green-800/5 border border-green-200/30 dark:border-green-700/20"
+                              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(34, 197, 94, 0.2)" }}
+                              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            >
+                              <span className="text-slate-800 dark:text-green-400 font-mono font-bold tracking-wide text-sm">
+                                {prospect.rpg?.toFixed(1) ?? '-'}
+                              </span>
+                            </motion.div>
+                            <motion.div 
+                              className="col-span-1 text-center relative p-1 rounded bg-gradient-to-br from-orange-50 to-orange-100/30 dark:from-orange-900/15 dark:to-orange-800/5 border border-orange-200/30 dark:border-orange-700/20"
+                              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(249, 115, 22, 0.2)" }}
+                              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                            >
+                              <span className="text-slate-800 dark:text-orange-400 font-mono font-bold tracking-wide text-sm">
+                                {prospect.apg?.toFixed(1) ?? '-'}
+                              </span>
+                            </motion.div>
 
                             {/* Universidade */}
                             <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.high_school_team || 'N/A'}</div>

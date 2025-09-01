@@ -56,23 +56,6 @@
     @apply bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent;
   }
   
-  /* Gaming text styles */
-  .text-gaming-title {
-    @apply font-gaming font-bold tracking-wider text-shadow-lg;
-  }
-  
-  .text-gaming-stats {
-    @apply font-mono font-semibold tracking-wide;
-  }
-  
-  .text-glow {
-    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(168, 85, 247, 0.3);
-  }
-  
-  .text-shadow-lg {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  }
-  
   /* Stats highlight */
   .stat-highlight {
     @apply text-brand-orange font-bold;
@@ -90,24 +73,24 @@
     @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200;
   }
 
-  /* Badges de Posição */
+  /* Badges de Posição - Gaming Style */
   .badge-position {
-    @apply px-2 py-1 rounded-full text-xs font-medium;
+    @apply px-3 py-1.5 rounded-full text-xs font-bold font-mono tracking-wide border shadow-lg transition-all duration-300 hover:scale-105 relative overflow-hidden;
   }
   .badge-position.PG {
-    @apply bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300;
+    @apply bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400/50 shadow-purple-500/30 hover:shadow-purple-500/50;
   }
   .badge-position.SG {
-    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300;
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400/50 shadow-blue-500/30 hover:shadow-blue-500/50;
   }
   .badge-position.SF {
-    @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+    @apply bg-gradient-to-r from-green-500 to-green-600 text-white border-green-400/50 shadow-green-500/30 hover:shadow-green-500/50;
   }
   .badge-position.PF {
-    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300;
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white border-orange-400/50 shadow-orange-500/30 hover:shadow-orange-500/50;
   }
   .badge-position.C {
-    @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300;
+    @apply bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400/50 shadow-red-500/30 hover:shadow-red-500/50;
   }
 }
 
