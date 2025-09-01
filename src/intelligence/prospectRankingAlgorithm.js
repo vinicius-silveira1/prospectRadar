@@ -279,12 +279,21 @@ export class ProspectRankingAlgorithm {
       // --- DETECÇÃO DA FONTE DE DADOS (HIGH SCHOOL VS COLLEGE/PRO) ---
       const hasCollegeStats = p.ppg > 0;
       const hasHighSchoolStats = p.high_school_stats && typeof p.high_school_stats === 'object' && Object.keys(p.high_school_stats).length > 0;
-      const isHighSchoolData = !hasCollegeStats && hasHighSchoolStats;
+      const isOTE = p.league === 'Overtime Elite' || p.league === 'OTE';
+      const isHighSchoolData = (!hasCollegeStats && hasHighSchoolStats) || isOTE;
 
       if (isHighSchoolData) {
         // --- LÓGICA PARA DADOS DE HIGH SCHOOL ---
-        const hsStats = p.high_school_stats.season_total || {};
-        gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
+        const hsStats = p.high_school_stats?.season_total || {};
+        
+        // Para prospectos OTE, usar dados do nível superior se hsStats estiver vazio
+        const useTopLevelStats = isOTE && (!hsStats.games_played || hsStats.games_played === 0);
+        
+        if (useTopLevelStats) {
+          gamesPlayed = p.games_played || 30;
+        } else {
+          gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
+        }
 
         // 1. Rebalancear pesos para High School
         currentWeights = {
@@ -294,26 +303,50 @@ export class ProspectRankingAlgorithm {
           technicalSkills: { weight: 0.35, metrics: this.weights.technicalSkills.metrics }
         };
 
-        // 2. Calcular estatísticas básicas a partir dos totais
-        basicStats = {
-          ppg: hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0,
-          rpg: hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0,
-          apg: hsStats.ast && gamesPlayed > 0 ? (hsStats.ast / gamesPlayed) : 0,
-          spg: hsStats.stl && gamesPlayed > 0 ? (hsStats.stl / gamesPlayed) : 0,
-          bpg: hsStats.blk && gamesPlayed > 0 ? (hsStats.blk / gamesPlayed) : 0,
-          fg_pct: hsStats.fga > 0 ? (hsStats.fgm / hsStats.fga) : 0,
-          three_pct: hsStats['3pa'] > 0 ? (hsStats['3pm'] / hsStats['3pa']) : 0,
-          ft_pct: hsStats.fta > 0 ? (hsStats.ftm / hsStats.fta) : 0,
-          ft_attempts: hsStats.fta || 0,
-          three_pt_attempts: hsStats['3pa'] || 0,
-        };
-        
-        // 3. Calcular as métricas avançadas possíveis (TS%, eFG%)
-        const ts_denominator = 2 * (hsStats.fga + 0.44 * hsStats.fta);
-        advancedStats.ts_percent = ts_denominator > 0 ? (hsStats.pts / ts_denominator) : 0;
-        
-        const efg_denominator = hsStats.fga;
-        advancedStats.efg_percent = efg_denominator > 0 ? ((hsStats.fgm + 0.5 * hsStats['3pm']) / efg_denominator) : 0;
+        // 2. Calcular estatísticas básicas
+        if (useTopLevelStats) {
+          // Para prospectos OTE, usar dados do nível superior
+          basicStats = {
+            ppg: p.total_points && gamesPlayed > 0 ? (p.total_points / gamesPlayed) : (p.ppg || 0),
+            rpg: p.total_rebounds && gamesPlayed > 0 ? (p.total_rebounds / gamesPlayed) : (p.rpg || 0),
+            apg: p.total_assists && gamesPlayed > 0 ? (p.total_assists / gamesPlayed) : (p.apg || 0),
+            spg: p.total_steals && gamesPlayed > 0 ? (p.total_steals / gamesPlayed) : (p.spg || 0),
+            bpg: p.total_blocks && gamesPlayed > 0 ? (p.total_blocks / gamesPlayed) : (p.bpg || 0),
+            fg_pct: p.total_field_goal_attempts > 0 ? ((p.two_pt_makes + p.three_pt_makes) / p.total_field_goal_attempts) : (p.fg_pct || 0),
+            three_pct: p.three_pt_attempts > 0 ? (p.three_pt_makes / p.three_pt_attempts) : (p.three_pct || 0),
+            ft_pct: p.ft_attempts > 0 ? (p.ft_makes / p.ft_attempts) : (p.ft_pct || 0),
+            ft_attempts: p.ft_attempts || 0,
+            three_pt_attempts: p.three_pt_attempts || 0,
+          };
+          
+          // 3. Calcular as métricas avançadas possíveis para OTE
+          const ts_denominator = 2 * (p.total_field_goal_attempts + 0.44 * p.ft_attempts);
+          advancedStats.ts_percent = ts_denominator > 0 ? (p.total_points / ts_denominator) : 0;
+          
+          const efg_denominator = p.total_field_goal_attempts;
+          advancedStats.efg_percent = efg_denominator > 0 ? ((p.two_pt_makes + p.three_pt_makes + 0.5 * p.three_pt_makes) / efg_denominator) : 0;
+        } else {
+          // Lógica original para dados de high school
+          basicStats = {
+            ppg: hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0,
+            rpg: hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0,
+            apg: hsStats.ast && gamesPlayed > 0 ? (hsStats.ast / gamesPlayed) : 0,
+            spg: hsStats.stl && gamesPlayed > 0 ? (hsStats.stl / gamesPlayed) : 0,
+            bpg: hsStats.blk && gamesPlayed > 0 ? (hsStats.blk / gamesPlayed) : 0,
+            fg_pct: hsStats.fga > 0 ? (hsStats.fgm / hsStats.fga) : 0,
+            three_pct: hsStats['3pa'] > 0 ? (hsStats['3pm'] / hsStats['3pa']) : 0,
+            ft_pct: hsStats.fta > 0 ? (hsStats.ftm / hsStats.fta) : 0,
+            ft_attempts: hsStats.fta || 0,
+            three_pt_attempts: hsStats['3pa'] || 0,
+          };
+          
+          // 3. Calcular as métricas avançadas possíveis (TS%, eFG%)
+          const ts_denominator = 2 * (hsStats.fga + 0.44 * hsStats.fta);
+          advancedStats.ts_percent = ts_denominator > 0 ? (hsStats.pts / ts_denominator) : 0;
+          
+          const efg_denominator = hsStats.fga;
+          advancedStats.efg_percent = efg_denominator > 0 ? ((hsStats.fgm + 0.5 * hsStats['3pm']) / efg_denominator) : 0;
+        }
 
         competitionMultiplier = 0.9; // Aplicar um multiplicador padrão para High School
 

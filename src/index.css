@@ -93,3 +93,14 @@
     @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300;
   }
 }
+
+/* Utility classes para gaming tooltips */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

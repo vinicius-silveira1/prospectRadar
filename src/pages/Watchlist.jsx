@@ -11,7 +11,6 @@ import WatchlistProspectCard from '@/components/Watchlist/WatchlistProspectCard'
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import ProspectNotesCard from '@/components/Watchlist/ProspectNotesCard';
 import useProspectNotes from '@/hooks/useProspectNotes';
-import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const Watchlist = () => {
   const { getNote, saveNote, deleteNote, saving } = useProspectNotes();
@@ -157,12 +156,6 @@ const Watchlist = () => {
           ))}
         </AnimatePresence>
       </motion.div>
-
-      <BadgeBottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={handleCloseBottomSheet}
-        badge={selectedBadgeData}
-      />
     </div>
   );
 };

@@ -15,11 +15,11 @@ import HeightInput from '../components/Common/HeightInput';
 import { parseHeightToInches, parseWingspanToInches, formatInchesToFeet, parseWeightToLbs } from '@/utils/filterUtils.js';
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
+import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import { useResponsive } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
-import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
 const getAllAvailableBadges = (prospects) => {
@@ -71,19 +71,6 @@ const Prospects = () => {
   const [searchParams] = useSearchParams();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-
-  // State and handlers for mobile badge bottom sheet
-  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-
-  const handleBadgeClick = (badge) => {
-    setSelectedBadgeData(badge);
-    setIsBottomSheetOpen(true);
-  };
-
-  const handleCloseBottomSheet = () => {
-    setIsBottomSheetOpen(false);
-  };
   
   // User plan is now derived from the user object
   const userPlan = user?.subscription_tier?.toLowerCase() || 'free';
@@ -100,6 +87,7 @@ const Prospects = () => {
   const [minRPG, setMinRPG] = useState('');
   const [minAPG, setMinAPG] = useState('');
   const [selectedBadge, setSelectedBadge] = useState('all');
+  const [hoveredBadgeByProspect, setHoveredBadgeByProspect] = useState({});
 
 
   useEffect(() => {
@@ -119,6 +107,29 @@ const Prospects = () => {
       } else {
         console.error('Erro ao adicionar à watchlist:', error);
       }
+    }
+  };
+
+  // Funções para gerenciar badges hover
+  const handleBadgeHover = (prospectId, badge) => {
+    if (isMobile) {
+      // No mobile, toggle: se o mesmo badge for clicado, fecha
+      const currentBadge = hoveredBadgeByProspect[prospectId];
+      if (currentBadge && currentBadge?.label === badge?.label) {
+        setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: null }));
+      } else {
+        setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: badge }));
+      }
+    } else {
+      // No desktop, comportamento normal de hover
+      setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: badge }));
+    }
+  };
+
+  const handleCardClick = (prospectId, e) => {
+    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    if (isMobile && hoveredBadgeByProspect[prospectId] && !e.target.closest('.badge-container')) {
+      setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: null }));
     }
   };
 
@@ -449,6 +460,7 @@ const Prospects = () => {
                   }}
                   whileHover={{ scale: 1.03, y: -5, transition: { duration: 0.2 } }}
                   className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transform transition-all duration-300 flex flex-col"
+                  onClick={(e) => handleCardClick(prospect.id, e)}
                 >
                   {/* Header Image */}
                   <div className="relative">
@@ -504,9 +516,14 @@ const Prospects = () => {
 
                     {/* Badges */}
                     {badges.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 badge-container">
                         {badges.map((badge, index) => (
-                          <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
+                          <Badge 
+                            key={index} 
+                            badge={badge} 
+                            onBadgeHover={(badge) => handleBadgeHover(prospect.id, badge)} 
+                            isMobile={isMobile} 
+                          />
                         ))}
                       </div>
                     )}
@@ -526,37 +543,59 @@ const Prospects = () => {
                     {/* Spacer to push stats and actions to the bottom */}
                     <div className="flex-grow"></div>
 
-                    {/* Stats */}
+                    {/* Stats / Achievements Section */}
                     <div className="border-t dark:border-super-dark-border pt-3">
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
-                        <div className="flex items-center gap-2">
-                          {isHighSchool && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                              High School
-                            </span>
-                          )}
-                          {(league || season) && !isHighSchool && (
-                            <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                              {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4 text-center text-sm mt-2">
-                        <div>
-                          <p className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
-                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-                        </div>
-                        <div>
-                          <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
-                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-                        </div>
-                        <div>
-                          <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
-                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-                        </div>
-                      </div>
+                      <AnimatePresence mode="wait">
+                        {hoveredBadgeByProspect[prospect.id] ? (
+                          <motion.div
+                            key="achievements"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <AchievementUnlock badge={hoveredBadgeByProspect[prospect.id]} />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="stats"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">Estatísticas</h4>
+                              <div className="flex items-center gap-2">
+                                {isHighSchool && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                                    High School
+                                  </span>
+                                )}
+                                {(league || season) && !isHighSchool && (
+                                  <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                                    {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 text-center text-sm mt-2">
+                              <div>
+                                <p className="font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+                              </div>
+                              <div>
+                                <p className="font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+                              </div>
+                              <div>
+                                <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
+                                <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Action Buttons */}
@@ -632,7 +671,7 @@ const Prospects = () => {
                             {badges.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
                                 {badges.slice(0, 3).map((badge, index) => (
-                                  <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
+                                  <Badge key={index} badge={badge} />
                                 ))}
                                 {badges.length > 3 && (
                                   <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 3} mais badges`}>
@@ -712,12 +751,6 @@ const Prospects = () => {
         onClose={() => setIsUpgradeModalOpen(false)}
         feature="watchlist"
         limit={5}
-      />
-
-      <BadgeBottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={handleCloseBottomSheet}
-        badge={selectedBadgeData}
       />
     </div>
   );

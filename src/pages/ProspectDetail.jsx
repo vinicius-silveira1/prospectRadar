@@ -14,7 +14,7 @@ import SingleProspectExport from '@/components/Common/SingleProspectExport.jsx';
 import MobileExportActions from '@/components/Common/MobileExportActions.jsx';
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
-import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
+
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
@@ -81,6 +81,7 @@ const ProspectDetail = () => {
     if (!prospect) return {};
 
     const isHighSchool = prospect.stats_source === 'high_school_total';
+    const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
 
     if (isHighSchool && prospect.high_school_stats?.season_total) {
       const hs = prospect.high_school_stats.season_total;
@@ -106,6 +107,35 @@ const ProspectDetail = () => {
         ft_pct,
         three_pct,
         ts_percent,
+        efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
+      };
+    }
+
+    // Para prospectos OTE, usar estatísticas do nível superior
+    if (isOTE) {
+      const gamesPlayed = Number(prospect.games_played || 0);
+      const calculatedPPG = gamesPlayed > 0 ? (Number(prospect.total_points || 0) / gamesPlayed) : Number(prospect.ppg || 0);
+      const calculatedRPG = gamesPlayed > 0 ? (Number(prospect.total_rebounds || 0) / gamesPlayed) : Number(prospect.rpg || 0);
+      const calculatedAPG = gamesPlayed > 0 ? (Number(prospect.total_assists || 0) / gamesPlayed) : Number(prospect.apg || 0);
+      const calculatedSPG = gamesPlayed > 0 ? (Number(prospect.total_steals || 0) / gamesPlayed) : Number(prospect.spg || 0);
+      const calculatedBPG = gamesPlayed > 0 ? (Number(prospect.total_blocks || 0) / gamesPlayed) : Number(prospect.bpg || 0);
+      
+      // Verificar se tem estatísticas válidas
+      const hasValidStats = calculatedPPG > 0 || calculatedRPG > 0 || calculatedAPG > 0 || gamesPlayed > 0;
+      
+      return {
+        ...prospect,
+        is_hs: true,
+        hasStats: hasValidStats,
+        ppg: calculatedPPG,
+        rpg: calculatedRPG,
+        apg: calculatedAPG,
+        spg: calculatedSPG,
+        bpg: calculatedBPG,
+        fg_pct: Number(prospect.total_field_goal_attempts || 0) > 0 ? ((Number(prospect.two_pt_makes || 0) + Number(prospect.three_pt_makes || 0)) / Number(prospect.total_field_goal_attempts || 0)) : 0,
+        ft_pct: Number(prospect.ft_attempts || 0) > 0 ? (Number(prospect.ft_makes || 0) / Number(prospect.ft_attempts || 0)) : 0,
+        three_pct: Number(prospect.three_pct || 0),
+        ts_percent: Number(prospect.ts_percent || prospect.fg_pct || 0),
         efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
       };
     }
@@ -664,11 +694,7 @@ const ProspectDetail = () => {
           </div>
         </div>
       </div>
-      <BadgeBottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={handleCloseBottomSheet}
-        badge={selectedBadgeData}
-      />
+      
     </div>
   );
 };

@@ -2,6 +2,11 @@ import { Star, TrendingUp, TrendingDown, Minus, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { imageManager } from '../../utils/imageManagerV2.js';
+import { assignBadges } from '../../lib/badges';
+import Badge from '../Common/Badge';
+import AchievementUnlock from '../Common/AchievementUnlock';
+import { useResponsive } from '../../hooks/useResponsive';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   const [imageState, setImageState] = useState({
@@ -9,6 +14,9 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
     isLoading: true,
     hasError: false
   });
+  const [hoveredBadge, setHoveredBadge] = useState(null);
+  const { isMobile } = useResponsive();
+  const badges = assignBadges(prospect);
 
   // Load image when component mounts
   useEffect(() => {
@@ -49,6 +57,27 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
     }
   };
 
+  const handleCardClick = (e) => {
+    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    if (isMobile && hoveredBadge && !e.target.closest('.badge-container')) {
+      setHoveredBadge(null);
+    }
+  };
+
+  const handleBadgeHover = (badge) => {
+    if (isMobile) {
+      // No mobile, toggle: se o mesmo badge for clicado, fecha
+      if (hoveredBadge && hoveredBadge.label === badge?.label) {
+        setHoveredBadge(null);
+      } else {
+        setHoveredBadge(badge);
+      }
+    } else {
+      // No desktop, comportamento normal de hover
+      setHoveredBadge(badge);
+    }
+  };
+
   const handleImageError = async () => {
     // Se falhar, usa o avatar como fallback
     const fallbackUrl = imageManager.generateDetailedAvatar(prospect.name, prospect.position, prospect.height, prospect.weight);
@@ -73,7 +102,10 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   const displayImageUrl = imageState.currentUrl || imageManager.generateDetailedAvatar(prospect.name, prospect.position, prospect.height, prospect.weight);
 
   return (
-    <div className="prospect-card bg-white/60 backdrop-blur-lg border border-slate-200 rounded-2xl shadow-xl hover:shadow-2xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1">
+    <div 
+      className="prospect-card bg-white/60 backdrop-blur-lg border border-slate-200 rounded-2xl shadow-xl hover:shadow-2xl hover:border-brand-orange transition-all duration-300 transform hover:-translate-y-1"
+      onClick={handleCardClick}
+    >
       {/* Header with ranking and watchlist */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-2">
@@ -159,47 +191,90 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
           <span>{prospect.position}</span>
           <span>Class of {prospect.class}</span>
         </div>
+        
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div className="mt-3 flex flex-wrap justify-center gap-1 badge-container">
+            {badges.slice(0, 4).map((badge, index) => (
+              <Badge 
+                key={index} 
+                badge={badge} 
+                onBadgeHover={handleBadgeHover}
+                isMobile={isMobile}
+              />
+            ))}
+            {badges.length > 4 && (
+              <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 4} mais badges`}>
+                +{badges.length - 4}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-2 text-center text-xs">
-        <div>
-          <p className="font-bold text-blue-600 dark:text-blue-400">{prospect.stats.ppg}</p>
-          <p className="text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-        </div>
-        <div>
-          <p className="font-bold text-green-600 dark:text-green-400">{prospect.stats.rpg}</p>
-          <p className="text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-        </div>
-        <div>
-          <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.stats.apg}</p>
-          <p className="text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-        </div>
-      </div>
+      {/* Stats Grid ou Achievement Unlock */}
+      <AnimatePresence mode="wait">
+        {hoveredBadge ? (
+          <motion.div
+            key="achievement"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4"
+          >
+            <AchievementUnlock badge={hoveredBadge} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="stats"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-2 text-center text-xs mb-4">
+              <div>
+                <p className="font-bold text-blue-600 dark:text-blue-400">{prospect.stats.ppg}</p>
+                <p className="text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+              </div>
+              <div>
+                <p className="font-bold text-green-600 dark:text-green-400">{prospect.stats.rpg}</p>
+                <p className="text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+              </div>
+              <div>
+                <p className="font-bold text-orange-600 dark:text-orange-400">{prospect.stats.apg}</p>
+                <p className="text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+              </div>
+            </div>
 
-      {/* Shooting Stats */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-super-dark-border">
-        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div>
-            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.fg_pct * 100).toFixed(1)}%</p>
-            <p className="text-slate-500 dark:text-super-dark-text-secondary">FG%</p>
-          </div>
-          <div>
-            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</p>
-            <p className="text-slate-500 dark:text-super-dark-text-secondary">3P%</p>
-          </div>
-          <div>
-            <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.ft_pct * 100).toFixed(1)}%</p>
-            <p className="text-slate-500 dark:text-super-dark-text-secondary">FT%</p>
-          </div>
-        </div>
-      </div>
+            {/* Shooting Stats */}
+            <div className="pt-4 border-t border-gray-200 dark:border-super-dark-border">
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div>
+                  <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.fg_pct * 100).toFixed(1)}%</p>
+                  <p className="text-slate-500 dark:text-super-dark-text-secondary">FG%</p>
+                </div>
+                <div>
+                  <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.three_pt_pct * 100).toFixed(1)}%</p>
+                  <p className="text-slate-500 dark:text-super-dark-text-secondary">3P%</p>
+                </div>
+                <div>
+                  <p className="font-bold text-purple-600 dark:text-purple-400">{(prospect.stats.ft_pct * 100).toFixed(1)}%</p>
+                  <p className="text-slate-500 dark:text-super-dark-text-secondary">FT%</p>
+                </div>
+              </div>
+            </div>
 
-      {/* Comparison */}
-      <div className="mt-4 text-center">
-        <p className="text-xs text-gray-500">NBA Comparison</p>
-        <p className="text-sm font-medium text-nba-blue">{prospect.comparison}</p>
-      </div>
+            {/* Comparison */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-500">NBA Comparison</p>
+              <p className="text-sm font-medium text-nba-blue">{prospect.comparison}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

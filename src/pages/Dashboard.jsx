@@ -15,7 +15,6 @@ import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js
 
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { createPortalSession } from '@/services/stripe';
-import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -324,11 +323,7 @@ const Dashboard = () => {
         limit={5}
       />
 
-      <BadgeBottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={handleCloseBottomSheet}
-        badge={selectedBadgeData}
-      />
+      
     </div>
   );
 };

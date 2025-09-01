@@ -11,6 +11,8 @@ import { useProspectImage } from '@/hooks/useProspectImage';
 import { assignBadges } from '@/lib/badges';
 import UpgradeModal from '@/components/Common/UpgradeModal';
 import Badge from '@/components/Common/Badge';
+import AchievementUnlock from '@/components/Common/AchievementUnlock';
+import { useResponsive } from '@/hooks/useResponsive';
 import useMockDraft from '../hooks/useMockDraft.js';
 import useProspects from '@/hooks/useProspects.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
@@ -19,7 +21,7 @@ import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet.jsx';
+
 
 const MockDraft = () => {
   const { user } = useAuth();
@@ -382,11 +384,7 @@ const MockDraft = () => {
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
         </div>
 
-        <BadgeBottomSheet
-          isOpen={isBottomSheetOpen}
-          onClose={handleCloseBottomSheet}
-          badge={selectedBadgeData}
-        />
+        
       </div>
     </LayoutGroup>
   );
@@ -572,15 +570,39 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
 const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const badges = assignBadges(prospect);
+  const [hoveredBadge, setHoveredBadge] = useState(null);
+  const { isMobile } = useResponsive();
 
   const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
   const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
   const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
+  const handleCardClick = (e) => {
+    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    if (isMobile && hoveredBadge && !e.target.closest('.badge-container')) {
+      setHoveredBadge(null);
+    }
+  };
+
+  const handleBadgeHover = (badge) => {
+    if (isMobile) {
+      // No mobile, toggle: se o mesmo badge for clicado, fecha
+      if (hoveredBadge && hoveredBadge.label === badge?.label) {
+        setHoveredBadge(null);
+      } else {
+        setHoveredBadge(badge);
+      }
+    } else {
+      // No desktop, comportamento normal de hover
+      setHoveredBadge(badge);
+    }
+  };
+
   return (
     <motion.div 
       whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
       className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple min-h-[320px] flex flex-col"
+      onClick={handleCardClick}
     >
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-3">
@@ -598,9 +620,14 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
             <p className="font-bold text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">{prospect.name}</p>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
-            <div className="mt-1 flex flex-wrap gap-1">
+            <div className="mt-1 flex flex-wrap gap-1 badge-container">
               {badges.slice(0, 4).map((badge, index) => (
-                <Badge key={index} badge={badge} onBadgeClick={onBadgeClick} />
+                <Badge 
+                  key={index} 
+                  badge={badge} 
+                  onBadgeHover={handleBadgeHover}
+                  isMobile={isMobile}
+                />
               ))}
               {badges.length > 4 && (
                 <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 4} mais badges`}>
@@ -622,39 +649,62 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
           </div>
         )}
         
-        {/* Stats Grid */}
+        {/* Stats Grid ou Achievement Unlock */}
         <div className="border-t dark:border-super-dark-border pt-3">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
-              Estatísticas
-            </h4>
-            <div className="flex items-center gap-2">
-              {isHighSchool && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                  High School
-                </span>
-              )}
-              {(league || season) && !isHighSchool && (
-                <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                  {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
-            <div>
-              <p className="font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-            </div>
-            <div>
-              <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-            </div>
-            <div>
-              <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
-              <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-            </div>
-          </div>
+          <AnimatePresence mode="wait">
+            {hoveredBadge ? (
+              <motion.div
+                key="achievement"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="mb-4"
+              >
+                <AchievementUnlock badge={hoveredBadge} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="stats"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
+                    Estatísticas
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    {isHighSchool && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                        High School
+                      </span>
+                    )}
+                    {(league || season) && !isHighSchool && (
+                      <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                        {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
+                  <div>
+                    <p className="font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         
         {/* Action Buttons */}
