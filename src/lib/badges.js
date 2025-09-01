@@ -8,36 +8,36 @@
 export const badges = {
   // Shooting
   ELITE_SHOOTER: {
-    label: 'Arremessador de Elite',
-    description: 'Um arremessador letal da longa distância com altíssimo aproveitamento e volume.',
+    label: 'Sniper de 3',
+    description: 'Um arremessador letal da linha de três pontos, com altíssimo aproveitamento e volume. Faz chover de qualquer lugar!',
     icon: '🎯',
   },
   PROMISING_SHOOTER: {
-    label: 'Arremessador Promissor',
-    description: 'Mostra um arremesso consistente e eficiente, com potencial para se tornar uma ameaça de elite.',
-    icon: '👌',
+    label: 'Futuro Sniper',
+    description: 'Mostra um arremesso consistente e eficiente, com potencial para se tornar uma ameaça de elite. Olho nele!',
+    icon: '📈',
   },
   // Playmaking
   FLOOR_GENERAL: {
-    label: 'Maestro da Equipe',
-    description: 'Um playmaker de elite que cria para os outros com eficiência e baixo número de erros.',
+    label: 'Cérebro da Quadra',
+    description: 'Um playmaker que enxerga o jogo em câmera lenta, orquestrando o ataque com ótimos passes e boas decisões.',
     icon: '🧠',
   },
   // Defense
   ELITE_DEFENDER: {
-    label: 'Defensor de Elite',
-    description: 'Impacto defensivo de elite, combinando roubos e tocos em alto nível.',
+    label: 'Cadeado',
+    description: 'Um pesadelo para o ataque adversário. Rouba bolas e distribui tocas como se não houvesse amanhã. Não passa nada!',
     icon: '🔒',
   },
   RIM_PROTECTOR: {
-    label: 'Protetor de Aro',
-    description: 'Intimida adversários no garrafão com uma excelente taxa de tocos para sua posição.',
+    label: 'Guardião do Garrafão',
+    description: 'O terror da área pintada. Ninguém esta sujeito à atacar a cesta sem levar um tocasso. A muralha do time!',
     icon: '🛡️',
   },
   PERIMETER_DEFENDER: {
     label: 'Defensor de Perímetro',
     description: 'Um "carrapato" na defesa, gerando roubos de bola e pressionando o adversário no perímetro.',
-    icon: '✋',
+    icon: '🧤',
   },
   // Scoring & Efficiency
   EFFICIENT_SCORER: {
@@ -52,9 +52,9 @@ export const badges = {
   },
   // Rebounding
   REBOUNDING_FORCE: {
-    label: 'Força nos Rebotes',
-    description: 'Domina os rebotes, garantindo posses de bola para sua equipe.',
-    icon: '💪',
+    label: 'Imã de Rebotes',
+    description: 'Gigante na briga pela bola. Pega rebotes ofensivos e defensivos, fechando o garrafão ou gerando segundas chances.',
+    icon: '🧲',
   },
   // Intangibles & Archetypes
   EXPLOSIVO: {
@@ -63,8 +63,8 @@ export const badges = {
     icon: '💥',
   },
   HIGH_MOTOR: {
-    label: 'Motor Incansável',
-    description: 'Jogador de alta energia que está sempre ativo, especialmente nos rebotes ofensivos e linhas de passe.',
+    label: 'Incansável',
+    description: 'Nunca para! jogador de alta energia que está sempre ativo, especialmente nos rebotes ofensivos e linhas de passe.',
     icon: '🔋',
   },
   SWISS_ARMY_KNIFE: {
@@ -74,24 +74,24 @@ export const badges = {
   },
   THE_CONNECTOR: {
     label: 'Conector',
-    description: 'Jogador de baixo uso que otimiza o ataque com alta eficiência e baixo número de erros.',
+    description: 'Faz tudo funcionar! Não precisa da bola na mão, otimiza o ataque com inteligência, passes precisos e poucos erros.',
     icon: '🔗',
   },
   MICROWAVE_SCORER: {
     label: 'Micro-ondas',
-    description: 'Capaz de marcar muitos pontos em poucos minutos.',
+    description: 'Entra em quadra e esquenta em segundos! Capaz de marcar muitos pontos em pouco tempo, mudando o ritmo do jogo.',
     icon: '♨️',
   },
   IRON_MAN: {
-    label: 'Pilar do Time',
-    description: 'Jogador durável e confiável, com alto número de jogos e minutos jogados na temporada.',
+    label: 'Tanque de Guerra',
+    description: 'Sempre em quadra, nunca se machuca. Aguenta o tranco, joga todos os minutos e é a base da equipe.',
     icon: '🦾',
   },
   // Negative Badge
   FOUL_MAGNET: {
-    label: 'Ímã de Faltas',
-    description: 'Comete um número elevado de faltas por jogo, o que pode ser um risco para a equipe.',
-    icon: '🚩',
+    label: 'Mão Pesada',
+    description: 'Vive no limite de faltas! Pode ser um risco para a equipe.',
+    icon: '🚨',
   },
 };
 
