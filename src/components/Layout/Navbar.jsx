@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Menu, LogOut, User } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveStack, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
@@ -89,7 +90,27 @@ const Navbar = ({ onMenuClick }) => {
   }[breakpoint] || 'px-3 py-2';
 
   return (
-    <nav className={`bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-md rounded-xl shadow-lg dark:shadow-super-dark-primary/50 border border-slate-200/60 dark:border-super-dark-border/60 ${containerPadding}`}>
+    <motion.nav 
+      className={`relative bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-md rounded-xl shadow-md dark:shadow-super-dark-primary/30 border border-slate-200/60 dark:border-super-dark-border/60 ${containerPadding} overflow-hidden group`}
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      whileHover={{
+        boxShadow: "0 0 20px rgba(59, 130, 246, 0.1), 0 0 40px rgba(168, 85, 247, 0.05)"
+      }}
+    >
+      {/* Hexagonal pattern background */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <pattern id="hexPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#hexPattern)" />
+        </svg>
+      </div>
+
+      {/* Subtle shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
       <ResponsiveStack
         direction={{
           xs: 'flex-row',
@@ -119,48 +140,68 @@ const Navbar = ({ onMenuClick }) => {
             <Menu className={isMobile ? 'h-5 w-5' : 'h-6 w-6'} />
           </button>
           
-          <Link to="/" className="flex items-center gap-2">
-            <img 
+          <Link to="/" className="flex items-center gap-2 group">
+            <motion.img 
               src="/logo.png" 
               alt="ProspectRadar Logo" 
               className={`${logoSize} object-contain`}
-            />
-            <ResponsiveText
-              as="h1"
-              size={{
-                xs: 'text-sm',
-                sm: 'text-base',
-                md: 'text-lg',
-                lg: 'text-lg',
-                xl: 'text-xl',
-                '2xl': 'text-xl'
+              whileHover={{ 
+                scale: 1.1, 
+                rotate: 5,
+                filter: "drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))"
               }}
-              weight="font-bold"
-              className="hidden sm:block"
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            />
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <span className="text-brand-orange">prospect</span>
-              <span className="text-brand-purple">Radar</span>
-            </ResponsiveText>
+              <ResponsiveText
+                as="h1"
+                size={{
+                  xs: 'text-sm',
+                  sm: 'text-base',
+                  md: 'text-lg',
+                  lg: 'text-lg',
+                  xl: 'text-xl',
+                  '2xl': 'text-xl'
+                }}
+                weight="font-bold"
+                className="hidden sm:block"
+              >
+                <span className="text-brand-orange">prospect</span>
+                <span className="text-brand-purple">Radar</span>
+              </ResponsiveText>
+            </motion.div>
           </Link>
         </div>
 
         {/* Center Section: Search (Hidden on mobile) */}
         {!isMobile && (
           <div className={`flex-1 flex justify-center px-2 md:px-4`}>
-            <form onSubmit={handleSearch} className={`relative w-full ${searchWidth}`}>
+            <motion.form 
+              onSubmit={handleSearch} 
+              className={`relative w-full ${searchWidth} group`}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
               <button 
                 type="submit" 
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 dark:text-super-dark-text-secondary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 focus:outline-none z-10" 
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 dark:text-super-dark-text-secondary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 focus:outline-none z-20" 
                 aria-label="Buscar"
               >
                 <Search className="h-4 w-4 md:h-5 md:w-5" />
               </button>
-              <AnimatedSearchInput 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 md:pl-10 pr-4 py-2 border border-slate-200 dark:border-super-dark-border rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white/80 dark:bg-super-dark-secondary/80 text-slate-900 dark:text-super-dark-text-primary backdrop-blur-xl text-sm md:text-base"
-              />
-            </form>
+              <div className="relative">
+                <AnimatedSearchInput 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8 md:pl-10 pr-4 py-2 border border-slate-200 dark:border-super-dark-border rounded-lg focus:ring-2 focus:ring-brand-orange focus:border-transparent bg-white/80 dark:bg-super-dark-secondary/80 text-slate-900 dark:text-super-dark-text-primary backdrop-blur-xl text-sm md:text-base transition-all duration-300 group-hover:shadow-lg group-hover:border-brand-purple/30 dark:group-hover:border-brand-purple/30"
+                />
+                {/* Subtle glow effect on focus */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-brand-purple/10 to-brand-cyan/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </div>
+            </motion.form>
           </div>
         )}
 
@@ -168,55 +209,85 @@ const Navbar = ({ onMenuClick }) => {
         <div className="flex items-center gap-1 sm:gap-2">
           {/* Mobile Search Button */}
           {isMobile && (
-            <Link 
-              to="/prospects" 
-              className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary text-slate-600 dark:text-super-dark-text-primary transition-colors active:scale-95" 
-              title="Buscar"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <Search size={18} />
-            </Link>
+              <Link 
+                to="/prospects" 
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary text-slate-600 dark:text-super-dark-text-primary transition-colors active:scale-95 hover:shadow-lg hover:shadow-brand-purple/20" 
+                title="Buscar"
+              >
+                <Search size={18} />
+              </Link>
+            </motion.div>
           )}
           
           {/* Theme Toggle */}
-          <div className="scale-90 sm:scale-100">
+          <motion.div 
+            className="scale-90 sm:scale-100"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
             <ThemeToggle />
-          </div>
+          </motion.div>
           
           {/* Authentication */}
           {user ? (
             <div className="flex items-center gap-1">
               {/* User Info (Hidden on mobile) */}
               {!isMobile && !isTablet && (
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 dark:bg-super-dark-secondary/80 rounded-lg backdrop-blur-sm">
+                <motion.div 
+                  className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 dark:bg-super-dark-secondary/80 rounded-lg backdrop-blur-sm"
+                  whileHover={{ 
+                    scale: 1.02,
+                    boxShadow: "0 0 15px rgba(59, 130, 246, 0.2)"
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
                   <User size={14} className="text-slate-500 dark:text-super-dark-text-secondary" />
                   <span className="text-sm text-slate-600 dark:text-super-dark-text-secondary font-medium truncate max-w-20">
                     {user.email.split('@')[0]}
                   </span>
-                </div>
+                </motion.div>
               )}
               
               {/* Logout Button */}
-              <button 
+              <motion.button 
                 onClick={handleLogout} 
                 className="p-1.5 sm:p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors active:scale-95" 
                 title="Sair"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(239, 68, 68, 0.3)"
+                }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <LogOut size={isMobile ? 16 : 18} />
-              </button>
+              </motion.button>
             </div>
           ) : (
-            <Link 
-              to="/login" 
-              className={`flex items-center bg-brand-orange text-white rounded-lg hover:bg-orange-600 transition-colors active:scale-95 font-medium ${
-                isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              {isMobile ? 'Login' : 'Entrar'}
-            </Link>
+              <Link 
+                to="/login" 
+                className={`relative flex items-center bg-gradient-to-r from-brand-orange to-orange-500 text-white rounded-lg hover:from-orange-500 hover:to-orange-600 transition-all duration-300 active:scale-95 font-medium overflow-hidden group ${
+                  isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
+                }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-out" />
+                <span className="relative z-10">{isMobile ? 'Login' : 'Entrar'}</span>
+              </Link>
+            </motion.div>
           )}
         </div>
       </ResponsiveStack>
-    </nav>
+    </motion.nav>
   );
 };
 

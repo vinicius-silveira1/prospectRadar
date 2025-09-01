@@ -50,40 +50,93 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
   const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
   return (
-    <div 
-      className={`bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-xl hover:-translate-y-2 transform transition-all duration-300 ease-out ${className}`} 
-      style={style}
+    <motion.div 
+      className={`bg-gradient-to-br from-white via-gray-50 to-blue-50/30 dark:from-super-dark-secondary dark:via-gray-900/80 dark:to-black/40 rounded-xl shadow-lg border dark:border-gray-700/50 hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-2xl hover:-translate-y-2 transform transition-all duration-300 ease-out group ${className}`} 
+      style={{
+        ...style,
+        boxShadow: '0 0 20px rgba(59, 130, 246, 0.1), 0 0 40px rgba(168, 85, 247, 0.05), 0 10px 25px rgba(0, 0, 0, 0.1)'
+      }}
       onClick={handleCardClick}
+      whileHover={{
+        scale: 1.02,
+        y: -5,
+        transition: { type: "spring", stiffness: 300, damping: 20 }
+      }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
       {/* Watch List Button */}
-      <button
+      <motion.button
         onClick={handleToggle}
-        className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-super-dark-secondary/80 hover:bg-white dark:hover:bg-slate-600 transition-all"
+        className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/90 dark:bg-super-dark-secondary/90 hover:bg-white dark:hover:bg-slate-600 transition-all backdrop-blur-sm"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        <Heart
-          size={16}
-          className={`transition-colors ${
-            isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'
-          } ${isAnimatingHeart ? 'animate-pulse-once' : ''}`} 
-        />
-      </button>
+        <motion.div
+          animate={isAnimatingHeart ? { 
+            scale: [1, 1.3, 1],
+            rotate: [0, 5, -5, 0]
+          } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <Heart
+            size={16}
+            className={`transition-colors ${
+              isInWatchlist ? 'text-brand-orange fill-current drop-shadow-sm' : 'text-slate-400 hover:text-brand-orange'
+            }`} 
+          />
+        </motion.div>
+      </motion.button>
       <div className="p-4">
         <div className="flex items-center space-x-4 mb-4">
           {/* Image or Skeleton */}
-          <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+          <motion.div 
+            className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold ring-2 ring-transparent group-hover:ring-brand-purple/30 transition-all duration-300"
+            style={{ backgroundColor: getColorFromName(prospect?.name) }}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
             {isLoading ? (
-              <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+              <motion.div 
+                className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
             ) : imageUrl ? (
               <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span>{getInitials(prospect?.name)}</span>
+              <motion.span
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                {getInitials(prospect?.name)}
+              </motion.span>
             )}
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
-            <Link to={`/prospects/${prospect.id}`} className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate">
-              {prospect.name}
-            </Link>
-            <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary truncate">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Link 
+                to={`/prospects/${prospect.id}`} 
+                className="relative font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate block group"
+              >
+                <span className="relative z-10">{prospect.name}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-purple/10 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
+              </Link>
+            </motion.div>
+            <motion.p 
+              className="text-sm text-slate-500 dark:text-super-dark-text-secondary truncate"
+              initial={{ opacity: 0.7 }}
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {prospect.position} • {prospect.high_school_team || 'N/A'}
+            </motion.p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1 badge-container">
               {badges.map((badge, index) => (
@@ -100,20 +153,55 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
         </div>
         <div className="flex items-center gap-2 mt-2">
           {prospect.radar_score && (
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
-              <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
-              <span className="text-xs">Radar Score</span>
-            </div>
+            <motion.div 
+              className="relative inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 0 25px rgba(59, 130, 246, 0.4), 0 0 50px rgba(168, 85, 247, 0.2)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <motion.span 
+                className="font-bold text-lg relative z-10"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                {prospect.radar_score.toFixed(2)}
+              </motion.span>
+              <span className="text-xs relative z-10">Radar Score</span>
+            </motion.div>
           )}
           {prospect.name === 'Lucas Atauri' && (
-            <motion.span
-              className="inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-300 dark:border-blue-700"
+            <motion.div
+              className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white border-2 border-blue-400 dark:border-blue-300 shadow-lg shadow-blue-500/40 dark:shadow-blue-400/30 overflow-hidden group"
               initial={{ scale: 1 }}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ 
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0 0 20px rgba(59, 130, 246, 0.4)",
+                  "0 0 30px rgba(59, 130, 246, 0.6)", 
+                  "0 0 20px rgba(59, 130, 246, 0.4)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              whileHover={{
+                scale: 1.1,
+                boxShadow: "0 0 40px rgba(59, 130, 246, 0.8)"
+              }}
             >
-              DePaul Commit! 🔵
-            </motion.span>
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+              
+              {/* Pulsing background */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-blue-600/30 rounded-full"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              <span className="relative z-10 font-bold">DePaul Commit! 🔵</span>
+            </motion.div>
           )}
         </div>
         <div className="mt-4 border-t dark:border-super-dark-border pt-3">
@@ -137,14 +225,32 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                 transition={{ duration: 0.3 }}
               >
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
-                    Estatísticas
-                  </h4>
+                  <motion.h4 
+                    className="relative text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase tracking-wider"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <span className="relative z-10">Estatísticas</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 scale-x-0 hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
+                  </motion.h4>
                   <div className="flex items-center gap-2">
                     {isHighSchool && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                        High School
-                      </span>
+                      <motion.span 
+                        className="relative inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white border border-orange-300 dark:border-orange-400 shadow-md shadow-orange-500/30 dark:shadow-orange-400/20 overflow-hidden group"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        {/* Subtle shimmer */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <span className="relative z-10 font-semibold">High School</span>
+                      </motion.span>
                     )}
                     {(league || season) && !isHighSchool && (
                       <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
@@ -154,18 +260,60 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-center mt-2">
-                  <div>
-                    <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{prospect.ppg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold text-green-600 dark:text-green-400">{prospect.rpg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold text-orange-600 dark:text-orange-400">{prospect.apg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-                  </div>
+                  <motion.div
+                    className="relative p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p 
+                      className="text-xl font-bold text-purple-600 dark:text-purple-400 relative z-10"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      {prospect.ppg?.toFixed(1) || '-'}
+                    </motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">PPG</p>
+                  </motion.div>
+                  <motion.div
+                    className="relative p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30 overflow-hidden group"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p 
+                      className="text-xl font-bold text-green-600 dark:text-green-400 relative z-10"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      {prospect.rpg?.toFixed(1) || '-'}
+                    </motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">RPG</p>
+                  </motion.div>
+                  <motion.div
+                    className="relative p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30 overflow-hidden group"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p 
+                      className="text-xl font-bold text-orange-600 dark:text-orange-400 relative z-10"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                      {prospect.apg?.toFixed(1) || '-'}
+                    </motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">APG</p>
+                  </motion.div>
                 </div>
               </motion.div>
             )}
@@ -173,9 +321,21 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
         </div>
       </div>
       <div className="p-4 pt-0">
-        <Link to={`/prospects/${prospect.id}`} className="w-full block text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium">Ver Detalhes</Link>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <Link 
+            to={`/prospects/${prospect.id}`} 
+            className="relative w-full block text-center px-3 py-2 bg-gradient-to-r from-purple-100/50 via-purple-50 to-purple-100/50 dark:from-brand-purple/10 dark:via-brand-purple/5 dark:to-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:from-cyan-100/80 hover:via-cyan-50 hover:to-cyan-100/80 dark:hover:from-brand-cyan/20 dark:hover:via-brand-cyan/10 dark:hover:to-brand-cyan/20 transition-all duration-300 text-sm font-medium border border-purple-200/50 dark:border-purple-700/30 hover:border-cyan-300/50 dark:hover:border-cyan-600/30 overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-purple-500/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+            <span className="relative z-10">Ver Detalhes</span>
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
