@@ -131,6 +131,18 @@ const Prospects = () => {
     // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
     if (isMobile && hoveredBadgeByProspect[prospectId] && !e.target.closest('.badge-container')) {
       setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: null }));
+      return;
+    }
+    
+    // Verifica se clicou em algum elemento interativo
+    const isButton = e.target.closest('button');
+    const isLink = e.target.closest('a');
+    const isInput = e.target.closest('input');
+    const isSelect = e.target.closest('select');
+    
+    // Se não clicou em elemento interativo, navega para a página do prospecto
+    if (!isButton && !isLink && !isInput && !isSelect) {
+      navigate(`/prospects/${prospectId}`);
     }
   };
 
@@ -279,7 +291,7 @@ const Prospects = () => {
     setSelectedBadge('all');
   };
   
-  const inputBaseClasses = "w-full px-4 py-2 bg-gradient-to-r from-slate-50 to-white dark:from-super-dark-secondary dark:to-slate-800 border-2 border-slate-200 dark:border-super-dark-border hover:border-purple-300 dark:hover:border-purple-600 rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500";
+  const inputBaseClasses = "w-full px-4 py-2 bg-gradient-to-r from-slate-50 to-white dark:from-super-dark-secondary dark:to-slate-800 border-2 border-slate-200 dark:border-super-dark-border hover:border-purple-300 dark:hover:border-purple-600 rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 relative z-50";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
@@ -595,37 +607,41 @@ const Prospects = () => {
                     transition: { duration: 0.3, type: "spring", stiffness: 300 } 
                   }}
                   className="bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-lg border border-gray-200/50 dark:border-super-dark-border hover:border-purple-300/50 dark:hover:border-purple-700/50 backdrop-blur-sm transform transition-all duration-300 flex flex-col relative overflow-hidden group"
-                  onClick={(e) => handleCardClick(prospect.id, e)}
                 >
-                  {/* Gaming glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-purple-600/20 rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500 -z-10" />
-                  {/* Header Image */}
-                  <div className="relative">
-                    <button 
-                      onClick={() => handleToggleWatchlist(prospect.id)} 
-                      className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 transition-all"
-                    >
-                      <Heart 
-                        size={16} 
-                        className={`transition-colors ${isInWatchList ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} 
-                      />
-                    </button>
-                    <div 
-                      className="h-48 flex items-center justify-center text-white text-5xl font-bold"
-                      style={{ backgroundColor: getColorFromName(prospect?.name) }}
-                    >
-                      {prospect.image ? (
-                        <img 
-                          src={prospect.image} 
-                          alt={prospect?.name || 'Prospect'} 
-                          className="w-full h-full object-cover" 
+                  {/* Clickable area for card navigation */}
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/prospects/${prospect.id}`)}
+                  >
+                    {/* Header Image */}
+                    <div className="relative">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleWatchlist(prospect.id);
+                        }} 
+                        className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-slate-700/80 hover:bg-white dark:hover:bg-slate-600 transition-all"
+                      >
+                        <Heart 
+                          size={16} 
+                          className={`transition-colors ${isInWatchList ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} 
                         />
-                      ) : (
-                        <span>{getInitials(prospect?.name)}</span>
-                      )}
+                      </button>
+                      <div 
+                        className="h-48 flex items-center justify-center text-white text-5xl font-bold"
+                        style={{ backgroundColor: getColorFromName(prospect?.name) }}
+                      >
+                        {prospect.image ? (
+                          <img 
+                            src={prospect.image} 
+                            alt={prospect?.name || 'Prospect'} 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <span>{getInitials(prospect?.name)}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                   {/* Card Content */}
                   <div className="p-4 space-y-3 flex-grow flex flex-col">
@@ -634,6 +650,7 @@ const Prospects = () => {
                       <Link 
                         to={`/prospects/${prospect.id}`} 
                         className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-purple dark:hover:text-purple-400 transition-colors block font-mono tracking-wide"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {prospect.name}
                       </Link>
@@ -798,21 +815,47 @@ const Prospects = () => {
                         )}
                       </AnimatePresence>
                     </div>
+                  </div>
+                  {/* End of clickable area */}
+                  
+                  {/* Gaming glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-transparent to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-purple-600/20 rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500 -z-10" />
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 pt-2">
-                      <Link 
-                        to={`/prospects/${prospect.id}`} 
-                        className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-sm font-medium"
+                    <div className="flex gap-2 pt-2 px-4 pb-4">
+                      <motion.button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/prospects/${prospect.id}`);
+                        }}
+                        className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-sm font-medium relative overflow-hidden group"
+                        whileHover={{ 
+                          scale: 1.02,
+                          boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       >
-                        Ver Detalhes
-                      </Link>
-                      <Link 
-                        to={`/compare?add=${prospect.id}`} 
-                        className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm"
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <span className="relative z-10">Ver Detalhes</span>
+                      </motion.button>
+                      <motion.button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/compare?add=${prospect.id}`);
+                        }}
+                        className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm relative overflow-hidden group"
+                        whileHover={{ 
+                          scale: 1.02,
+                          boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)"
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       >
-                        Comparar
-                      </Link>
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <span className="relative z-10">Comparar</span>
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
