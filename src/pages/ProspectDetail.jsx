@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
@@ -14,12 +14,15 @@ import SingleProspectExport from '@/components/Common/SingleProspectExport.jsx';
 import MobileExportActions from '@/components/Common/MobileExportActions.jsx';
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
+import AchievementUnlock from '@/components/Common/AchievementUnlock';
+import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet';
+import { useResponsive } from '@/hooks/useResponsive';
 
 
 const AwaitingStats = ({ prospectName }) => (
   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 text-center">
     <Clock className="mx-auto h-10 w-10 text-brand-purple mb-4" />
-    <h3 className="text-lg font-bold text-slate-900 dark:text-super-dark-text-primary">Aguardando Início da Temporada</h3>
+    <h3 className="text-lg font-bold text-black dark:text-white font-mono tracking-wide">Aguardando Início da Temporada</h3>
     <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mt-2">
       As estatísticas detalhadas e a análise do Radar Score para {prospectName} serão geradas assim que a temporada 2025-26 começar.
     </p>
@@ -34,7 +37,7 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
     <div className="relative">
       <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
         <Lock className="w-10 h-10 text-orange-500" />
-        <h3 className="mt-3 text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
+        <h3 className="mt-3 text-lg font-bold text-black dark:text-white text-center font-mono tracking-wide">
           {title}
         </h3>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
@@ -57,16 +60,35 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [hoveredBadge, setHoveredBadge] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar se é mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleBadgeClick = (badge) => {
-    setSelectedBadgeData(badge);
-    setIsBottomSheetOpen(true);
+    // Toggle behavior para ambos desktop e mobile
+    if (hoveredBadge?.label === badge?.label) {
+      setHoveredBadge(null);
+    } else {
+      setHoveredBadge(badge);
+    }
   };
 
-  const handleCloseBottomSheet = () => {
-    setIsBottomSheetOpen(false);
+  const handleBadgeHover = (badge) => {
+    // Apenas para desktop usar hover
+    if (!isMobile) {
+      setHoveredBadge(badge);
+    }
   };
 
   const { prospect, loading, error } = useProspect(id);
@@ -219,14 +241,16 @@ const ProspectDetail = () => {
   console.log('Prospect object in ProspectDetail:', prospect);
   const badges = assignBadges(prospect);
 
-  const getPositionColor = (position) => {
-    const colors = { 'PG': 'bg-blue-100 text-blue-800 dark:bg-black/50 dark:text-blue-300', 'SG': 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300', 'SF': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300', 'PF': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300', 'C': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' };
-    return colors[position] || 'bg-gray-100 text-gray-800 dark:bg-super-dark-secondary dark:text-super-dark-text-secondary';
-  };
-
   const getTierColor = (tier) => {
-    const colors = { 'Elite': 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white', 'First Round': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white', 'Second Round': 'bg-gradient-to-r from-green-500 to-green-600 text-white', 'Sleeper': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white', 'Early Second': 'bg-gradient-to-r from-green-500 to-green-600 text-white', 'Late Second': 'bg-gradient-to-r from-gray-500 to-gray-600 text-white' };
-    return colors[tier] || 'bg-gray-500 text-white';
+    const colors = { 
+      'Elite': 'bg-gradient-to-br from-yellow-400 via-orange-400 to-orange-500 text-white shadow-lg shadow-orange-400/30 border border-orange-300/50', 
+      'First Round': 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-400/30 border border-blue-400/50', 
+      'Second Round': 'bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white shadow-lg shadow-green-400/30 border border-green-400/50', 
+      'Sleeper': 'bg-gradient-to-br from-purple-500 via-purple-600 to-violet-600 text-white shadow-lg shadow-purple-400/30 border border-purple-400/50', 
+      'Early Second': 'bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white shadow-lg shadow-green-400/30 border border-green-400/50', 
+      'Late Second': 'bg-gradient-to-br from-gray-500 via-gray-600 to-slate-600 text-white shadow-lg shadow-gray-400/30 border border-gray-400/50' 
+    };
+    return colors[tier] || 'bg-gradient-to-br from-gray-500 via-gray-600 to-slate-600 text-white shadow-lg shadow-gray-400/30';
   };
 
   const getStarRating = (prospect) => {
@@ -240,14 +264,30 @@ const ProspectDetail = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl"
+        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl group"
+        whileHover={{
+          boxShadow: "0 0 40px rgba(59, 130, 246, 0.3), 0 0 80px rgba(168, 85, 247, 0.2)"
+        }}
       >
-        <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M5 0h1L0 6V5zM6 5v1H5z\'%3E%3C/path%3E%3C/g%3E%3C/svg%3E")' }}></div>
+        {/* Hexagonal pattern background */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="hexPattern-prospect" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+              <polygon points="7.5,1 13,4.5 13,10.5 7.5,14 2,10.5 2,4.5" fill="currentColor" className="text-white/10" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hexPattern-prospect)" />
+          </svg>
+        </div>
+
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
           <button onClick={() => navigate('/prospects')} className="flex items-center text-blue-100 hover:text-white transition-colors mb-4 sm:mb-6">
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
             <span className="text-sm sm:text-base">Voltar para <span className="text-yellow-300 font-semibold ml-1">Prospects</span></span>
           </button>
+          
+          {/* Layout responsivo para o banner */}
           <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
             {/* Prospect Image */}
             <div className="flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center text-white text-2xl sm:text-4xl font-bold" style={{ backgroundColor: getColorFromName(displayStats.name) }}>
@@ -262,16 +302,22 @@ const ProspectDetail = () => {
 
             {/* Prospect Info */}
             <div className="text-center md:text-left flex-grow min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white mb-2 break-words">{displayStats.name}</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-white mb-2 break-words font-mono tracking-wide">{displayStats.name}</h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getPositionColor(displayStats.position)}`}>{displayStats.position}</span>
+                <span className={`badge-position ${displayStats.position}`}>{displayStats.position}</span>
                 <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getTierColor(evaluation.draftProjection?.description)}`}>{evaluation.draftProjection?.description || displayStats.tier}</span>
                 <div className="flex items-center">{getStarRating(displayStats)}</div>
                 {/* Badges */}
                 {badges.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {badges.map((badge, index) => (
-                      <Badge key={index} badge={badge} onBadgeClick={handleBadgeClick} />
+                      <Badge 
+                        key={index} 
+                        badge={badge} 
+                        onBadgeClick={handleBadgeClick}
+                        onBadgeHover={handleBadgeHover}
+                        isMobile={isMobile}
+                      />
                     ))}
                   </div>
                 )}
@@ -283,8 +329,47 @@ const ProspectDetail = () => {
                 <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(displayStats.weight)}</div>
               </div>
             </div>
-
-            </div>
+          </div>
+          
+          {/* Achievement Desktop - Posicionamento Inteligente */}
+          <AnimatePresence mode="wait">
+            {hoveredBadge && (
+              <motion.div
+                key="achievement-desktop"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="hidden lg:block absolute top-6 right-6 w-72 z-20"
+                style={{
+                  maxHeight: '200px', // Altura fixa menor para garantir que fique no banner
+                  bottom: '1.5rem', // Garante distância mínima da borda inferior
+                }}
+              >
+                <div className="bg-white/95 dark:bg-super-dark-secondary/95 backdrop-blur-sm rounded-lg shadow-2xl border border-white/20 dark:border-super-dark-border/50 h-full overflow-hidden">
+                  <AchievementUnlock badge={hoveredBadge} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {/* Achievement Mobile - Expande banner */}
+          <div className="lg:hidden">
+            <AnimatePresence mode="wait">
+              {hoveredBadge && (
+                <motion.div
+                  key="achievement-mobile"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 pt-4 border-t border-white/20"
+                >
+                  <AchievementUnlock badge={hoveredBadge} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -294,15 +379,106 @@ const ProspectDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-              className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+              className="relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 25px rgba(249, 115, 22, 0.2)"
+              }}
             >
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4 flex items-center"><Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-orange flex-shrink-0" />Informações Básicas</h2>
-              <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                {displayStats.nationality === '🇧🇷' && <div className="flex items-start"><Globe className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Nacionalidade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">🇧🇷 Brasil<span className="ml-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-xs font-bold">BR</span></div></div></div>}
-                <div className="flex items-start"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Time Atual</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{displayStats.team || 'N/A'}</div></div></div>
-                <div className="flex items-start"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Idade</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{displayStats.age} anos</div></div></div>
-                <div className="flex items-start"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Altura</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary">{getHeightDisplay(displayStats.height)}</div></div></div>
-                <div className="flex items-start"><Weight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-super-dark-text-secondary mr-2 sm:mr-3 mt-0.5 flex-shrink-0" /><div className="min-w-0"><div className="text-xs sm:text-sm leading-normal text-gray-600 dark:text-super-dark-text-secondary">Peso</div><div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words">{getWeightDisplay(displayStats.weight)}</div></div></div>
+              {/* Background hover effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative z-10">
+                <h2 className="text-lg sm:text-xl font-bold text-black dark:text-white mb-3 sm:mb-4 flex items-center font-mono tracking-wide">
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-brand-orange flex-shrink-0" />
+                  Informações Básicas
+                </h2>
+                <motion.div 
+                  className="grid grid-cols-1 gap-3 sm:gap-4"
+                  variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {displayStats.nationality === '🇧🇷' && (
+                    <motion.div 
+                      variants={{
+                        hidden: { opacity: 0, x: -20 },
+                        visible: { opacity: 1, x: 0 }
+                      }}
+                      className="flex items-start p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-100/50 dark:from-green-900/20 dark:to-emerald-800/10 border border-green-200/50 dark:border-green-700/30 hover:bg-green-100/50 dark:hover:bg-green-900/30 transition-all duration-300"
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(34, 197, 94, 0.2)" }}
+                    >
+                      <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm leading-normal text-green-600 dark:text-green-400 font-mono tracking-wide">Nacionalidade</div>
+                        <div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">
+                          🇧🇷 Brasil
+                          <span className="ml-2 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs font-bold font-mono">BR</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  
+                  <motion.div 
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    className="flex items-start p-3 rounded-lg bg-gradient-to-r from-blue-50 to-sky-100/50 dark:from-blue-900/20 dark:to-sky-800/10 border border-blue-200/50 dark:border-blue-700/30 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-all duration-300"
+                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(59, 130, 246, 0.2)" }}
+                  >
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm leading-normal text-blue-600 dark:text-blue-400 font-mono tracking-wide">Time Atual</div>
+                      <div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words font-mono">{displayStats.team || 'N/A'}</div>
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div 
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    className="flex items-start p-3 rounded-lg bg-gradient-to-r from-purple-50 to-violet-100/50 dark:from-purple-900/20 dark:to-violet-800/10 border border-purple-200/50 dark:border-purple-700/30 hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-all duration-300"
+                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(168, 85, 247, 0.2)" }}
+                  >
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm leading-normal text-purple-600 dark:text-purple-400 font-mono tracking-wide">Idade</div>
+                      <div className="font-medium text-gray-800 dark:text-super-dark-text-primary font-mono">{displayStats.age} anos</div>
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div 
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    className="flex items-start p-3 rounded-lg bg-gradient-to-r from-orange-50 to-amber-100/50 dark:from-orange-900/20 dark:to-amber-800/10 border border-orange-200/50 dark:border-orange-700/30 hover:bg-orange-100/50 dark:hover:bg-orange-900/30 transition-all duration-300"
+                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(249, 115, 22, 0.2)" }}
+                  >
+                    <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm leading-normal text-orange-600 dark:text-orange-400 font-mono tracking-wide">Altura</div>
+                      <div className="font-medium text-gray-800 dark:text-super-dark-text-primary font-mono">{getHeightDisplay(displayStats.height)}</div>
+                    </div>
+                  </motion.div>
+                  
+                  <motion.div 
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    className="flex items-start p-3 rounded-lg bg-gradient-to-r from-red-50 to-rose-100/50 dark:from-red-900/20 dark:to-rose-800/10 border border-red-200/50 dark:border-red-700/30 hover:bg-red-100/50 dark:hover:bg-red-900/30 transition-all duration-300"
+                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(239, 68, 68, 0.2)" }}
+                  >
+                    <Weight className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm leading-normal text-red-600 dark:text-red-400 font-mono tracking-wide">Peso</div>
+                      <div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words font-mono">{getWeightDisplay(displayStats.weight)}</div>
+                    </div>
+                  </motion.div>
+                </motion.div>
               </div>
             </motion.div>
 
@@ -311,45 +487,93 @@ const ProspectDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
-              className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+              className="relative block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 25px rgba(99, 102, 241, 0.2)"
+              }}
             >
-              <div className="flex justify-between items-center mb-3 sm:mb-4">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                <div className="flex items-center gap-2">
-                  {displayStats.is_hs && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                      High School
-                    </span>
-                  )}
-                  {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                      {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
-                    </span>
-                  )}
+              {/* Background hover effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-bold text-black dark:text-white font-mono tracking-wide flex items-center">
+                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-indigo-500 rounded-full mr-2" />
+                    Estatísticas
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {displayStats.is_hs && (
+                      <motion.span 
+                        className="relative inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white border border-orange-300 dark:border-orange-400 shadow-md shadow-orange-500/30 dark:shadow-orange-400/20 overflow-hidden group"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        {/* Subtle shimmer */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <span className="relative z-10 font-semibold">High School</span>
+                      </motion.span>
+                    )}
+                    {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
+                      <motion.span 
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-indigo-500 text-white border border-purple-300 dark:border-purple-400 font-mono tracking-wide"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 15px rgba(168, 85, 247, 0.4)"
+                        }}
+                      >
+                        {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
+                      </motion.span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <motion.div 
+                  className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
+                  variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                  initial="hidden"
+                  animate="visible"
+                >
                 {(() => {
-                  const renderStat = (label, value, colorClass, isPercentage = false) => (
-                    <div className="flex justify-between items-center text-xs sm:text-sm">
-                      <span className="text-gray-600 dark:text-super-dark-text-secondary truncate mr-2">{label}</span>
-                      <span className={`font-bold ${colorClass}`}>{value ?? '—'}</span>
-                    </div>
+                  const renderStat = (label, value, colorClass, bgClass, borderClass, shadowColor) => (
+                    <motion.div
+                      className={`relative p-3 rounded-lg ${bgClass} border ${borderClass} overflow-hidden group cursor-pointer`}
+                      whileHover={{ 
+                        scale: 1.05,
+                        boxShadow: `0 0 20px ${shadowColor}`
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-r ${colorClass.replace('text-', 'from-').replace('dark:text-', '')}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                      <motion.p 
+                        className={`text-lg sm:text-xl font-mono font-bold ${colorClass} relative z-10 tracking-wide text-center`}
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        {value ?? '—'}
+                      </motion.p>
+                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">{label}</p>
+                    </motion.div>
                   );
 
                   return (
                     <>
-                      {renderStat('Pontos', displayStats.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
-                      {renderStat('Rebotes', displayStats.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
-                      {renderStat('Assistências', displayStats.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
-                      {renderStat('Roubos', displayStats.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('Tocos', displayStats.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('PPG', displayStats.ppg?.toFixed(1), 'text-purple-600 dark:text-purple-400', 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10', 'border-purple-200/50 dark:border-purple-700/30', 'rgba(168, 85, 247, 0.3)')}
+                      {renderStat('RPG', displayStats.rpg?.toFixed(1), 'text-green-600 dark:text-green-400', 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', 'border-green-200/50 dark:border-green-700/30', 'rgba(34, 197, 94, 0.3)')}
+                      {renderStat('APG', displayStats.apg?.toFixed(1), 'text-orange-600 dark:text-orange-400', 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10', 'border-orange-200/50 dark:border-orange-700/30', 'rgba(249, 115, 22, 0.3)')}
+                      {renderStat('SPG', displayStats.spg?.toFixed(1), 'text-blue-600 dark:text-blue-400', 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10', 'border-blue-200/50 dark:border-blue-700/30', 'rgba(59, 130, 246, 0.3)')}
+                      {renderStat('BPG', displayStats.bpg?.toFixed(1), 'text-red-600 dark:text-red-400', 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10', 'border-red-200/50 dark:border-red-700/30', 'rgba(239, 68, 68, 0.3)')}
+                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)')}
                     </>
                   );
                 })()}
+                </motion.div>
               </div>
             </motion.div>
 
@@ -358,25 +582,86 @@ const ProspectDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-              className="block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6"
+              className="relative block lg:hidden bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 25px rgba(148, 163, 184, 0.2)"
+              }}
             >
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-3 sm:mb-4">Ações</h3>
-              <div className="space-y-3">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-90 transition-colors text-sm sm:text-base">
-                  <GitCompare className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">Comparar Jogador</span>
-                </motion.button>
-                <MobileExportActions prospect={prospect} />
-                {user && (
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 sm:py-3 px-4 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}>
-                    <Heart className={`w-4 h-4 mr-2 flex-shrink-0 ${isInWatchlist ? 'fill-current' : ''}`} />
-                    <span className="truncate">{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</span>
+              {/* Background hover effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative z-10">
+                <h3 className="text-base sm:text-lg font-bold text-black dark:text-white mb-3 sm:mb-4 font-mono tracking-wide flex items-center">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-500 rounded-full mr-2" />
+                  Ações
+                </h3>
+                <motion.div 
+                  className="space-y-3"
+                  variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.button 
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)" }} 
+                    whileTap={{ scale: 0.98 }} 
+                    onClick={() => navigate(`/compare?add=${prospect.id}`)} 
+                    className="w-full flex items-center justify-center bg-gradient-to-r from-brand-purple to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:brightness-110 transition-all duration-300 text-sm sm:text-base font-mono tracking-wide shadow-lg"
+                  >
+                    <GitCompare className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Comparar Jogador</span>
                   </motion.button>
-                )}
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors text-sm sm:text-base">
-                  <Share2 className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">Compartilhar Perfil</span>
-                </motion.button>
+                  
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                  >
+                    <MobileExportActions prospect={prospect} />
+                  </motion.div>
+                  
+                  {user && (
+                    <motion.button 
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ 
+                        scale: 1.05, 
+                        boxShadow: isInWatchlist ? "0 0 20px rgba(239, 68, 68, 0.3)" : "0 0 20px rgba(148, 163, 184, 0.3)" 
+                      }} 
+                      whileTap={{ scale: 0.98 }} 
+                      onClick={() => toggleWatchlist(prospect.id)} 
+                      className={`w-full py-2 sm:py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center text-sm sm:text-base font-mono tracking-wide shadow-lg ${
+                        isInWatchlist 
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:brightness-110' 
+                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:text-super-dark-text-primary dark:hover:from-super-dark-secondary dark:hover:to-super-dark-border'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 mr-2 flex-shrink-0 ${isInWatchlist ? 'fill-current' : ''}`} />
+                      <span className="truncate">{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</span>
+                    </motion.button>
+                  )}
+                  
+                  <motion.button 
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(148, 163, 184, 0.3)" }} 
+                    whileTap={{ scale: 0.98 }} 
+                    onClick={handleShare} 
+                    className="w-full flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 py-2 sm:py-3 px-4 rounded-lg hover:from-gray-200 hover:to-gray-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:text-super-dark-text-primary dark:hover:from-super-dark-secondary dark:hover:to-super-dark-border transition-all duration-300 text-sm sm:text-base font-mono tracking-wide shadow-lg"
+                  >
+                    <Share2 className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Compartilhar Perfil</span>
+                  </motion.button>
+                </motion.div>
               </div>
             </motion.div>
 
@@ -389,35 +674,49 @@ const ProspectDetail = () => {
                   className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white flex items-center font-mono tracking-wide"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
                     {(displayStats.league || displayStats['stats-season']) && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
                         {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {(() => {
-                      const renderStat = (label, value, colorClass, isPercentage = true) => (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 dark:text-super-dark-text-secondary leading-normal">{label}</span>
-                          <span className={`font-bold ${colorClass}`}>{value != null ? `${value}${isPercentage ? '%' : ''}` : '—'}</span>
-                        </div>
+                      const renderStat = (label, value, colorClass, bgClass, borderClass, shadowColor, isPercentage = true) => (
+                        <motion.div
+                          className={`relative p-3 rounded-lg ${bgClass} border ${borderClass} overflow-hidden group cursor-pointer`}
+                          whileHover={{ 
+                            scale: 1.05,
+                            boxShadow: `0 0 20px ${shadowColor}`
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                          <div className={`absolute inset-0 bg-gradient-to-r ${colorClass.replace('text-', 'from-').replace('dark:text-', '')}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                          <motion.p 
+                            className={`text-lg font-mono font-bold ${colorClass} relative z-10 tracking-wide text-center`}
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                          >
+                            {value != null ? `${value}${isPercentage ? '%' : ''}` : '—'}
+                          </motion.p>
+                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">{label}</p>
+                        </motion.div>
                       );
 
                       return (
                         <>
-                          {renderStat('TS%', (displayStats.ts_percent * 100)?.toFixed(1), 'text-purple-500')}
-                          {renderStat('eFG%', (displayStats.efg_percent * 100)?.toFixed(1), 'text-teal-500')}
-                          {renderStat('PER', displayStats.per?.toFixed(2), 'text-indigo-500', false)}
-                          {renderStat('USG%', displayStats.usg_percent?.toFixed(1), 'text-pink-500')}
-                          {renderStat('ORtg', displayStats.ortg?.toFixed(1), 'text-lime-500', false)}
-                          {renderStat('DRtg', displayStats.drtg?.toFixed(1), 'text-red-500', false)}
-                          {renderStat('TOV%', displayStats.tov_percent?.toFixed(1), 'text-orange-500')}
-                          {renderStat('AST%', displayStats.ast_percent?.toFixed(1), 'text-green-500')}
-                          {renderStat('TRB%', displayStats.trb_percent?.toFixed(1), 'text-blue-500')}
-                          {renderStat('STL%', displayStats.stl_percent?.toFixed(1), 'text-purple-500')}
-                          {renderStat('BLK%', displayStats.blk_percent?.toFixed(1), 'text-yellow-500')}
+                          {renderStat('TS%', (displayStats.ts_percent * 100)?.toFixed(1), 'text-purple-600 dark:text-purple-400', 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10', 'border-purple-200/50 dark:border-purple-700/30', 'rgba(168, 85, 247, 0.3)')}
+                          {renderStat('eFG%', (displayStats.efg_percent * 100)?.toFixed(1), 'text-teal-600 dark:text-teal-400', 'bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10', 'border-teal-200/50 dark:border-teal-700/30', 'rgba(20, 184, 166, 0.3)')}
+                          {renderStat('PER', displayStats.per?.toFixed(2), 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)', false)}
+                          {renderStat('USG%', displayStats.usg_percent?.toFixed(1), 'text-pink-600 dark:text-pink-400', 'bg-gradient-to-br from-pink-50 to-pink-100/50 dark:from-pink-900/20 dark:to-pink-800/10', 'border-pink-200/50 dark:border-pink-700/30', 'rgba(236, 72, 153, 0.3)')}
+                          {renderStat('ORtg', displayStats.ortg?.toFixed(1), 'text-lime-600 dark:text-lime-400', 'bg-gradient-to-br from-lime-50 to-lime-100/50 dark:from-lime-900/20 dark:to-lime-800/10', 'border-lime-200/50 dark:border-lime-700/30', 'rgba(132, 204, 22, 0.3)', false)}
+                          {renderStat('DRtg', displayStats.drtg?.toFixed(1), 'text-red-600 dark:text-red-400', 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10', 'border-red-200/50 dark:border-red-700/30', 'rgba(239, 68, 68, 0.3)', false)}
+                          {renderStat('TOV%', displayStats.tov_percent?.toFixed(1), 'text-orange-600 dark:text-orange-400', 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10', 'border-orange-200/50 dark:border-orange-700/30', 'rgba(249, 115, 22, 0.3)')}
+                          {renderStat('AST%', displayStats.ast_percent?.toFixed(1), 'text-green-600 dark:text-green-400', 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', 'border-green-200/50 dark:border-green-700/30', 'rgba(34, 197, 94, 0.3)')}
+                          {renderStat('TRB%', displayStats.trb_percent?.toFixed(1), 'text-blue-600 dark:text-blue-400', 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10', 'border-blue-200/50 dark:border-blue-700/30', 'rgba(59, 130, 246, 0.3)')}
+                          {renderStat('STL%', displayStats.stl_percent?.toFixed(1), 'text-violet-600 dark:text-violet-400', 'bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-900/20 dark:to-violet-800/10', 'border-violet-200/50 dark:border-violet-700/30', 'rgba(139, 92, 246, 0.3)')}
+                          {renderStat('BLK%', displayStats.blk_percent?.toFixed(1), 'text-yellow-600 dark:text-yellow-400', 'bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/10', 'border-yellow-200/50 dark:border-yellow-700/30', 'rgba(234, 179, 8, 0.3)')}
                         </>
                       );
                     })()}
@@ -433,7 +732,7 @@ const ProspectDetail = () => {
                     transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
                     className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                   >
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                       {isScout ? (
                         <div><RadarScoreChart data={evaluation.categoryScores} /></div>
@@ -443,28 +742,79 @@ const ProspectDetail = () => {
                         </ScoutFeaturePlaceholder>
                       )}
                       <div className="space-y-4">
-                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Projeção de Draft</h3><p className="text-lg font-bold text-brand-gold dark:text-super-dark-text-primary">{evaluation.draftProjection?.description || 'N/A'}</p><p className="text-sm text-gray-500 dark:text-super-dark-text-secondary">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p></div>
-                        <div><h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Prontidão para a NBA</h3><p className="text-lg font-bold text-brand-gold dark:text-super-dark-text-primary">{evaluation.nbaReadiness || 'N/A'}</p></div>
-                        <div>
-                          <h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal">Score Total (Potencial)</h3>
-                          <p className="text-2xl font-extrabold text-brand-gold dark:text-super-dark-text-primary">{evaluation.potentialScore}</p>
-                        </div>
+                        {/* Projeção de Draft */}
+                        <motion.div 
+                          className="relative p-4 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/10 border border-yellow-200/50 dark:border-yellow-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 20px rgba(234, 179, 8, 0.3)"
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <h3 className="font-semibold text-yellow-700 dark:text-yellow-400 leading-normal relative z-10 font-mono tracking-wide">Projeção de Draft</h3>
+                          <p className="text-lg font-bold text-yellow-800 dark:text-yellow-300 font-mono tracking-wide relative z-10">{evaluation.draftProjection?.description || 'N/A'}</p>
+                          <p className="text-sm text-yellow-600/70 dark:text-yellow-400/70 relative z-10">Alcance: {evaluation.draftProjection?.range || 'N/A'}</p>
+                        </motion.div>
+
+                        {/* Prontidão para a NBA */}
+                        <motion.div 
+                          className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <h3 className="font-semibold text-purple-700 dark:text-purple-400 leading-normal relative z-10 font-mono tracking-wide">Prontidão para a NBA</h3>
+                          <p className="text-lg font-bold text-purple-800 dark:text-purple-300 font-mono tracking-wide relative z-10">{evaluation.nbaReadiness || 'N/A'}</p>
+                        </motion.div>
+
+                        {/* Score Total */}
+                        <motion.div 
+                          className="relative p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200/50 dark:border-blue-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)"
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <h3 className="font-semibold text-blue-700 dark:text-blue-400 leading-normal relative z-10 font-mono tracking-wide">Score Total (Potencial)</h3>
+                          <p className="text-2xl font-bold text-blue-800 dark:text-blue-300 font-mono tracking-wide relative z-10">{evaluation.potentialScore}</p>
+                        </motion.div>
+
+                        {/* Nível de Confiança */}
                         {evaluation.confidenceScore < 1.0 && (
-                          <div>
-                            <h3 className="font-semibold text-brand-purple dark:text-brand-orange leading-normal flex items-center">
-                              <AlertTriangle className="w-4 h-4 mr-2 text-brand-yellow" />
+                          <motion.div 
+                            className="relative p-4 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30 overflow-hidden group cursor-pointer"
+                            whileHover={{ 
+                              scale: 1.02,
+                              boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)"
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <h3 className="font-semibold text-orange-700 dark:text-orange-400 leading-normal flex items-center relative z-10 font-mono tracking-wide">
+                              <AlertTriangle className="w-4 h-4 mr-2 text-orange-600 dark:text-orange-500" />
                               Nível de Confiança
                             </h3>
-                            <div className="flex items-center gap-2">
-                              <div className="w-full bg-slate-200 dark:bg-super-dark-border rounded-full h-2.5">
-                                <div className="bg-brand-yellow h-2.5 rounded-full" style={{ width: `${evaluation.confidenceScore * 100}%` }}></div>
+                            <div className="flex items-center gap-2 relative z-10">
+                              <div className="w-full bg-orange-200 dark:bg-orange-900/50 rounded-full h-2.5">
+                                <motion.div 
+                                  className="bg-orange-500 h-2.5 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${evaluation.confidenceScore * 100}%` }}
+                                  transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                                />
                               </div>
-                              <span className="text-sm font-bold text-brand-yellow dark:text-yellow-400">
+                              <span className="text-sm font-bold text-orange-700 dark:text-orange-400 font-mono">
                                 {Math.round(evaluation.confidenceScore * 100)}%
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary mt-1">Baseado em uma amostra pequena de jogos.</p>
-                          </div>
+                            <p className="text-xs text-orange-600/70 dark:text-orange-400/70 mt-1 relative z-10">Baseado em uma amostra pequena de jogos.</p>
+                          </motion.div>
                         )}
                       </div>
                     </div>
@@ -483,17 +833,61 @@ const ProspectDetail = () => {
                 transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
                 className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
               >
-                <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Destaques & Alertas do Radar</h2>
-                <div className="space-y-3">
+                <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Destaques & Alertas do Radar</h2>
+                <div className="space-y-4">
                   {flags.map((flag, index) => (
-                    <div key={index} className={`flex items-start p-4 rounded-lg shadow-sm ${flag.type === 'green' ? 'bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500' : 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500'}`}>
-                      <div className="flex-shrink-0 mt-0.5 mr-3">
-                        {flag.type === 'green' ? <CheckCircle2 className="w-6 h-6 text-green-500" /> : <AlertTriangle className="w-6 h-6 text-red-500" />}
+                    <motion.div 
+                      key={index} 
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className={`relative flex items-start p-4 rounded-lg overflow-hidden group cursor-pointer transition-all duration-300 ${
+                        flag.type === 'green' 
+                          ? 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30 hover:shadow-lg hover:shadow-green-500/20' 
+                          : 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 border border-red-200/50 dark:border-red-700/30 hover:shadow-lg hover:shadow-red-500/20'
+                      }`}
+                      whileHover={{ 
+                        scale: 1.02,
+                        boxShadow: flag.type === 'green' 
+                          ? "0 0 20px rgba(34, 197, 94, 0.3)" 
+                          : "0 0 20px rgba(239, 68, 68, 0.3)"
+                      }}
+                    >
+                      {/* Background hover effect */}
+                      <div className={`absolute inset-0 bg-gradient-to-r ${
+                        flag.type === 'green' 
+                          ? 'from-green-600/10' 
+                          : 'from-red-600/10'
+                      } to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                      
+                      {/* Icon */}
+                      <motion.div 
+                        className="flex-shrink-0 mt-0.5 mr-3 relative z-10"
+                        whileHover={{ scale: 1.1, rotate: flag.type === 'green' ? 0 : 5 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        {flag.type === 'green' ? 
+                          <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" /> : 
+                          <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                        }
+                      </motion.div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10">
+                        <p className={`text-sm leading-relaxed font-medium ${
+                          flag.type === 'green' 
+                            ? 'text-green-700 dark:text-green-300' 
+                            : 'text-red-700 dark:text-red-300'
+                        } mt-1`}>
+                          {flag.message}
+                        </p>
                       </div>
-                      <div>
-                        <p className={`text-sm leading-relaxed ${flag.type === 'green' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'} mt-1`}>{flag.message}</p>
-                      </div>
-                    </div>
+                      
+                      {/* Left border indicator */}
+                      <div className={`absolute left-0 top-0 bottom-0 w-1 ${
+                        flag.type === 'green' ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
@@ -509,7 +903,7 @@ const ProspectDetail = () => {
                     transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
                     className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                   >
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4 flex items-center"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
                     <motion.div
                       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                       variants={{
@@ -525,11 +919,41 @@ const ProspectDetail = () => {
                             hidden: { opacity: 0, y: 20 },
                             visible: { opacity: 1, y: 0 }
                           }}
-                          className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border"
+                          className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.05,
+                            boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
+                          }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
-                          <p className="font-bold text-brand-purple dark:text-brand-orange">{player.name}</p>
-                          <p className="text-sm leading-normal text-slate-600 dark:text-super-dark-text-secondary">Similaridade: <span className="font-semibold text-brand-purple dark:text-purple-400">{player.similarity}%</span></p>
-                          <p className="text-xs leading-normal text-slate-500 dark:text-super-dark-text-secondary mt-1">Sucesso na Carreira: {player.careerSuccess}/10</p>
+                          {/* Background hover effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          
+                          {/* Content */}
+                          <div className="relative z-10">
+                            <p className="font-bold text-purple-700 dark:text-purple-300 font-mono tracking-wide text-lg">{player.name}</p>
+                            <div className="flex justify-between items-center mt-2">
+                              <div>
+                                <p className="text-sm leading-normal text-purple-600 dark:text-purple-400">
+                                  Similaridade: <span className="font-semibold font-mono">{player.similarity}%</span>
+                                </p>
+                                <p className="text-xs leading-normal text-purple-500 dark:text-purple-500 mt-1">
+                                  Sucesso: <span className="font-bold">{player.careerSuccess}/10</span>
+                                </p>
+                              </div>
+                              {/* Success indicator */}
+                              <div className="flex items-center">
+                                <div className="w-12 h-2 bg-purple-200 dark:bg-purple-800/50 rounded-full overflow-hidden">
+                                  <motion.div 
+                                    className="h-full bg-purple-500 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${(player.careerSuccess / 10) * 100}%` }}
+                                    transition={{ duration: 1, delay: 0.3 }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </motion.div>
                       ))}
                     </motion.div>
@@ -538,7 +962,7 @@ const ProspectDetail = () => {
               ) : (
                 <ScoutFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Comparações com Jogadores da NBA</h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white mb-4 font-mono tracking-wide">Comparações com Jogadores da NBA</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
                         <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">Jogador Exemplo</p>
@@ -560,44 +984,80 @@ const ProspectDetail = () => {
                     transition={{ duration: 0.5, delay: 0.9, ease: "easeOut" }}
                     className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                   >
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6 flex items-center"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white mb-6 flex items-center font-mono tracking-wide"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {displayStats.strengths?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
-                          <motion.ul 
-                            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-                            initial="hidden"
-                            animate="visible"
-                            className="space-y-2"
-                          >
-                            {displayStats.strengths.map((strength, index) => (
-                              <motion.li 
-                                key={index}
-                                variants={{
-                                  hidden: { opacity: 0, x: -20 },
-                                  visible: { opacity: 1, x: 0 }
-                                }}
-                                className="flex items-start"
-                              >
-                                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                                <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{strength}</span>
-                              </motion.li>
-                            ))}
-                          </motion.ul>
-                        </div>
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5, delay: 0.3 }}
+                          className="relative p-6 rounded-lg bg-gradient-to-br from-green-50 to-emerald-100/50 dark:from-green-900/20 dark:to-emerald-800/10 border border-green-200/50 dark:border-green-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)"
+                          }}
+                        >
+                          {/* Background hover effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          
+                          {/* Content */}
+                          <div className="relative z-10">
+                            <h3 className="text-lg font-bold text-green-600 dark:text-green-400 mb-4 font-mono tracking-wide flex items-center">
+                              <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
+                              Pontos Fortes
+                            </h3>
+                            <motion.ul 
+                              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                              initial="hidden"
+                              animate="visible"
+                              className="space-y-3"
+                            >
+                              {displayStats.strengths.map((strength, index) => (
+                                <motion.li 
+                                  key={index}
+                                  variants={{
+                                    hidden: { opacity: 0, x: -20 },
+                                    visible: { opacity: 1, x: 0 }
+                                  }}
+                                  className="flex items-start p-3 rounded-lg bg-white/60 dark:bg-black/20 border border-green-200/30 dark:border-green-700/30 hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-all duration-300"
+                                  whileHover={{ scale: 1.02 }}
+                                >
+                                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                                  <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed font-mono text-sm">{strength}</span>
+                                </motion.li>
+                              ))}
+                            </motion.ul>
+                          </div>
+                        </motion.div>
                       )}
                       {displayStats.weaknesses?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">Pontos a Melhorar</h3>
-                          <motion.ul
-                            variants={{
-                              visible: { transition: { staggerChildren: 0.1 } }
-                            }}
-                            initial="hidden"
-                            animate="visible"
-                            className="space-y-2"
-                          >
+                        <motion.div
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5, delay: 0.4 }}
+                          className="relative p-6 rounded-lg bg-gradient-to-br from-red-50 to-rose-100/50 dark:from-red-900/20 dark:to-rose-800/10 border border-red-200/50 dark:border-red-700/30 overflow-hidden group cursor-pointer"
+                          whileHover={{ 
+                            scale: 1.02,
+                            boxShadow: "0 0 20px rgba(239, 68, 68, 0.3)"
+                          }}
+                        >
+                          {/* Background hover effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          
+                          {/* Content */}
+                          <div className="relative z-10">
+                            <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-4 font-mono tracking-wide flex items-center">
+                              <div className="w-3 h-3 bg-red-500 rounded-full mr-2" />
+                              Pontos a Melhorar
+                            </h3>
+                            <motion.ul
+                              variants={{
+                                visible: { transition: { staggerChildren: 0.1 } }
+                              }}
+                              initial="hidden"
+                              animate="visible"
+                              className="space-y-3"
+                            >
                             {displayStats.weaknesses.map((weakness, index) => (
                               <motion.li
                                 key={index}
@@ -605,14 +1065,16 @@ const ProspectDetail = () => {
                                   hidden: { opacity: 0, x: -20 },
                                   visible: { opacity: 1, x: 0 }
                                 }}
-                                className="flex items-start"
+                                className="flex items-start p-3 rounded-lg bg-white/60 dark:bg-black/20 border border-red-200/30 dark:border-red-700/30 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-all duration-300"
+                                whileHover={{ scale: 1.02 }}
                               >
                                 <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                                <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed">{weakness}</span>
+                                <span className="text-gray-700 dark:text-super-dark-text-primary leading-relaxed font-mono text-sm">{weakness}</span>
                               </motion.li>
                             ))}
                           </motion.ul>
-                        </div>
+                          </div>
+                        </motion.div>
                       )}
                     </div>
                   </motion.div>
@@ -620,7 +1082,7 @@ const ProspectDetail = () => {
               ) : (
                 <ScoutFeaturePlaceholder title="Análise Detalhada do Jogador" featureName="a análise de pontos fortes e fracos">
                   <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-super-dark-text-primary mb-6">Análise Detalhada do Jogador</h2>
+                    <h2 className="text-xl font-bold text-black dark:text-white mb-6 font-mono tracking-wide">Análise Detalhada do Jogador</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-3">Pontos Fortes</h3>
@@ -637,60 +1099,218 @@ const ProspectDetail = () => {
             )}
           </div>
           <div className="hidden lg:block space-y-6">
-            <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary">Estatísticas</h3>
-                <div className="flex items-center gap-2">
-                  {displayStats.is_hs && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                      High School
-                    </span>
-                  )}
-                  {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                      {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
-                    </span>
-                  )}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 25px rgba(99, 102, 241, 0.2)"
+              }}
+            >
+              {/* Background hover effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-black dark:text-white font-mono tracking-wide flex items-center">
+                    <div className="w-3 h-3 bg-indigo-500 rounded-full mr-2" />
+                    Estatísticas
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {displayStats.is_hs && (
+                      <motion.span 
+                        className="relative inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white border border-orange-300 dark:border-orange-400 shadow-md shadow-orange-500/30 dark:shadow-orange-400/20 overflow-hidden group"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        {/* Subtle shimmer */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <span className="relative z-10 font-semibold">High School</span>
+                      </motion.span>
+                    )}
+                    {(displayStats.league || displayStats['stats-season']) && !displayStats.is_hs && (
+                      <motion.span 
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-500 to-indigo-500 text-white border border-purple-300 dark:border-purple-400 font-mono tracking-wide"
+                        whileHover={{ 
+                          scale: 1.05,
+                          boxShadow: "0 0 15px rgba(168, 85, 247, 0.4)"
+                        }}
+                      >
+                        {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
+                      </motion.span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-4">
+                <motion.div 
+                  className="grid grid-cols-2 gap-3"
+                  variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                  initial="hidden"
+                  animate="visible"
+                >
                 {(() => {
-                  const renderStat = (label, value, colorClass, isPercentage = false) => (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600 dark:text-super-dark-text-secondary">{label}</span>
-                      <span className={`font-bold ${colorClass}`}>{value != null ? value : '—'}</span>
-                    </div>
+                  const renderStat = (label, value, colorClass, bgClass, borderClass, shadowColor) => (
+                    <motion.div
+                      className={`relative p-3 rounded-lg ${bgClass} border ${borderClass} overflow-hidden group cursor-pointer`}
+                      whileHover={{ 
+                        scale: 1.05,
+                        boxShadow: `0 0 20px ${shadowColor}`
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-r ${colorClass.replace('text-', 'from-').replace('dark:text-', '')}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                      <motion.p 
+                        className={`text-lg font-mono font-bold ${colorClass} relative z-10 tracking-wide text-center`}
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        {value != null ? value : '—'}
+                      </motion.p>
+                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">{label}</p>
+                    </motion.div>
                   );
 
                   return (
                     <>
-                      {renderStat('Pontos', displayStats.ppg?.toFixed(1), 'text-blue-500 dark:text-blue-400')}
-                      {renderStat('Rebotes', displayStats.rpg?.toFixed(1), 'text-green-500 dark:text-green-400')}
-                      {renderStat('Assistências', displayStats.apg?.toFixed(1), 'text-orange-500 dark:text-orange-400')}
-                      {renderStat('Roubos', displayStats.spg?.toFixed(1), 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('Tocos', displayStats.bpg?.toFixed(1), 'text-red-500 dark:text-red-400')}
-                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-purple-500 dark:text-purple-400')}
-                      {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-indigo-500 dark:text-indigo-400')}
-                      {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-500 dark:text-teal-400')}
+                      {renderStat('PPG', displayStats.ppg?.toFixed(1), 'text-purple-600 dark:text-purple-400', 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10', 'border-purple-200/50 dark:border-purple-700/30', 'rgba(168, 85, 247, 0.3)')}
+                      {renderStat('RPG', displayStats.rpg?.toFixed(1), 'text-green-600 dark:text-green-400', 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', 'border-green-200/50 dark:border-green-700/30', 'rgba(34, 197, 94, 0.3)')}
+                      {renderStat('APG', displayStats.apg?.toFixed(1), 'text-orange-600 dark:text-orange-400', 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10', 'border-orange-200/50 dark:border-orange-700/30', 'rgba(249, 115, 22, 0.3)')}
+                      {renderStat('SPG', displayStats.spg?.toFixed(1), 'text-blue-600 dark:text-blue-400', 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10', 'border-blue-200/50 dark:border-blue-700/30', 'rgba(59, 130, 246, 0.3)')}
+                      {renderStat('BPG', displayStats.bpg?.toFixed(1), 'text-red-600 dark:text-red-400', 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10', 'border-red-200/50 dark:border-red-700/30', 'rgba(239, 68, 68, 0.3)')}
+                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)')}
+                      {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-violet-600 dark:text-violet-400', 'bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-900/20 dark:to-violet-800/10', 'border-violet-200/50 dark:border-violet-700/30', 'rgba(139, 92, 246, 0.3)')}
+                      {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-600 dark:text-teal-400', 'bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10', 'border-teal-200/50 dark:border-teal-700/30', 'rgba(20, 184, 166, 0.3)')}
                     </>
                   );
                 })()}
+                </motion.div>
               </div>
-            </div>
-            <div className="bg-gradient-to-r from-brand-orange to-orange-600 rounded-xl shadow-lg p-6 text-white">
-              <h3 className="text-lg font-bold mb-2">Projeção Mock Draft</h3>
-              <div className="text-3xl font-bold mb-1">{evaluation.draftProjection?.description || 'N/A'}</div>
-              <div className="text-orange-100 text-sm">{evaluation.draftProjection?.range ? `Range: ${evaluation.draftProjection.range}` : 'N/A'}</div>
-            </div>
-            <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-super-dark-text-primary mb-4">Ações</h3>
-              <div className="space-y-3">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => navigate(`/compare?add=${prospect.id}`)} className="w-full flex items-center justify-center bg-brand-purple text-white py-2 px-4 rounded-lg hover:brightness-90 transition-colors"><GitCompare className="w-4 h-4 mr-2" />Comparar Jogador</motion.button>
-                <MobileExportActions prospect={prospect} />
-                {user && <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => toggleWatchlist(prospect.id)} className={`w-full py-2 px-4 rounded-lg transition-colors flex items-center justify-center ${isInWatchlist ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary'}`}><Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />{isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}</motion.button>}
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={handleShare} className="w-full flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 dark:bg-super-dark-border dark:text-super-dark-text-primary dark:hover:bg-super-dark-secondary transition-colors"><Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil</motion.button>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="relative bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 rounded-xl shadow-lg p-6 text-white overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 30px rgba(249, 115, 22, 0.4)"
+              }}
+            >
+              {/* Background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              {/* Glow orb */}
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-300/20 rounded-full blur-xl group-hover:bg-yellow-300/30 transition-all duration-300" />
+              
+              <div className="relative z-10">
+                <h3 className="text-lg font-bold mb-3 font-mono tracking-wide flex items-center">
+                  <div className="w-3 h-3 bg-white rounded-full mr-2" />
+                  Projeção Mock Draft
+                </h3>
+                <motion.div 
+                  className="text-3xl font-bold mb-2 font-mono tracking-wider"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  {evaluation.draftProjection?.description || 'N/A'}
+                </motion.div>
+                <div className="text-orange-100 text-sm font-mono">
+                  {evaluation.draftProjection?.range ? `Range: ${evaluation.draftProjection.range}` : 'N/A'}
+                </div>
               </div>
-            </div>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 overflow-hidden group"
+              whileHover={{ 
+                scale: 1.02,
+                boxShadow: "0 0 25px rgba(148, 163, 184, 0.2)"
+              }}
+            >
+              {/* Background hover effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative z-10">
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4 font-mono tracking-wide flex items-center">
+                  <div className="w-3 h-3 bg-slate-500 rounded-full mr-2" />
+                  Ações
+                </h3>
+                <motion.div 
+                  className="space-y-3"
+                  variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.button 
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)" }} 
+                    whileTap={{ scale: 0.98 }} 
+                    onClick={() => navigate(`/compare?add=${prospect.id}`)} 
+                    className="w-full flex items-center justify-center bg-gradient-to-r from-brand-purple to-purple-600 text-white py-3 px-4 rounded-lg hover:brightness-110 transition-all duration-300 font-mono tracking-wide shadow-lg"
+                  >
+                    <GitCompare className="w-4 h-4 mr-2" />Comparar Jogador
+                  </motion.button>
+                  
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                  >
+                    <MobileExportActions prospect={prospect} />
+                  </motion.div>
+                  
+                  {user && (
+                    <motion.button 
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ 
+                        scale: 1.05, 
+                        boxShadow: isInWatchlist ? "0 0 20px rgba(239, 68, 68, 0.3)" : "0 0 20px rgba(148, 163, 184, 0.3)" 
+                      }} 
+                      whileTap={{ scale: 0.98 }} 
+                      onClick={() => toggleWatchlist(prospect.id)} 
+                      className={`w-full py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center font-mono tracking-wide shadow-lg ${
+                        isInWatchlist 
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:brightness-110' 
+                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:text-super-dark-text-primary dark:hover:from-super-dark-secondary dark:hover:to-super-dark-border'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 mr-2 ${isInWatchlist ? 'fill-current' : ''}`} />
+                      {isInWatchlist ? 'Remover da Watchlist' : 'Adicionar à Watchlist'}
+                    </motion.button>
+                  )}
+                  
+                  <motion.button 
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(148, 163, 184, 0.3)" }} 
+                    whileTap={{ scale: 0.98 }} 
+                    onClick={handleShare} 
+                    className="w-full flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:from-gray-200 hover:to-gray-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:text-super-dark-text-primary dark:hover:from-super-dark-secondary dark:hover:to-super-dark-border transition-all duration-300 font-mono tracking-wide shadow-lg"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />Compartilhar Perfil
+                  </motion.button>
+                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
