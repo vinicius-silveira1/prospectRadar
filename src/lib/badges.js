@@ -1,41 +1,15 @@
 /**
- * ----------------------------------------------------------------
+
  * BADGE DEFINITIONS
  * ----------------------------------------------------------------
- * Each badge has a label, description, and icon. This provides a  if (p  // --- Defense Badges ---
-  if (p.is_hs) {
-    // Debug temporário para Samis
-    if (prospect.name === 'Samis Calderon') {
-      console.log('Defense badges check for Samis:', { 
-        is_hs: p.is_hs, 
-        bpg: p.bpg, 
-        position, 
-        positionTrimmed: position,
-        includesPF: ['PF', 'C'].includes(position)
-      });
-    }
-    
-    if (p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.ELITE_DEFENDER);_hs) {
-    if (p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.ELITE_DEFENDER);
-    if (p.bpg >= 1.3 && (position.includes('PF') || position.includes('C'))) {
-      assignedBadges.add(badges.RIM_PROTECTOR);
-      // Debug temporário
-      if (prospect.name === 'Samis Calderon') {
-        console.log('RIM_PROTECTOR added for Samis:', { 
-          bpg: p.bpg, 
-          position, 
-          includesPF: position.includes('PF'),
-          includesC: position.includes('C')
-        });
-      }
-    }
-    if (p.spg >= 1.5 && ['PG', 'SG', 'SF'].includes(position)) assignedBadges.add(badges.PERIMETER_DEFENDER);centralized library of all possible badges a prospect can earn.
+ * Each badge has a label, description, and icon. This provides a
+ * centralized library of all possible badges a prospect can earn.
  */
 export const badges = {
   // Shooting
   ELITE_SHOOTER: {
     key: 'ELITE_SHOOTER',
-    label: 'Sniper de 3',
+    label: 'Sniper',
     description: 'Um arremessador letal da linha de três pontos, com altíssimo aproveitamento e volume. Faz chover de qualquer lugar!',
     icon: '🎯',
   },
@@ -43,20 +17,20 @@ export const badges = {
     key: 'PROMISING_SHOOTER',
     label: 'Futuro Sniper',
     description: 'Mostra um arremesso consistente e eficiente, com potencial para se tornar uma ameaça de elite. Olho nele!',
-    icon: '📈',
+    icon: '🌟',
   },
   // Playmaking
   FLOOR_GENERAL: {
     key: 'FLOOR_GENERAL',
     label: 'Cérebro da Quadra',
-    description: 'Um playmaker que enxerga o jogo em câmera lenta, orquestrando o ataque com ótimos passes e boas decisões.',
+    description: 'O maestro da equipe! Dita o ritmo, enxerga jogadas que ninguém vê e faz todos jogarem melhor.',
     icon: '🧠',
   },
   // Defense
   ELITE_DEFENDER: {
     key: 'ELITE_DEFENDER',
     label: 'Cadeado',
-    description: 'Um pesadelo para o ataque adversário. Rouba bolas e distribui tocas como se não houvesse amanhã. Não passa nada!',
+    description: 'Um pesadelo para o ataque adversário. Rouba bolas e distribui tocos como se não houvesse amanhã. Não passa nada!',
     icon: '🔒',
   },
   RIM_PROTECTOR: {
@@ -67,21 +41,21 @@ export const badges = {
   },
   PERIMETER_DEFENDER: {
     key: 'PERIMETER_DEFENDER',
-    label: 'Defensor de Perímetro',
-    description: 'Um "carrapato" na defesa, gerando roubos de bola e pressionando o adversário no perímetro.',
-    icon: '🧤',
+    label: 'Chiclete',
+    description: 'Gruda no adversário e não solta mais! Marcação pegajosa que incomoda muito no perímetro.',
+    icon: '🍬',
   },
   // Scoring & Efficiency
   EFFICIENT_SCORER: {
     key: 'EFFICIENT_SCORER',
-    label: 'Pontuador Eficiente',
-    description: 'Consegue pontuar em alto volume sem comprometer a eficiência.',
-    icon: '🔥',
+    label: 'Calibrado',
+    description: 'Pontuação cirúrgica! Faz muitos pontos gastando poucas posses, sem força desnecessária.',
+    icon: '📐',
   },
   ELITE_FINISHER: {
     key: 'ELITE_FINISHER',
-    label: 'Finalizador de Elite',
-    description: 'Extremamente eficiente pontuando dentro do arco, com alto volume e aproveitamento de arremessos de 2 pontos.',
+    label: 'Demolidor',
+    description: 'Muito dificil de ser parado na área pintada. Converte quase tudo que chega perto da cesta.',
     icon: '🔨',
   },
   // Rebounding
@@ -101,7 +75,7 @@ export const badges = {
   HIGH_MOTOR: {
     key: 'HIGH_MOTOR',
     label: 'Incansável',
-    description: 'Nunca para! jogador de alta energia que está sempre ativo, especialmente nos rebotes ofensivos e linhas de passe.',
+    description: 'Motor V8! Não para nunca, sempre correndo, brigando por cada bola solta e rebote. Muito ativo nas linhas de passe.',
     icon: '🔋',
   },
   SWISS_ARMY_KNIFE: {
@@ -328,8 +302,16 @@ export const assignBadges = (prospect) => {
   if (contributions.filter(Boolean).length >= 4) assignedBadges.add(badges.SWISS_ARMY_KNIFE);
   const pointsPer36 = p.minutes_played > 0 ? (p.total_points / p.minutes_played) * 36 : 0;
   if (pointsPer36 >= 25 && p.minutes_played > 80) assignedBadges.add(badges.MICROWAVE_SCORER);
+  
+  // Iron Man badge com critérios diferenciados
   const minutesPerGame = p.games_played > 0 ? p.minutes_played / p.games_played : 0;
-  if (p.games_played >= 25 && minutesPerGame >= 28) assignedBadges.add(badges.IRON_MAN);
+  if (p.is_hs) {
+    // High School: temporada mais curta, critérios mais flexíveis
+    if (p.games_played >= 18 && minutesPerGame >= 24) assignedBadges.add(badges.IRON_MAN);
+  } else {
+    // College/Pro: temporada mais longa, critérios mais rigorosos
+    if (p.games_played >= 22 && minutesPerGame >= 26) assignedBadges.add(badges.IRON_MAN);
+  }
 
   return Array.from(assignedBadges);
 };

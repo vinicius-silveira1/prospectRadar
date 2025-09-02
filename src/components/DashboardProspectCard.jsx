@@ -25,7 +25,9 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
   };
 
   const handleCardClick = (e) => {
-    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    // 📱 MOBILE: Se clicar fora dos badges e tem achievement aberto, fecha
+    // 
+    // Melhora UX mobile permitindo fechar achievements clicando fora
     if (isMobile && hoveredBadge && !e.target.closest('.badge-container')) {
       setHoveredBadge(null);
     }
@@ -33,18 +35,26 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
 
   const handleBadgeHover = (badge) => {
     if (isMobile) {
-      // No mobile, toggle: se o mesmo badge for clicado, fecha
+      // 📱 MOBILE: Toggle - se o mesmo badge for clicado, fecha
+      // 
+      // No mobile, não temos hover então usamos click para toggle
       if (hoveredBadge && hoveredBadge.label === badge?.label) {
         setHoveredBadge(null);
       } else {
         setHoveredBadge(badge);
       }
     } else {
-      // No desktop, comportamento normal de hover
+      // 🖥️ DESKTOP: Comportamento normal de hover
+      // 
+      // No desktop, hover simples para mostrar achievement
       setHoveredBadge(badge);
     }
   };
 
+  // 🎓 DETECÇÃO INTELIGENTE DE FONTE DOS DADOS
+  // 
+  // Determina se os dados vêm de high school ou college/pro para
+  // exibir as informações corretas na interface
   const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
   const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
   const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
@@ -67,7 +77,11 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      {/* Watch List Button */}
+      {/* 💜 BOTÃO DE WATCHLIST */}
+      {/* 
+        Permite adicionar/remover prospects da lista pessoal do usuário.
+        Posicionado no canto superior direito com animações suaves.
+      */}
       <motion.button
         onClick={handleToggle}
         className="absolute top-3 right-3 z-[5] p-1.5 rounded-full bg-white/90 dark:bg-super-dark-secondary/90 hover:bg-white dark:hover:bg-slate-600 transition-all backdrop-blur-sm"
@@ -92,7 +106,15 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
       </motion.button>
       <div className="p-4">
         <div className="flex items-center space-x-4 mb-4">
-          {/* Image or Skeleton */}
+          {/* 🖼️ AVATAR DO PROSPECT */}
+          {/* 
+            Sistema inteligente de imagem que usa:
+            1. Imagem oficial se disponível
+            2. Skeleton loading durante carregamento  
+            3. Iniciais coloridas como fallback
+            
+            Cores são geradas deterministicamente pelo nome para consistência.
+          */}
           <motion.div 
             className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold ring-2 ring-transparent group-hover:ring-brand-purple/30 transition-all duration-300"
             style={{ backgroundColor: getColorFromName(prospect?.name) }}

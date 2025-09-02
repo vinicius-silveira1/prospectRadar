@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveStack, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 import ThemeToggle from './ThemeToggle';
+import BetaBadge from '../Common/BetaBadge';
 
 // AnimatedSearchInput: placeholder animado
 const animatedSearchPlaceholders = [
@@ -167,10 +168,16 @@ const Navbar = ({ onMenuClick }) => {
                   '2xl': 'text-xl'
                 }}
                 weight="font-black"
-                className="hidden sm:block tracking-tight"
+                className="hidden sm:flex items-center gap-2 tracking-tight"
               >
-                <span className="text-brand-orange font-black">prospect</span>
-                <span className="text-brand-purple font-black italic">Radar</span>
+                <div>
+                  <span className="text-brand-orange font-black">prospect</span>
+                  <span className="text-brand-purple font-black italic">Radar</span>
+                </div>
+                {/* Beta Badge inline à direita */}
+                <div className="hidden md:block">
+                  <BetaBadge size="xs" />
+                </div>
               </ResponsiveText>
             </motion.div>
           </Link>

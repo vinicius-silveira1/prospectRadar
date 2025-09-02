@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Github, Twitter, Linkedin, Heart } from 'lucide-react';
+import BetaBadge from '../Common/BetaBadge';
 
 const Footer = () => {
   const navigationLinks = [
@@ -61,12 +62,15 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               />
               <motion.h1 
-                className="text-lg font-black tracking-tight"
+                className="text-lg font-black tracking-tight flex items-center gap-2"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <span className="text-brand-orange font-black">prospect</span>
-                <span className="text-brand-purple font-black italic">Radar</span>
+                <div>
+                  <span className="text-brand-orange font-black">prospect</span>
+                  <span className="text-brand-purple font-black italic">Radar</span>
+                </div>
+                <BetaBadge size="xs" />
               </motion.h1>
             </div>
             <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary leading-relaxed max-w-xs mx-auto sm:mx-0">

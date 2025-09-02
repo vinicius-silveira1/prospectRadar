@@ -10,6 +10,7 @@ import {
   Star,
   Activity
 } from 'lucide-react';
+import BetaBadge from '../components/Common/BetaBadge';
 
 const About = () => {
   return (
@@ -67,10 +68,13 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-3xl md:text-5xl lg:text-6xl font-gaming font-extrabold mb-4 leading-tight font-mono tracking-wide"
+              className="text-3xl md:text-5xl lg:text-6xl font-gaming font-extrabold mb-4 leading-tight font-mono tracking-wide flex flex-col items-center"
             >
               <span className="block">Sobre o</span> 
-              <span className="text-yellow-300 drop-shadow-lg">prospect</span>Radar
+              <div className="flex items-center gap-3">
+                <span><span className="text-yellow-300 drop-shadow-lg">prospect</span>Radar</span>
+                <BetaBadge size="md" />
+              </div>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
@@ -292,6 +296,129 @@ const About = () => {
             </p>
             
           </motion.div>
+        </motion.div>
+
+        {/* Open Source Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          whileHover={{
+            scale: 1.02,
+            transition: { duration: 0.3 }
+          }}
+          className="bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/50 rounded-xl shadow-lg p-8 mb-16 border border-gray-200 dark:border-gray-700 group relative overflow-hidden"
+        >
+          {/* Animated Background */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
+            <div className="w-full h-full bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-900/20 dark:to-blue-900/20"></div>
+          </div>
+
+          {/* Floating GitHub-style elements */}
+          <div className="absolute top-6 right-8 opacity-0 group-hover:opacity-30 transition-all duration-500">
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+          </div>
+          <div className="absolute bottom-8 left-8 opacity-0 group-hover:opacity-30 transition-all duration-500 delay-200">
+            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row items-center gap-8 relative z-10">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ duration: 0.3 }}
+              className="flex-shrink-0"
+            >
+              <div className="bg-gradient-to-br from-gray-600 to-black text-white rounded-2xl p-6 shadow-lg">
+                <Shield className="w-12 h-12" />
+              </div>
+            </motion.div>
+            <div className="text-center lg:text-left">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 font-mono tracking-wide"
+              >
+                🔓 100% Open Source
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="text-lg text-slate-700 dark:text-slate-300 leading-relaxed group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors duration-300 mb-6"
+              >
+                Somos a <strong>primeira plataforma brasileira de scouting completamente open source</strong>. 
+                Todo nosso código, incluindo o algoritmo do Radar Score, está disponível publicamente no GitHub. 
+                Acreditamos que transparência total gera confiança e permite que a comunidade contribua para 
+                melhorar continuamente a plataforma.
+              </motion.p>
+              
+              {/* Features Grid */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{
+                  visible: { transition: { staggerChildren: 0.1 } }
+                }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                {[
+                  { icon: "🔍", title: "Código Auditável", desc: "Veja exatamente como funciona cada cálculo" },
+                  { icon: "🤝", title: "Contribuições Bem-vindas", desc: "Desenvolvedores podem melhorar a plataforma" },
+                  { icon: "📖", title: "Educativo", desc: "Aprenda sobre análise de dados esportivos" },
+                  { icon: "🆓", title: "Sempre Gratuito", desc: "Core funcionalidades sempre disponíveis" }
+                ].map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, x: -20 },
+                      visible: { opacity: 1, x: 0 }
+                    }}
+                    whileHover={{
+                      scale: 1.05,
+                      transition: { duration: 0.2 }
+                    }}
+                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-white/50 dark:hover:bg-slate-800/30 transition-all duration-300"
+                  >
+                    <span className="text-xl flex-shrink-0">{feature.icon}</span>
+                    <div>
+                      <h4 className="font-gaming font-semibold text-slate-900 dark:text-white text-sm font-mono tracking-wide">
+                        {feature.title}
+                      </h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {feature.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+              
+              {/* GitHub Link */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="mt-6"
+              >
+                <a 
+                  href="https://github.com/vinicius-silveira1/prospectRadar" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-gray-900 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors duration-300 font-gaming font-semibold text-sm font-mono tracking-wide"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  Ver no GitHub
+                </a>
+              </motion.div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Target Audience Section */}

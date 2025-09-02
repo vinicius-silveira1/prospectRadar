@@ -14,7 +14,32 @@ Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos d
 [![Supabase](https://img.shields.io/badge/Supabase-36B37E?logo=supabase&logoColor=white)](https://supabase.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=tanstack&logoColor=white)](https://tanstack.com/query/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-0055FF?logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Stripe](https://img.shields.io/badge/Stripe-008CDD?logo=stripe&logoColor=white)](https://stripe.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/Version-1.0.0--beta.1-orange.svg)](https://github.com/vinicius-silveira1/prospectRadar)
+[![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)](https://github.com/vinicius-silveira1/prospectRadar)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/vinicius-silveira1/prospectRadar/issues)
+
+## 🌟 **100% Open Source & Transparente**
+
+O ProspectRadar é **completamente open source** porque acreditamos que transparência e colaboração geram produtos melhores para toda a comunidade.
+
+### **🔓 Por que Open Source?**
+- **🇧🇷 Transparência Brasileira:** Sem caixas-pretas - você pode ver exatamente como analisamos prospects
+- **🤝 Desenvolvido pela Comunidade:** Contribuições de desenvolvedores e fãs de basquete melhoram continuamente a plataforma
+- **📖 Educativo:** Código aberto para quem quer aprender sobre análise de dados esportivos
+- **🔧 Auditável:** Algoritmo do Radar Score totalmente visível e verificável pela comunidade
+
+### **💡 Como Contribuir**
+- 🐛 **Reportar bugs:** [Abra uma issue](https://github.com/vinicius-silveira1/prospectRadar/issues)
+- 💡 **Sugerir features:** Compartilhe suas ideias para melhorar a plataforma
+- 🔀 **Pull Requests:** Contribua com código, documentação ou correções
+- 📊 **Dados:** Ajude a melhorar nossa base de dados de prospects
+- 🎨 **Design:** Sugestões de UI/UX são sempre bem-vindas
+
+### **🏆 Primeira Plataforma Open Source de Scouting do Brasil**
+Somos pioneiros em trazer transparência total para análise de prospects de basquete no Brasil. Todo nosso algoritmo, metodologia e código estão disponíveis para a comunidade auditar, melhorar e aprender.
 
 ## 🇧🇷 Para a Comunidade Brasileira
 
@@ -28,18 +53,41 @@ Este projeto foi criado para preencher uma lacuna na comunidade brasileira de ba
 
 ## 🚀 Funcionalidades
 
+### 🆓 **Funcionalidades Gratuitas**
 -   **Dashboard Interativo:** Visão geral dos principais prospects, com destaques para jogadores brasileiros e os melhores ranqueados.
--   **Database de Prospects:** Explore uma lista completa de jogadores com filtros avançados por posição, tier, nacionalidade, estatísticas, e mais.
--   **Análise Detalhada:** Mergulhe em perfis completos de jogadores, com estatísticas, atributos físicos, pontos fortes e fracos.
--   **Radar Score Inteligente:** Nosso algoritmo exclusivo avalia o potencial de cada prospecto com base em uma combinação de estatísticas avançadas, atributos físicos e fatores de desenvolvimento, gerando uma pontuação de 0 a 1 que reflete sua projeção no draft e prontidão para a NBA.
--   **Ferramenta de Comparação:** Compare até 4 prospects lado a lado em uma análise head-to-head detalhada.
--   **Simulador de Mock Draft:** Crie e exporte seu próprio Mock Draft, fazendo as escolhas para cada time.
--   **Badges de Habilidade:** Identifique rapidamente as principais características de um jogador através de um sistema de badges, como "Bom Arremessador", "Defensor de Elite", "Playmaker", etc.
+-   **Database de Prospects:** Explore uma lista completa de jogadores com filtros básicos por posição, tier e nacionalidade.
+-   **Análise Detalhada:** Mergulhe em perfis completos de jogadores, com estatísticas, atributos físicos e badges de habilidade.
+-   **Radar Score Básico:** Visualize nossa pontuação proprietária de potencial NBA para cada prospect.
+-   **Comparação Simples:** Compare até 2 prospects lado a lado.
+-   **Mock Draft Básico:** Crie até 2 mock drafts salvos.
+-   **Watchlist Limitada:** Acompanhe até 5 prospects favoritos.
+
+### 👑 **Funcionalidades Premium (Scout)**
+-   **Filtros Avançados:** Altura, peso, envergadura, estatísticas específicas e métricas avançadas.
+-   **Radar Score Completo:** Análise gráfica detalhada com breakdown por categorias.
+-   **Comparações Profissionais:** Compare até 4 prospects com análise head-to-head completa.
+-   **Mock Draft Ilimitado:** Salve quantos drafts quiser com sistema de trade de picks.
+-   **Watchlist Ilimitada:** Adicione quantos prospects desejar com sistema de notas pessoais.
+-   **Comparações NBA:** Encontre jogadores similares da NBA para cada prospect.
+-   **Exportação Profissional:** Gere relatórios em PDF, Excel, CSV e imagens em alta qualidade.
+-   **Análise Detalhada:** Pontos fortes, fracos e projeções completas para cada jogador.
+
+### 🏀 **Funcionalidades Especiais**
+-   **Badges de Habilidade:** Sistema inteligente com 30+ badges que identificam características únicas (Sniper, Cadeado, Demolidor, etc.).
+-   **Sistema de Flags:** Indicadores automáticos de pontos fortes (verde) e riscos (vermelho) baseados em dados.
+-   **Prospects Brasileiros:** Seção dedicada aos talentos nacionais com análises especializadas.
+-   **Responsivo:** Interface otimizada para desktop, tablet e mobile.
 
 
 ## 🧠 O que é o Radar Score?
 
-O **Radar Score** é uma métrica proprietária do prospectRadar, projetada para fornecer uma avaliação do potencial de um prospecto. Desenvolvido e validado através de análise histórica de classes de draft anteriores, o algoritmo vai além das estatísticas tradicionais, incorporando uma variedade de fatores para criar um perfil completo do jogador.
+O **Radar Score** é nossa metodologia proprietária **100% transparente** para avaliação de prospects de basquete. Diferente de rankings fechados, todo nosso algoritmo está aberto para auditoria e melhorias da comunidade.
+
+### **🔍 Transparência Total**
+- **Código Aberto:** Todo o algoritmo está visível no repositório
+- **Metodologia Documentada:** Explicação completa de cada cálculo
+- **Validação Pública:** Testado com dados históricos verificáveis
+- **Auditável:** Comunidade pode validar e sugerir melhorias
 
 ### Como é Calculado?
 
@@ -65,6 +113,31 @@ O verdadeiro poder do Radar Score vem de seus ajustes inteligentes validados his
 *   **Validação Histórica:** O algoritmo foi testado e validado usando classes de draft anteriores.
 
 O resultado é uma pontuação de 0 a 1, onde valores mais altos indicam um maior potencial de sucesso na NBA, complementada por um score de confiança que indica a qualidade dos dados disponíveis.
+
+> 💡 **Quer entender mais?** Veja o código completo do algoritmo em [`src/intelligence/prospectRankingAlgorithm.js`](./src/intelligence/prospectRankingAlgorithm.js)
+
+## ⚡ **Performance e Arquitetura**
+
+### **Otimizações Implementadas**
+- **React 19:** Concurrent features e Server Components
+- **Code Splitting:** Carregamento lazy de rotas e componentes
+- **Image Optimization:** Lazy loading e WebP
+- **Caching Inteligente:** TanStack Query com cache persistente
+- **Bundle Optimization:** Tree shaking e minificação avançada
+
+### **Responsividade e UX**
+- **Mobile First:** Interface otimizada para todos os dispositivos
+- **Design Gaming:** Animações suaves com Framer Motion
+- **Dark Mode:** Suporte completo a tema escuro
+- **Acessibilidade:** Seguindo diretrizes WCAG 2.1
+- **PWA Ready:** Instalação offline e push notifications
+
+### **Segurança e Confiabilidade**
+- **Row Level Security:** Proteção de dados no Supabase
+- **Rate Limiting:** Proteção contra abuso de APIs
+- **Input Validation:** Sanitização e validação rigorosa
+- **HTTPS Only:** Comunicação segura end-to-end
+- **Data Backup:** Backups automáticos diários
 
 ## 📋 Casos de Uso Principais
 
@@ -92,19 +165,90 @@ O resultado é uma pontuação de 0 a 1, onde valores mais altos indicam um maio
 
 -   **Backend com Supabase:** Toda a aplicação é alimentada por um backend robusto e escalável no Supabase, garantindo dados consistentes e em tempo real.
 -   **Prospects Verificados:** Acompanhe dezenas de prospects da classe de 2026, incluindo os principais talentos brasileiros.
--   **Fontes Confiáveis:** Os dados são curados e agregados a partir de fontes renomadas como ESPN, 247Sports e Basketball Reference.
+-   **Fontes Confiáveis:** Os dados são curados e agregados a partir de fontes renomadas como ESPN, 247Sports, RealGM e Basketball Reference.
+
+## 🎯 **Modelo de Negócio**
+
+### **Plano Gratuito**
+- Acesso a funcionalidades básicas
+- Watchlist limitada (5 prospects)
+- Mock drafts limitados (2 salvos)
+- Comparação de 2 prospects
+- Radar Score básico
+
+### **Plano Scout ($9.99/mês)**
+- Todas as funcionalidades premium
+- Watchlist e mock drafts ilimitados
+- Comparação de até 4 prospects
+- Exportação profissional
+- Análises avançadas
+- Comparações com jogadores NBA
+
+### **Comparação de Funcionalidades**
+
+| Funcionalidade | Gratuito | Scout |
+|---------------|----------|-------|
+| Dashboard e navegação | ✅ | ✅ |
+| Visualizar prospects | ✅ | ✅ |
+| Radar Score básico | ✅ | ✅ |
+| Filtros básicos | ✅ | ✅ |
+| Watchlist | 5 prospects | Ilimitado |
+| Mock Draft | 2 salvos | Ilimitado |
+| Comparação | 2 prospects | 4 prospects |
+| Filtros avançados | ❌ | ✅ |
+| Radar Score gráfico | ❌ | ✅ |
+| Comparações NBA | ❌ | ✅ |
+| Exportação de dados | ❌ | ✅ |
+| Análise detalhada | ❌ | ✅ |
+| Suporte prioritário | ❌ | ✅ |
+
+## 🔬 **Metodologia e Validação**
+
+### **Validação Histórica**
+Nosso algoritmo foi testado e validado usando dados de classes de drafts passados, demonstrando maior precisão que rankings tradicionais na previsão de sucesso na NBA.
+
+### **Fontes de Dados**
+- **ESPN:** Rankings e estatísticas universitárias
+- **247Sports:** Dados de high school e rankings
+- **RealGM:** Informações de draft e comparações
+- **Basketball Reference:** Estatísticas históricas da NBA
+- **Dados Próprios:** Web scraping e curadoria manual
 
 ## 🛠️ Tecnologias
 
--   **React 19:** Framework principal para uma UI moderna e reativa.
--   **Vite:** Build tool de alta performance.
--   **Tailwind CSS:** Styling utilitário para um design rápido e consistente.
--   **React Router:** Navegação e roteamento SPA.
--   **Supabase:** Backend as a Service para banco de dados, autenticação e APIs.
--   **TanStack Query (React Query):** Gerenciamento de estado do servidor, cache e sincronização de dados.
--   **Lucide React:** Biblioteca de ícones leve e consistente.
+### **Frontend**
+-   **React 19:** Framework principal com as mais recentes funcionalidades
+-   **Vite 7.0:** Build tool de alta performance com Hot Module Replacement
+-   **Tailwind CSS 3.4:** Design system utilitário para interfaces consistentes
+-   **Framer Motion:** Animações fluidas e micro-interações
+-   **React Router:** Navegação SPA com lazy loading
+-   **Lucide React:** Biblioteca de ícones moderna e leve
+
+### **Backend & Infraestrutura**
+-   **Supabase:** Backend-as-a-Service completo
+  - PostgreSQL Database com Row Level Security
+  - Authentication & Authorization
+  - Edge Functions para APIs customizadas
+  - Real-time subscriptions
+-   **TanStack Query:** Gerenciamento de estado do servidor com cache inteligente
+-   **Stripe:** Processamento de pagamentos e gerenciamento de assinaturas
+
+### **DevOps & Ferramentas**
+-   **Capacitor:** Build nativo para iOS e Android
+-   **ESLint:** Análise estática de código
+-   **PostCSS:** Processamento avançado de CSS
+-   **Puppeteer:** Web scraping para coleta de dados
+-   **Firebase:** Analytics e crash reporting
 
 ## 📋 Instalação
+
+### **Pré-requisitos**
+- Node.js 18+ 
+- npm ou yarn
+- Conta no Supabase
+- Conta no Stripe (para pagamentos)
+
+### **Configuração do Projeto**
 
 ```bash
 # Clone o repositório
@@ -114,35 +258,178 @@ cd prospectRadar
 # Instale as dependências
 npm install
 
-# Crie seu arquivo .env a partir do exemplo
+# Configure as variáveis de ambiente
 cp .env.example .env
+# Edite o .env com suas chaves do Supabase e Stripe
 
 # Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-### Scripts Disponíveis
+### **Scripts Disponíveis**
 ```bash
-npm run dev      # Servidor de desenvolvimento
+npm run dev      # Servidor de desenvolvimento (localhost:5173)
 npm run build    # Build para produção
-npm run preview  # Preview do build
-npm run lint     # Análise de código
+npm run preview  # Preview do build de produção
+npm run lint     # Análise de código com ESLint
+npm test         # Executar testes com Vitest
 ```
 
-## 🤝 Contribuição
+### **Estrutura do Projeto**
+```
+src/
+├── components/     # Componentes React reutilizáveis
+├── pages/         # Páginas principais da aplicação
+├── hooks/         # Custom hooks para lógica de estado
+├── intelligence/  # Algoritmos de análise (Radar Score)
+├── lib/           # Utilitários e configurações
+├── services/      # Integrações com APIs externas
+└── context/       # Contextos React (Auth, etc.)
+```
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+## 🤝 **Junte-se à Comunidade Open Source**
 
-##  Licença
+Este projeto prospera graças às contribuições da comunidade brasileira de basquete e desenvolvedores apaixonados! 🇧🇷
+
+### **🌟 Como Você Pode Contribuir**
+
+#### **Para Desenvolvedores:**
+1. 🍴 **Fork o projeto** e clone localmente
+2. 🌿 **Crie uma branch** (`git checkout -b feature/minha-contribuicao`)
+3. ✨ **Faça suas melhorias** (código, documentação, testes)
+4. 📝 **Commit com mensagens claras** (`git commit -m 'Adiciona: nova funcionalidade X'`)
+5. 🚀 **Push para sua branch** (`git push origin feature/minha-contribuicao`)
+6. 🔄 **Abra um Pull Request** detalhando suas mudanças
+
+#### **Para Fãs de Basquete:**
+- 🐛 **Reporte bugs** ou problemas encontrados
+- 💡 **Sugira funcionalidades** que faltam na plataforma
+- 📊 **Contribua com dados** de prospects ou correções
+- 🗣️ **Divulgue o projeto** nas redes sociais
+- ⭐ **Dê uma estrela** no repositório para apoiar
+
+### **🏷️ Tipos de Contribuição Bem-Vindas**
+
+| Tipo | Descrição | Dificuldade |
+|------|-----------|-------------|
+| 🐛 **Bug Fixes** | Correção de problemas encontrados | ⭐ Iniciante |
+| 📝 **Documentação** | Melhorias no README, comentários | ⭐ Iniciante |
+| 🎨 **UI/UX** | Melhorias visuais e de experiência | ⭐⭐ Intermediário |
+| ⚡ **Performance** | Otimizações de velocidade | ⭐⭐ Intermediário |
+| 🧮 **Algoritmo** | Melhorias no Radar Score | ⭐⭐⭐ Avançado |
+| 📊 **Dados** | Novos prospects ou correções | ⭐ Iniciante |
+| 🔧 **Features** | Novas funcionalidades | ⭐⭐⭐ Avançado |
+
+### **🎯 Issues para Iniciantes**
+Procure por issues marcadas com `good-first-issue` ou `help-wanted` no [GitHub Issues](https://github.com/vinicius-silveira1/prospectRadar/issues)
+
+### **📞 Dúvidas sobre Contribuição?**
+- 💬 Abra uma [Discussion](https://github.com/vinicius-silveira1/prospectRadar/discussions)
+- 📧 Entre em contato: contato@prospectradar.com.br
+- 🐦 Twitter: [@prospectRadar](https://twitter.com/prospectRadar)
+
+### **Tipos de Contribuição**
+- 🐛 **Bug Reports:** Encontrou um problema? Abra uma issue
+- 💡 **Feature Requests:** Sugestões de novas funcionalidades
+- 📝 **Documentação:** Melhorias na documentação
+- 🎨 **Design:** Melhorias na UI/UX
+- 📊 **Dados:** Contribuições para a base de dados de prospects
+- 🧮 **Algoritmo:** Melhorias no Radar Score
+
+### **Diretrizes**
+- Siga as convenções de código existentes
+- Adicione testes para novas funcionalidades
+- Mantenha a documentação atualizada
+- Seja respeitoso nas discussões
+
+## 🗺️ **Roadmap**
+
+### **🎯 Próximas Releases**
+
+#### **v1.1.0 - Q4 2025**
+- [ ] Expansão para classe de draft 2027
+- [ ] Sistema de notificações push
+- [ ] Análise de trending prospects
+- [ ] Modo offline (PWA)
+
+#### **v1.2.0 - Q1 2026**
+- [ ] API pública para desenvolvedores
+- [ ] Integração com redes sociais
+- [ ] Sistema de achievements
+- [ ] Análise de draft histórico completo
+
+#### **v2.0.0 - Q2 2026**
+- [ ] Análise de jogadores internacionais
+- [ ] Predições de salário NBA
+- [ ] Sistema de ligas/competições
+- [ ] Mobile app nativo
+
+### **🔬 Pesquisa e Desenvolvimento**
+- Machine Learning para predições mais precisas
+- Análise de vídeo automatizada
+- Integração com dados biométricos
+- Análise de fit por equipe NBA
+
+## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
+## 🙏 **Agradecimentos**
+
+- Comunidade brasileira de basquete
+## 📄 **Licença Open Source**
+
+Este projeto está sob a **licença MIT** - uma das mais permissivas e acolhedoras para a comunidade open source.
+
+### **O que isso significa:**
+- ✅ **Uso Livre:** Use para qualquer propósito, pessoal ou comercial
+- ✅ **Modificação:** Adapte o código às suas necessidades
+- ✅ **Distribuição:** Compartilhe livremente com outros
+- ✅ **Transparência Total:** Sem restrições ou licenças proprietárias escondidas
+
+Veja o arquivo [LICENSE](LICENSE) para todos os detalhes legais.
+
+## 🙏 **Agradecimentos & Comunidade**
+
+### **💙 Contribuidores e Apoiadores:**
+- **Comunidade Brasileira de Basquete** - Feedback, ideias e paixão pelo esporte
+- **Desenvolvedores Open Source** - Inspiração e ferramentas incríveis
+- **Beta Testers** - Paciência e relatórios detalhados de bugs
+- **Early Adopters** - Primeiros usuários que confiaram no projeto
+
+### **📊 Fontes de Dados Reconhecidas:**
+- **ESPN** - Rankings e estatísticas universitárias
+- **247Sports** - Dados de high school e rankings
+- **RealGM** - Informações históricas e comparações
+- **Basketball-Reference** - Estatísticas da NBA para validação
+
+## 📞 **Contato & Comunidade**
+
+### **🌐 Links Oficiais:**
+- **🖥️ Website:** [prospectradar.com.br](https://prospectradar.com.br)
+- **📂 GitHub:** [github.com/vinicius-silveira1/prospectRadar](https://github.com/vinicius-silveira1/prospectRadar)
+- **💼 LinkedIn:** [Vinícius Silveira](https://linkedin.com/in/vinicius-silveira1)
+
+### **💬 Suporte e Comunidade:**
+- **📧 Email:** contato@prospectradar.com.br
+- **🐛 Bugs & Issues:** [GitHub Issues](https://github.com/vinicius-silveira1/prospectRadar/issues)
+- **💡 Discussions:** [GitHub Discussions](https://github.com/vinicius-silveira1/prospectRadar/discussions)
+
 ---
 
-**ProspectRadar** - Revolucionando o scouting de basquete no Brasil 🇧🇷🏀
+<div align="center">
 
-*Algoritmo validado historicamente com classes de draft NBA 2018-2023*
+### **ProspectRadar** 🏀
+#### *A primeira plataforma open source de scouting brasileiro*
+
+**🇧🇷 Desenvolvido com ❤️ pela comunidade brasileira de basquete**
+
+*Algoritmo 100% transparente • Validado historicamente • Sempre gratuito*
+
+**Versão Beta 1.0.0** - Setembro 2025
+
+[![Feito no Brasil](https://img.shields.io/badge/Feito%20no-Brasil-green.svg)](https://github.com/vinicius-silveira1/prospectRadar)
+[![Para a Comunidade](https://img.shields.io/badge/Para%20a-Comunidade-blue.svg)](https://github.com/vinicius-silveira1/prospectRadar)
+[![100% Open Source](https://img.shields.io/badge/100%25-Open%20Source-red.svg)](https://github.com/vinicius-silveira1/prospectRadar)
+
+</div>

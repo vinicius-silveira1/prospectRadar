@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock } from 'lucide-react';
+import BetaBadge from '../components/Common/BetaBadge';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -67,9 +68,12 @@ const Login = () => {
             >
               <LogIn className="h-8 w-8 text-yellow-300" />
             </motion.div>
-            <h1 className="text-2xl sm:text-3xl font-gaming font-bold font-mono tracking-wide">
-              Entrar no <span className="text-yellow-300">prospectRadar</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-gaming font-bold font-mono tracking-wide">
+                Entrar no <span className="text-yellow-300">prospectRadar</span>
+              </h1>
+              <BetaBadge size="sm" />
+            </div>
           </motion.div>
           
           <motion.p 
