@@ -899,79 +899,108 @@ const useAdvancedExport = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
-      // Configurar dimensões para social media (ex: 1200x1600 para Instagram)
+      // Configurar dimensões para social media otimizado
       canvas.width = 1200;
       canvas.height = 1600; 
 
-      // Fundo branco
+      // Fundo claro limpo
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid background sutil
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)'; // slate-400 with low opacity
+      ctx.lineWidth = 1;
+      const gridSize = 40; // Larger grid for cleaner look
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Corner accents simplificados
+      const accentSize = 40;
+      const accentThickness = 3;
+      ctx.strokeStyle = '#3b82f6'; // blue-500
+      ctx.lineWidth = accentThickness;
       
-      // Header
-      let currentY = 80;
-      const headerLeftX = 50;
+      // Top-left
+      ctx.beginPath();
+      ctx.moveTo(30, 30 + accentSize);
+      ctx.lineTo(30, 30);
+      ctx.lineTo(30 + accentSize, 30);
+      ctx.stroke();
+      
+      // Top-right
+      ctx.beginPath();
+      ctx.moveTo(canvas.width - 30 - accentSize, 30);
+      ctx.lineTo(canvas.width - 30, 30);
+      ctx.lineTo(canvas.width - 30, 30 + accentSize);
+      ctx.stroke();
+      
+      // Header simplificado e bem posicionado
+      let currentY = 60;
       const headerCenter = canvas.width / 2;
+      const margin = 80;
 
-      // "prospect" em laranja
-      ctx.font = 'bold 28px Arial, sans-serif';
+      // Logo simples
+      ctx.fillStyle = '#3b82f6'; // blue-500
+      ctx.font = 'bold 24px Arial, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#f97316'; // orange-500
-      ctx.fillText('prospect', headerLeftX, currentY);
+      ctx.fillText('prospectRadar', margin, currentY);
 
-      // "Radar" em azul
-      const prospectTextWidth = ctx.measureText('prospect').width;
-      ctx.fillStyle = '#2563eb'; // blue-600
-      ctx.fillText('Radar', headerLeftX + prospectTextWidth, currentY);
-
-      // Nome do prospecto (centralizado)
-      ctx.fillStyle = '#1a202c';
-      ctx.font = 'bold 56px Arial, sans-serif';
+      // Nome do prospecto centralizado
+      currentY += 50;
+      ctx.fillStyle = '#1f2937'; // gray-800
+      ctx.font = 'bold 48px Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(data.basicInfo.name || 'N/A', headerCenter, currentY + 60);
+      ctx.fillText(data.basicInfo.name || 'N/A', headerCenter, currentY);
       
-      ctx.font = '32px Arial, sans-serif';
-      ctx.fillStyle = '#4a5568';
-      currentY += 105;
+      currentY += 35;
+      ctx.font = '24px Arial, sans-serif';
+      ctx.fillStyle = '#6b7280'; // gray-500
       ctx.fillText(`${data.basicInfo.position || 'N/A'} | ${data.basicInfo.team || 'N/A'}`, headerCenter, currentY);
 
-      // Linha divisória
-      ctx.strokeStyle = '#e2e8f0';
+      // Divisória simples
+      currentY += 20;
+      ctx.strokeStyle = '#e5e7eb'; // gray-200
       ctx.lineWidth = 2;
       ctx.beginPath();
-      currentY += 30;
-      ctx.moveTo(50, currentY);
-      ctx.lineTo(canvas.width - 50, currentY);
+      ctx.moveTo(margin, currentY);
+      ctx.lineTo(canvas.width - margin, currentY);
       ctx.stroke();
 
-      // Radar Score Section (Two Columns)
+      // Radar Score Section (expandindo layout)
       currentY += 60;
-      const radarSectionY = currentY;
-      const radarLeftColumnX = 100;
-      const radarRightColumnX = canvas.width / 2 + 50;
+      const sectionStartY = currentY;
+      const leftColumnX = margin;
+      const rightColumnX = canvas.width / 2 + 40;
+      const columnWidth = (canvas.width / 2) - 60;
 
-      // Initialize chart dimensions with default values
+      // Radar Chart (Left Column) - aumentando tamanho
       let chartWidth = 450;
-      let chartHeight = 337;
-
-      // Radar Chart (Left Column)
+      let chartHeight = 350;
       const radarChartImage = await captureElement('radar-chart-container');
       if (radarChartImage) {
         const img = new Image();
         img.src = radarChartImage;
         await new Promise(resolve => img.onload = resolve); 
-
-        // Update chart dimensions if captured successfully
-        // chartWidth and chartHeight are already defined above
-        ctx.drawImage(img, radarLeftColumnX, radarSectionY, chartWidth, chartHeight);
+        ctx.drawImage(img, leftColumnX, sectionStartY, chartWidth, chartHeight);
       } else {
-        ctx.fillStyle = '#e53e3e';
+        ctx.fillStyle = '#dc2626';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('Radar Score Chart indisponível', radarLeftColumnX, radarSectionY + 100);
+        ctx.fillText('Radar Chart indisponível', leftColumnX, sectionStartY + 50);
       }
 
-      // Radar Analysis (Right Column)
-      let radarAnalysisY = radarSectionY + 20; // Adjust starting Y for right column
+      // Right Column - Análises (começando mais abaixo para alinhar)
+      let rightColumnY = sectionStartY + 50; // Iniciando mais abaixo
       ctx.textAlign = 'left';
 
       // Função para quebrar texto
@@ -997,91 +1026,91 @@ const useAdvancedExport = () => {
         return y + lineHeight;
       };
 
-      // Projeção de Draft
-      ctx.fillStyle = '#e53e3e';
+      // Projeção de Draft (movendo para baixo)
+      ctx.fillStyle = '#dc2626'; // red-600
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillText('PROJEÇÃO DE DRAFT', rightColumnX, rightColumnY);
+      
+      rightColumnY += 40;
+      ctx.fillStyle = '#1f2937'; // gray-800
       ctx.font = 'bold 32px Arial, sans-serif';
-      ctx.fillText('PROJEÇÃO DE DRAFT', radarRightColumnX, radarAnalysisY);
-      
-      radarAnalysisY += 45;
-      ctx.fillStyle = '#1a202c';
-      ctx.font = 'bold 36px Arial, sans-serif'; // Reduced font size
       const projectionText = data.radarAnalysis.draftProjection || 'N/A';
-      const projectionMaxWidth = (canvas.width / 2) - 100;
-      radarAnalysisY = wrapText(ctx, projectionText, radarRightColumnX, radarAnalysisY, projectionMaxWidth, 40); // Use wrapText
+      rightColumnY = wrapText(ctx, projectionText, rightColumnX, rightColumnY, columnWidth, 36);
       
-      radarAnalysisY += 15; // Adjust space after projection
-      ctx.font = '24px Arial, sans-serif';
-      ctx.fillStyle = '#4a5568';
-      ctx.fillText(`Range: ${data.radarAnalysis.draftRange || 'N/A'}`, radarRightColumnX, radarAnalysisY);
+      rightColumnY += 20;
+      ctx.font = '20px Arial, sans-serif';
+      ctx.fillStyle = '#6b7280'; // gray-500
+      ctx.fillText(`Range: ${data.radarAnalysis.draftRange || 'N/A'}`, rightColumnX, rightColumnY);
 
       // NBA Readiness
-      radarAnalysisY += 60;
-      ctx.fillStyle = '#2b6cb0';
+      rightColumnY += 50;
+      ctx.fillStyle = '#2563eb'; // blue-600
       ctx.font = 'bold 28px Arial, sans-serif';
-      ctx.fillText('PRONTIDÃO PARA NBA', radarRightColumnX, radarAnalysisY);
+      ctx.fillText('PRONTIDÃO PARA NBA', rightColumnX, rightColumnY);
       
-      radarAnalysisY += 35;
-      ctx.fillStyle = '#1a202c';
-      ctx.font = '36px Arial, sans-serif';
-      ctx.fillText(data.radarAnalysis.readiness || 'N/A', radarRightColumnX, radarAnalysisY);
+      rightColumnY += 35;
+      ctx.fillStyle = '#1f2937'; // gray-800
+      ctx.font = '28px Arial, sans-serif';
+      ctx.fillText(data.radarAnalysis.readiness || 'N/A', rightColumnX, rightColumnY);
 
-      // Total Potential Score
-      radarAnalysisY += 60;
-      ctx.fillStyle = '#2b6cb0';
+      // Score Total
+      rightColumnY += 50;
+      ctx.fillStyle = '#059669'; // emerald-600
       ctx.font = 'bold 28px Arial, sans-serif';
-      ctx.fillText('SCORE TOTAL (POTENCIAL)', radarRightColumnX, radarAnalysisY);
+      ctx.fillText('SCORE TOTAL', rightColumnX, rightColumnY);
       
-      radarAnalysisY += 35;
-      ctx.fillStyle = '#1a202c';
-      ctx.font = '36px Arial, sans-serif';
-      ctx.fillText(data.radarAnalysis.potentialScore || 'N/A', radarRightColumnX, radarAnalysisY);
+      rightColumnY += 35;
+      ctx.fillStyle = '#1f2937'; // gray-800
+      ctx.font = '28px Arial, sans-serif';
+      ctx.fillText(data.radarAnalysis.potentialScore || 'N/A', rightColumnX, rightColumnY);
 
-      // Adjust currentY after radar section with more space
-      currentY = Math.max(radarSectionY + chartHeight, radarAnalysisY) + 120;
+      // Ajustar currentY após radar section - aguardando o final do chart
+      currentY = sectionStartY + chartHeight + 60;
 
-      // Informações Básicas, Estatísticas Básicas, Estatísticas Avançadas, Flags
-      const column1X = 100;
-      const column2X = canvas.width / 2 + 50;
-      let columnY = currentY;
-
-      // Função auxiliar para desenhar seção
-      const drawSection = (title, items, x, y, titleColor = '#2b6cb0', itemColor = '#1a202c', titleFont = 'bold 36px Arial, sans-serif', itemFont = '28px Arial, sans-serif') => {
+      // Sections expandidas
+      const drawSection = (title, items, x, y, titleColor = '#2563eb', itemColor = '#1f2937') => {
         ctx.fillStyle = titleColor;
-        ctx.font = titleFont;
+        ctx.font = 'bold 26px Arial, sans-serif';
         ctx.textAlign = 'left';
         ctx.fillText(title, x, y);
-        y += 50;
+        y += 35;
+        
         ctx.fillStyle = itemColor;
-        ctx.font = itemFont;
-        items.forEach(item => {
-          ctx.fillText(item, x, y);
-          y += 40;
+        ctx.font = '20px Arial, sans-serif';
+        items.forEach((item, index) => {
+          ctx.fillText(`• ${item}`, x, y);
+          y += 30;
         });
         return y;
       };
 
-      // Informações Básicas
-      columnY = drawSection('INFORMAÇÕES BÁSICAS', [
+      // Layout de 2 colunas para o resto - stats no mesmo nível
+      const col1X = margin;
+      const col2X = rightColumnX;
+      let col1Y = currentY;
+      let col2Y = currentY;
+
+      // Coluna 1: Informações e Estatísticas Básicas
+      col1Y = drawSection('INFORMAÇÕES BÁSICAS', [
         `Idade: ${data.basicInfo.age || 'N/A'} anos`,
         `Altura: ${data.basicInfo.height || 'N/A'}`,
         `Peso: ${data.basicInfo.weight || 'N/A'}`,
         `Nacionalidade: ${data.basicInfo.nationality || 'N/A'}`,
-      ], column1X, columnY);
+      ], col1X, col1Y, '#dc2626');
 
-      // Estatísticas Básicas
-      columnY += 80; // Increased spacing
-      columnY = drawSection('ESTATÍSTICAS BÁSICAS', [
+      col1Y += 40;
+      col1Y = drawSection('ESTATÍSTICAS BÁSICAS', [
         `PPG: ${data.basicStats.ppg || 'N/A'}`,
         `RPG: ${data.basicStats.rpg || 'N/A'}`,
         `APG: ${data.basicStats.apg || 'N/A'}`,
         `FG%: ${data.basicStats.fg_percentage || 'N/A'}`,
         `3P%: ${data.basicStats.three_p_percentage || 'N/A'}`,
         `FT%: ${data.basicStats.ft_percentage || 'N/A'}`,
-      ], column1X, columnY);
+      ], col1X, col1Y, '#059669');
 
-      // Estatísticas Avançadas (segunda coluna)
-      let advancedStatsY = currentY;
-      advancedStatsY = drawSection('ESTATÍSTICAS AVANÇADAS', [
+      // Coluna 2: Estatísticas Avançadas - no mesmo nível das básicas
+      col2Y += 185; // Ajuste para alinhar com stats básicas
+      col2Y = drawSection('ESTATÍSTICAS AVANÇADAS', [
         `TS%: ${data.advancedStats.trueShooting || 'N/A'}`,
         `eFG%: ${data.advancedStats.effectiveFG || 'N/A'}`,
         `PER: ${data.advancedStats.playerEfficiency || 'N/A'}`,
@@ -1090,33 +1119,71 @@ const useAdvancedExport = () => {
         `DRtg: ${data.advancedStats.defensiveRating || 'N/A'}`,
         `TOV%: ${data.advancedStats.turnoverRate || 'N/A'}`,
         `AST%: ${data.advancedStats.assistRate || 'N/A'}`,
-        `TRB%: ${data.advancedStats.totalReboundRate || 'N/A'}`,
-        `STL%: ${data.advancedStats.stealRate || 'N/A'}`,
-        `BLK%: ${data.advancedStats.blockRate || 'N/A'}`,
-      ], column2X, advancedStatsY);
+      ], col2X, col2Y, '#d97706');
 
-      // Flags (terceira coluna, ou abaixo das avançadas se não houver espaço)
-      let flagsY = Math.max(columnY, advancedStatsY) + 60;
+      // Flags centralizadas abaixo de ambas as colunas com mais espaço
+      let flagsY = Math.max(col1Y, col2Y) + 50;
       if (data.flags && data.flags.length > 0) {
-        ctx.fillStyle = '#2b6cb0';
-        ctx.font = 'bold 36px Arial, sans-serif';
+        ctx.fillStyle = '#7c3aed';
+        ctx.font = 'bold 26px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('DESTAQUES E ALERTAS', column1X, flagsY);
-        flagsY += 50;
-        ctx.font = '28px Arial, sans-serif';
+        ctx.fillText('DESTAQUES E ALERTAS', col1X, flagsY);
+        flagsY += 35;
+        ctx.font = '20px Arial, sans-serif';
         data.flags.slice(0, 4).forEach(flag => {
-          ctx.fillStyle = flag.type === 'Alerta' ? '#e53e3e' : '#38a169';
-          ctx.fillText(`• ${flag.message}`, column1X, flagsY);
-          flagsY += 40;
+          ctx.fillStyle = flag.type === 'Alerta' ? '#dc2626' : '#059669';
+          ctx.fillText(`• ${flag.message}`, col1X, flagsY);
+          flagsY += 30;
         });
       }
 
-      // Footer
-      const footerY = canvas.height - 60;
-      ctx.fillStyle = '#718096';
-      ctx.font = '20px Arial, sans-serif';
+      // Área adicional para análise detalhada
+      let analysisY = Math.max(flagsY + 40, canvas.height - 300);
+      
+      if (data.detailedAnalysis && data.detailedAnalysis.length > 100) {
+        ctx.fillStyle = '#7c3aed';
+        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('ANÁLISE DETALHADA', col1X, analysisY);
+        analysisY += 35;
+        
+        ctx.fillStyle = '#374151';
+        ctx.font = '18px Arial, sans-serif';
+        
+        // Quebrar texto da análise em múltiplas linhas
+        const maxWidth = canvas.width - 160;
+        const words = data.detailedAnalysis.substring(0, 400).split(' ');
+        let line = '';
+        let lineHeight = 25;
+        
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && n > 0) {
+            ctx.fillText(line, col1X, analysisY);
+            line = words[n] + ' ';
+            analysisY += lineHeight;
+            
+            // Evitar que o texto saia da página
+            if (analysisY > canvas.height - 100) break;
+          } else {
+            line = testLine;
+          }
+        }
+        
+        if (line.length > 0 && analysisY < canvas.height - 100) {
+          ctx.fillText(line, col1X, analysisY);
+        }
+      }
+      
+      // Footer expandido
+      const footerY = canvas.height - 50;
+      
+      ctx.fillStyle = '#64748b';
+      ctx.font = '18px Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`Relatório gerado em ${new Date().toLocaleDateString('pt-BR')} | prospectRadar.com`, canvas.width / 2, footerY);
+      ctx.fillText(`prospectRadar.com • ${new Date().toLocaleDateString('pt-BR')} • Análise Profissional`, canvas.width / 2, footerY);
       
       // Converter para blob e baixar
       canvas.toBlob((blob) => {

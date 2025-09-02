@@ -167,14 +167,14 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
           stats.map(({ key, label, isPct }) => {
             const winners = getStatWinners(key);
             return (
-              <div key={key} className="grid grid-cols-3 items-stretch gap-4">
-                <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center h-20 tracking-wide ${winners[0].isWinner ? winnerBg : defaultCellBg}`}>
+              <div key={key} className="grid grid-cols-3 items-center gap-4 min-h-[60px]">
+                <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center tracking-wide ${winners[0].isWinner ? winnerBg : defaultCellBg}`}>
                   <span>{isPct ? `${((winners[0].value || 0) * 100).toFixed(1)}%` : (winners[0].value || 0).toFixed(key === 'games_played' ? 0 : 1)}</span>
                 </div>
-                <div className={`font-bold text-xl text-center p-4 rounded-lg flex items-center justify-center h-20 tracking-wide ${statLabelBg}`}>
+                <div className={`font-bold text-xl text-center p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>
                   <span>{label}</span>
                 </div>
-                <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center h-20 tracking-wide ${winners[1].isWinner ? winnerBg : defaultCellBg}`}>
+                <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center tracking-wide ${winners[1].isWinner ? winnerBg : defaultCellBg}`}>
                   <span>{isPct ? `${((winners[1].value || 0) * 100).toFixed(1)}%` : (winners[1].value || 0).toFixed(key === 'games_played' ? 0 : 1)}</span>
                 </div>
               </div>
@@ -198,7 +198,7 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
                     <span>{label}</span>
                   </div>
                   {processedProspects.map((prospect, index) => (
-                    <div key={prospect.id} className={`text-2xl font-bold p-4 rounded-lg flex items-center justify-center text-center h-20 tracking-wide ${winners[index].isWinner ? winnerBg : defaultCellBg}`}>
+                    <div key={prospect.id} className={`text-2xl font-bold p-4 rounded-lg flex items-center justify-center text-center min-h-[60px] tracking-wide ${winners[index].isWinner ? winnerBg : defaultCellBg}`}>
                       <span>{isPct ? `${((winners[index].value || 0) * 100).toFixed(1)}%` : (winners[index].value || 0).toFixed(key === 'games_played' ? 0 : 1)}</span>
                     </div>
                   ))}

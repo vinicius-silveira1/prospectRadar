@@ -122,102 +122,83 @@ export const useExport = () => {
     }
   };
 
-  // Exportar para PDF
+  // Exportar para PDF com gaming design melhorado
   const exportToPDF = async (prospects, filename = 'prospects') => {
     try {
       setIsExporting(true);
       
-      const doc = new jsPDF();
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.width;
+      let currentY = 30;
+
+      // Gaming Header
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 0, pageWidth, 50, 'F');
       
-      // Configurar fonte para suportar acentos
-      doc.setFont('helvetica');
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(251, 191, 36); // yellow-400
+      doc.text('prospectRadar', 20, 25);
       
-      // Header do documento
-      doc.setFontSize(20);
-      doc.setTextColor(59, 130, 246); // Blue-600
-      doc.text('ProspectRadar - Relatório de Prospects', 20, 25);
+      doc.setFontSize(16);
+      doc.setTextColor(148, 163, 184); // slate-400
+      doc.text('• ANÁLISE PROFISSIONAL DE PROSPECTS', 20, 35);
       
-      doc.setFontSize(12);
-      doc.setTextColor(100, 116, 139); // Slate-500
-      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 35);
-      doc.text(`Total de prospects: ${prospects.length}`, 20, 45);
-      
-      // Preparar dados para a tabela
+      doc.setFontSize(18);
+      doc.setTextColor(255, 255, 255);
+      doc.text('RELATÓRIO DE PROSPECTS', 20, 45);
+
+      currentY = 60;
+
+      // Preparar dados formatados
       const formattedData = await Promise.all(
         prospects.map(prospect => formatProspectData(prospect))
       );
 
-      const tableData = formattedData.map(prospect => [
-        prospect.nome,
-        prospect.idade,
-        prospect.posicao,
-        prospect.altura,
-        prospect.universidade,
-        prospect.radarScore,
-        prospect.pontos,
-        prospect.rebotes,
-        prospect.assistencias
-      ]);
-
-      // Configurar tabela
+      // Gaming table com cores atualizadas
       autoTable(doc, {
-        head: [['Nome', 'Idade', 'Posição', 'Altura', 'Universidade', 'Radar Score', 'PTS', 'REB', 'AST']],
-        body: tableData,
-        startY: 60,
-        styles: {
-          fontSize: 8,
-          cellPadding: 3,
-        },
-        headStyles: {
-          fillColor: [59, 130, 246], // Blue-600
-          textColor: 255,
+        startY: currentY,
+        head: [['Nome', 'Pos.', 'Idade', 'Altura', 'Radar Score', 'PPG', 'RPG', 'APG']],
+        body: formattedData.map(prospect => [
+          prospect.nome,
+          prospect.posicao,
+          prospect.idade,
+          prospect.altura,
+          prospect.radarScore,
+          prospect.pontos,
+          prospect.rebotes,
+          prospect.assistencias
+        ]),
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [59, 130, 246], // blue-500
+          textColor: [255, 255, 255],
           fontStyle: 'bold'
         },
         alternateRowStyles: {
-          fillColor: [248, 250, 252] // Slate-50
+          fillColor: [248, 250, 252] // slate-50
+        },
+        styles: {
+          fontSize: 9,
+          cellPadding: 3
         },
         columnStyles: {
-          0: { cellWidth: 25 }, // Nome
-          1: { cellWidth: 15 }, // Idade
-          2: { cellWidth: 20 }, // Posição
-          3: { cellWidth: 18 }, // Altura
-          4: { cellWidth: 30 }, // Universidade
-          5: { cellWidth: 20 }, // Radar Score
-          6: { cellWidth: 15 }, // PTS
-          7: { cellWidth: 15 }, // REB
-          8: { cellWidth: 15 }  // AST
+          0: { cellWidth: 35 },
+          1: { cellWidth: 15 },
+          2: { cellWidth: 15 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 15 },
+          6: { cellWidth: 15 },
+          7: { cellWidth: 15 }
         }
       });
 
-      // Adicionar anotações em página separada se existirem
-      const prospectsWithNotes = formattedData.filter(p => p.anotacoes !== 'Sem anotações');
-      
-      if (prospectsWithNotes.length > 0) {
-        doc.addPage();
-        doc.setFontSize(16);
-        doc.setTextColor(59, 130, 246);
-        doc.text('Anotações dos Prospects', 20, 25);
-        
-        let yPosition = 40;
-        
-        prospectsWithNotes.forEach(prospect => {
-          if (yPosition > 270) {
-            doc.addPage();
-            yPosition = 25;
-          }
-          
-          doc.setFontSize(12);
-          doc.setTextColor(0, 0, 0);
-          doc.text(`${prospect.nome}:`, 20, yPosition);
-          
-          const splitNotes = doc.splitTextToSize(prospect.anotacoes, 170);
-          doc.setFontSize(10);
-          doc.setTextColor(100, 116, 139);
-          doc.text(splitNotes, 20, yPosition + 7);
-          
-          yPosition += 7 + (splitNotes.length * 4) + 10;
-        });
-      }
+      // Gaming Footer
+      const footerY = doc.internal.pageSize.height - 20;
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139); // slate-500
+      doc.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')} | prospectRadar.com | O futuro do scouting brasileiro`, 20, footerY);
 
       doc.save(`${filename}_${new Date().toISOString().split('T')[0]}.pdf`);
       return true;
