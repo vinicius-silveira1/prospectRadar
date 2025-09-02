@@ -70,7 +70,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
       {/* Watch List Button */}
       <motion.button
         onClick={handleToggle}
-        className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/90 dark:bg-super-dark-secondary/90 hover:bg-white dark:hover:bg-slate-600 transition-all backdrop-blur-sm"
+        className="absolute top-3 right-3 z-[5] p-1.5 rounded-full bg-white/90 dark:bg-super-dark-secondary/90 hover:bg-white dark:hover:bg-slate-600 transition-all backdrop-blur-sm"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}

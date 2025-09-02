@@ -47,15 +47,109 @@ const Watchlist = () => {
 
   if (!user) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border dark:border-super-dark-border">
-        <UserX className="mx-auto h-12 w-12 text-slate-400 dark:text-super-dark-text-secondary" />
-        <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Acesso Restrito</h3>
-        <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Você precisa estar logado para ver sua watchlist.</p>
-        <div className="mt-6">
-          <Link to="/login" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-            Fazer Login
-          </Link>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="restrictedPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+              <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#restrictedPattern)" />
+          </svg>
         </div>
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/5 via-transparent to-brand-purple/5" />
+
+        <motion.div 
+          className="bg-gradient-to-br from-white to-slate-50 dark:from-super-dark-primary dark:to-super-dark-secondary p-8 md:p-12 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl max-w-md mx-4 relative z-10"
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, type: "spring", stiffness: 300 }}
+        >
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] animate-pulse rounded-2xl" style={{ animation: 'shimmer 3s infinite linear' }} />
+          
+          <motion.div
+            className="mx-auto h-20 w-20 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/50 dark:to-orange-900/50 rounded-2xl flex items-center justify-center mb-6 relative overflow-hidden"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+          >
+            {/* Icon background shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+            
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0]
+              }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="relative z-10"
+            >
+              <UserX className="h-10 w-10 text-red-600 dark:text-red-400" />
+            </motion.div>
+          </motion.div>
+
+          <motion.h3 
+            className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            🔒 Acesso Restrito
+          </motion.h3>
+
+          <motion.p 
+            className="text-sm text-slate-600 dark:text-slate-400 mb-8 leading-relaxed"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Você precisa estar logado para ver sua watchlist e acompanhar seus prospects favoritos.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Link 
+              to="/login" 
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden group w-full justify-center"
+            >
+              {/* Hover shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+              
+              <motion.span 
+                className="relative z-10"
+                whileHover={{ scale: 1.05 }}
+              >
+                🚀 Fazer Login
+              </motion.span>
+            </Link>
+          </motion.div>
+
+          {/* Floating lock icon */}
+          <motion.div
+            className="absolute top-4 right-4 text-red-400/30"
+            animate={{ 
+              y: [0, -5, 0],
+              rotate: [0, 10, -10, 0]
+            }}
+            transition={{ 
+              duration: 4, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+          >
+            🔐
+          </motion.div>
+        </motion.div>
       </div>
     );
   }

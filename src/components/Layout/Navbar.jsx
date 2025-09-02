@@ -91,7 +91,7 @@ const Navbar = ({ onMenuClick }) => {
 
   return (
     <motion.nav 
-      className={`relative bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-md rounded-xl shadow-md dark:shadow-super-dark-primary/30 border border-slate-200/60 dark:border-super-dark-border/60 ${containerPadding} overflow-hidden group`}
+      className={`relative bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-md rounded-xl border border-slate-200/60 dark:border-super-dark-border/60 ${containerPadding} overflow-hidden group`}
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
@@ -159,18 +159,18 @@ const Navbar = ({ onMenuClick }) => {
               <ResponsiveText
                 as="h1"
                 size={{
-                  xs: 'text-sm',
-                  sm: 'text-base',
-                  md: 'text-lg',
+                  xs: 'text-xs',
+                  sm: 'text-sm',
+                  md: 'text-base',
                   lg: 'text-lg',
-                  xl: 'text-xl',
+                  xl: 'text-lg',
                   '2xl': 'text-xl'
                 }}
-                weight="font-bold"
-                className="hidden sm:block"
+                weight="font-black"
+                className="hidden sm:block tracking-tight"
               >
-                <span className="text-brand-orange">prospect</span>
-                <span className="text-brand-purple">Radar</span>
+                <span className="text-brand-orange font-black">prospect</span>
+                <span className="text-brand-purple font-black italic">Radar</span>
               </ResponsiveText>
             </motion.div>
           </Link>

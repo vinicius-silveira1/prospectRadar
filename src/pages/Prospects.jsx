@@ -681,12 +681,25 @@ const Prospects = () => {
                     {badges.length > 0 && (
                       <div className="flex flex-wrap gap-1 badge-container">
                         {badges.map((badge, index) => (
-                          <Badge 
-                            key={index} 
-                            badge={badge} 
-                            onBadgeHover={(badge) => handleBadgeHover(prospect.id, badge)} 
-                            isMobile={isMobile} 
-                          />
+                          <div
+                            key={index}
+                            className="cursor-pointer relative z-20"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (isMobile) handleBadgeHover(prospect.id, badge);
+                            }}
+                            onMouseEnter={(e) => {
+                              e.stopPropagation();
+                              if (!isMobile) handleBadgeHover(prospect.id, badge);
+                            }}
+                            onMouseLeave={(e) => {
+                              e.stopPropagation();
+                              if (!isMobile) handleBadgeHover(prospect.id, null);
+                            }}
+                          >
+                            <Badge badge={badge} />
+                          </div>
                         ))}
                       </div>
                     )}
