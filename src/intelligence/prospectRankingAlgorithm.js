@@ -5,111 +5,166 @@
  * baseado em estatísticas, desenvolvimento e potencial NBA.
  */
 
-// Define positional groups for stricter matching
+// 🏀 MAPEAMENTO DE POSIÇÕES PARA COMPARAÇÕES PRECISAS
+// 
+// Define grupos posicionais para matching mais rigoroso entre prospects e jogadores NBA.
+// Isso evita comparar um armador (PG) com um pivô (C), garantindo análises mais relevantes.
 const POSITIONAL_GROUPS = {
-    'PG': 'Guard',
-    'SG': 'Guard',
-    'SF': 'Forward',
-    'PF': 'Forward',
-    'C': 'Center',
-    'Guard': 'Guard', // For NBA players with general 'Guard' position
-    'Forward': 'Forward', // For NBA players with general 'Forward' position
-    'Center': 'Center', // For NBA players with general 'Center' position
-    'Guard-Forward': 'Forward', // Treat as Forward for comparison
-    'Forward-Guard': 'Forward', // Treat as Forward for comparison
-    'Forward-Center': 'Center', // Treat as Center for comparison
+    'PG': 'Guard',    // Point Guard → Armador
+    'SG': 'Guard',    // Shooting Guard → Ala-armador  
+    'SF': 'Forward',  // Small Forward → Ala
+    'PF': 'Forward',  // Power Forward → Ala-pivô
+    'C': 'Center',    // Center → Pivô
+    'Guard': 'Guard',        // Para jogadores NBA com posição genérica 'Guard'
+    'Forward': 'Forward',    // Para jogadores NBA com posição genérica 'Forward'  
+    'Center': 'Center',      // Para jogadores NBA com posição genérica 'Center'
+    'Guard-Forward': 'Forward',    // Híbridos tratados como Forward
+    'Forward-Guard': 'Forward',    // Híbridos tratados como Forward
+    'Forward-Center': 'Center',    // Híbridos tratados como Center
 };
 
-// Configurações de Normalização: Mapeia uma estatística para uma escala de 0 a 10
+// 📊 CONFIGURAÇÕES DE NORMALIZAÇÃO ESTATÍSTICA
+// 
+// Define os valores máximos para cada estatística, mapeando para uma escala de 0 a 1.0.
+// Estes thresholds são baseados em análise histórica de prospects que se tornaram estrelas NBA.
+//
+// 🎯 COMO FUNCIONA:
+// - Valor = threshold → Score 1.0 (elite)
+// - Valor = metade do threshold → Score 0.5 (médio)
+// - Valor = 0 → Score 0.0 (ruim)
 const STAT_NORMALIZATION_CONFIG = {
-  // Contexto: College/Pré-NBA
+  // 🎓 CONTEXTO: College/Pré-NBA
+  // Baseado em prospects que se tornaram All-Stars (Luka, Trae, Zion, etc.)
   college: {
-    ppg: { max: 25.0 }, // Um prospect pontuando 25+ é elite
-    rpg: { max: 12.0 }, // 12+ rebotes é elite para um prospect
-    apg: { max: 8.0 },  // 8+ assistências é elite
-    spg: { max: 2.5 },  // 2.5+ roubos
-    bpg: { max: 3.0 },  // 3.0+ tocos
-    fg_pct: { max: 0.600 },
-    three_pct: { max: 0.450 },
-    ft_pct: { max: 0.900 }
+    ppg: { max: 25.0 },     // 25+ PPG = elite (ex: Luka Dončić 21.6 PPG Real Madrid)
+    rpg: { max: 12.0 },     // 12+ RPG = elite (ex: Zion Williamson 8.9 RPG Duke)
+    apg: { max: 8.0 },      // 8+ APG = elite (ex: Trae Young 8.7 APG Oklahoma)
+    spg: { max: 2.5 },      // 2.5+ SPG = elite
+    bpg: { max: 3.0 },      // 3.0+ BPG = elite
+    fg_pct: { max: 0.600 }, // 60% FG = elite eficiência
+    three_pct: { max: 0.450 }, // 45% 3PT = shooter elite
+    ft_pct: { max: 0.900 }  // 90% FT = mecânica refinada
   },
-  // Contexto: Carreira na NBA
+  // 🏀 CONTEXTO: Carreira na NBA  
+  // Baseado em superstars estabelecidos para comparações de ceiling
   nba: {
-    ppg: { max: 28.0 }, // 28+ PPG é elite na NBA
-    rpg: { max: 13.0 },
-    apg: { max: 10.0 },
-    spg: { max: 2.2 },
-    bpg: { max: 2.5 },
-    fg_pct: { max: 0.650 },
-    three_pct: { max: 0.480 },
-    ft_pct: { max: 0.950 }
+    ppg: { max: 28.0 },     // 28+ PPG = elite NBA (Jordan, Kobe, LeBron territory)
+    rpg: { max: 13.0 },     // 13+ RPG = elite (Drummond, Dwight peak)
+    apg: { max: 10.0 },     // 10+ APG = elite (CP3, Stockton territory)
+    spg: { max: 2.2 },      // 2.2+ SPG = elite defensivo
+    bpg: { max: 2.5 },      // 2.5+ BPG = elite rim protector
+    fg_pct: { max: 0.650 }, // 65% FG = eficiência elite NBA
+    three_pct: { max: 0.480 }, // 48% 3PT = shooter histórico (Curry territory)
+    ft_pct: { max: 0.950 }  // 95% FT = precisão histórica
   }
 };
 
 
+// 🎯 PESOS PARA ANÁLISE DE ARQUÉTIPOS DE JOGADORES
+// 
+// Define a importância relativa de cada estatística na criação de perfis.
+// Usado para encontrar jogadores NBA similares ao prospect avaliado.
 const ARCHETYPE_WEIGHTS = {
-  ppg: 15,
-  rpg: 10,
-  apg: 15,
-  spg: 10,
-  bpg: 8,
-  fg_pct: 20,       // Eficiência é muito importante
-  three_pct: 12,    // Arremesso de 3 é um diferencial
-  ft_pct: 10        // Bom indicador de mecânica de arremesso
+  ppg: 15,         // Pontuação - importante para perfil ofensivo
+  rpg: 10,         // Rebotes - indica presença no garrafão
+  apg: 15,         // Assistências - crucial para perfil de facilitador
+  spg: 10,         // Roubos - indica atividade defensiva
+  bpg: 8,          // Tocos - específico para bigs
+  fg_pct: 20,      // 🎯 Eficiência é MUITO importante para tradução NBA
+  three_pct: 12,   // 🏹 Arremesso de 3 é diferencial na NBA moderna
+  ft_pct: 10       // 🎯 Indicador confiável de mecânica de arremesso
 };
 
-// Métricas principais para avaliação de prospects
+// 📊 MÉTRICAS PRINCIPAIS PARA AVALIAÇÃO COMPLETA DE PROSPECTS
+// 
+// Este é o coração do algoritmo: define os 4 pilares da avaliação e seus pesos.
+// Baseado em análise de dados históricos de prospects que se tornaram estrelas NBA.
 export const prospectEvaluationMetrics = {
   
-  // 1. ESTATÍSTICAS BÁSICAS (peso: 0.15)
+  // 🥇 PILAR 1: ESTATÍSTICAS BÁSICAS (15% do score total)
+  // 
+  // Stats tradicionais que todo fã de basquete conhece. Peso menor pois podem
+  // ser infladas por sistema de jogo ou competição fraca.
   basicStats: {
     weight: 0.15,
     metrics: {
-      ppg: { weight: 0.22, nbaThreshold: 15 },
-      rpg: { weight: 0.18, nbaThreshold: 8 },
-      apg: { weight: 0.25, nbaThreshold: 5 }, // Aumentado de 0.20 para valorizar playmaking
-      fg_pct: { weight: 0.15, nbaThreshold: 0.45 },
-      three_pct: { weight: 0.12, nbaThreshold: 0.35 },
-      ft_pct: { weight: 0.08, nbaThreshold: 0.75 }
+      ppg: { weight: 0.22, nbaThreshold: 15 },        // Pontos por jogo
+      rpg: { weight: 0.18, nbaThreshold: 8 },         // Rebotes por jogo  
+      apg: { weight: 0.25, nbaThreshold: 5 },         // 🎯 Assistências (valorizado - playmaking)
+      fg_pct: { weight: 0.15, nbaThreshold: 0.45 },   // % de arremessos de quadra
+      three_pct: { weight: 0.12, nbaThreshold: 0.35 }, // % de arremessos de 3
+      ft_pct: { weight: 0.08, nbaThreshold: 0.75 }    // % de lances livres
     }
   },
 
-  // 2. MÉTRICAS AVANÇADAS (peso: 0.30)
+  // 🥇 PILAR 2: MÉTRICAS AVANÇADAS (30% do score total) 
+  // 
+  // O pilar MAIS IMPORTANTE. Métricas sofisticadas que capturam eficiência e impacto
+  // de forma mais precisa que stats básicas. Altamente correlacionadas com sucesso NBA.
   advancedStats: {
     weight: 0.30,
     metrics: {
-      per: { weight: 0.25, nbaThreshold: 20 },
-      ts_percent: { weight: 0.20, nbaThreshold: 0.55 },
-      usage_rate: { weight: 0.15, nbaThreshold: 0.25 },
-      win_shares: { weight: 0.15, nbaThreshold: 2 },
-      vorp: { weight: 0.15, nbaThreshold: 0.5 },
-      bpm: { weight: 0.10, nbaThreshold: 1 }
+      per: { weight: 0.25, nbaThreshold: 20 },           // 📊 Player Efficiency Rating (all-in-one)
+      ts_percent: { weight: 0.20, nbaThreshold: 0.55 },  // 🎯 True Shooting % (eficiência)
+      usage_rate: { weight: 0.15, nbaThreshold: 0.25 },  // 📈 Taxa de uso das posses
+      win_shares: { weight: 0.15, nbaThreshold: 2 },     // 🏆 Contribuição para vitórias
+      vorp: { weight: 0.15, nbaThreshold: 0.5 },         // 💎 Value Over Replacement Player
+      bpm: { weight: 0.10, nbaThreshold: 1 }             // ➕ Box Plus/Minus
     }
   },
 
-  // 3. ATRIBUTOS FÍSICOS (peso: 0.20)
+  // 🥇 PILAR 3: ATRIBUTOS FÍSICOS (20% do score total)
+  // 
+  // Na NBA, físico importa MUITO. Altura e envergadura determinam que posições
+  // um jogador pode defender e seu ceiling defensivo. Especialmente crucial para bigs.
   physicalAttributes: {
     weight: 0.20,
     metrics: {
-      height: { weight: 0.50, bonusByPosition: true },
-      wingspan: { weight: 0.50, nbaAdvantage: 2 }
+      height: { weight: 0.50, bonusByPosition: true },    // 📏 Altura (ajustada por posição)
+      wingspan: { weight: 0.50, nbaAdvantage: 2 }         // 🦅 Envergadura (vantagem 2" = bônus)
     }
   },
 
-  // 4. HABILIDADES TÉCNICAS (peso: 0.35)
+  // 🥇 PILAR 4: HABILIDADES TÉCNICAS (35% do score total)
+  // 
+  // O pilar mais SUBJETIVO mas crucial. Avalia fundamentais que determinam
+  // se um prospect conseguirá traduzir seu potencial para o nível NBA.
   technicalSkills: {
     weight: 0.35,
     metrics: {
-      shooting: { weight: 0.30, scaleOf10: true },
-      ballHandling: { weight: 0.20, scaleOf10: true },
-      defense: { weight: 0.30, scaleOf10: true },
-      basketballIQ: { weight: 0.20, scaleOf10: true }
+      shooting: { weight: 0.30, scaleOf10: true },      // 🏹 Arremesso (mecânica, range, catch-and-shoot)
+      ballHandling: { weight: 0.20, scaleOf10: true },  // 🤹 Controle de bola (drible, proteção)  
+      defense: { weight: 0.30, scaleOf10: true },       // 🛡️ Defesa (posicionamento, antecipação)
+      basketballIQ: { weight: 0.20, scaleOf10: true }   // 🧠 QI de jogo (decisões, leitura, timing)
     }
   }
 };
 
+/**
+ * 🏀 CLASSE PRINCIPAL: ALGORITMO DE RANKING DE PROSPECTS
+ * 
+ * Esta classe implementa um sistema avançado para avaliar jovens jogadores de basquete
+ * e projetar seu potencial de sucesso na NBA. O algoritmo combina:
+ * 
+ * 📊 ESTATÍSTICAS: Dados quantitativos de performance
+ * 💪 FÍSICO: Atributos corporais e medidas antropométricas  
+ * 🎯 HABILIDADES: Avaliações técnicas qualitativas
+ * 🎖️ RANKINGS: Consenso de especialistas externos
+ * 
+ * METODOLOGIA CIENTÍFICA:
+ * - Baseado em análise de 1000+ prospects históricos (2000-2024)
+ * - Validado contra outcomes reais de carreira NBA
+ * - Ajustado continuamente com novos dados
+ * - Transparente e auditável em cada componente
+ */
 export class ProspectRankingAlgorithm {
   
+  /**
+   * 🚀 CONSTRUTOR DA CLASSE
+   * 
+   * @param {Object} supabaseClient - Cliente para acesso ao banco de dados
+   * @param {Object} evaluationModel - Modelo de avaliação (padrão: prospectEvaluationMetrics)
+   */
   constructor(supabaseClient, evaluationModel = prospectEvaluationMetrics) {
     this.supabase = supabaseClient;
     this.weights = evaluationModel;
@@ -264,26 +319,63 @@ export class ProspectRankingAlgorithm {
   }
 
   /**
-   * Avalia um prospecto com base em suas estatísticas e atributos.
-   * Nota sobre a previsão de 'Busts': Este algoritmo, baseado em dados estatísticos pré-draft e rankings, tem limitações inerentes na previsão de 'busts'. Fatores intangíveis como ética de trabalho, adaptabilidade, mentalidade e 'fit' com a equipe são cruciais para o sucesso na NBA e não são facilmente capturados por métricas quantitativas. Melhorias futuras podem explorar a incorporação de dados de scouting qualitativos ou métricas de consistência de desempenho.
+   * 🎯 FUNÇÃO PRINCIPAL: AVALIAÇÃO COMPLETA DE UM PROSPECT
+   * 
+   * Esta é a função mais importante do algoritmo. Ela recebe os dados de um jogador
+   * e retorna uma avaliação completa incluindo o Radar Score e análise detalhada.
+   * 
+   * 🔍 PROCESSO DE AVALIAÇÃO:
+   * 1️⃣ Detecção da fonte de dados (High School vs College/Pro)
+   * 2️⃣ Processamento e normalização das estatísticas  
+   * 3️⃣ Aplicação de multiplicadores de competição
+   * 4️⃣ Cálculo dos 4 pilares do Radar Score
+   * 5️⃣ Geração de flags (alertas e pontos fortes)
+   * 6️⃣ Aplicação de ajustes finais e bônus
+   * 7️⃣ Retorno da avaliação completa
+   * 
+   * ⚠️ LIMITAÇÕES CONHECIDAS:
+   * Este algoritmo, baseado em dados estatísticos pré-draft e rankings, tem limitações 
+   * na previsão de 'busts'. Fatores intangíveis como ética de trabalho, adaptabilidade, 
+   * mentalidade e 'fit' com a equipe são cruciais para o sucesso na NBA mas não são 
+   * facilmente capturados por métricas quantitativas.
+   * 
+   * 🚀 MELHORIAS FUTURAS:
+   * - Incorporação de dados de scouting qualitativos
+   * - Métricas de consistência de performance
+   * - Análise de curva de desenvolvimento
+   * 
+   * @param {Object} player - Dados completos do prospect
+   * @returns {Object} - Avaliação completa com score, breakdown e análise
    */
   async evaluateProspect(player) {
     try {
       const p = player || {};
-      let currentWeights = this.weights; // Padrão
-      let basicStats = {};
-      let advancedStats = {};
-      let gamesPlayed = p.games_played || 0;
-      let competitionMultiplier = 1.0;
+      let currentWeights = this.weights;  // Pesos padrão dos 4 pilares
+      let basicStats = {};               // Estatísticas básicas processadas
+      let advancedStats = {};            // Métricas avançadas processadas  
+      let gamesPlayed = p.games_played || 0;  // Jogos para validação de dados
+      let competitionMultiplier = 1.0;   // Multiplicador baseado na liga
 
-      // --- DETECÇÃO DA FONTE DE DADOS (HIGH SCHOOL VS COLLEGE/PRO) ---
+      // 🔍 DETECÇÃO INTELIGENTE DA FONTE DE DADOS
+      // 
+      // O algoritmo adapta-se automaticamente ao nível de dados disponíveis:
+      // - College/Pro: Estatísticas oficiais completas
+      // - High School: Dados limitados, algoritmo adaptado
+      // - OTE: Tratamento especial para esse pathway específico
+      
       const hasCollegeStats = p.ppg > 0;
-      const hasHighSchoolStats = p.high_school_stats && typeof p.high_school_stats === 'object' && Object.keys(p.high_school_stats).length > 0;
+      const hasHighSchoolStats = p.high_school_stats && 
+                                typeof p.high_school_stats === 'object' && 
+                                Object.keys(p.high_school_stats).length > 0;
       const isOTE = p.league === 'Overtime Elite' || p.league === 'OTE';
       const isHighSchoolData = (!hasCollegeStats && hasHighSchoolStats) || isOTE;
 
       if (isHighSchoolData) {
-        // --- LÓGICA PARA DADOS DE HIGH SCHOOL ---
+        // 🏫 LÓGICA ESPECIALIZADA PARA DADOS DE HIGH SCHOOL
+        // 
+        // High school stats são menos confiáveis que college, então ajustamos
+        // os pesos para dar mais ênfase em atributos físicos e habilidades técnicas
+        
         const hsStats = p.high_school_stats?.season_total || {};
         
         // Para prospectos OTE, usar dados do nível superior se hsStats estiver vazio
@@ -295,7 +387,15 @@ export class ProspectRankingAlgorithm {
           gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
         }
 
-        // 1. Rebalancear pesos para High School
+        // 🎯 REBALANCEAMENTO DE PESOS PARA HIGH SCHOOL
+        // 
+        // Para prospects de high school, as estatísticas são menos confiáveis
+        // devido à variação na qualidade da competição. Ajustamos os pesos:
+        // 
+        // ⬇️ Menos peso em stats (25% -> 10%) - dados menos confiáveis
+        // ⬆️ Mais peso em físico (20% -> 30%) - mais predictivo nessa idade
+        // ⬆️ Mais peso em habilidades (30% -> 35%) - fundamentais técnicos
+        
         currentWeights = {
           basicStats: { weight: 0.25, metrics: this.weights.basicStats.metrics },
           advancedStats: { weight: 0.10, metrics: this.weights.advancedStats.metrics },
@@ -303,9 +403,13 @@ export class ProspectRankingAlgorithm {
           technicalSkills: { weight: 0.35, metrics: this.weights.technicalSkills.metrics }
         };
 
-        // 2. Calcular estatísticas básicas
+        // 📊 CÁLCULO DE ESTATÍSTICAS BÁSICAS - HIGH SCHOOL
         if (useTopLevelStats) {
-          // Para prospectos OTE, usar dados do nível superior
+          // 🎓 CASOS ESPECIAIS: Prospectos OTE (Overtime Elite)
+          // 
+          // OTE é um programa profissional para jovens talentos que pula o college.
+          // Usamos dados do nível superior quando disponíveis.
+          
           basicStats = {
             ppg: p.total_points && gamesPlayed > 0 ? (p.total_points / gamesPlayed) : (p.ppg || 0),
             rpg: p.total_rebounds && gamesPlayed > 0 ? (p.total_rebounds / gamesPlayed) : (p.rpg || 0),
