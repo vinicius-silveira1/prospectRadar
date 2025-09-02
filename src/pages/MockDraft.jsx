@@ -236,20 +236,42 @@ const MockDraft = () => {
             {/* Pick Atual - Visível em todas as telas */}
             <motion.div 
               animate={{ 
-                scale: [1, 1.05, 1],
+                scale: [1, 1.08, 1],
                 textShadow: [
                   "0 0 20px rgba(255, 215, 0, 0.3)",
-                  "0 0 30px rgba(255, 215, 0, 0.5)",
+                  "0 0 30px rgba(255, 215, 0, 0.6)",
                   "0 0 20px rgba(255, 215, 0, 0.3)"
                 ]
               }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-              className="text-center"
+              className="text-center relative group"
             >
-              <div className="text-2xl md:text-3xl font-mono font-bold tracking-wide bg-gradient-to-r from-yellow-300 via-yellow-200 to-orange-300 bg-clip-text text-transparent">
-                #{currentPick}
+              {/* Glow effect background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-400/30 to-yellow-400/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              
+              {/* Main content */}
+              <div className="relative z-10 p-4 bg-gradient-to-br from-yellow-200/10 to-orange-200/10 rounded-2xl border border-yellow-300/30 backdrop-blur-sm">
+                <div className="text-3xl md:text-4xl font-mono font-black tracking-wider bg-gradient-to-r from-yellow-200 via-yellow-100 to-orange-200 bg-clip-text text-transparent drop-shadow-lg">
+                  #{currentPick}
+                </div>
+                <div className="text-xs text-blue-100 mt-2 font-mono tracking-wide uppercase opacity-90 font-bold">
+                  🎯 Pick Atual
+                </div>
+                
+                {/* Animated pulse ring */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl border-2 border-yellow-300/40"
+                  animate={{
+                    scale: [1, 1.02, 1],
+                    opacity: [0.4, 0.8, 0.4]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
               </div>
-              <div className="text-xs text-blue-100 mt-1 font-mono tracking-wide uppercase opacity-90">Pick Atual</div>
             </motion.div>
           </div>
         </motion.div>

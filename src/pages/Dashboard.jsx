@@ -147,17 +147,19 @@ const Dashboard = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-2xl sm:text-3xl font-gaming font-bold mb-2 leading-tight flex items-center font-mono tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl font-gaming font-bold mb-2 leading-tight flex flex-col sm:flex-row sm:items-center font-mono tracking-wide"
             >
               <motion.div
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="mr-2 sm:mr-3 text-2xl sm:text-3xl"
+                className="mr-0 sm:mr-3 text-2xl sm:text-3xl mb-1 sm:mb-0"
               >
                 👋
               </motion.div>
-              <span>Bem-vindo ao</span>
-              <span className="text-yellow-300 ml-3">prospectRadar</span>
+              <div className="flex flex-col sm:flex-row sm:items-center">
+                <span>Bem-vindo ao</span>
+                <span className="text-yellow-300 sm:ml-3">prospectRadar</span>
+              </div>
             </motion.h1>
             
             <motion.p 

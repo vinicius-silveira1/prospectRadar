@@ -50,16 +50,14 @@ const Watchlist = () => {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
-          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <pattern id="restrictedPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-              <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#restrictedPattern)" />
-          </svg>
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(168, 85, 247, 0.1) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}></div>
         </div>
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/5 via-transparent to-brand-purple/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-purple-600/5" />
 
         <motion.div 
           className="bg-gradient-to-br from-white to-slate-50 dark:from-super-dark-primary dark:to-super-dark-secondary p-8 md:p-12 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl max-w-md mx-4 relative z-10"
@@ -96,7 +94,7 @@ const Watchlist = () => {
           </motion.div>
 
           <motion.h3 
-            className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight"
+            className="text-2xl font-gaming font-black text-slate-900 dark:text-white mb-3 tracking-tight font-mono tracking-wide"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -105,12 +103,12 @@ const Watchlist = () => {
           </motion.h3>
 
           <motion.p 
-            className="text-sm text-slate-600 dark:text-slate-400 mb-8 leading-relaxed"
+            className="text-sm text-slate-600 dark:text-slate-400 mb-8 leading-relaxed font-mono"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            Você precisa estar logado para ver sua watchlist e acompanhar seus prospects favoritos.
+            ➤ Você precisa estar logado para ver sua watchlist e acompanhar seus prospects favoritos.
           </motion.p>
 
           <motion.div
@@ -120,7 +118,7 @@ const Watchlist = () => {
           >
             <Link 
               to="/login" 
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden group w-full justify-center"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-gaming font-bold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden group w-full justify-center font-mono tracking-wide"
             >
               {/* Hover shimmer effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
