@@ -200,7 +200,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
               
-              <span className="relative z-10 font-bold">DePaul Commit! 🔵</span>
+              <span className="relative z-10 font-bold">DePaul Commit!</span>
             </motion.div>
           )}
         </div>
