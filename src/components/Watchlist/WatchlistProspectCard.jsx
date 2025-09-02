@@ -49,45 +49,60 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
 
   return (
     <div className="space-y-0 h-full relative">
-      <div 
-        className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-lg transition-all duration-300 flex flex-col h-full"
+      <motion.div 
+        className="relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden group"
         onClick={handleCardClick}
+        whileHover={{ 
+          scale: 1.02,
+          boxShadow: "0 0 25px rgba(168, 85, 247, 0.15)"
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <button 
-          onClick={() => toggleWatchlist(prospect.id)} 
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-white/80 dark:bg-super-dark-secondary/80 hover:bg-white dark:hover:bg-slate-600 transition-all" 
-          title="Remover da Watchlist"
-        >
-          <Heart size={16} className={`transition-colors ${isInWatchlist ? 'text-brand-orange fill-current' : 'text-slate-400 hover:text-brand-orange'}`} />
-        </button>
+        {/* Background gaming effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 via-transparent to-blue-50/30 dark:from-purple-900/10 dark:via-transparent dark:to-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
-        <div className="p-4 flex-grow flex flex-col">
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-pink-500 opacity-60" />
+        
+        <motion.button 
+          onClick={() => toggleWatchlist(prospect.id)} 
+          className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 dark:bg-super-dark-secondary/90 hover:bg-white dark:hover:bg-slate-600 transition-all shadow-lg border border-gray-200/50 dark:border-gray-700/50" 
+          title="Remover da Watchlist"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Heart size={16} className={`transition-colors ${isInWatchlist ? 'text-red-500 fill-current' : 'text-slate-400 hover:text-red-500'}`} />
+        </motion.button>
+        
+        <div className="relative z-10 p-4 flex-grow flex flex-col">
           <div className="flex items-start justify-between">
-            <div 
-              className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4" 
+            <motion.div 
+              className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold mr-4 border-2 border-white/20 dark:border-gray-700/50 shadow-lg" 
               style={{ backgroundColor: getColorFromName(prospect?.name) }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               {isLoading ? (
-                <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+                <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse rounded-full"></div>
               ) : imageUrl ? (
                 <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
               ) : (
-                <span>{getInitials(prospect?.name)}</span>
+                <span className="font-mono tracking-wide">{getInitials(prospect?.name)}</span>
               )}
-            </div>
+            </motion.div>
             
             <div className="flex-grow"> 
               <Link 
                 to={`/prospects/${prospect.id}`} 
-                className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple"
+                className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple transition-colors font-mono tracking-wide"
               >
                 {prospect.name}
               </Link>
-              <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">
+              <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary font-mono">
                 {prospect.position} • {prospect.high_school_team || 'N/A'}
               </p>
               
-              <div className="mt-1 flex flex-wrap gap-1 badge-container">
+              <div className="mt-2 flex flex-wrap gap-1 badge-container">
                 {badges.map((badge, index) => (
                   <Badge 
                     key={index} 
@@ -101,14 +116,17 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
             </div>
           </div>
           
-          <div className="flex justify-start mt-2">
-            {prospect.radar_score && (
-              <div className="inline-flex items-center space-x-2 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-super-dark-border dark:via-super-dark-secondary dark:to-super-dark-border bg-opacity-70 dark:bg-opacity-70 border border-gray-300 dark:border-super-dark-border text-gray-800 dark:text-super-dark-text-primary px-3 py-1 rounded-full shadow-md shadow-gray-400/30 dark:shadow-gray-900/50">
+          {prospect.radar_score && (
+            <motion.div 
+              className="flex justify-start mt-3"
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 border border-purple-200/50 dark:border-purple-700/30 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full shadow-lg font-mono tracking-wide">
                 <span className="font-bold text-lg">{prospect.radar_score.toFixed(2)}</span>
                 <span className="text-xs">Radar Score</span>
               </div>
-            )}
-          </div>
+            </motion.div>
+          )}
 
           <div className="flex-grow"></div>
           
@@ -132,83 +150,140 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase">
+                  <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-xs font-semibold text-slate-400 dark:text-super-dark-text-secondary uppercase font-mono tracking-wider">
                       Estatísticas
                     </h4>
                     <div className="flex items-center gap-2">
                       {isHighSchool && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+                        <motion.span 
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 to-amber-500 text-white border border-orange-300 dark:border-orange-400 font-mono tracking-wide shadow-lg"
+                          whileHover={{ scale: 1.05 }}
+                        >
                           High School
-                        </span>
+                        </motion.span>
                       )}
                       {(league || season) && !isHighSchool && (
-                        <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
+                        <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary font-mono">
                           {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-center mt-2">
-                    <div>
-                      <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                  <motion.div 
+                    className="grid grid-cols-3 gap-4 text-center"
+                    variants={{
+                      visible: { transition: { staggerChildren: 0.1 } }
+                    }}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <p className="text-xl font-bold text-purple-600 dark:text-purple-400 font-mono tracking-wide">
                         {prospect.ppg?.toFixed(1) || '-'}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">PPG</p>
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary font-mono">PPG</p>
+                    </motion.div>
+                    
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      className="p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400 font-mono tracking-wide">
                         {prospect.rpg?.toFixed(1) || '-'}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">RPG</p>
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary font-mono">RPG</p>
+                    </motion.div>
+                    
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      className="p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <p className="text-xl font-bold text-orange-600 dark:text-orange-400 font-mono tracking-wide">
                         {prospect.apg?.toFixed(1) || '-'}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary">APG</p>
-                    </div>
-                  </div>
+                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary font-mono">APG</p>
+                    </motion.div>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
         
-        <div className="p-4 pt-0">
-          <div className="flex space-x-2">
-            <Link 
-              to={`/prospects/${prospect.id}`} 
-              className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-cyan-100/80 dark:hover:bg-brand-cyan/20 transition-colors text-sm font-medium"
+        <div className="relative z-10 p-4 pt-0">
+          <motion.div 
+            className="flex space-x-2"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1 } }
+            }}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              className="flex-1"
             >
-              Ver Detalhes
-            </Link>
+              <Link 
+                to={`/prospects/${prospect.id}`} 
+                className="block w-full text-center px-3 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 text-sm font-medium font-mono tracking-wide shadow-lg transform hover:scale-105"
+              >
+                Ver Detalhes
+              </Link>
+            </motion.div>
             
-            {isScoutUser ? (
-              <button
-                onClick={onOpenNotes}
-                className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center space-x-2 ${
-                  hasExistingNote || isNotesOpen
-                    ? 'bg-amber-100 hover:bg-amber-200 text-amber-700 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 dark:text-amber-400'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-super-dark-border dark:hover:bg-slate-600 dark:text-super-dark-text-primary'
-                }`}
-                title={isNotesOpen ? 'Fechar anotações' : hasExistingNote ? 'Editar anotações' : 'Adicionar anotações'}
-              >
-                {isNotesOpen ? <X size={16} /> : <FileText size={16} />}
-                {(hasExistingNote && !isNotesOpen) && <span className="w-2 h-2 bg-amber-500 rounded-full"></span>}
-              </button>
-            ) : (
-              <button
-                disabled
-                className="px-3 py-2 bg-slate-100 dark:bg-super-dark-border text-slate-400 dark:text-slate-500 rounded-lg cursor-not-allowed text-sm font-medium flex items-center space-x-2"
-                title="Anotações disponíveis apenas para usuários Scout"
-              >
-                <Lock size={16} />
-              </button>
-            )}
-          </div>
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 10 },
+                visible: { opacity: 1, y: 0 }
+              }}
+            >
+              {isScoutUser ? (
+                <motion.button
+                  onClick={onOpenNotes}
+                  className={`px-3 py-2.5 rounded-lg transition-all duration-300 text-sm font-medium flex items-center space-x-2 font-mono tracking-wide shadow-lg transform hover:scale-105 ${
+                    hasExistingNote || isNotesOpen
+                      ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:from-amber-500 hover:to-orange-600'
+                      : 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-700 hover:from-slate-300 hover:to-slate-400 dark:from-super-dark-border dark:to-slate-600 dark:text-super-dark-text-primary'
+                  }`}
+                  title={isNotesOpen ? 'Fechar anotações' : hasExistingNote ? 'Editar anotações' : 'Adicionar anotações'}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isNotesOpen ? <X size={16} /> : <FileText size={16} />}
+                  {(hasExistingNote && !isNotesOpen) && <span className="w-2 h-2 bg-white rounded-full"></span>}
+                </motion.button>
+              ) : (
+                <button
+                  disabled
+                  className="px-3 py-2.5 bg-gradient-to-r from-slate-200 to-slate-300 text-slate-400 dark:from-super-dark-border dark:to-slate-600 dark:text-slate-500 rounded-lg cursor-not-allowed text-sm font-medium flex items-center space-x-2 font-mono tracking-wide shadow-lg opacity-60"
+                  title="Anotações disponíveis apenas para usuários Scout"
+                >
+                  <Lock size={16} />
+                </button>
+              )}
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

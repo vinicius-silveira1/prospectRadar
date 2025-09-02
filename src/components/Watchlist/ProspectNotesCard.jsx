@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Trash2, X, FileText, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ProspectNotesCard = ({ 
   prospect, 
@@ -57,10 +58,16 @@ const ProspectNotesCard = ({
   if (!isOpen) return null;
 
   return (
-  <div className="mt-4 animate-fade-in w-full max-w-md mx-auto bg-white dark:bg-transparent shadow-2xl rounded-xl">
+    <motion.div 
+      className="mt-4 w-full max-w-md mx-auto"
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
       {/* Bloco de Notas Realista */}
-      <div 
-        className="relative bg-purple-50 dark:bg-purple-100/50 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300 border dark:border-slate-600"
+      <motion.div 
+        className="relative bg-purple-50 dark:bg-purple-100/50 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-300 border dark:border-slate-600 rounded-sm"
         style={{
           backgroundImage: `
             linear-gradient(transparent 23px, #E0F7FA 24px),
@@ -69,6 +76,12 @@ const ProspectNotesCard = ({
           backgroundSize: '100% 24px, 100% 24px',
           backgroundPosition: '0 24px, 0 0'
         }}
+        whileHover={{ 
+          rotate: 0,
+          scale: 1.02,
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {/* Aplicar estilo diferente para modo escuro */}
         <div 
@@ -102,9 +115,13 @@ const ProspectNotesCard = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-brand-purple rounded-lg shadow-lg">
+              <motion.div 
+                className="p-2 bg-gradient-to-r from-brand-purple to-purple-600 rounded-lg shadow-lg"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
                 <FileText className="w-5 h-5 text-white" />
-              </div>
+              </motion.div>
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg" style={{ fontFamily: 'Kalam, cursive' }}>
                   Anotações - {prospect.name}
@@ -117,13 +134,15 @@ const ProspectNotesCard = ({
                 </p>
               </div>
             </div>
-            <button
+            <motion.button
               onClick={handleCancel}
               className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-colors group"
               title="Fechar"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
             >
               <X className="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-red-600 dark:group-hover:text-red-400" />
-            </button>
+            </motion.button>
           </div>
 
           {/* Textarea com linhas */}
@@ -161,11 +180,13 @@ const ProspectNotesCard = ({
           {/* Botões */}
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-300 dark:border-slate-600">
             <div className="flex flex-wrap gap-3">
-              <button
+              <motion.button
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}
-                className="inline-flex items-center px-4 py-2 bg-brand-orange hover:brightness-90 disabled:bg-orange-300 text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
+                className="inline-flex items-center px-4 py-2 bg-brand-orange hover:brightness-90 disabled:bg-orange-300 text-white rounded-lg transition-colors text-sm font-medium shadow-lg disabled:cursor-not-allowed"
                 style={{ fontFamily: 'Kalam, cursive' }}
+                whileHover={{ scale: hasChanges && !isSaving ? 1.05 : 1 }}
+                whileTap={{ scale: hasChanges && !isSaving ? 0.95 : 1 }}
               >
                 {isSaving ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -173,36 +194,40 @@ const ProspectNotesCard = ({
                   <Save className="w-4 h-4 mr-2" />
                 )}
                 Salvar
-              </button>
+              </motion.button>
               
               {note && note.notes && (
-                <button
+                <motion.button
                   onClick={handleDelete}
                   disabled={isSaving}
-                  className="inline-flex items-center px-4 py-2 bg-brand-orange hover:brightness-90 dark:bg-brand-orange dark:hover:brightness-90 disabled:bg-orange-300 dark:disabled:bg-orange-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-lg transform hover:scale-105 active:scale-95"
+                  className="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 disabled:bg-red-300 dark:disabled:bg-red-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium shadow-lg"
                   style={{ fontFamily: 'Kalam, cursive' }}
+                  whileHover={{ scale: !isSaving ? 1.05 : 1 }}
+                  whileTap={{ scale: !isSaving ? 0.95 : 1 }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Excluir
-                </button>
+                </motion.button>
               )}
             </div>
 
-            <button
+            <motion.button
               onClick={handleCancel}
               disabled={isSaving}
               className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm font-medium"
               style={{ fontFamily: 'Kalam, cursive' }}
+              whileHover={{ scale: !isSaving ? 1.05 : 1 }}
+              whileTap={{ scale: !isSaving ? 0.95 : 1 }}
             >
               Fechar
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Sombra da espiral */}
         <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-black/5 dark:from-black/20 to-transparent pointer-events-none z-10"></div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

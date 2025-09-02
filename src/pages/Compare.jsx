@@ -125,22 +125,71 @@ function Compare() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full"
       >
-        <div className="bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-lg mb-4">
-          <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight flex items-center">
-            <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0" />
-            <span className="truncate">Comparar&nbsp;<span className="text-yellow-300">Prospects</span></span>
-          </h1>
-          <p className="text-sm sm:text-base text-blue-100 dark:text-blue-200">
-            Compare até {maxComparisons} prospects lado a lado para análise detalhada e identifique as diferenças cruciais.
-            {user?.subscription_tier?.toLowerCase() !== 'scout' && (
-              <span className="block mt-1 text-xs sm:text-sm text-yellow-200">
-                <Lock className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                Upgrade para Scout para comparar até 4 prospects
+        <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 dark:from-gray-900 dark:via-black dark:to-gray-800 text-white p-4 sm:p-6 rounded-lg shadow-2xl mb-4 border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group cursor-pointer">
+          {/* Particles de fundo */}
+          <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+            <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
+            <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
+            <div className="absolute bottom-6 left-16 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-400 rounded-full animate-pulse delay-700 group-hover:animate-bounce"></div>
+            <div className="absolute bottom-4 right-6 w-2 h-2 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-500 group-hover:animate-ping"></div>
+            <div className="absolute top-12 left-1/3 w-1 h-1 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse delay-1000 group-hover:animate-bounce"></div>
+            <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-500 rounded-full animate-pulse delay-200 group-hover:animate-ping"></div>
+          </div>
+          
+          {/* Grid de fundo */}
+          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
+            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}></div>
+          
+          <div className="relative z-10">
+            <motion.h1 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-2xl sm:text-3xl font-gaming font-mono font-bold mb-2 leading-tight flex items-center tracking-wide"
+            >
+              <motion.div
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
+              </motion.div>
+              <span className="bg-gradient-to-r from-yellow-300 via-orange-300 to-red-300 bg-clip-text text-transparent font-extrabold">
+                COMPARAR PROSPECTS
               </span>
-            )}
-          </p>
-          <div className="text-sm sm:text-lg font-bold text-yellow-300 bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-md whitespace-nowrap mt-2">
-            {selectedProspects.length}/{maxComparisons} selecionados
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wider"
+            >
+              ➤ Sistema de comparação avançada: até {maxComparisons} prospects
+              {user?.subscription_tier?.toLowerCase() !== 'scout' && (
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="block mt-1 text-xs sm:text-sm text-yellow-300 font-mono"
+                >
+                  <Lock className="inline h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  [PREMIUM] Desbloqueie 4 slots de comparação
+                </motion.span>
+              )}
+            </motion.p>
+            
+            <motion.div 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-3 inline-block"
+            >
+              <div className="text-sm sm:text-lg font-mono font-bold text-yellow-300 bg-black/30 backdrop-blur-sm px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-xl border border-yellow-400/30 tracking-widest">
+                STATUS: {selectedProspects.length}/{maxComparisons} CARREGADOS
+              </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>
@@ -148,10 +197,23 @@ function Compare() {
       <div className="w-full">
         {/* Adicionar prospects */}
         <div className="w-full">
-          <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4 mb-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4 mb-4 shadow-xl"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Adicionar Prospects</h2>
-              <button onClick={() => setShowSearch(!showSearch)} className="flex items-center px-3 py-2 bg-brand-purple text-white rounded-lg hover:brightness-90 transition-colors" disabled={selectedProspects.length >= maxComparisons}><Plus className="h-4 w-4 mr-2" /> Buscar</button>
+              <h2 className="font-mono font-bold text-slate-600 dark:text-slate-200 tracking-wide">BUSCAR PROSPECTS</h2>
+              <motion.button 
+                whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.3)" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowSearch(!showSearch)} 
+                className="flex items-center px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg transition-all font-mono font-bold tracking-wide shadow-lg border border-blue-400/50" 
+                disabled={selectedProspects.length >= maxComparisons}
+              >
+                <Plus className="h-4 w-4 mr-2" /> BUSCAR
+              </motion.button>
             </div>
             <AnimatePresence>
               {showSearch && (
@@ -159,38 +221,68 @@ function Compare() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="border-t dark:border-super-dark-border pt-4 space-y-4 overflow-hidden"
+                  className="border-t border-slate-200 dark:border-super-dark-border pt-4 space-y-4 overflow-hidden"
                 >
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                    <input type="text" placeholder="Buscar por nome ou time..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-secondary border border-slate-300 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 h-4 w-4" />
+                    <input 
+                      type="text" 
+                      placeholder="Digite o nome do prospect ou time..." 
+                      value={searchTerm} 
+                      onChange={(e) => setSearchTerm(e.target.value)} 
+                      className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-primary border border-slate-200 dark:border-super-dark-border rounded-lg text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all font-mono" 
+                    />
                   </div>
-                  <div className="max-h-60 overflow-y-auto border dark:border-super-dark-border rounded-lg divide-y dark:divide-super-dark-border">
+                  <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-super-dark-border rounded-lg divide-y divide-slate-100 dark:divide-super-dark-border bg-white dark:bg-super-dark-primary">
                     {filteredProspects.length > 0 ? (
                       filteredProspects.map(prospect => (
-                        <div key={prospect.id} onClick={() => addProspect(prospect)} className="flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-super-dark-secondary cursor-pointer">
+                        <motion.div 
+                          key={prospect.id} 
+                          whileHover={{ x: 5, backgroundColor: "rgba(100, 116, 139, 0.1)" }}
+                          onClick={() => addProspect(prospect)} 
+                          className="flex items-center justify-between p-3 cursor-pointer border-l-2 border-transparent hover:border-slate-500 transition-all"
+                        >
                           <div>
-                            <p className="font-medium text-slate-800 dark:text-super-dark-text-primary">{prospect.name}</p>
-                            <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary">{prospect.position} - {prospect.high_school_team}</p>
+                            <p className="font-mono font-bold text-gray-900 dark:text-gray-100">{prospect.name}</p>
+                            <p className="text-sm text-gray-600 dark:text-slate-400 font-mono">{prospect.position} • {prospect.high_school_team}</p>
                           </div>
-                          <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"><Plus className="h-5 w-5" /></button>
-                        </div>
+                          <motion.button 
+                            whileHover={{ scale: 1.2, rotate: 90 }}
+                            className="text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
+                          >
+                            <Plus className="h-5 w-5" />
+                          </motion.button>
+                        </motion.div>
                       ))
                     ) : (
-                      <p className="p-4 text-center text-slate-500 dark:text-super-dark-text-secondary">Nenhum prospect encontrado.</p>
+                      <p className="p-4 text-center text-slate-500 dark:text-slate-400 font-mono">NENHUM_PROSPECT_ENCONTRADO.exe</p>
                     )}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         </div>
         {/* Slots de comparação */}
         <div className="w-full">
-          <div className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4 shadow-xl"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary">Selecionados ({selectedProspects.length} / {maxComparisons})</h2>
-              {selectedProspects.length > 0 && <button onClick={() => setSelectedProspects([])} className="text-sm text-brand-purple dark:text-purple-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium flex items-center gap-1"><X size={14} /> Limpar</button>}
+              <h2 className="font-mono font-bold text-slate-600 dark:text-slate-200 tracking-wide">SELECIONADOS ({selectedProspects.length} / {maxComparisons})</h2>
+              {selectedProspects.length > 0 && (
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedProspects([])} 
+                  className="text-sm text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-mono font-bold flex items-center gap-1 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded border border-red-200 dark:border-red-800 tracking-wide"
+                >
+                  <X size={14} /> LIMPAR TUDO
+                </motion.button>
+              )}
             </div>
             <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-${maxComparisons} gap-3 sm:gap-4 min-h-[6rem] w-full`}>
               <AnimatePresence>
@@ -215,31 +307,54 @@ function Compare() {
                 if (isUpgradeSlot) {
                   // Se for grid de 2 ou mais colunas, ocupa 2 slots
                   return (
-                    <div
+                    <motion.div
                       key={`upgrade-placeholder-${index}`}
-                      className="relative flex flex-col items-center justify-center p-4 bg-orange-50/70 dark:bg-brand-orange/10 border-2 border-dashed border-brand-orange dark:border-brand-orange rounded-lg text-center transition-all group col-span-2"
+                      whileHover={{ scale: 1.02 }}
+                      className="relative flex flex-col items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-2 border-dashed border-orange-400 dark:border-orange-500 rounded-lg text-center transition-all group col-span-2"
                       style={{ gridColumn: 'span 2' }}
                     >
-                      <div className="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded-full font-semibold">Scout</div>
-                      <Lock size={28} className="text-brand-orange mb-2 group-hover:scale-110 transition-transform" />
-                      <span className="text-sm font-semibold text-brand-orange dark:text-orange-400 mb-1">Mais Comparações</span>
-                      <span className="text-xs text-orange-600 dark:text-orange-400 leading-tight px-1">Upgrade para Scout e compare até 4 prospects</span>
-                      <button onClick={() => navigate('/pricing')} className="mt-2 px-3 py-1 bg-brand-orange hover:bg-orange-600 text-white text-xs rounded-full transition-colors">Upgrade</button>
-                    </div>
+                      <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full font-mono font-bold">SCOUT</div>
+                      <motion.div
+                        animate={{ rotate: [0, 5, -5, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Lock size={28} className="text-orange-500 dark:text-orange-400 mb-2" />
+                      </motion.div>
+                      <span className="text-sm font-mono font-bold text-orange-600 dark:text-orange-400 mb-1 tracking-wide">UPGRADE NECESSÁRIO</span>
+                      <span className="text-xs text-orange-500 dark:text-orange-400 leading-tight px-1 font-mono">Desbloqueie 4 slots de comparação</span>
+                      <motion.button 
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => navigate('/pricing')} 
+                        className="mt-2 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs rounded-full transition-all font-mono font-bold tracking-wide"
+                      >
+                        FAZER UPGRADE
+                      </motion.button>
+                    </motion.div>
                   );
                 }
                 if (isFreeUser && slotPosition >= 2) {
                   return null;
                 }
                 return (
-                  <div key={`placeholder-${index}`} className="flex flex-col items-center justify-center p-3 bg-slate-50/70 dark:bg-super-dark-secondary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-400 dark:text-super-dark-text-secondary text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary hover:border-blue-400 transition-all" onClick={() => setShowSearch(true)}>
-                    <Plus size={24} className="text-brand-purple" />
-                    <span className="text-sm mt-2 text-brand-purple">Adicionar Prospect</span>
-                  </div>
+                  <motion.div 
+                    key={`placeholder-${index}`} 
+                    whileHover={{ scale: 1.05, borderColor: "rgba(59, 130, 246, 0.8)" }}
+                    className="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-super-dark-primary border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg text-slate-600 dark:text-slate-300 text-center cursor-pointer hover:bg-slate-100 dark:hover:bg-super-dark-secondary transition-all" 
+                    onClick={() => setShowSearch(true)}
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 90, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <Plus size={24} className="text-slate-500 dark:text-slate-400" />
+                    </motion.div>
+                    <span className="text-sm mt-2 text-slate-600 dark:text-slate-400 font-mono font-bold tracking-wide">ADICIONAR PROSPECT</span>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
           {/* Comparação HeadToHead */}
           <div>
             <AnimatePresence>
@@ -253,11 +368,20 @@ function Compare() {
                   <HeadToHeadComparison prospects={selectedProspects} onRemove={removeProspect} onExport={exportAsImage} isExporting={isExporting} />
                 </motion.div>
               ) : (
-                <div className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg">
-                  <GitCompare className="mx-auto h-12 w-12 text-brand-cyan" />
-                  <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-super-dark-text-primary">Comece a Comparar</h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-super-dark-text-secondary">Adicione 2 ou mais prospects para ver a análise lado a lado.</p>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12 border-2 border-dashed border-slate-300 dark:border-super-dark-border rounded-lg bg-slate-50 dark:bg-super-dark-primary"
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <GitCompare className="mx-auto h-12 w-12 text-slate-500 dark:text-slate-400 mb-4" />
+                  </motion.div>
+                  <h3 className="mt-2 text-lg font-mono font-bold text-slate-600 dark:text-slate-300 tracking-wide">INICIALIZAÇÃO NECESSÁRIA</h3>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 font-mono">Adicione 2+ prospects para iniciar análise comparativa</p>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>

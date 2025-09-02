@@ -206,7 +206,7 @@ const MockDraft = () => {
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
               <motion.h1 
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight text-white text-glow flex items-center"
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight text-white text-glow flex items-center tracking-wide"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >

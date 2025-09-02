@@ -81,25 +81,75 @@ const Watchlist = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-black dark:via-purple-800 dark:to-black text-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6"
+        className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl group transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] cursor-pointer"
       >
-        <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-3 leading-tight flex items-center">
-              <Heart className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3" /> 
-              <span className="flex items-center flex-wrap gap-1">
-                Minha <span className="text-yellow-300">Watchlist</span>
-              </span>
-            </h1>
-            <p className="text-lg text-blue-100 max-w-2xl">
-              Você está acompanhando {favoritedProspects.length} prospect(s) na sua lista de favoritos.
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <ExportButtons prospects={favoritedProspects} source="watchlist" />
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
+          <div className="absolute inset-0" style={{ 
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), 
+                            radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%), 
+                            radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%)` 
+          }}></div>
+        </div>
+
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-300/30 rounded-full animate-pulse group-hover:animate-bounce"></div>
+          <div className="absolute top-3/4 right-1/3 w-1 h-1 bg-white/40 rounded-full animate-ping group-hover:animate-bounce" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 right-1/4 w-1.5 h-1.5 bg-blue-300/20 rounded-full animate-pulse group-hover:animate-ping" style={{ animationDelay: '2s' }}></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 p-4 md:p-6 lg:p-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <motion.h1 
+                className="text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-3 leading-tight flex items-center font-mono tracking-wide"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "loop"
+                  }}
+                >
+                  <Heart className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3 fill-current" />
+                </motion.div>
+                <span className="flex items-center flex-wrap gap-1">
+                  Minha <span className="text-yellow-300">Watchlist</span>
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                className="text-lg text-blue-100 max-w-2xl font-mono tracking-wide"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                Você está acompanhando <span className="font-bold text-yellow-300">{favoritedProspects.length}</span> prospect(s) na sua lista de favoritos.
+              </motion.p>
+            </div>
+            
+            <motion.div 
+              className="mt-4 md:mt-0"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <ExportButtons prospects={favoritedProspects} source="watchlist" />
+            </motion.div>
           </div>
         </div>
+
+        {/* Bottom gradient overlay */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 opacity-60"></div>
       </motion.div>
 
       <motion.div
