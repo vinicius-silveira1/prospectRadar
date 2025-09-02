@@ -1,13 +1,35 @@
 # 🏀 prospectRadar
 
-**A plataforma definitiva para análise de prospects de basquete, com foco na comunidade brasileira.**
+**Plata## 🌟 **100% Open Source & Transparente**
 
-Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, construída com a comunidade brasileira de basquete em mente.
+O ProspectRadar é **completamente open source** porque acreditamos que transparência gera melhores produtos para a comunidade.
+
+### **🔓 Por que Open Source?**
+- **🇧🇷 Transparência Total:** Sem caixas-pretas - você pode ver exatamente como analisamos prospects
+- **🤝 Desenvolvido com a Comunidade:** Contribuições melhoram continuamente a plataforma  
+- **📖 Código Educativo:** Algoritmos comentados em português para a comunidade brasileira
+
+### **💰 Modelo Sustentável**
+O ProspectRadar adota um **modelo freemium transparente**:
+- **🆓 Core sempre gratuito** - Funcionalidades principais sempre acessíveis
+- **⭐ Features premium opcionais** - Para usuários profissionais (scouts, jornalistas)
+- **🔓 Código sempre aberto** - Sem mudança para closed source
+- **🤝 Contribuidores valorizados** - Reconhecimento e benefícios para quem colabora
+
+
+Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, com foco especial na comunidade brasileira de basquete.
 
 <img width="1890" height="863" alt="image" src="https://github.com/user-attachments/assets/1286b717-622a-45ea-b89c-76ae3e729355" />
 
+## 🎯 **Sobre o Projeto**
 
-## ✨ Badges
+O ProspectRadar combina análise de dados avançada com interface moderna para oferecer:
+- � **Algoritmo de ranking proprietário** baseado em 4 pilares de avaliação
+- 🏀 **Foco em prospects brasileiros** e mercado nacional  
+- 🔬 **Análise estatística profunda** com métricas NBA modernas
+- 🌐 **Plataforma 100% transparente** e open source
+
+## ✨ Stack Tecnológica
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -15,19 +37,19 @@ Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos d
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![TanStack Query](https://img.shields.io/badge/TanStack%20Query-FF4154?logo=tanstack&logoColor=white)](https://tanstack.com/query/)
 [![Framer Motion](https://img.shields.io/badge/Framer%20Motion-0055FF?logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Stripe](https://img.shields.io/badge/Stripe-008CDD?logo=stripe&logoColor=white)](https://stripe.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/Version-1.0.0--beta.1-orange.svg)](https://github.com/vinicius-silveira1/prospectRadar)
 [![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)](https://github.com/vinicius-silveira1/prospectRadar)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/vinicius-silveira1/prospectRadar/issues)
+[![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-blue.svg)](https://github.com/vinicius-silveira1/prospectRadar)
 
-## 🌟 **100% Open Source & Transparente**
+## 🌟 **100% Open Source & Educativo**
 
-O ProspectRadar é **completamente open source** porque acreditamos que transparência e colaboração geram produtos melhores para toda a comunidade.
+Este projeto é **completamente open source** como forma de:
 
-### **🔓 Por que Open Source?**
-- **🇧🇷 Transparência Brasileira:** Sem caixas-pretas - você pode ver exatamente como analisamos prospects
-- **🤝 Desenvolvido pela Comunidade:** Contribuições de desenvolvedores e fãs de basquete melhoram continuamente a plataforma
+### **🔓 Transparência Educativa**
+- **🇧🇷 Código Comentado em Português:** Algoritmos explicados didaticamente para a comunidade brasileira
+- **� Documentação Completa:** Metodologia de análise NBA totalmente documentada
+- **🤝 Aprendizado Colaborativo:** Convite para outros estudantes e desenvolvedores contribuírem
 - **📖 Educativo:** Código aberto para quem quer aprender sobre análise de dados esportivos
 - **🔧 Auditável:** Algoritmo do Radar Score totalmente visível e verificável pela comunidade
 
@@ -377,38 +399,21 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 🙏 **Agradecimentos**
 
 - Comunidade brasileira de basquete
-## 📄 **Licença Open Source**
+## � **Contato & Comunidade**
 
-Este projeto está sob a **licença MIT** - uma das mais permissivas e acolhedoras para a comunidade open source.
-
-### **O que isso significa:**
-- ✅ **Uso Livre:** Use para qualquer propósito, pessoal ou comercial
-- ✅ **Modificação:** Adapte o código às suas necessidades
-- ✅ **Distribuição:** Compartilhe livremente com outros
-- ✅ **Transparência Total:** Sem restrições ou licenças proprietárias escondidas
-
-Veja o arquivo [LICENSE](LICENSE) para todos os detalhes legais.
-
-## 🙏 **Agradecimentos & Comunidade**
-
-### **💙 Contribuidores e Apoiadores:**
-- **Comunidade Brasileira de Basquete** - Feedback, ideias e paixão pelo esporte
-- **Desenvolvedores Open Source** - Inspiração e ferramentas incríveis
-- **Beta Testers** - Paciência e relatórios detalhados de bugs
-- **Early Adopters** - Primeiros usuários que confiaram no projeto
-
-### **📊 Fontes de Dados Reconhecidas:**
-- **ESPN** - Rankings e estatísticas universitárias
-- **247Sports** - Dados de high school e rankings
-- **RealGM** - Informações históricas e comparações
-- **Basketball-Reference** - Estatísticas da NBA para validação
-
-## 📞 **Contato & Comunidade**
-
-### **🌐 Links Oficiais:**
-- **🖥️ Website:** [prospectradar.com.br](https://prospectradar.com.br)
+### **🌐 Links do Projeto:**
+- **🖥️ Website:** [prospectradar.com.br](https://prospectradar.com.br)  
 - **📂 GitHub:** [github.com/vinicius-silveira1/prospectRadar](https://github.com/vinicius-silveira1/prospectRadar)
 - **💼 LinkedIn:** [Vinícius Silveira](https://linkedin.com/in/vinicius-silveira1)
+
+### **🤝 Contribuições & Feedback:**
+- **🐛 Issues:** Relate bugs ou sugira melhorias
+- **💡 Discussions:** Compartilhe ideias para novas funcionalidades  
+- **🎯 Pull Requests:** Contribuições de código são sempre bem-vindas!
+
+---
+
+**⭐ Se este projeto foi útil para você, considere dar uma estrela no GitHub! 🙏**
 
 ### **💬 Suporte e Comunidade:**
 - **📧 Email:** contato@prospectradar.com.br
