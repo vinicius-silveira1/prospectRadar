@@ -182,48 +182,55 @@ const MockDraft = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 mb-4 md:mb-6 overflow-hidden group"
+          className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-2xl mb-4 border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group cursor-pointer"
           whileHover={{
-            boxShadow: "0 0 40px rgba(59, 130, 246, 0.3), 0 0 80px rgba(168, 85, 247, 0.2)"
+            boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
           }}
         >
-          {/* Hexagonal pattern background */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <pattern id="hexPattern-mockdraft" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
-                <polygon points="7.5,1 13,4.5 13,10.5 7.5,14 2,10.5 2,4.5" fill="currentColor" className="text-white/10" />
-              </pattern>
-              <rect width="100%" height="100%" fill="url(#hexPattern-mockdraft)" />
-            </svg>
+          {/* Particles de fundo */}
+          <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+            <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
+            <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
+            <div className="absolute bottom-6 left-16 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-400 rounded-full animate-pulse delay-700 group-hover:animate-bounce"></div>
+            <div className="absolute bottom-4 right-6 w-2 h-2 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-500 group-hover:animate-ping"></div>
+            <div className="absolute top-12 left-1/3 w-1 h-1 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse delay-1000 group-hover:animate-bounce"></div>
+            <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-500 rounded-full animate-pulse delay-200 group-hover:animate-ping"></div>
           </div>
-
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
-
-          {/* Original dotted pattern (keeping for layering) */}
-          <div className="absolute inset-0 z-0 opacity-5" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'6\' height=\'6\' viewBox=\'0 0 6 6\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'%2F%3E%3C/g%3E%3C/svg%3E")' }}></div>
+          
+          {/* Grid de fundo */}
+          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
+            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}></div>
           
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
               <motion.h1 
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-gaming font-extrabold mb-2 leading-tight text-white text-glow flex items-center tracking-wide"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-2xl sm:text-3xl font-gaming font-bold mb-2 leading-tight flex items-center font-mono tracking-wide"
               >
-                <Shuffle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-3 drop-shadow-lg" />
-                <span className="flex items-center flex-wrap gap-2">
-                  <span className="text-yellow-300 drop-shadow-lg">Mock&nbsp;Draft</span>
-                  <span className="text-white drop-shadow-lg">{draftSettings.draftClass}</span>
-                </span>
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Shuffle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
+                </motion.div>
+                <span className="text-yellow-300">Mock Draft</span>
+                <span className="ml-3">{draftSettings.draftClass}</span>
               </motion.h1>
+              
               <motion.p 
-                className="text-sm sm:text-base md:text-lg text-blue-100 dark:text-blue-200 max-w-2xl leading-relaxed"
-                initial={{ opacity: 0.8 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wide"
               >
-                🎯 Monte seu próprio draft com {allProspects.length} prospects reais e curados. Simule estratégias e descubra os futuros astros.
+                ➤ Monte seu próprio draft com {allProspects.length} prospects reais e curados
               </motion.p>
+              
+
             </div>
               
             {/* Pick Atual - Visível em todas as telas */}
@@ -242,7 +249,7 @@ const MockDraft = () => {
               <div className="text-2xl md:text-3xl font-mono font-bold tracking-wide bg-gradient-to-r from-yellow-300 via-yellow-200 to-orange-300 bg-clip-text text-transparent">
                 #{currentPick}
               </div>
-              <div className="text-xs text-blue-100 mt-1 font-mono tracking-wider uppercase opacity-90">Pick Atual</div>
+              <div className="text-xs text-blue-100 mt-1 font-mono tracking-wide uppercase opacity-90">Pick Atual</div>
             </motion.div>
           </div>
         </motion.div>
@@ -599,7 +606,7 @@ const MockDraft = () => {
           isOpen={isTeamOrderModalOpen}
           onClose={() => setIsTeamOrderModalOpen(false)}
           onConfirmOrder={handleTeamOrderConfirm}
-          currentDraftOrder={draftBoard.map(pick => pick.team)}
+          currentDraftOrder={getCurrentDraftOrder()}
         />
 
         <div className="absolute left-[-9999px] top-0 z-[-10">

@@ -83,6 +83,13 @@ const useMockDraft = (allProspects) => {
     setIsLoading(false);
   }, [customDraftOrder]);
 
+  // Efeito para inicializar o draft quando prospects são carregados ou ordem é modificada
+  useEffect(() => {
+    if (allProspects && allProspects.length > 0) {
+      initializeDraft();
+    }
+  }, [allProspects, customDraftOrder, initializeDraft]);
+
   // Função para buscar os drafts salvos do usuário
   const listSavedDrafts = useCallback(async () => {
     if (!user) return;
@@ -102,6 +109,13 @@ const useMockDraft = (allProspects) => {
       setIsLoadingDrafts(false);
     }
   }, [user]);
+
+  // Efeito para inicializar o draft quando prospects são carregados ou ordem é modificada
+  useEffect(() => {
+    if (allProspects && allProspects.length > 0) {
+      initializeDraft();
+    }
+  }, [allProspects, customDraftOrder]); // Removido initializeDraft da dependência
 
   // Efeito para buscar os drafts quando o usuário é carregado
   useEffect(() => {

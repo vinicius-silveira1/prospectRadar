@@ -124,8 +124,11 @@ function Compare() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full"
+        whileHover={{
+          boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
+        }}
       >
-        <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 dark:from-gray-900 dark:via-black dark:to-gray-800 text-white p-4 sm:p-6 rounded-lg shadow-2xl mb-4 border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group cursor-pointer">
+        <div className="relative overflow-hidden bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 dark:from-gray-900 dark:via-black dark:to-gray-800 text-white p-4 sm:p-6 rounded-lg shadow-2xl mb-4 border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group cursor-pointer">
           {/* Particles de fundo */}
           <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
             <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
@@ -155,9 +158,8 @@ function Compare() {
               >
                 <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
               </motion.div>
-              <span className="bg-gradient-to-r from-yellow-300 via-orange-300 to-red-300 bg-clip-text text-transparent font-extrabold">
-                COMPARAR PROSPECTS
-              </span>
+              <span>Comparar</span>
+              <span className="text-yellow-300 ml-3">prospects</span>
             </motion.h1>
             
             <motion.p 
@@ -180,16 +182,7 @@ function Compare() {
               )}
             </motion.p>
             
-            <motion.div 
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-3 inline-block"
-            >
-              <div className="text-sm sm:text-lg font-mono font-bold text-yellow-300 bg-black/30 backdrop-blur-sm px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-xl border border-yellow-400/30 tracking-widest">
-                STATUS: {selectedProspects.length}/{maxComparisons} CARREGADOS
-              </div>
-            </motion.div>
+
           </div>
         </div>
       </motion.div>

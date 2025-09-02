@@ -26,7 +26,7 @@ function ResponsiveSidebar({ isOpen, onClose }) {
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
     { path: '/trending', icon: TrendingUp, label: 'Em Alta' },
     { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
-    { path: '/radar-score-explained', icon: Lightbulb, label: 'Score do Radar' },
+    { path: '/radar-score-explained', icon: Lightbulb, label: 'Radar Score' },
     { path: '/pricing', icon: CreditCard, label: 'Planos', isSpecial: true },
     { path: '/about', icon: Info, label: 'Sobre' },
   ];
@@ -49,7 +49,7 @@ function ResponsiveSidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-super-dark-primary dark:to-super-dark-secondary border-r border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl text-slate-600 p-6 z-40 overflow-hidden transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        className={`fixed top-0 left-0 w-64 h-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-super-dark-primary dark:to-super-dark-secondary border-r border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl text-slate-600 p-6 z-50 overflow-hidden transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
@@ -59,18 +59,6 @@ function ResponsiveSidebar({ isOpen, onClose }) {
             </pattern>
             <rect width="100%" height="100%" fill="url(#sidebarPattern)" />
           </svg>
-        </div>
-
-        {/* Close button (mobile) with enhanced design */}
-        <div className="flex justify-end mb-6 md:hidden relative z-10">
-          <motion.button
-            whileHover={{ scale: 1.1, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="p-2 rounded-xl bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-sm text-slate-500 dark:text-super-dark-text-secondary hover:text-brand-orange hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 shadow-lg"
-          >
-            <X size={20} />
-          </motion.button>
         </div>
 
         {/* Close button (mobile) with enhanced design */}

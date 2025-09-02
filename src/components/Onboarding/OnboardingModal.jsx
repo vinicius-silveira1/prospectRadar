@@ -57,33 +57,31 @@ const OnboardingModal = ({ show, onClose }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="bg-gradient-to-b from-white to-slate-50 dark:from-super-dark-primary dark:to-super-dark-secondary rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden border border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl relative"
+            className="bg-white dark:bg-super-dark-secondary rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden border border-slate-200 dark:border-super-dark-border backdrop-blur-xl relative"
           >
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
-              <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <pattern id="onboardingPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
-                </pattern>
-                <rect width="100%" height="100%" fill="url(#onboardingPattern)" />
-              </svg>
+              <div className="absolute inset-0 opacity-10 transition-opacity duration-300" style={{
+                backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}></div>
             </div>
 
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-orange/5 via-transparent to-brand-purple/5" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-purple-600/5" />
 
             <div className="p-6 sm:p-8 relative z-10">
               <div className="flex justify-between items-start mb-6">
                 <motion.div 
-                  className="p-4 bg-gradient-to-br from-brand-purple/10 to-brand-orange/10 dark:from-brand-purple/20 dark:to-brand-orange/20 rounded-xl backdrop-blur-sm border border-brand-purple/20"
+                  className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl backdrop-blur-sm border border-blue-200/20 dark:border-purple-500/20"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  {Icon && <Icon className="h-8 w-8 text-brand-purple" />}
+                  {Icon && <Icon className="h-8 w-8 text-blue-600 dark:text-blue-400" />}
                 </motion.div>
                 <motion.button 
                   onClick={handleClose} 
-                  className="p-2 rounded-xl bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:text-super-dark-text-secondary dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="p-2 rounded-xl bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:text-super-dark-text-secondary dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-200 dark:border-super-dark-border"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -92,7 +90,7 @@ const OnboardingModal = ({ show, onClose }) => {
               </div>
 
               <motion.h2 
-                className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight"
+                className="text-2xl font-gaming font-bold font-mono tracking-wide text-slate-900 dark:text-white mb-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -100,12 +98,12 @@ const OnboardingModal = ({ show, onClose }) => {
                 {onboardingSteps[currentStep].title}
               </motion.h2>
               <motion.p 
-                className="text-slate-600 dark:text-super-dark-text-secondary leading-relaxed"
+                className="text-slate-600 dark:text-super-dark-text-secondary leading-relaxed font-mono"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                {onboardingSteps[currentStep].content}
+                ➤ {onboardingSteps[currentStep].content}
               </motion.p>
 
               {/* Progress Dots */}
@@ -120,7 +118,7 @@ const OnboardingModal = ({ show, onClose }) => {
                     key={index}
                     className={`h-2 rounded-full transition-all duration-500 ${
                       currentStep === index 
-                        ? 'w-8 bg-gradient-to-r from-brand-orange to-brand-purple shadow-lg' 
+                        ? 'w-8 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg' 
                         : 'w-2 bg-slate-300 dark:bg-super-dark-border hover:bg-slate-400 dark:hover:bg-slate-600'
                     }`}
                     whileHover={{ scale: 1.2 }}
@@ -141,7 +139,7 @@ const OnboardingModal = ({ show, onClose }) => {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handlePrev}
-                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:hover:from-slate-700 dark:hover:to-slate-600 text-slate-700 dark:text-super-dark-text-primary font-semibold py-3 px-4 rounded-xl transition-all duration-300 backdrop-blur-sm border border-slate-200/60 dark:border-super-dark-border/60 relative overflow-hidden group"
+                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 dark:from-super-dark-border dark:to-super-dark-secondary dark:hover:from-slate-700 dark:hover:to-slate-600 text-slate-700 dark:text-super-dark-text-primary font-gaming font-semibold py-3 px-4 rounded-xl transition-all duration-300 backdrop-blur-sm border border-slate-200/60 dark:border-super-dark-border/60 relative overflow-hidden group font-mono"
                   >
                     {/* Hover shimmer effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -153,7 +151,7 @@ const OnboardingModal = ({ show, onClose }) => {
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={currentStep === onboardingSteps.length - 1 ? handleClose : handleNext}
-                  className="w-full bg-gradient-to-r from-brand-purple to-brand-orange hover:from-brand-purple/90 hover:to-brand-orange/90 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl relative overflow-hidden group"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-gaming font-bold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl relative overflow-hidden group font-mono tracking-wide"
                 >
                   {/* Hover shimmer effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />

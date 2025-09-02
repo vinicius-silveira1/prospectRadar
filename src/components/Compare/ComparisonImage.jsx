@@ -131,9 +131,6 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
         </div>
         <div className="text-right">
           <h2 className="text-4xl font-bold tracking-wide">COMPARAÇÃO</h2>
-          <div className="text-sm tracking-widest text-slate-500 dark:text-slate-400 mt-1">
-            STATUS: {processedProspects.length} PROSPECTS CARREGADOS
-          </div>
         </div>
       </div>
 

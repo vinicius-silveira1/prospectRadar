@@ -955,15 +955,15 @@ const useAdvancedExport = () => {
       ctx.textAlign = 'left';
       ctx.fillText('prospectRadar', margin, currentY);
 
-      // Nome do prospecto centralizado
+      // Nome do prospecto centralizado - Fonte Muito Maior
       currentY += 50;
       ctx.fillStyle = '#1f2937'; // gray-800
-      ctx.font = 'bold 48px Arial, sans-serif';
+      ctx.font = 'bold 56px Arial, sans-serif'; // Aumentado de 48px para 56px
       ctx.textAlign = 'center';
       ctx.fillText(data.basicInfo.name || 'N/A', headerCenter, currentY);
       
       currentY += 35;
-      ctx.font = '24px Arial, sans-serif';
+      ctx.font = '28px Arial, sans-serif'; // Aumentado de 24px para 28px
       ctx.fillStyle = '#6b7280'; // gray-500
       ctx.fillText(`${data.basicInfo.position || 'N/A'} | ${data.basicInfo.team || 'N/A'}`, headerCenter, currentY);
 
@@ -1026,60 +1026,60 @@ const useAdvancedExport = () => {
         return y + lineHeight;
       };
 
-      // Projeção de Draft (movendo para baixo)
+      // Projeção de Draft (movendo para baixo) - Fonte Maior
       ctx.fillStyle = '#dc2626'; // red-600
-      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 28px para 32px
       ctx.fillText('PROJEÇÃO DE DRAFT', rightColumnX, rightColumnY);
       
       rightColumnY += 40;
       ctx.fillStyle = '#1f2937'; // gray-800
-      ctx.font = 'bold 32px Arial, sans-serif';
+      ctx.font = 'bold 36px Arial, sans-serif'; // Aumentado de 32px para 36px
       const projectionText = data.radarAnalysis.draftProjection || 'N/A';
-      rightColumnY = wrapText(ctx, projectionText, rightColumnX, rightColumnY, columnWidth, 36);
+      rightColumnY = wrapText(ctx, projectionText, rightColumnX, rightColumnY, columnWidth, 40); // Aumentado lineHeight
       
       rightColumnY += 20;
-      ctx.font = '20px Arial, sans-serif';
+      ctx.font = '24px Arial, sans-serif'; // Aumentado de 20px para 24px
       ctx.fillStyle = '#6b7280'; // gray-500
       ctx.fillText(`Range: ${data.radarAnalysis.draftRange || 'N/A'}`, rightColumnX, rightColumnY);
 
-      // NBA Readiness
+      // NBA Readiness - Fonte Maior
       rightColumnY += 50;
       ctx.fillStyle = '#2563eb'; // blue-600
-      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 28px para 32px
       ctx.fillText('PRONTIDÃO PARA NBA', rightColumnX, rightColumnY);
       
       rightColumnY += 35;
       ctx.fillStyle = '#1f2937'; // gray-800
-      ctx.font = '28px Arial, sans-serif';
+      ctx.font = '32px Arial, sans-serif'; // Aumentado de 28px para 32px
       ctx.fillText(data.radarAnalysis.readiness || 'N/A', rightColumnX, rightColumnY);
 
-      // Score Total
+      // Score Total - Fonte Maior
       rightColumnY += 50;
       ctx.fillStyle = '#059669'; // emerald-600
-      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 28px para 32px
       ctx.fillText('SCORE TOTAL', rightColumnX, rightColumnY);
       
       rightColumnY += 35;
       ctx.fillStyle = '#1f2937'; // gray-800
-      ctx.font = '28px Arial, sans-serif';
+      ctx.font = '32px Arial, sans-serif'; // Aumentado de 28px para 32px
       ctx.fillText(data.radarAnalysis.potentialScore || 'N/A', rightColumnX, rightColumnY);
 
       // Ajustar currentY após radar section - aguardando o final do chart
       currentY = sectionStartY + chartHeight + 60;
 
-      // Sections expandidas
+      // Sections expandidas - Fontes Ajustadas
       const drawSection = (title, items, x, y, titleColor = '#2563eb', itemColor = '#1f2937') => {
         ctx.fillStyle = titleColor;
-        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 26px para 32px (Informações Básicas)
         ctx.textAlign = 'left';
         ctx.fillText(title, x, y);
-        y += 35;
+        y += 40; // Aumentado de 35 para 40
         
         ctx.fillStyle = itemColor;
-        ctx.font = '20px Arial, sans-serif';
+        ctx.font = '24px Arial, sans-serif'; // Aumentado de 20px para 24px (Stats básicas/avançadas)
         items.forEach((item, index) => {
           ctx.fillText(`• ${item}`, x, y);
-          y += 30;
+          y += 35; // Aumentado de 30 para 35
         });
         return y;
       };
@@ -1121,40 +1121,40 @@ const useAdvancedExport = () => {
         `AST%: ${data.advancedStats.assistRate || 'N/A'}`,
       ], col2X, col2Y, '#d97706');
 
-      // Flags centralizadas abaixo de ambas as colunas com mais espaço
+      // Flags centralizadas abaixo de ambas as colunas com mais espaço - Fonte Bem Maior
       let flagsY = Math.max(col1Y, col2Y) + 50;
       if (data.flags && data.flags.length > 0) {
         ctx.fillStyle = '#7c3aed';
-        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 26px para 32px
         ctx.textAlign = 'left';
         ctx.fillText('DESTAQUES E ALERTAS', col1X, flagsY);
-        flagsY += 35;
-        ctx.font = '20px Arial, sans-serif';
+        flagsY += 40; // Aumentado de 35 para 40
+        ctx.font = '26px Arial, sans-serif'; // Aumentado de 20px para 26px
         data.flags.slice(0, 4).forEach(flag => {
           ctx.fillStyle = flag.type === 'Alerta' ? '#dc2626' : '#059669';
           ctx.fillText(`• ${flag.message}`, col1X, flagsY);
-          flagsY += 30;
+          flagsY += 35; // Aumentado de 30 para 35
         });
       }
 
-      // Área adicional para análise detalhada
+      // Área adicional para análise detalhada - Fonte Bem Maior
       let analysisY = Math.max(flagsY + 40, canvas.height - 300);
       
       if (data.detailedAnalysis && data.detailedAnalysis.length > 100) {
         ctx.fillStyle = '#7c3aed';
-        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 26px para 32px
         ctx.textAlign = 'left';
         ctx.fillText('ANÁLISE DETALHADA', col1X, analysisY);
-        analysisY += 35;
+        analysisY += 40; // Aumentado de 35 para 40
         
         ctx.fillStyle = '#374151';
-        ctx.font = '18px Arial, sans-serif';
+        ctx.font = '22px Arial, sans-serif'; // Aumentado de 18px para 22px
         
         // Quebrar texto da análise em múltiplas linhas
         const maxWidth = canvas.width - 160;
         const words = data.detailedAnalysis.substring(0, 400).split(' ');
         let line = '';
-        let lineHeight = 25;
+        let lineHeight = 30; // Aumentado de 25 para 30
         
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
@@ -1177,11 +1177,11 @@ const useAdvancedExport = () => {
         }
       }
       
-      // Footer expandido
+      // Footer expandido - Fonte Ligeiramente Maior
       const footerY = canvas.height - 50;
       
       ctx.fillStyle = '#64748b';
-      ctx.font = '18px Arial, sans-serif';
+      ctx.font = '20px Arial, sans-serif'; // Aumentado de 18px para 20px
       ctx.textAlign = 'center';
       ctx.fillText(`prospectRadar.com • ${new Date().toLocaleDateString('pt-BR')} • Análise Profissional`, canvas.width / 2, footerY);
       

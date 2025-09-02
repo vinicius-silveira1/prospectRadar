@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Shield, Lock, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 const ResetPassword = () => {
@@ -32,32 +34,171 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-100 dark:bg-super-dark-primary">
-      <div className="hidden lg:flex w-1/3 bg-brand-dark items-center justify-center p-8 text-white relative">
-        <div className="text-center">
-          <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold">
-            <span className="text-brand-orange">prospect</span>
-            <span className="text-brand-purple">Radar</span>
-          </h1>
-          <p className="mt-2 text-slate-300">Analisando o futuro do basquete.</p>
+    <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
+      {/* Banner de Reset com estilo gaming */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 mb-8"
+        whileHover={{
+          boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
+        }}
+      >
+        {/* Particles de fundo */}
+        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+          <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
+          <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
+          <div className="absolute bottom-6 left-16 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-400 rounded-full animate-pulse delay-700 group-hover:animate-bounce"></div>
+          <div className="absolute bottom-4 right-6 w-2 h-2 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-500 group-hover:animate-ping"></div>
         </div>
-      </div>
-      <div className="w-full lg:w-2/3 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-lg shadow-lg dark:shadow-super-dark-primary/50 animate-fade-in">
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-super-dark-text-primary mb-6">Crie sua Nova Senha</h2>
-          {error && <p className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-md mb-4 text-sm">{error}</p>}
-          {message && <p className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-md mb-4 text-sm">{message}</p>}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-super-dark-text-secondary">Nova Senha</label>
-              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-super-dark-border rounded-md shadow-sm focus:ring-brand-orange focus:border-brand-orange dark:bg-super-dark-secondary dark:text-super-dark-text-primary" />
+        
+        {/* Grid de fundo */}
+        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
+          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}></div>
+        
+        <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex items-center justify-center mb-4"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="mr-3"
+            >
+              <Shield className="h-8 w-8 text-yellow-300" />
+            </motion.div>
+            <h1 className="text-2xl sm:text-3xl font-gaming font-bold font-mono tracking-wide">
+              Redefinir <span className="text-yellow-300">Senha</span>
+            </h1>
+          </motion.div>
+          
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wide"
+          >
+            ➤ Crie uma nova senha segura para sua conta
+          </motion.p>
+        </div>
+      </motion.div>
+
+      {/* Formulário centralizado */}
+      <div className="flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="max-w-md w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50 border border-slate-200 dark:border-super-dark-border"
+        >
+          {/* Título da seção */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="text-center mb-8"
+          >
+            <div className="flex items-center justify-center mb-4">
+              <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+              <h2 className="text-2xl font-gaming font-bold font-mono tracking-wide text-slate-900 dark:text-super-dark-text-primary">
+                Crie sua Nova Senha
+              </h2>
             </div>
-            <button type="submit" disabled={loading || !!message} className="w-full py-3 px-4 bg-brand-orange text-white font-semibold rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors">
-              {loading ? 'Salvando...' : 'Salvar Nova Senha'}
-            </button>
+            <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary font-mono">
+              ➤ Digite uma senha forte e memorável
+            </p>
+          </motion.div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-3 rounded-lg mb-6 text-sm border border-red-200 dark:border-red-800"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 p-3 rounded-lg mb-6 text-sm border border-green-200 dark:border-green-800 flex items-center"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              {message}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <label htmlFor="password" className="block text-sm font-gaming font-medium text-slate-700 dark:text-super-dark-text-secondary mb-2">
+                <Lock className="inline h-4 w-4 mr-2" />
+                Nova Senha
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-super-dark-primary border-2 border-slate-300 dark:border-super-dark-border rounded-lg shadow-sm text-slate-900 dark:text-super-dark-text-primary placeholder-slate-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-purple-500 dark:focus:border-purple-500 transition-all duration-300 font-mono"
+                placeholder="••••••••"
+              />
+            </motion.div>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              whileHover={!loading && !message ? { scale: 1.02, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" } : {}}
+              whileTap={!loading && !message ? { scale: 0.98 } : {}}
+              type="submit"
+              disabled={loading || !!message}
+              className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-gaming font-semibold rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out font-mono tracking-wide"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Salvando...
+                </span>
+              ) : message ? (
+                <span className="flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Senha Atualizada!
+                </span>
+              ) : (
+                <span className="flex items-center justify-center">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Salvar Nova Senha
+                </span>
+              )}
+            </motion.button>
           </form>
-        </div>
+
+          {!message && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              className="mt-8 text-center"
+            >
+              <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary font-mono">
+                Senha deve ter pelo menos 6 caracteres
+              </p>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
   );

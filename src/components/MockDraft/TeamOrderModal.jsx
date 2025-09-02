@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Shuffle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { X, Shuffle, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 
 const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) => {
   const [tempOrder, setTempOrder] = useState([]);
@@ -46,16 +46,6 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
     }
   }, [isOpen, currentDraftOrder]);
 
-  const moveTeam = (fromIndex, toIndex) => {
-    if (fromIndex === toIndex) return;
-    
-    const newOrder = [...tempOrder];
-    const [movedTeam] = newOrder.splice(fromIndex, 1);
-    newOrder.splice(toIndex, 0, movedTeam);
-    
-    setTempOrder(newOrder);
-  };
-
   const shuffleOrder = () => {
     const shuffled = [...tempOrder];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -95,7 +85,7 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
                   Ordem dos Times no Draft
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mt-1">
-                  Use os seletores para reordenar os times
+                  Arraste e solte os times para reordenar
                 </p>
               </div>
               <button 
@@ -127,13 +117,25 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
               </motion.button>
             </div>
 
-            {/* Team List */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-96 overflow-y-auto">
+            {/* Team List with Drag and Drop */}
+            <Reorder.Group 
+              axis="y" 
+              values={tempOrder} 
+              onReorder={setTempOrder}
+              className="space-y-2 mb-6 max-h-96 overflow-y-auto"
+            >
               {tempOrder.map((team, index) => (
-                <motion.div
-                  key={`${team}-${index}`}
-                  layout
-                  className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-lg border border-gray-200 dark:border-gray-600"
+                <Reorder.Item
+                  key={team.pick}
+                  value={team}
+                  className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-lg border border-gray-200 dark:border-gray-600 cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
+                  whileDrag={{ 
+                    scale: 1.02, 
+                    rotate: 1,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+                    zIndex: 10
+                  }}
+                  dragTransition={{ bounceStiffness: 600, bounceDamping: 10 }}
                 >
                   <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                     {index + 1}
@@ -141,29 +143,19 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
                   
                   <div className="flex-1 min-w-0">
                     <div className="font-gaming font-bold text-sm text-gray-900 dark:text-white">
-                      {team}
+                      {team.team}
                     </div>
                     <div className="text-xs text-gray-600 dark:text-gray-300 truncate">
-                      {teamFullNames[team] || team}
+                      {teamFullNames[team.team] || team.team}
                     </div>
                   </div>
 
-                  <div className="flex gap-1">
-                    <select
-                      value={index}
-                      onChange={(e) => moveTeam(index, parseInt(e.target.value))}
-                      className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      {tempOrder.map((_, i) => (
-                        <option key={i} value={i}>
-                          #{i + 1}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="flex-shrink-0 text-gray-400 dark:text-gray-500">
+                    <GripVertical className="h-5 w-5" />
                   </div>
-                </motion.div>
+                </Reorder.Item>
               ))}
-            </div>
+            </Reorder.Group>
 
             {/* Footer */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-super-dark-border">
@@ -179,7 +171,12 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
-                  onConfirmOrder(tempOrder);
+                  // Recriar a ordem com os picks atualizados baseados na nova posição
+                  const newOrder = tempOrder.map((team, index) => ({
+                    ...team,
+                    pick: index + 1
+                  }));
+                  onConfirmOrder(newOrder);
                   onClose();
                 }}
                 className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"

@@ -176,6 +176,9 @@ const Watchlist = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white shadow-lg overflow-hidden rounded-xl group transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] cursor-pointer"
+        whileHover={{
+          boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
+        }}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
@@ -216,9 +219,8 @@ const Watchlist = () => {
                 >
                   <Heart className="h-6 md:h-8 w-6 md:w-8 text-yellow-300 mr-2 md:mr-3 fill-current" />
                 </motion.div>
-                <span className="flex items-center flex-wrap gap-1">
-                  Minha <span className="text-yellow-300">Watchlist</span>
-                </span>
+                <span>Meus</span>
+                <span className="text-yellow-300 ml-3">Favoritos</span>
               </motion.h1>
               
               <motion.p 

@@ -20,7 +20,7 @@ const About = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl p-8 md:p-12 mb-12 overflow-hidden group"
+          className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-2xl shadow-2xl p-8 md:p-12 mb-12 overflow-hidden group"
         >
           {/* Animated Background Pattern */}
           <div 
@@ -67,7 +67,7 @@ const About = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight"
+              className="text-3xl md:text-5xl lg:text-6xl font-gaming font-extrabold mb-4 leading-tight font-mono tracking-wide"
             >
               <span className="block">Sobre o</span> 
               <span className="text-yellow-300 drop-shadow-lg">prospect</span>Radar
@@ -116,7 +116,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-3xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300"
+                className="text-3xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300 font-mono tracking-wide"
               >
                 🇧🇷 Nossa Missão
               </motion.h2>
@@ -172,15 +172,15 @@ const About = () => {
               <Activity className="w-8 h-8" />
             </motion.div>
             
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300">
+            <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300 font-mono tracking-wide">
               Radar Score Inteligente
             </h3>
             <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors duration-300">
-              Nosso algoritmo exclusivo avalia o potencial de cada prospecto usando IA, combinando estatísticas avançadas, 
-              atributos físicos e fatores de desenvolvimento.
+              Nosso algoritmo exclusivo avalia o potencial de cada prospecto usando métricas condizentes com o basquete moderno, combinando estatísticas básicas, avançadas, 
+              atributos físicos, habilidades e fatores de desenvolvimento.
             </p>
             <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
-              Validado com 15+ anos de dados históricos da NBA
+              Validado com dados históricos da NBA
             </div>
           </motion.div>
 
@@ -209,11 +209,11 @@ const About = () => {
               <Database className="w-8 h-8" />
             </motion.div>
             
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300">
+            <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300 font-mono tracking-wide">
               Base de Dados Completa
             </h3>
             <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors duration-300">
-              Dados curados de fontes confiáveis como ESPN, 247Sports e Basketball Reference, 
+              Centraliza informações com dados curados e extraidos de diversas fontes confiáveis como ESPN, 247Sports, RealGM e Basketball Reference, 
               com foco especial em talentos brasileiros e internacionais.
             </p>
             <div className="text-sm text-green-600 dark:text-green-400 font-semibold">
@@ -246,7 +246,7 @@ const About = () => {
               <BarChart3 className="w-8 h-8" />
             </motion.div>
             
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+            <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300 font-mono tracking-wide">
               Análise Avançada
             </h3>
             <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors duration-300">
@@ -283,16 +283,14 @@ const About = () => {
               <Heart className="w-8 h-8" />
             </motion.div>
             
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors duration-300">
+            <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors duration-300 font-mono tracking-wide">
               Para a Comunidade
             </h3>
             <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors duration-300">
-              Criado por brasileiros para a comunidade global de basquete, com destaque especial 
+              Criado por brasileiros com a comunidade brasileira de basquete em mente, com destaque especial 
               para talentos nacionais e acesso totalmente gratuito.
             </p>
-            <div className="text-sm text-orange-600 dark:text-orange-400 font-semibold">
-              100% gratuito e open source
-            </div>
+            
           </motion.div>
         </motion.div>
 
@@ -330,9 +328,9 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-3xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300"
+                className="text-3xl font-gaming font-bold text-slate-900 dark:text-white mb-4 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300 font-mono tracking-wide"
               >
-                Para Quem é o prospectRadar?
+                Para quem é o prospectRadar?
               </motion.h2>
             </div>
 
@@ -348,21 +346,21 @@ const About = () => {
               {[
                 {
                   icon: Heart,
-                  title: "Fãs de Basquete",
+                  title: "Fãs de basquete",
                   description: "Para quem ama acompanhar o surgimento de novos talentos e quer entender melhor o processo de scouting",
                   features: ["Análises detalhadas", "Comparações visuais", "Mock drafts personalizados"],
                   color: "red"
                 },
                 {
                   icon: TrendingUp,
-                  title: "Scouts e Analistas",
+                  title: "Scouts e analistas",
                   description: "Uma ferramenta poderosa para otimizar o processo de scouting profissional",
                   features: ["Dados agregados", "Métricas avançadas", "Relatórios exportáveis"],
                   color: "blue"
                 },
                 {
                   icon: Star,
-                  title: "Jogadores e Treinadores",
+                  title: "Jogadores e treinadores",
                   description: "Para entender o cenário competitivo e identificar pontos de melhoria",
                   features: ["Benchmarking", "Análise posicional", "Feedback contextual"],
                   color: "green"
@@ -409,7 +407,7 @@ const About = () => {
                   
                   <div className="relative z-10">
                     <h3 className={`
-                      text-xl font-semibold mb-3 transition-colors duration-300
+                      text-xl font-gaming font-semibold mb-3 transition-colors duration-300 font-mono tracking-wide
                       text-slate-900 dark:text-white
                       ${audience.color === 'red' ? 'group-hover/card:text-red-700 dark:group-hover/card:text-red-300' : ''}
                       ${audience.color === 'blue' ? 'group-hover/card:text-blue-700 dark:group-hover/card:text-blue-300' : ''}
@@ -459,7 +457,7 @@ const About = () => {
             <span className="text-2xl">🇧🇷🏀</span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
-            Algoritmo validado historicamente com classes de draft NBA 2018-2023
+            Algoritmo validado historicamente com classes de draft anteriores
           </p>
         </motion.div>
       </div>

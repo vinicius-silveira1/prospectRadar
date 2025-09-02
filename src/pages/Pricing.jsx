@@ -90,7 +90,7 @@ const Pricing = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-2xl p-6 md:p-8 mb-12 overflow-hidden group"
+          className="relative bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white rounded-2xl shadow-2xl p-6 md:p-8 mb-12 overflow-hidden group"
         >
           {/* Animated Background Pattern */}
           <div 
@@ -137,7 +137,7 @@ const Pricing = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight"
+              className="text-2xl md:text-4xl lg:text-5xl font-gaming font-extrabold mb-3 leading-tight font-mono tracking-wide"
             >
               <span className="block">Planos</span> 
               <span className="text-yellow-300 drop-shadow-lg">prospect</span>Radar
@@ -170,7 +170,7 @@ const Pricing = () => {
                 <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </motion.div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200">
+                <h3 className="text-lg font-gaming font-semibold text-orange-800 dark:text-orange-200 font-mono tracking-wide">
                   🚧 Modo de Desenvolvimento Ativo
                 </h3>
                 <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
@@ -223,7 +223,7 @@ const Pricing = () => {
                   <Star className="h-8 w-8 text-slate-600 dark:text-slate-300" />
                 </motion.div>
                 <div className="ml-4">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300">
+                  <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300 font-mono tracking-wide">
                     Free
                   </h3>
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -271,8 +271,7 @@ const Pricing = () => {
                         </motion.div>
                       )}
                     </div>
-                    <div className="ml-3 flex items-center">
-                      <feature.icon className={`h-4 w-4 mr-2 ${feature.available ? 'text-slate-600 dark:text-slate-400' : 'text-red-400 dark:text-red-500'}`} />
+                    <div className="ml-3">
                       <p className={`text-sm leading-relaxed ${feature.available ? 'text-slate-700 dark:text-slate-300' : 'text-red-500 dark:text-red-400 line-through'}`}>
                         {feature.text}
                       </p>
@@ -330,7 +329,7 @@ const Pricing = () => {
                     <Crown className="h-8 w-8 text-white" />
                   </motion.div>
                   <div className="ml-4">
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
+                    <h3 className="text-2xl font-gaming font-bold text-slate-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300 font-mono tracking-wide">
                       Plano Scout
                     </h3>
                     <p className="text-sm font-medium text-purple-600 dark:text-purple-400">
@@ -350,7 +349,7 @@ const Pricing = () => {
                     repeat: Infinity, 
                     ease: "easeInOut" 
                   }}
-                  className="px-4 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold tracking-wide rounded-full shadow-lg flex items-center gap-1"
+                  className="px-4 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-gaming font-bold tracking-wide rounded-full shadow-lg flex items-center gap-1 font-mono"
                 >
                   <Sparkles className="w-3 h-3" />
                   Mais Popular
@@ -395,8 +394,7 @@ const Pricing = () => {
                           <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                         </motion.div>
                       </div>
-                      <div className="ml-3 flex items-center">
-                        <feature.icon className="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
+                      <div className="ml-3">
                         <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                           {feature.text}
                         </p>
@@ -426,7 +424,7 @@ const Pricing = () => {
                       type="button"
                       onClick={handleUpgrade}
                       disabled={processingUpgrade || loading}
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-6 rounded-xl text-center font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-6 rounded-xl text-center font-gaming font-bold shadow-xl transition-all duration-300 flex items-center justify-center gap-3 font-mono tracking-wide"
                     >
                       {processingUpgrade ? (
                         <>

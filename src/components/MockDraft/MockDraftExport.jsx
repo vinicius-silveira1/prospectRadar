@@ -91,9 +91,9 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
 
   const renderRound = (round, title) => (
     <div key={title} className="relative mb-6">
-      {/* Section Header Simplificado */}
-      <div className="bg-gray-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
-        <h3 className="text-2xl font-bold text-gray-800 text-center">
+      {/* Section Header Limpo */}
+      <div className="bg-gray-50 border-l-4 border-orange-500 p-3 mb-4 rounded">
+        <h3 className="text-3xl font-bold text-gray-800 text-center">
           {title}
         </h3>
       </div>
@@ -102,10 +102,12 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       <div className="grid grid-cols-2 gap-6">
         {round.map((pick) => (
           <div key={pick.pick} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start space-x-3">
-              {/* Pick Number */}
-              <div className="w-12 h-12 flex items-center justify-center font-bold text-white text-lg bg-blue-600 rounded-lg flex-shrink-0">
-                {pick.pick}
+            <div className="flex items-center space-x-4">
+              {/* Pick Number - Solto, Sem Container */}
+              <div className="flex-shrink-0">
+                <span className="font-bold text-orange-600 text-3xl">
+                  {pick.pick}
+                </span>
               </div>
               
               {/* Team Logo */}
@@ -113,35 +115,20 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                 <img src={getTeamLogo(pick.team)} alt={pick.team} className="w-10 h-10 object-contain" />
               </div>
               
-              {/* Prospect Info */}
+              {/* Prospect Info - Apenas Nome */}
               <div className="flex-1 min-w-0">
                 {pick.prospect ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        <ProspectImage prospect={pick.prospect} />
-                      </div>
-                      <div className="flex-grow">
-                        <p className="font-bold text-base text-gray-900 leading-tight">
-                          {pick.prospect.name}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="ml-15 space-y-1">
-                      <div className="text-blue-600 font-semibold text-sm">
-                        {pick.prospect.position}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        {pick.prospect.high_school_team}
-                      </div>
+                  <div className="flex items-center">
+                    {/* Nome Principal */}
+                    <div className="flex-1">
+                      <h3 className="font-bold text-3xl text-gray-900 leading-tight">
+                        {pick.prospect.name}
+                      </h3>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-gray-400 font-bold">?</span>
-                    </div>
-                    <p className="text-gray-400 italic text-sm">Seleção em aberto</p>
+                  <div className="flex items-center">
+                    <p className="text-gray-400 italic text-xl font-medium">Seleção em aberto</p>
                   </div>
                 )}
               </div>
@@ -161,28 +148,28 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       }}></div>
       
       {/* Corner Accents Simples */}
-      <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-blue-500"></div>
-      <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-blue-500"></div>
+      <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-gray-300"></div>
+      <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-gray-300"></div>
 
-      {/* Header Simplificado */}
-      <header className="relative z-10 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-lg mb-6 shadow-lg">
+      {/* Header Limpo */}
+      <header className="relative z-10 bg-white border-b-2 border-gray-200 p-6 mb-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <img src="/logo.png" alt="ProspectRadar Logo" className="w-16 h-16 mr-4" />
             <div>
               <h1 className="text-3xl font-bold mb-1">
-                <span className="text-orange-300">prospect</span>
-                <span className="text-white">Radar</span>
+                <span className="text-orange-500">prospect</span>
+                <span className="text-gray-800">Radar</span>
               </h1>
-              <p className="text-blue-100 text-lg">Mock Draft Profissional</p>
+              <p className="text-gray-600 text-lg">Mock Draft Profissional</p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-yellow-300 mb-1">
+            <div className="text-2xl font-bold text-gray-800 mb-1">
               DRAFT {settings.draftClass}
             </div>
-            <div className="bg-black/20 px-3 py-1 rounded">
-              <p className="text-sm text-gray-200">GERADO EM: {new Date().toLocaleDateString('pt-BR')}</p>
+            <div className="bg-gray-100 px-3 py-1 rounded">
+              <p className="text-sm text-gray-600">GERADO EM: {new Date().toLocaleDateString('pt-BR')}</p>
             </div>
           </div>
         </div>
@@ -193,10 +180,11 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
         {shouldRenderSecondRound && renderRound(secondRound, "SEGUNDA RODADA")}
       </section>
 
-      {/* Footer Simplificado */}
-      <footer className="relative z-10 bg-gray-50 border-t-2 border-blue-500 text-center p-4 rounded-lg">
+      {/* Footer Limpo */}
+      <footer className="relative z-10 bg-white border-t-2 border-gray-200 text-center p-4">
         <div className="mb-2">
-          <span className="text-xl font-bold text-blue-600">prospectRadar</span>
+          <span className="text-xl font-bold text-orange-500">prospect</span>
+          <span className="text-xl font-bold text-gray-800">Radar</span>
           <span className="text-gray-600 ml-2">• Análise Profissional de Prospects</span>
         </div>
         <div className="text-sm text-gray-500">

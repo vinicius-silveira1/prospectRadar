@@ -5,130 +5,173 @@ import { Wrench, ArrowLeft, Sparkles } from 'lucide-react';
 
 const ComingSoon = ({ title, message }) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] text-center relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
-        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <pattern id="comingSoonPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-            <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#comingSoonPattern)" />
-        </svg>
-      </div>
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-orange/5 via-transparent to-brand-purple/5" />
-
-      <motion.div 
-        className="bg-gradient-to-br from-white to-slate-50 dark:from-super-dark-primary dark:to-super-dark-secondary p-8 md:p-12 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl max-w-2xl mx-4 relative z-10"
-        initial={{ opacity: 0, y: 20 }}
+    <div className="min-h-screen bg-slate-50 dark:bg-super-dark-primary">
+      {/* Banner com estilo gaming */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 mb-8"
+        whileHover={{
+          boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
+        }}
       >
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] animate-pulse rounded-2xl" style={{ animation: 'shimmer 3s infinite linear' }} />
+        {/* Particles de fundo */}
+        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+          <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
+          <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
+          <div className="absolute bottom-6 left-16 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-400 rounded-full animate-pulse delay-700 group-hover:animate-bounce"></div>
+          <div className="absolute bottom-4 right-6 w-2 h-2 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-500 group-hover:animate-ping"></div>
+        </div>
         
-        <motion.div 
-          className="bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/50 dark:to-orange-900/50 text-yellow-700 dark:text-yellow-300 p-6 rounded-2xl mb-8 relative overflow-hidden"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-        >
-          {/* Icon background shimmer */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-200/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
-          
+        {/* Grid de fundo */}
+        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
+          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}></div>
+        
+        <div className="relative z-10 text-center">
           <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex items-center justify-center mb-4"
+          >
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.05, 1]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="mr-3"
+            >
+              <Wrench className="h-8 w-8 text-yellow-300" />
+            </motion.div>
+            <h1 className="text-2xl sm:text-3xl font-gaming font-bold font-mono tracking-wide">
+              {title.split('(')[0]}<span className="text-yellow-300">{title.includes('(') ? ` ${title.split('(')[1]}` : ''}</span>
+            </h1>
+          </motion.div>
+          
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wide"
+          >
+            ➤ Em desenvolvimento - volte em breve
+          </motion.p>
+        </div>
+      </motion.div>
+
+      {/* Conteúdo centralizado */}
+      <div className="flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="max-w-2xl w-full bg-white dark:bg-super-dark-secondary p-8 rounded-2xl shadow-2xl dark:shadow-super-dark-primary/50 border border-slate-200 dark:border-super-dark-border text-center"
+        >
+          {/* Ícone de construção */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
+            className="mx-auto w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mb-8 border-2 border-yellow-500"
+          >
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                scale: [1, 1.05, 1]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+            >
+              <Wrench className="w-10 h-10 text-yellow-600 dark:text-yellow-300" />
+            </motion.div>
+          </motion.div>
+
+          {/* Mensagem principal */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mb-8"
+          >
+            <h2 className="text-2xl md:text-3xl font-gaming font-bold font-mono tracking-wide text-slate-900 dark:text-super-dark-text-primary mb-4">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Funcionalidade
+              </span>
+              <motion.span
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="ml-2 text-yellow-500"
+              >
+                ✨
+              </motion.span>
+            </h2>
+            <p className="text-sm md:text-base text-slate-600 dark:text-super-dark-text-secondary font-mono leading-relaxed">
+              ➤ {message}
+            </p>
+          </motion.div>
+
+          {/* Botão de retorno */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <Link
+              to="/"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-gaming font-semibold rounded-lg shadow-lg transition-all duration-300 ease-in-out font-mono tracking-wide relative overflow-hidden group"
+            >
+              {/* Hover shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+              
+              <ArrowLeft className="h-5 w-5 mr-3 relative z-10" />
+              <span className="relative z-10">Voltar para o Dashboard</span>
+            </Link>
+          </motion.div>
+
+          {/* Elementos flutuantes */}
+          <motion.div
+            className="absolute top-4 right-4 text-blue-600/20 dark:text-purple-400/20"
             animate={{ 
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.05, 1]
+              y: [0, -10, 0],
+              rotate: [0, 5, -5, 0]
             }}
             transition={{ 
-              duration: 4, 
+              duration: 6, 
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="relative z-10"
           >
-            <Wrench className="h-16 w-16 mx-auto" />
+            <Sparkles className="h-6 w-6" />
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-4 left-4 text-purple-600/20 dark:text-blue-400/20"
+            animate={{ 
+              y: [0, 10, 0],
+              rotate: [0, -5, 5, 0]
+            }}
+            transition={{ 
+              duration: 5, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 1
+            }}
+          >
+            <Sparkles className="h-4 w-4" />
           </motion.div>
         </motion.div>
-
-        <motion.h1 
-          className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-800 dark:text-white mb-4 tracking-tight"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <span className="bg-gradient-to-r from-brand-orange to-brand-purple bg-clip-text text-transparent">
-            {title}
-          </span>
-          <motion.span
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="ml-2"
-          >
-            ✨
-          </motion.span>
-        </motion.h1>
-
-        <motion.p 
-          className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-lg mx-auto mb-10 leading-relaxed"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          {message}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Link
-            to="/"
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-brand-purple to-brand-orange text-white font-bold rounded-xl hover:from-brand-purple/90 hover:to-brand-orange/90 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden group"
-          >
-            {/* Hover shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-            
-            <ArrowLeft className="h-5 w-5 mr-3 relative z-10" />
-            <span className="relative z-10">Voltar para o Dashboard</span>
-          </Link>
-        </motion.div>
-
-        {/* Floating elements */}
-        <motion.div
-          className="absolute top-4 right-4 text-brand-purple/20"
-          animate={{ 
-            y: [0, -10, 0],
-            rotate: [0, 5, -5, 0]
-          }}
-          transition={{ 
-            duration: 6, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-        >
-          <Sparkles className="h-6 w-6" />
-        </motion.div>
-
-        <motion.div
-          className="absolute bottom-4 left-4 text-brand-orange/20"
-          animate={{ 
-            y: [0, 10, 0],
-            rotate: [0, -5, 5, 0]
-          }}
-          transition={{ 
-            duration: 5, 
-            repeat: Infinity, 
-            ease: "easeInOut",
-            delay: 1
-          }}
-        >
-          <Sparkles className="h-4 w-4" />
-        </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };

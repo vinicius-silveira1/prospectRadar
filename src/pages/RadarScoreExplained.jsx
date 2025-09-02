@@ -65,7 +65,7 @@ const RadarScoreExplained = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 dark:from-blue-800 dark:via-purple-800 dark:to-indigo-900 p-8 md:p-12 mb-12 shadow-2xl"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark p-8 md:p-12 mb-12 shadow-2xl"
         >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
@@ -83,7 +83,7 @@ const RadarScoreExplained = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-4xl md:text-6xl font-bold text-white mb-4"
+              className="text-4xl md:text-6xl font-gaming font-bold text-white mb-4 font-mono tracking-wide"
             >
               Entenda o <span className="text-yellow-300">Radar Score</span>
             </motion.h1>
@@ -143,7 +143,7 @@ const RadarScoreExplained = () => {
                 </motion.div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors duration-300">
+                    <h3 className="text-xl font-gaming font-bold text-slate-900 dark:text-white group-hover:text-slate-800 dark:group-hover:text-slate-100 transition-colors duration-300 font-mono tracking-wide">
                       {pillar.title}
                     </h3>
                     <motion.span 
@@ -220,9 +220,9 @@ const RadarScoreExplained = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-3xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300"
+                className="text-3xl font-gaming font-bold text-slate-900 dark:text-white mb-2 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300 font-mono tracking-wide"
               >
-                Inteligência Artificial e Ajustes Contextuais
+                Ajustes Contextuais
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -231,7 +231,7 @@ const RadarScoreExplained = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors duration-300"
               >
-                O Radar Score vai além das estatísticas básicas, utilizando IA para contextualizar o desempenho
+                O Radar Score vai além das estatísticas básicas, utilizando ajustes contextuais para capturar cada nuance dos diferentes níveis de competição e arquétipos físicos
               </motion.p>
             </div>
 
@@ -261,11 +261,11 @@ const RadarScoreExplained = () => {
                   <ShieldCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </motion.div>
                 <div className="relative z-10">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-blue-700 dark:group-hover/card:text-blue-300 transition-colors duration-300">
+                  <h3 className="text-lg font-gaming font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-blue-700 dark:group-hover/card:text-blue-300 transition-colors duration-300 font-mono tracking-wide">
                     Nível de Competição
                   </h3>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed group-hover/card:text-slate-700 dark:group-hover/card:text-slate-200 transition-colors duration-300">
-                    O algoritmo ajusta pontuações baseado na força da liga. Desempenho na EuroLeague, NCAA Power 5, ou NBB tem maior peso que ligas amadoras.
+                    O algoritmo ajusta pontuações baseado na força da liga. Desempenho em ligas profissionais como EuroLeague e NBB, e em conferências Power 5 da NCAA tem maior peso que ligas de ensino médio ou amadoras.
                   </p>
                 </div>
               </motion.div>
@@ -294,11 +294,11 @@ const RadarScoreExplained = () => {
                   <Activity className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </motion.div>
                 <div className="relative z-10">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-purple-700 dark:group-hover/card:text-purple-300 transition-colors duration-300">
+                  <h3 className="text-lg font-gaming font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-purple-700 dark:group-hover/card:text-purple-300 transition-colors duration-300 font-mono tracking-wide">
                     Potencial vs Confiança
                   </h3>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed group-hover/card:text-slate-700 dark:group-hover/card:text-slate-200 transition-colors duration-300">
-                    O <strong>Radar Score</strong> mostra potencial máximo, enquanto o <strong>Confidence Score</strong> indica confiabilidade dos dados baseado no volume de jogos analisados.
+                    O <strong>Radar Score</strong> mostra potencial máximo, enquanto o <strong>Confidence Score</strong> indica confiabilidade dos dados baseado no volume de jogos analisados. Jogadores com poucos jogos, devido a ínicio de temporada ou lesões, tem um Confidence Score menor.
                   </p>
                 </div>
               </motion.div>
@@ -327,11 +327,11 @@ const RadarScoreExplained = () => {
                   <Eye className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </motion.div>
                 <div className="relative z-10">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-green-700 dark:group-hover/card:text-green-300 transition-colors duration-300">
+                  <h3 className="text-lg font-gaming font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-green-700 dark:group-hover/card:text-green-300 transition-colors duration-300 font-mono tracking-wide">
                     Análise Posicional
                   </h3>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed group-hover/card:text-slate-700 dark:group-hover/card:text-slate-200 transition-colors duration-300">
-                    Atributos são avaliados considerando a posição do jogador. Um armador de 1,85m pode ter score alto, enquanto um pivô da mesma altura seria penalizado.
+                    Atributos são avaliados considerando a posição do jogador. Um armador de 1,95m pode ter score alto, enquanto um pivô da mesma altura seria penalizado.
                   </p>
                 </div>
               </motion.div>
@@ -360,11 +360,11 @@ const RadarScoreExplained = () => {
                   <Sparkles className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </motion.div>
                 <div className="relative z-10">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-orange-700 dark:group-hover/card:text-orange-300 transition-colors duration-300">
+                  <h3 className="text-lg font-gaming font-semibold text-slate-900 dark:text-white mb-2 group-hover/card:text-orange-700 dark:group-hover/card:text-orange-300 transition-colors duration-300 font-mono tracking-wide">
                     Validação Histórica
                   </h3>
                   <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed group-hover/card:text-slate-700 dark:group-hover/card:text-slate-200 transition-colors duration-300">
-                    O modelo foi treinado com dados de 15+ anos de draft da NBA, correlacionando scores de prospect com sucesso profissional real.
+                    O algoritmo do Radar Score foi treinado com dados de 15+ anos de draft da NBA, correlacionando scores de prospect com sucesso profissional real.
                   </p>
                 </div>
               </motion.div>
@@ -386,8 +386,8 @@ const RadarScoreExplained = () => {
             <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl mb-4">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Validação com a Classe de 2018
+            <h2 className="text-3xl font-gaming font-bold text-slate-900 dark:text-white mb-2 font-mono tracking-wide">
+              Classe de 2018
             </h2>
             <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
               Veja como o Radar Score avaliou prospects de 2018 e como essas previsões se alinharam com o sucesso na NBA
@@ -452,7 +452,7 @@ const RadarScoreExplained = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-3xl font-bold mb-4 group-hover:text-yellow-100 transition-colors duration-300"
+              className="text-3xl font-gaming font-bold mb-4 group-hover:text-yellow-100 transition-colors duration-300 font-mono tracking-wide"
             >
               Mais que Estatísticas: Uma Visão Completa
             </motion.h2>

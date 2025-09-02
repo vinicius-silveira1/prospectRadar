@@ -51,11 +51,11 @@ const FeedbackWidget = () => {
         <motion.button
           whileHover={{ 
             scale: 1.1,
-            boxShadow: "0 0 25px rgba(168, 85, 247, 0.4)"
+            boxShadow: "0 0 25px rgba(59, 130, 246, 0.4)"
           }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-r from-brand-purple to-brand-orange text-white rounded-full p-4 shadow-2xl hover:shadow-purple-500/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-purple transition-all duration-300 backdrop-blur-sm border border-white/20 relative overflow-hidden group"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full p-4 shadow-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 backdrop-blur-sm border border-blue-500/20 relative overflow-hidden group"
         >
           {/* Hover shimmer effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -78,22 +78,20 @@ const FeedbackWidget = () => {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="relative bg-gradient-to-b from-white to-slate-50 dark:from-super-dark-primary dark:to-super-dark-secondary rounded-2xl shadow-2xl w-full max-w-md border border-slate-200/60 dark:border-super-dark-border/60 backdrop-blur-xl overflow-hidden"
             >
-              {/* Background Pattern */}
+              {/* Gaming grid background */}
               <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <pattern id="feedbackPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <polygon points="10,2 18,7 18,15 10,20 2,15 2,7" fill="currentColor" className="text-brand-purple/20" />
-                  </pattern>
-                  <rect width="100%" height="100%" fill="url(#feedbackPattern)" />
-                </svg>
+                <div className="absolute inset-0 opacity-10 transition-opacity duration-300" style={{
+                  backgroundImage: 'linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)',
+                  backgroundSize: '20px 20px'
+                }}></div>
               </div>
 
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-orange/5 via-transparent to-brand-purple/5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-purple-600/5" />
 
               <motion.button 
                 onClick={() => setIsOpen(false)} 
-                className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="absolute top-4 right-4 z-20 p-2 rounded-xl bg-white/80 dark:bg-super-dark-primary/80 backdrop-blur-sm text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl border border-slate-200 dark:border-super-dark-border"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -102,7 +100,7 @@ const FeedbackWidget = () => {
 
               <div className="p-6 relative z-10">
                 <motion.h3 
-                  className="text-xl font-black text-slate-900 dark:text-white mb-6 tracking-tight"
+                  className="text-xl font-gaming font-bold font-mono tracking-wide text-slate-900 dark:text-white mb-6"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
@@ -124,8 +122,8 @@ const FeedbackWidget = () => {
                     >
                       <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                     </motion.div>
-                    <p className="font-bold text-slate-800 dark:text-slate-200 text-lg">Obrigado! 🎉</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">Seu feedback foi enviado com sucesso.</p>
+                    <p className="font-gaming font-bold text-slate-800 dark:text-slate-200 text-lg font-mono">Obrigado! 🎉</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 font-mono">➤ Seu feedback foi enviado com sucesso</p>
                   </motion.div>
                 ) : (
                   <motion.form 
@@ -135,11 +133,11 @@ const FeedbackWidget = () => {
                     transition={{ delay: 0.2 }}
                   >
                     <div className="mb-4">
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Tipo de Feedback</label>
+                      <label className="block text-sm font-gaming font-medium text-slate-700 dark:text-slate-300 mb-3 font-mono">Tipo de Feedback</label>
                       <select 
                         value={feedbackType} 
                         onChange={(e) => setFeedbackType(e.target.value)}
-                        className="w-full p-3 bg-white/80 dark:bg-super-dark-primary/80 border border-slate-200 dark:border-super-dark-border rounded-xl focus:ring-2 focus:ring-brand-purple focus:border-brand-purple backdrop-blur-sm transition-all duration-300"
+                        className="w-full p-3 bg-slate-50 dark:bg-super-dark-primary border-2 border-slate-300 dark:border-super-dark-border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-purple-500 dark:focus:border-purple-500 backdrop-blur-sm transition-all duration-300 font-mono"
                       >
                         <option value="suggestion">💡 Sugestão de Melhoria</option>
                         <option value="bug">🐛 Relatar um Bug</option>
@@ -148,13 +146,13 @@ const FeedbackWidget = () => {
                     </div>
 
                     <div className="mb-6">
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Mensagem</label>
+                      <label className="block text-sm font-gaming font-medium text-slate-700 dark:text-slate-300 mb-3 font-mono">Mensagem</label>
                       <textarea 
                         value={message} 
                         onChange={(e) => setMessage(e.target.value)}
                         rows="4" 
                         placeholder="Como podemos melhorar o prospectRadar? 🚀"
-                        className="w-full p-3 bg-white/80 dark:bg-super-dark-primary/80 border border-slate-200 dark:border-super-dark-border rounded-xl focus:ring-2 focus:ring-brand-purple focus:border-brand-purple backdrop-blur-sm transition-all duration-300 resize-none"
+                        className="w-full p-3 bg-slate-50 dark:bg-super-dark-primary border-2 border-slate-300 dark:border-super-dark-border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-purple-500 dark:focus:border-purple-500 backdrop-blur-sm transition-all duration-300 resize-none font-mono"
                         required
                       />
                     </div>
@@ -166,28 +164,28 @@ const FeedbackWidget = () => {
                         animate={{ opacity: 1, x: 0 }}
                       >
                         <AlertTriangle size={16} />
-                        <span>Ocorreu um erro. Tente novamente.</span>
+                        <span className="font-mono">Ocorreu um erro. Tente novamente.</span>
                       </motion.div>
                     )}
 
                     <motion.button 
                       type="submit" 
                       disabled={status === 'sending'}
-                      className="w-full bg-gradient-to-r from-brand-purple to-brand-orange text-white font-bold py-3 px-4 rounded-xl hover:from-brand-purple/90 hover:to-brand-orange/90 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl relative overflow-hidden group"
-                      whileHover={{ scale: 1.02, y: -2 }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-gaming font-semibold rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out py-3 px-4 relative overflow-hidden group font-mono tracking-wide"
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
                       whileTap={{ scale: 0.98 }}
                     >
                       {/* Hover shimmer effect */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
                       
                       {status === 'sending' ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent relative z-10"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent relative z-10 mx-auto"></div>
                       ) : (
-                        <Send size={18} className="relative z-10" />
+                        <div className="flex items-center justify-center relative z-10">
+                          <Send size={18} className="mr-2" />
+                          <span>Enviar Feedback</span>
+                        </div>
                       )}
-                      <span className="relative z-10">
-                        {status === 'sending' ? 'Enviando...' : 'Enviar Feedback'}
-                      </span>
                     </motion.button>
                   </motion.form>
                 )}
