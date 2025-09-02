@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock, Crown } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
@@ -35,20 +35,39 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
   
   return (
     <div className="relative">
-      <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
-        <Lock className="w-10 h-10 text-orange-500" />
-        <h3 className="mt-3 text-lg font-bold text-black dark:text-white text-center font-mono tracking-wide">
-          {title}
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
-          Tenha acesso completo a {featureName} no plano Scout.
-        </p>
-        <button 
-          onClick={() => navigate('/pricing')}
-          className="mt-4 px-5 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors"
-        >
-          Fazer Upgrade
-        </button>
+      <div className="absolute inset-0 bg-white/70 dark:bg-super-dark-secondary/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-6 border border-purple-200/30 dark:border-super-dark-border">
+        {/* Gaming background pattern */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none rounded-xl">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 51, 234, 0.1) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}></div>
+        </div>
+        
+        <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+            className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 mb-4 border-2 border-purple-500/50 dark:border-violet-500/50"
+          >
+            <Lock className="w-6 h-6 text-purple-600 dark:text-violet-400" />
+          </motion.div>
+          
+          <h3 className="text-lg font-gaming font-bold text-black dark:text-white mb-2 font-mono tracking-wide">
+            {title}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 font-mono">
+            ➤ Tenha acesso completo a {featureName} no plano Scout.
+          </p>
+          <button 
+            onClick={() => navigate('/pricing')}
+            className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-gaming font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-mono tracking-wide"
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Fazer Upgrade
+          </button>
+        </div>
       </div>
       <div className="opacity-20 blur-sm pointer-events-none">
         {children}

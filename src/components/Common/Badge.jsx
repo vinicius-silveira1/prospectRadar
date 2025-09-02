@@ -46,12 +46,12 @@ const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = f
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-full p-1 w-6 h-6 cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${colorClass} ${className}`}
+      className={`relative flex items-center justify-center rounded-full p-1 w-5 h-5 md:w-6 md:h-6 cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${colorClass} ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
-      <span className="text-base">{badge.icon}</span>
+      <span className="text-sm md:text-base">{badge.icon}</span>
     </div>
   );
 };

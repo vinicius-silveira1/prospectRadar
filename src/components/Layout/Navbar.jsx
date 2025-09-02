@@ -81,13 +81,13 @@ const Navbar = ({ onMenuClick }) => {
   }[breakpoint] || 'max-w-lg';
 
   const containerPadding = {
-    xs: 'px-2 py-2',
-    sm: 'px-3 py-2',
+    xs: 'px-2 py-1.5',
+    sm: 'px-2 py-1.5',
     md: 'px-3 py-2',
     lg: 'px-4 py-2',
     xl: 'px-4 py-2',
     '2xl': 'px-5 py-2'
-  }[breakpoint] || 'px-3 py-2';
+  }[breakpoint] || 'px-2 py-1.5';
 
   return (
     <motion.nav 

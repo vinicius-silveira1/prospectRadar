@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, ChevronDown, Zap, Star, Lock, X } from 'lucide-react';
+import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, ChevronDown, Zap, Star, Lock, X, Crown } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx'; // Import useAuth
@@ -33,20 +33,42 @@ const getAllAvailableBadges = (prospects) => {
 
 // Placeholder for Pro Features - Styled to match ProspectDetail
 const ProFeaturePlaceholder = ({ children, title, featureName }) => (
-  <div className="relative">
-    <div className="absolute inset-0 bg-white/60 dark:bg-super-dark-secondary/70 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4">
-      <Lock className="w-10 h-10 text-orange-500" />
-      <h3 className="mt-3 text-lg font-bold text-gray-800 dark:text-gray-200 text-center">
-        {title}
-      </h3>
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-center">
-        Tenha acesso completo a {featureName} no plano Scout.
-      </p>
-      <Link to="/pricing" className="mt-4 px-5 py-2 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-        Fazer Upgrade
-      </Link>
+  <div className="relative min-h-48 sm:min-h-64 md:min-h-80">
+    <div className="absolute inset-0 bg-white/70 dark:bg-super-dark-secondary/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4 sm:p-5 md:p-6 border border-purple-200/30 dark:border-super-dark-border">
+      {/* Gaming background pattern */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none rounded-xl">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 51, 234, 0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}></div>
+      </div>
+      
+      <div className="relative z-10 text-center">
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+          className="mx-auto flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 mb-3 sm:mb-4 border-2 border-purple-500/50 dark:border-violet-500/50"
+        >
+          <Lock className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 text-purple-600 dark:text-violet-400" />
+        </motion.div>
+        
+        <h3 className="text-base sm:text-lg font-gaming font-bold text-gray-800 dark:text-gray-200 mb-2 font-mono tracking-wide">
+          {title}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 font-mono">
+          ➤ Tenha acesso completo a {featureName} no plano Scout.
+        </p>
+        <Link 
+          to="/pricing" 
+          className="inline-flex items-center px-4 sm:px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-gaming font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-mono tracking-wide text-sm"
+        >
+          <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
+          Fazer Upgrade
+        </Link>
+      </div>
     </div>
-    <div className="opacity-20 blur-sm pointer-events-none select-none">
+    <div className="opacity-20 blur-sm pointer-events-none select-none overflow-hidden max-h-48 sm:max-h-64 md:max-h-80">
       {children}
     </div>
   </div>
@@ -612,7 +634,7 @@ const Prospects = () => {
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(139, 92, 246, 0.15)",
                     transition: { duration: 0.3, type: "spring", stiffness: 300 } 
                   }}
-                  className="bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-lg border border-gray-200/50 dark:border-super-dark-border hover:border-purple-300/50 dark:hover:border-purple-700/50 backdrop-blur-sm transform transition-all duration-300 flex flex-col relative overflow-hidden group"
+                  className="bg-gradient-to-br from-white via-gray-50/50 to-white dark:from-super-dark-secondary dark:via-slate-800/50 dark:to-super-dark-secondary rounded-xl shadow-lg border border-gray-200/50 dark:border-super-dark-border backdrop-blur-sm transform transition-all duration-300 flex flex-col relative overflow-hidden group"
                 >
                   {/* Clickable area for card navigation */}
                   <div 
@@ -923,20 +945,20 @@ const Prospects = () => {
                       <div className="px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
                         <Link to={`/prospects/${prospect.id}`} className="block">
                           <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
-                            {/* Nome (col-span-2 no desktop) */}
-                            <div className="col-span-3 md:col-span-2 flex items-center space-x-4">
+                            {/* Nome (col-span-2 no mobile, col-span-2 no desktop) */}
+                            <div className="col-span-2 md:col-span-2 flex items-center space-x-4">
                               <div className="space-y-1">
                                 <div className="font-medium text-slate-900 dark:text-super-dark-text-primary font-mono tracking-wide">{prospect.name}</div>
                                 <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
                               </div>
                             </div>
 
-                            {/* Badges (col-span-3 no desktop, visível também no mobile) */}
-                            <div className="col-span-1 md:col-span-3 flex items-center">
+                            {/* Badges (col-span-1 no mobile para dar mais espaço, col-span-3 no desktop) */}
+                            <div className="col-span-1 md:col-span-3 flex items-start">
                               {badges.length > 0 ? (
-                                <div className="flex flex-wrap gap-1 badge-container">
-                                  {/* No desktop, mostrar todas as badges */}
-                                  {(isMobile ? badges.slice(0, 2) : badges).map((badge, index) => (
+                                <div className="flex flex-wrap gap-0.5 md:gap-1 badge-container max-w-full overflow-hidden items-center">
+                                  {/* No mobile, mostrar máximo 9 badges (3 linhas de ~3 badges cada), no desktop todas */}
+                                  {(isMobile ? badges.slice(0, 9) : badges).map((badge, index) => (
                                     <div
                                       key={index}
                                       onClick={(e) => {
@@ -946,19 +968,20 @@ const Prospects = () => {
                                       }}
                                       onMouseEnter={() => !isMobile && handleBadgeHover(prospect.id, badge)}
                                       onMouseLeave={() => !isMobile && handleBadgeHover(prospect.id, null)}
+                                      className="flex-shrink-0"
                                     >
                                       <Badge badge={badge} />
                                     </div>
                                   ))}
-                                  {/* Indicador de badges extras apenas no mobile */}
-                                  {isMobile && badges.length > 2 && (
-                                    <div className="flex items-center justify-center rounded-full p-1 w-6 h-6 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium" title={`+${badges.length - 2} mais badges`}>
-                                      +{badges.length - 2}
+                                  {/* Indicador de badges extras no mobile quando há mais de 9 */}
+                                  {isMobile && badges.length > 9 && (
+                                    <div className="flex items-center justify-center rounded-full p-1 w-5 h-5 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-xs font-medium flex-shrink-0 ml-0.5" title={`+${badges.length - 9} mais badges`}>
+                                      +{badges.length - 9}
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-slate-400 dark:text-slate-500 text-xs">Sem badges</span>
+                                <span className="text-slate-400 dark:text-slate-500 text-xs">-</span>
                               )}
                             </div>
 
