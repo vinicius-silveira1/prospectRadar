@@ -17,8 +17,26 @@ import ResetPassword from './pages/ResetPassword';
 import RadarScoreExplained from './pages/RadarScoreExplained';
 import Pricing from './pages/Pricing';
 import Success from './pages/Success';
-import Welcome from './pages/Welcome'; // Importe a página Welcome
-import OnboardingModal from './components/Onboarding/OnboardingModal'; // Importe o Onboarding
+import Welcome from './pages/Welcome'; 
+import OnboardingModal from './components/Onboarding/OnboardingModal'; 
+
+function GoogleAnalytics() {
+  useEffect(() => {
+    const GA_MEASUREMENT_ID = 'G-QQMMBJJP32 '; 
+    if (!window.gtag) {
+      const script = document.createElement('script');
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      script.async = true;
+      document.head.appendChild(script);
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', GA_MEASUREMENT_ID);
+    }
+  }, []);
+  return null;
+}
 
 function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -32,6 +50,7 @@ function App() {
 
   return (
     <>
+      <GoogleAnalytics />
       <OnboardingModal 
         show={showOnboarding} 
         onClose={() => setShowOnboarding(false)} 
