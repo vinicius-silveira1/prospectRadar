@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { X, Shuffle, GripVertical } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Shuffle, GripVertical, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { v4 as uuidv4 } from 'uuid';
 
 const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) => {
   const [tempOrder, setTempOrder] = useState([]);
+  const [initialOrder, setInitialOrder] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const listRef = useRef(null);
 
   // Team full names mapping
   const teamFullNames = {
@@ -39,10 +43,12 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
     'WAS': 'Washington Wizards',
   };
 
-  // Initialize temp order when modal opens
+  // Gera um id único e estável para cada item ao abrir o modal
   useEffect(() => {
     if (isOpen && currentDraftOrder) {
-      setTempOrder([...currentDraftOrder]);
+      const withIds = currentDraftOrder.map((item, idx) => ({ ...item, _orderId: item._orderId || `order-${idx}-${Date.now()}` }));
+      setTempOrder(withIds);
+      setInitialOrder(withIds);
     }
   }, [isOpen, currentDraftOrder]);
 
@@ -56,9 +62,21 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
   };
 
   const resetToOriginal = () => {
-    if (currentDraftOrder) {
-      setTempOrder([...currentDraftOrder]);
-    }
+    setTempOrder([...initialOrder]);
+  };
+
+  const handleSaveOrder = () => {
+    // Recriar a ordem com os picks atualizados baseados na nova posição
+    const newOrder = tempOrder.map((team, index) => ({
+      ...team,
+      pick: index + 1
+    }));
+    onConfirmOrder(newOrder);
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+      onClose();
+    }, 2000);
   };
 
   return (
@@ -75,9 +93,14 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-2xl p-6 w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-purple-200/20"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-2xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col border border-purple-200/20 relative"
           >
+            {/* Mensagem de instrução */}
+            <div className="mb-2 text-xs text-center text-slate-500 dark:text-super-dark-text-secondary">
+              Arraste pelo ícone para mover, deslize fora dos cards para rolar
+            </div>
+
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
               <div>
@@ -118,29 +141,29 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
             </div>
 
             {/* Team List with Drag and Drop */}
-            <Reorder.Group 
-              axis="y" 
-              values={tempOrder} 
+            <Reorder.Group
+              axis="y"
+              values={tempOrder}
               onReorder={setTempOrder}
               className="space-y-2 mb-6 max-h-96 overflow-y-auto"
+              ref={listRef}
             >
               {tempOrder.map((team, index) => (
                 <Reorder.Item
                   key={team.pick}
                   value={team}
                   className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-lg border border-gray-200 dark:border-gray-600 cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
-                  whileDrag={{ 
-                    scale: 1.02, 
+                  whileDrag={{
+                    scale: 1.02,
                     rotate: 1,
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                    zIndex: 10
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                    zIndex: 10,
                   }}
                   dragTransition={{ bounceStiffness: 600, bounceDamping: 10 }}
                 >
                   <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                     {index + 1}
                   </div>
-                  
                   <div className="flex-1 min-w-0">
                     <div className="font-gaming font-bold text-sm text-gray-900 dark:text-white">
                       {team.team}
@@ -149,13 +172,46 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
                       {teamFullNames[team.team] || team.team}
                     </div>
                   </div>
-
                   <div className="flex-shrink-0 text-gray-400 dark:text-gray-500">
                     <GripVertical className="h-5 w-5" />
                   </div>
                 </Reorder.Item>
               ))}
             </Reorder.Group>
+            {/* Botões flutuantes para scroll - apenas mobile/tablet */}
+            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3 items-end md:hidden">
+              <button
+                type="button"
+                className="bg-purple-600 text-white rounded-full shadow-lg p-3 flex items-center justify-center hover:bg-purple-700 transition-all"
+                style={{ boxShadow: '0 4px 16px rgba(99,102,241,0.15)' }}
+                onClick={() => {
+                  if (listRef.current) {
+                    listRef.current.scrollBy({ top: -200, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <ChevronDown className="h-6 w-6 rotate-180" />
+              </button>
+              <button
+                type="button"
+                className="bg-purple-600 text-white rounded-full shadow-lg p-3 flex items-center justify-center hover:bg-purple-700 transition-all"
+                style={{ boxShadow: '0 4px 16px rgba(99,102,241,0.15)' }}
+                onClick={() => {
+                  if (listRef.current) {
+                    listRef.current.scrollBy({ top: 200, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <ChevronDown className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Mensagem de sucesso */}
+            {showSuccess && (
+              <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+                ordem das escolhas alterada com sucesso
+              </div>
+            )}
 
             {/* Footer */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-super-dark-border">
@@ -167,22 +223,13 @@ const TeamOrderModal = ({ isOpen, onClose, onConfirmOrder, currentDraftOrder }) 
               >
                 Cancelar
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  // Recriar a ordem com os picks atualizados baseados na nova posição
-                  const newOrder = tempOrder.map((team, index) => ({
-                    ...team,
-                    pick: index + 1
-                  }));
-                  onConfirmOrder(newOrder);
-                  onClose();
-                }}
-                className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
+              <button
+                type="button"
+                className="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition-all"
+                onClick={handleSaveOrder}
               >
-                Confirmar Ordem
-              </motion.button>
+                Confirmar ordem
+              </button>
             </div>
           </motion.div>
         </motion.div>

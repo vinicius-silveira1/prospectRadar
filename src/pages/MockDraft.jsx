@@ -453,7 +453,7 @@ const MockDraft = () => {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <Users className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
-                  <span className="relative z-10">{isOrderCustomized ? 'Ordem Custom' : 'Ordem Times'}</span>
+                  <span className="relative z-10">{isOrderCustomized ? 'Ordenar' : 'Ordenar'}</span>
                 </motion.button>
                 
                 {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
