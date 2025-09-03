@@ -309,13 +309,12 @@ function Compare() {
                 const isFreeUser = !user || user.subscription_tier?.toLowerCase() !== 'scout';
                 const isUpgradeSlot = isFreeUser && slotPosition === 2;
                 if (isUpgradeSlot) {
-                  // Se for grid de 2 ou mais colunas, ocupa 2 slots
+                  // Ocupa 1 coluna no mobile, 2 colunas em md+
                   return (
                     <motion.div
                       key={`upgrade-placeholder-${index}`}
                       whileHover={{ scale: 1.02 }}
-                      className="relative flex flex-col items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-2 border-dashed border-orange-400 dark:border-orange-500 rounded-lg text-center transition-all group col-span-2"
-                      style={{ gridColumn: 'span 2' }}
+                      className="relative flex flex-col items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-2 border-dashed border-orange-400 dark:border-orange-500 rounded-lg text-center transition-all group md:col-span-2"
                     >
                       <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs px-2 py-1 rounded-full font-mono font-bold">SCOUT</div>
                       <motion.div

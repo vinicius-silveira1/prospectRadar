@@ -72,14 +72,15 @@ const Pricing = () => {
   ];
 
   const scoutFeatures = [
-    { icon: Sparkles, text: 'Acesso total ao Gráfico e detalhamento do Radar Score', available: true },
-    { icon: Target, text: 'Análises de especialistas e comparações com NBA', available: true },
-    { icon: Filter, text: 'Filtros avançados por atributos físicos e badges', available: true },
-    { icon: Crown, text: 'Mock Drafts com saves ilimitados', available: true },
-    { icon: Bell, text: 'Notificações em tempo real sobre Watchlist', available: true },
-    { icon: Download, text: 'Exportação completa (PDF, CSV, Excel, PNG)', available: true },
-    { icon: TrendingUp, text: 'Comparações ilimitadas de jogadores', available: true },
-    { icon: BarChart3, text: 'Métricas avançadas e análises preditivas', available: true },
+    { icon: Star, text: 'Radar Score gráfico e detalhado', available: true },
+    { icon: Filter, text: 'Filtros avançados', available: true },
+    { icon: Crown, text: 'Mock Draft ilimitado', available: true },
+    { icon: Bell, text: 'Watchlist ilimitada', available: true },
+    { icon: TrendingUp, text: 'Comparação de até 4 prospects', available: true },
+    { icon: Target, text: 'Comparações com jogadores da NBA', available: true },
+    { icon: Download, text: 'Exportação de dados (PDF, Excel, CSV, PNG)', available: true },
+    { icon: BarChart3, text: 'Análise detalhada dos prospects', available: true },
+    { icon: Sparkles, text: 'Suporte prioritário', available: true },
   ];
 
   return (

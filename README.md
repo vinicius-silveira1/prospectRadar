@@ -1,40 +1,36 @@
 
+
 # 🏀 prospectRadar
-
-## 🌟 100% Open Source & Transparente
-
-O ProspectRadar é **completamente open source** porque acreditamos que transparência gera melhores produtos para a comunidade.
-
-
-### 🔓 Por que Open Source?
-- 🇧🇷 **Transparência Total:** Sem caixas-pretas - você pode ver exatamente como analisamos prospects
-- 🤝 **Desenvolvido com a Comunidade:** Contribuições melhoram continuamente a plataforma
-- 📖 **Código Educativo:** Algoritmos comentados em português para a comunidade brasileira
-
-
-### 💰 Modelo Sustentável
-O ProspectRadar adota um **modelo freemium transparente**:
-- 🆓 **Core sempre gratuito** - Funcionalidades principais sempre acessíveis
-- ⭐ **Features premium opcionais** - Para usuários profissionais (scouts, jornalistas)
-- 🔓 **Código sempre aberto** - Sem mudança para closed source
-- 🤝 **Contribuidores valorizados** - Reconhecimento e benefícios para quem colabora
-
-
-
-Uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, com foco especial na comunidade brasileira de basquete.
-
 
 <img width="1890" height="863" alt="Dashboard prospectRadar" src="https://github.com/user-attachments/assets/1286b717-622a-45ea-b89c-76ae3e729355" />
 
-
 ## 🎯 Sobre o Projeto
 
-O ProspectRadar combina análise de dados avançada com interface moderna para oferecer:
-- 🧮 **Algoritmo de ranking proprietário** baseado em 4 pilares de avaliação
-- 🏀 **Foco em prospects brasileiros** e mercado nacional
-- 🔬 **Análise estatística profunda** com métricas NBA modernas
-- 🌐 **Plataforma 100% transparente** e open source
+O ProspectRadar é uma ferramenta moderna para descobrir, analisar e comparar os futuros talentos da NBA, com foco especial na comunidade brasileira de basquete.
 
+### Propósito, Missão e Visão
+- **Propósito:** Democratizar o acesso à análise de prospects de basquete, tornando dados e algoritmos acessíveis para todos.
+- **Missão:** Oferecer uma plataforma transparente, educativa e colaborativa para scouts, jornalistas, fãs e desenvolvedores.
+- **Visão:** Ser referência em transparência e inovação na análise de prospects, especialmente para o mercado brasileiro.
+
+### Principais Funcionalidades
+- **Dashboard Interativo:** Visão geral dos principais prospects, com destaques para jogadores brasileiros e os melhores ranqueados.
+- **Database de Prospects:** Lista completa de jogadores com filtros por posição, tier e nacionalidade.
+- **Análise Detalhada:** Perfis completos de jogadores, estatísticas, atributos físicos e badges de habilidade.
+- **Radar Score:** Pontuação proprietária de potencial NBA para cada prospect, baseada em 4 pilares de avaliação.
+- **Mock Draft:** Crie e salve seus próprios mock drafts.
+- **Comparação de Prospects:** Compare até 2 prospects no plano gratuito e até 4 no plano Scout.
+- **Watchlist:** Acompanhe prospects favoritos (limitada no plano gratuito, ilimitada no Scout).
+- **Funcionalidades Premium:** Filtros avançados, exportação de dados, comparações NBA, análise gráfica detalhada e mais.
+
+### Foco na Comunidade Brasileira
+O projeto foi criado para preencher uma lacuna na comunidade brasileira de basquete, destacando talentos nacionais e educando sobre o processo de draft.
+
+### Objetivos
+- Democratizar o acesso a dados de prospects
+- Centralizar informações em uma interface amigável
+- Destacar talentos brasileiros no cenário internacional
+- Educar a comunidade sobre o processo de draft
 
 ## ✨ Stack Tecnológica
 
@@ -49,69 +45,31 @@ O ProspectRadar combina análise de dados avançada com interface moderna para o
 [![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)](https://github.com/vinicius-silveira1/prospectRadar)
 [![Portfolio Project](https://img.shields.io/badge/Portfolio-Project-blue.svg)](https://github.com/vinicius-silveira1/prospectRadar)
 
+## 🌟 Transparência & Open Source
 
-## 🌟 100% Open Source & Educativo
+O ProspectRadar é **completamente open source**, porque acredito que transparência gera melhores produtos para a comunidade.
 
-Este projeto é **completamente open source** como forma de:
+### Por que Open Source?
+- **Transparência Total:** Você pode ver exatamente como analisamos prospects
+- **Desenvolvido com a Comunidade:** Contribuições melhoram continuamente a plataforma
+- **Código Educativo:** Algoritmos comentados em português para a comunidade brasileira
+- **Auditável:** Algoritmo do Radar Score totalmente visível e verificável pela comunidade
 
-### 🔓 Transparência Educativa
-- 🇧🇷 **Código Comentado em Português:** Algoritmos explicados didaticamente para a comunidade brasileira
-- 📄 **Documentação Completa:** Metodologia de análise NBA totalmente documentada
-- 🤝 **Aprendizado Colaborativo:** Convite para outros estudantes e desenvolvedores contribuírem
-- 📖 **Educativo:** Código aberto para quem quer aprender sobre análise de dados esportivos
-- 🔧 **Auditável:** Algoritmo do Radar Score totalmente visível e verificável pela comunidade
+### Modelo Sustentável
+Adotamos um **modelo freemium transparente**:
+- **Core sempre gratuito** - Funcionalidades principais sempre acessíveis
+- **Features premium opcionais** - Para usuários profissionais (scouts, jornalistas)
+- **Código sempre aberto** - Sem mudança para closed source
+- **Contribuidores valorizados** - Reconhecimento e benefícios para quem colabora
 
+### Como Contribuir
+- **Reportar bugs:** [Abra uma issue](https://github.com/vinicius-silveira1/prospectRadar/issues)
+- **Sugerir features:** Compartilhe suas ideias para melhorar a plataforma
+- **Pull Requests:** Contribua com código, documentação ou correções
+- **Dados:** Ajude a melhorar nossa base de dados de prospects
+- **Design:** Sugestões de UI/UX são sempre bem-vindas
 
-### 💡 Como Contribuir
-- 🐛 **Reportar bugs:** [Abra uma issue](https://github.com/vinicius-silveira1/prospectRadar/issues)
-- 💡 **Sugerir features:** Compartilhe suas ideias para melhorar a plataforma
-- 🔀 **Pull Requests:** Contribua com código, documentação ou correções
-- 📊 **Dados:** Ajude a melhorar nossa base de dados de prospects
-- 🎨 **Design:** Sugestões de UI/UX são sempre bem-vindas
-
-
-### 🏆 Primeira Plataforma Open Source de Scouting do Brasil
 Somos pioneiros em trazer transparência total para análise de prospects de basquete no Brasil. Todo nosso algoritmo, metodologia e código estão disponíveis para a comunidade auditar, melhorar e aprender.
-
-
-## 🇧🇷 Para a Comunidade Brasileira
-
-Este projeto foi criado para preencher uma lacuna na comunidade brasileira de basquete, oferecendo uma ferramenta moderna e gratuita para análise de prospects do draft da NBA.
-
-
-### Objetivos
-- **Democratizar** o acesso a dados de prospects
-- **Centralizar** informações em uma interface amigável
-- **Destacar** talentos brasileiros no cenário internacional
-- **Educar** a comunidade sobre o processo de draft
-
-
-## 🚀 Funcionalidades
-
-### 🆓 Funcionalidades Gratuitas
--   **Dashboard Interativo:** Visão geral dos principais prospects, com destaques para jogadores brasileiros e os melhores ranqueados.
--   **Database de Prospects:** Explore uma lista completa de jogadores com filtros básicos por posição, tier e nacionalidade.
--   **Análise Detalhada:** Mergulhe em perfis completos de jogadores, com estatísticas, atributos físicos e badges de habilidade.
--   **Radar Score Básico:** Visualize nossa pontuação proprietária de potencial NBA para cada prospect.
--   **Comparação Simples:** Compare até 2 prospects lado a lado.
--   **Mock Draft Básico:** Crie até 2 mock drafts salvos.
--   **Watchlist Limitada:** Acompanhe até 5 prospects favoritos.
-
-### 👑 **Funcionalidades Premium (Scout)**
--   **Filtros Avançados:** Altura, peso, envergadura, estatísticas específicas e métricas avançadas.
--   **Radar Score Completo:** Análise gráfica detalhada com breakdown por categorias.
--   **Comparações Profissionais:** Compare até 4 prospects com análise head-to-head completa.
--   **Mock Draft Ilimitado:** Salve quantos drafts quiser com sistema de trade de picks.
--   **Watchlist Ilimitada:** Adicione quantos prospects desejar com sistema de notas pessoais.
--   **Comparações NBA:** Encontre jogadores similares da NBA para cada prospect.
--   **Exportação Profissional:** Gere relatórios em PDF, Excel, CSV e imagens em alta qualidade.
--   **Análise Detalhada:** Pontos fortes, fracos e projeções completas para cada jogador.
-
-### 🏀 **Funcionalidades Especiais**
--   **Badges de Habilidade:** Sistema inteligente com 30+ badges que identificam características únicas (Sniper, Cadeado, Demolidor, etc.).
--   **Sistema de Flags:** Indicadores automáticos de pontos fortes (verde) e riscos (vermelho) baseados em dados.
--   **Prospects Brasileiros:** Seção dedicada aos talentos nacionais com análises especializadas.
--   **Responsivo:** Interface otimizada para desktop, tablet e mobile.
 
 
 ## 🧠 O que é o Radar Score?
@@ -166,13 +124,6 @@ O resultado é uma pontuação de 0 a 1, onde valores mais altos indicam um maio
 - **Dark Mode:** Suporte completo a tema escuro
 - **Acessibilidade:** Seguindo diretrizes WCAG 2.1
 - **PWA Ready:** Instalação offline e push notifications
-
-### **Segurança e Confiabilidade**
-- **Row Level Security:** Proteção de dados no Supabase
-- **Rate Limiting:** Proteção contra abuso de APIs
-- **Input Validation:** Sanitização e validação rigorosa
-- **HTTPS Only:** Comunicação segura end-to-end
-- **Data Backup:** Backups automáticos diários
 
 ## 📋 Casos de Uso Principais
 
@@ -377,34 +328,6 @@ Procure por issues marcadas com `good-first-issue` ou `help-wanted` no [GitHub I
 - Mantenha a documentação atualizada
 - Seja respeitoso nas discussões
 
-## 🗺️ **Roadmap**
-
-### **🎯 Próximas Releases**
-
-#### **v1.1.0 - Q4 2025**
-- [ ] Expansão para classe de draft 2027
-- [ ] Sistema de notificações push
-- [ ] Análise de trending prospects
-- [ ] Modo offline (PWA)
-
-#### **v1.2.0 - Q1 2026**
-- [ ] API pública para desenvolvedores
-- [ ] Integração com redes sociais
-- [ ] Sistema de achievements
-- [ ] Análise de draft histórico completo
-
-#### **v2.0.0 - Q2 2026**
-- [ ] Análise de jogadores internacionais
-- [ ] Predições de salário NBA
-- [ ] Sistema de ligas/competições
-- [ ] Mobile app nativo
-
-### **🔬 Pesquisa e Desenvolvimento**
-- Machine Learning para predições mais precisas
-- Análise de vídeo automatizada
-- Integração com dados biométricos
-- Análise de fit por equipe NBA
-
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
@@ -435,7 +358,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ---
 
-<div align="center">
 
 ### **ProspectRadar** 🏀
 #### *A primeira plataforma open source de scouting brasileiro*

@@ -126,12 +126,7 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
           className="flex items-center justify-between mb-4"
         >
             <h4 className="font-mono font-bold text-lg text-slate-600 dark:text-slate-200 flex items-center tracking-wide">
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              >
-                <BarChart3 className="h-5 w-5 text-slate-600 dark:text-slate-200 mr-2" />
-              </motion.div>
+              <BarChart3 className="h-5 w-5 text-slate-600 dark:text-slate-200 mr-2" />
               ANÁLISE ESTATÍSTICA
             </h4>
             {onExport && (
@@ -139,7 +134,7 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
                 whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(34, 197, 94, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onExport} 
-                className="flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-all shadow-lg text-sm font-mono font-bold tracking-wide border border-green-400/50" 
+                className="flex items-center px-2 py-1 sm:px-3 sm:py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-all shadow-lg text-xs sm:text-sm font-mono font-bold tracking-wide border border-green-400/50" 
                 disabled={isExporting}
               >
                 {isExporting ? (
