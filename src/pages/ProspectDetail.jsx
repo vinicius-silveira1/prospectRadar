@@ -61,7 +61,12 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
             ➤ Tenha acesso completo a {featureName} no plano Scout.
           </p>
           <button 
-            onClick={() => navigate('/pricing')}
+            onClick={() => {
+              if (window.gtag) {
+                window.gtag('event', 'upgrade_click', { location: 'prospect_detail' });
+              }
+              navigate('/pricing');
+            }}
             className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-gaming font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-mono tracking-wide"
           >
             <Crown className="w-4 h-4 mr-2" />
@@ -224,9 +229,17 @@ const ProspectDetail = () => {
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: `prospectRadar: ${displayStats.name}`, text: `Confira o perfil completo de ${displayStats.name} no prospectRadar.`, url: window.location.href });
+      // Evento Google Analytics: compartilhamento via Web Share
+      if (window.gtag) {
+        window.gtag('event', 'share_prospect', { prospect_id: prospect?.id, method: 'web_share' });
+      }
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link do perfil copiado para a área de transferência!');
+      // Evento Google Analytics: compartilhamento via clipboard
+      if (window.gtag) {
+        window.gtag('event', 'share_prospect', { prospect_id: prospect?.id, method: 'clipboard' });
+      }
     }
   };
 
@@ -1216,39 +1229,6 @@ const ProspectDetail = () => {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="relative bg-gradient-to-br from-orange-500 via-orange-400 to-orange-600 rounded-xl shadow-lg p-6 text-white overflow-hidden group"
-              whileHover={{ 
-                scale: 1.02,
-                boxShadow: "0 0 30px rgba(249, 115, 22, 0.4)"
-              }}
-            >
-              {/* Background pattern */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              {/* Glow orb */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-300/20 rounded-full blur-xl group-hover:bg-yellow-300/30 transition-all duration-300" />
-              
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold mb-3 font-mono tracking-wide flex items-center">
-                  <div className="w-3 h-3 bg-white rounded-full mr-2" />
-                  Projeção Mock Draft
-                </h3>
-                <motion.div 
-                  className="text-3xl font-bold mb-2 font-mono tracking-wider"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  {evaluation.draftProjection?.description || 'N/A'}
-                </motion.div>
-                <div className="text-orange-100 text-sm font-mono">
-                  {evaluation.draftProjection?.range ? `Range: ${evaluation.draftProjection.range}` : 'N/A'}
-                </div>
-              </div>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               className="relative bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6 overflow-hidden group"
               whileHover={{ 
@@ -1261,7 +1241,7 @@ const ProspectDetail = () => {
               
               <div className="relative z-10">
                 <h3 className="text-lg font-bold text-black dark:text-white mb-4 font-mono tracking-wide flex items-center">
-                  <div className="w-3 h-3 bg-slate-500 rounded-full mr-2" />
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-500 rounded-full mr-2" />
                   Ações
                 </h3>
                 <motion.div 
@@ -1332,6 +1312,7 @@ const ProspectDetail = () => {
             </motion.div>
           </div>
         </div>
+        
       </div>
       
     </div>

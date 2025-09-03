@@ -52,6 +52,10 @@ export default function useWatchlist() {
     const { error } = await supabase.from('user_watchlists').insert({ user_id: user.id, prospect_id: prospectId });
     if (!error) {
       setWatchlist(prev => new Set(prev).add(prospectId));
+      // Evento Google Analytics: adição à watchlist
+      if (window.gtag) {
+        window.gtag('event', 'add_to_watchlist', { prospect_id: prospectId });
+      }
     } else {
       throw error;
     }

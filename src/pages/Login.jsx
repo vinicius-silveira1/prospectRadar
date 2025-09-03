@@ -20,9 +20,17 @@ const Login = () => {
     try {
       const { error } = await signIn({ email, password });
       if (error) throw error;
+      // Evento Google Analytics: login bem-sucedido
+      if (window.gtag) {
+        window.gtag('event', 'login', { method: 'email' });
+      }
       navigate('/'); // Redireciona para o dashboard após o login
     } catch (err) {
       setError(err.message);
+      // Evento Google Analytics: erro de login
+      if (window.gtag) {
+        window.gtag('event', 'error', { type: 'login', message: err.message });
+      }
     } finally {
       setLoading(false);
     }

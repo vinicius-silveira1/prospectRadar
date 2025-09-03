@@ -166,6 +166,32 @@ const MockDraft = () => {
     setNotification({ type: 'success', message: 'Draft excluído.' });
   };
 
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF('landscape', 'pt', 'a4');
+    const element = exportRef.current;
+
+    if (!element) return;
+
+    // Adicionando rastreamento de evento para exportação de mock draft
+    if (window.gtag) {
+      window.gtag('event', 'export_mock_draft', { draft_class: draftSettings.draftClass });
+    }
+
+    // Obter o nome da escola do prospect para o cabeçalho
+    const schoolName = element.querySelector('.school-name')?.innerText || 'Mock Draft';
+
+    doc.setFontSize(20);
+    doc.text(schoolName, 40, 40);
+
+    const imgData = element.toDataURL('image/png', 1.0);
+    doc.addImage(imgData, 'PNG', 40, 60, 522, 0);
+
+    doc.save(`mock-draft-${new Date().toISOString().slice(0, 10)}.pdf`);
+    setIsExporting(false);
+  };
+
   if (prospectsLoading) {
     return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
   }

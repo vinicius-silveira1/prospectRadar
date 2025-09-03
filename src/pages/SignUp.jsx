@@ -21,11 +21,19 @@ const SignUp = () => {
     try {
       const { error } = await signUp({ email, password });
       if (error) throw error;
+      // Evento Google Analytics: cadastro bem-sucedido
+      if (window.gtag) {
+        window.gtag('event', 'sign_up', { method: 'email' });
+      }
       setMessage('Quase lá! 🏀 Enviamos um link de confirmação para o seu e-mail. Clique nele para validar sua conta e começar a descobrir os futuros talentos. Não se esqueça de checar sua caixa de spam!');
       // Opcional: redirecionar para o login após um tempo
       setTimeout(() => navigate('/login'), 5000);
     } catch (err) {
       setError(err.message);
+      // Evento Google Analytics: erro de cadastro
+      if (window.gtag) {
+        window.gtag('event', 'error', { type: 'sign_up', message: err.message });
+      }
     } finally {
       setLoading(false);
     }

@@ -56,6 +56,10 @@ function Compare() {
   const addProspect = useCallback((prospect) => {
     setSelectedProspects(prev => {
       if (prev.length < maxComparisons && !prev.find(p => p.id === prospect.id)) {
+        // Evento Google Analytics: comparação de prospects
+        if (window.gtag) {
+          window.gtag('event', 'compare_prospects', { ids: [...prev.map(p => p.id), prospect.id] });
+        }
         return [...prev, prospect];
       }
       return prev;
@@ -78,6 +82,10 @@ function Compare() {
 
   const filteredProspects = useMemo(() => {
     if (!prospects || prospects.length === 0) return [];
+    // Evento Google Analytics: busca/filtro
+    if (window.gtag && searchTerm) {
+      window.gtag('event', 'search_prospect', { query: searchTerm });
+    }
     return prospects.filter(prospect => 
       ((prospect.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (prospect.high_school_team || '').toLowerCase().includes(searchTerm.toLowerCase())) &&
@@ -98,8 +106,11 @@ function Compare() {
         const canvas = await html2canvas(imageExportRef.current, {
           backgroundColor: isDark ? '#0A0A0A' : '#f8fafc', 
           scale: 2, 
-          useCORS: true
         });
+        // Evento Google Analytics: exportação de comparação
+        if (window.gtag) {
+          window.gtag('event', 'export_comparison', { prospect_ids: selectedProspects.map(p => p.id) });
+        }
         const link = document.createElement('a');
         link.download = `prospects-comparison.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
@@ -318,7 +329,12 @@ function Compare() {
                       <motion.button 
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => navigate('/pricing')} 
+                        onClick={() => {
+                          if (window.gtag) {
+                            window.gtag('event', 'upgrade_click', { location: 'compare_page' });
+                          }
+                          navigate('/pricing'); 
+                        }} 
                         className="mt-2 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-xs rounded-full transition-all font-mono font-bold tracking-wide"
                       >
                         FAZER UPGRADE
