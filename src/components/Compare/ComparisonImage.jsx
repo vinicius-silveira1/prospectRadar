@@ -115,19 +115,13 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
       <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-orange-500"></div>
       <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-blue-500"></div>
 
-      {/* Header */}
+      {/* Header - Only prospectRadar text, no logo image, PR icon or phrase */}
       <div className="relative z-10 flex justify-between items-center mb-6 pb-6 border-b-2 border-slate-200 dark:border-super-dark-border">
         <div className="flex items-center">
-          <div className="bg-gradient-to-r from-orange-500 to-blue-500 p-4 rounded-xl mr-4 shadow-xl">
-            <span className="text-3xl font-bold text-white tracking-wide">PR</span>
-          </div>
-          <div>
-            <span className="text-4xl font-bold tracking-wide">
-              <span className="text-orange-500">prospect</span>
-              <span className="text-blue-500">Radar</span>
-            </span>
-            <p className="text-sm tracking-widest text-slate-500 dark:text-slate-400 mt-1">ANÁLISE COMPARATIVA GAMING</p>
-          </div>
+          <span className="text-4xl font-bold tracking-wide">
+            <span className="text-orange-500">prospect</span>
+            <span className="text-blue-500">Radar</span>
+          </span>
         </div>
         <div className="text-right">
           <h2 className="text-4xl font-bold tracking-wide">COMPARAÇÃO</h2>
@@ -145,10 +139,10 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
               <img src={prospect.image_url} alt={prospect.name} className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-slate-200 dark:border-super-dark-border shadow-lg" />
             ) : (
               <div
-                className="w-32 h-32 rounded-full mb-4 border-4 border-slate-200 dark:border-super-dark-border flex items-center justify-center text-white text-2xl font-bold shadow-lg"
+                className="w-32 h-32 rounded-full mb-4 border-4 border-slate-200 dark:border-super-dark-border flex items-center justify-center shadow-lg"
                 style={{ backgroundColor: getAvatarColor(prospect.name) }}
               >
-                <span className="tracking-wide">{getInitials(prospect.name)}</span>
+                {/* No initials inside avatar */}
               </div>
             )}
             <h3 className="text-2xl font-bold text-balance tracking-wide mb-1">{prospect.name}</h3>
@@ -206,21 +200,8 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
         )}
       </div>
       
-      {/* Gaming Footer with Enhanced Watermark */}
+      {/* Footer - Only keep the bottom occurrence, remove PR icon, logo and phrase */}
       <div className="relative z-10 mt-8 pt-6 text-center border-t-2 border-slate-200 dark:border-super-dark-border">
-        <div className="flex items-center justify-center mb-4">
-          <div className="bg-gradient-to-r from-orange-500 to-blue-500 p-3 rounded-lg mr-3 shadow-lg">
-            <span className="text-xl font-bold text-white tracking-wide">PR</span>
-          </div>
-          <div>
-            <div className="text-2xl font-bold tracking-wide">
-              <span className="text-orange-500">prospect</span>
-              <span className="text-blue-500">Radar</span>
-            </div>
-            <p className="text-sm tracking-widest text-slate-500 dark:text-slate-400">ANÁLISE PROFISSIONAL DE PROSPECTS</p>
-          </div>
-        </div>
-        
         <div className="bg-slate-100 dark:bg-super-dark-primary p-4 rounded-lg border-2 border-slate-200 dark:border-super-dark-border">
           <p className="text-lg font-bold tracking-wide text-slate-600 dark:text-slate-300">
             🎯 Gerado por <span className="text-orange-500">prospect</span><span className="text-blue-500">Radar</span>.com

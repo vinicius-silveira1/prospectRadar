@@ -572,39 +572,64 @@ const ProspectDetail = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                {(() => {
-                  const renderStat = (label, value, colorClass, bgClass, borderClass, shadowColor) => (
-                    <motion.div
-                      className={`relative p-3 rounded-lg ${bgClass} border ${borderClass} overflow-hidden group cursor-pointer`}
-                      whileHover={{ 
-                        scale: 1.05,
-                        boxShadow: `0 0 20px ${shadowColor}`
-                      }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    >
-                      <div className={`absolute inset-0 bg-gradient-to-r ${colorClass.replace('text-', 'from-').replace('dark:text-', '')}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                      <motion.p 
-                        className={`text-lg sm:text-xl font-mono font-bold ${colorClass} relative z-10 tracking-wide text-center`}
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                      >
-                        {value ?? '—'}
-                      </motion.p>
-                      <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">{label}</p>
-                    </motion.div>
-                  );
-
-                  return (
-                    <>
-                      {renderStat('PPG', displayStats.ppg?.toFixed(1), 'text-purple-600 dark:text-purple-400', 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10', 'border-purple-200/50 dark:border-purple-700/30', 'rgba(168, 85, 247, 0.3)')}
-                      {renderStat('RPG', displayStats.rpg?.toFixed(1), 'text-green-600 dark:text-green-400', 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', 'border-green-200/50 dark:border-green-700/30', 'rgba(34, 197, 94, 0.3)')}
-                      {renderStat('APG', displayStats.apg?.toFixed(1), 'text-orange-600 dark:text-orange-400', 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10', 'border-orange-200/50 dark:border-orange-700/30', 'rgba(249, 115, 22, 0.3)')}
-                      {renderStat('SPG', displayStats.spg?.toFixed(1), 'text-blue-600 dark:text-blue-400', 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10', 'border-blue-200/50 dark:border-blue-700/30', 'rgba(59, 130, 246, 0.3)')}
-                      {renderStat('BPG', displayStats.bpg?.toFixed(1), 'text-red-600 dark:text-red-400', 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10', 'border-red-200/50 dark:border-red-700/30', 'rgba(239, 68, 68, 0.3)')}
-                      {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)')}
-                    </>
-                  );
-                })()}
+                  {/* Cada stat é um group individual para hover isolado */}
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(168, 85, 247, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-purple-600 dark:text-purple-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{displayStats.ppg?.toFixed(1) ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">PPG</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(34, 197, 94, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-green-600 dark:text-green-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{displayStats.rpg?.toFixed(1) ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">RPG</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(249, 115, 22, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-orange-600 dark:text-orange-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{displayStats.apg?.toFixed(1) ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">APG</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200/50 dark:border-blue-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-blue-600 dark:text-blue-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{displayStats.spg?.toFixed(1) ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">SPG</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 border border-red-200/50 dark:border-red-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(239, 68, 68, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-red-600 dark:text-red-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{displayStats.bpg?.toFixed(1) ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">BPG</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10 border border-indigo-200/50 dark:border-indigo-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-indigo-600 dark:text-indigo-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{(displayStats.fg_pct * 100)?.toFixed(1) + '%' ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">FG%</p>
+                  </motion.div>
+                  {/* Adiciona 3PT% e FT% no mobile */}
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-pink-50 to-pink-100/50 dark:from-pink-900/20 dark:to-pink-800/10 border border-pink-200/50 dark:border-pink-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(236, 72, 153, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-pink-600 dark:text-pink-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{(displayStats.three_pct * 100)?.toFixed(1) + '%' ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">3PT%</p>
+                  </motion.div>
+                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/10 border border-yellow-200/50 dark:border-yellow-700/30 overflow-hidden cursor-pointer"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(253, 224, 71, 0.3)' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-yellow-600 dark:text-yellow-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{(displayStats.ft_pct * 100)?.toFixed(1) + '%' ?? '—'}</motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">FT%</p>
+                  </motion.div>
                 </motion.div>
               </div>
             </motion.div>

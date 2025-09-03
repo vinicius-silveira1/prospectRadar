@@ -371,8 +371,8 @@ const Dashboard = () => {
 
       <AlertBox 
         type="info"
-        title="Temporada 2025-26 em Breve!"
-        message="As estatísticas completas e o Radar Score de todos os prospectos serão atualizados em tempo real assim que os jogos da NCAA começarem. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
+        title="Temporada NCAA 2025-26 em Breve!"
+        message="Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
       />
 
       {/* Top Prospects Gerais */}

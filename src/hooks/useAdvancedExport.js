@@ -1109,7 +1109,7 @@ const useAdvancedExport = () => {
       ], col1X, col1Y, '#059669');
 
       // Coluna 2: Estatísticas Avançadas - no mesmo nível das básicas
-      col2Y += 185; // Ajuste para alinhar com stats básicas
+      // Alinha estatísticas avançadas com informações básicas (sem offset manual)
       col2Y = drawSection('ESTATÍSTICAS AVANÇADAS', [
         `TS%: ${data.advancedStats.trueShooting || 'N/A'}`,
         `eFG%: ${data.advancedStats.effectiveFG || 'N/A'}`,
@@ -1121,60 +1121,66 @@ const useAdvancedExport = () => {
         `AST%: ${data.advancedStats.assistRate || 'N/A'}`,
       ], col2X, col2Y, '#d97706');
 
-      // Flags centralizadas abaixo de ambas as colunas com mais espaço - Fonte Bem Maior
-      let flagsY = Math.max(col1Y, col2Y) + 50;
+      // Flags/alerts abaixo das stats avançadas, ocupando uma linha no grid
+      let gridY = Math.max(col1Y, col2Y) + 50;
       if (data.flags && data.flags.length > 0) {
         ctx.fillStyle = '#7c3aed';
-        ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 26px para 32px
+        ctx.font = 'bold 32px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText('DESTAQUES E ALERTAS', col1X, flagsY);
-        flagsY += 40; // Aumentado de 35 para 40
-        ctx.font = '26px Arial, sans-serif'; // Aumentado de 20px para 26px
+        ctx.fillText('DESTAQUES E ALERTAS', col1X, gridY);
+        gridY += 40;
+        ctx.font = '26px Arial, sans-serif';
         data.flags.slice(0, 4).forEach(flag => {
           ctx.fillStyle = flag.type === 'Alerta' ? '#dc2626' : '#059669';
-          ctx.fillText(`• ${flag.message}`, col1X, flagsY);
-          flagsY += 35; // Aumentado de 30 para 35
+          ctx.fillText(`• ${flag.message}`, col1X, gridY);
+          gridY += 35;
         });
       }
 
-      // Área adicional para análise detalhada - Fonte Bem Maior
-      let analysisY = Math.max(flagsY + 40, canvas.height - 300);
-      
-      if (data.detailedAnalysis && data.detailedAnalysis.length > 100) {
+      // Análise detalhada abaixo dos destaques/alertas, ocupando duas colunas
+      let analysisY = gridY + 40;
+      let strengths = prospect.strengths || evaluation.strengths || [];
+      let improvements = prospect.weaknesses || evaluation.improvements || [];
+      if (!Array.isArray(strengths)) strengths = [];
+      if (!Array.isArray(improvements)) improvements = [];
+
+      if (strengths.length > 0 || improvements.length > 0) {
         ctx.fillStyle = '#7c3aed';
-        ctx.font = 'bold 32px Arial, sans-serif'; // Aumentado de 26px para 32px
+        ctx.font = 'bold 32px Arial, sans-serif';
         ctx.textAlign = 'left';
         ctx.fillText('ANÁLISE DETALHADA', col1X, analysisY);
-        analysisY += 40; // Aumentado de 35 para 40
-        
+        analysisY += 40;
+
+        // Grid de duas colunas
+        const gridColWidth = (canvas.width - margin * 2) / 2 - 20;
+        const gridCol1X = col1X;
+        const gridCol2X = col1X + gridColWidth + 40;
+        let gridY1 = analysisY;
+        let gridY2 = analysisY;
+
+        // Render strengths (coluna 1)
+        ctx.fillStyle = '#059669';
+        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.fillText('Pontos Fortes', gridCol1X, gridY1);
+        gridY1 += 32;
+        ctx.font = '22px Arial, sans-serif';
         ctx.fillStyle = '#374151';
-        ctx.font = '22px Arial, sans-serif'; // Aumentado de 18px para 22px
-        
-        // Quebrar texto da análise em múltiplas linhas
-        const maxWidth = canvas.width - 160;
-        const words = data.detailedAnalysis.substring(0, 400).split(' ');
-        let line = '';
-        let lineHeight = 30; // Aumentado de 25 para 30
-        
-        for (let n = 0; n < words.length; n++) {
-          const testLine = line + words[n] + ' ';
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth && n > 0) {
-            ctx.fillText(line, col1X, analysisY);
-            line = words[n] + ' ';
-            analysisY += lineHeight;
-            
-            // Evitar que o texto saia da página
-            if (analysisY > canvas.height - 100) break;
-          } else {
-            line = testLine;
-          }
-        }
-        
-        if (line.length > 0 && analysisY < canvas.height - 100) {
-          ctx.fillText(line, col1X, analysisY);
-        }
+        strengths.forEach((item, idx) => {
+          ctx.fillText(`• ${item}`, gridCol1X, gridY1);
+          gridY1 += 28;
+        });
+
+        // Render improvements (coluna 2)
+        ctx.fillStyle = '#dc2626';
+        ctx.font = 'bold 26px Arial, sans-serif';
+        ctx.fillText('Pontos a Melhorar', gridCol2X, gridY2);
+        gridY2 += 32;
+        ctx.font = '22px Arial, sans-serif';
+        ctx.fillStyle = '#374151';
+        improvements.forEach((item, idx) => {
+          ctx.fillText(`• ${item}`, gridCol2X, gridY2);
+          gridY2 += 28;
+        });
       }
       
       // Footer expandido - Fonte Ligeiramente Maior

@@ -435,7 +435,7 @@ const Prospects = () => {
       </motion.div>
 
       {/* Filtros e Alerta - Gaming Enhanced */}
-      <div className="py-4 md:py-6">
+    <div className="py-4 md:py-6 relative z-10">
         <motion.div 
           className="bg-gradient-to-br from-white via-slate-50 to-white dark:from-super-dark-secondary dark:via-slate-900 dark:to-super-dark-secondary rounded-xl shadow-lg border-2 border-slate-200 dark:border-super-dark-border p-4 md:p-6 mb-4 md:mb-6 relative overflow-hidden"
           whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(147, 51, 234, 0.1)" }}
@@ -599,8 +599,8 @@ const Prospects = () => {
         <div className="mb-6">
           <AlertBox 
             type="info"
-            title="Temporada 2025-26 em Breve!"
-            message="As estatísticas completas e o Radar Score de todos os prospectos serão atualizados em tempo real assim que os jogos da NCAA começarem. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
+            title="Temporada NCAA 2025-26 em Breve!"
+            message="Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
           />
         </div>
 

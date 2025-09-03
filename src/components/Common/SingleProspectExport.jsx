@@ -196,13 +196,26 @@ const SingleProspectExport = ({ prospect }) => {
       })();
 
     // Análise detalhada do jogador
-    const playerAnalysis = `${prospect.name} é um prospect ${prospect.nationality === '🇧🇷' ? 'brasileiro' : 'internacional'} com perfil de ${evaluation.draftProjection.description}. 
-
-PONTOS FORTES: Demonstra sólido conhecimento tático e experiência em competições de alto nível. ${prospect.ppg && prospect.ppg >= 12 ? `Possui capacidade ofensiva consistente (${prospect.ppg.toFixed(1)} PPG)` : 'Foca em contribuições além da pontuação'}. ${prospect.apg && prospect.apg >= 3 ? `Mostra visão de jogo (${prospect.apg.toFixed(1)} APG)` : 'Focado na própria função tática'}. 
-
-ÁREAS DE DESENVOLVIMENTO: Como a maioria dos prospects internacionais, precisará se adaptar ao atletismo e velocidade da NBA. ${prospect.fg_percentage && prospect.fg_percentage < 0.45 ? 'Pode melhorar a eficiência ofensiva' : 'Mantém boa eficiência ofensiva'}. 
-
-PROJEÇÃO NBA: ${prospect.tier === 'Elite' ? 'Potencial para impacto imediato como rotação' : prospect.tier === 'First Round' ? 'Candidato a desenvolver papel na rotação' : 'Projeto de longo prazo com fundamentos sólidos'}. Sua experiência internacional é um diferencial importante para adaptação ao basquete profissional.`;
+    const strengths = [
+      'Pontuador de elite nos três níveis',
+      'Tamanho e fluidez excepcional para um ala',
+      'Controle de bola e visão de jogo avançados',
+      'Alto QI de Basquete'
+    ];
+    const improvements = [
+      'Precisa adicionar mais força',
+      'Pode ser inconsistente com o esforço defensivo',
+      'Seleção de arremesso pode ser questionável as vezes'
+    ];
+    const playerAnalysis = [
+      'Análise Detalhada do Jogador',
+      '',
+      'Pontos Fortes',
+      ...strengths,
+      '',
+      'Pontos a Melhorar',
+      ...improvements
+    ].join('\n');
 
     return { 
       evaluation: {
