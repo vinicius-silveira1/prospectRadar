@@ -51,9 +51,9 @@ const Footer = () => {
           >
             <div className="flex items-center justify-center sm:justify-start mb-4">
               <motion.img 
-                src="/logo.png" 
-                alt="ProspectRadar Logo" 
-                className="w-8 h-8 mr-2 flex-shrink-0" 
+                src="src\assets\logo.png" 
+                alt="prospectRadar Logo" 
+                className="w-16 h-16 mr-3 flex-shrink-0" 
                 whileHover={{ 
                   scale: 1.1, 
                   rotate: 5,

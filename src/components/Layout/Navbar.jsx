@@ -69,9 +69,9 @@ const Navbar = ({ onMenuClick }) => {
     xs: 'w-7 h-7',
     sm: 'w-8 h-8',
     md: 'w-9 h-9',
-    lg: 'w-9 h-9',
-    xl: 'w-10 h-10',
-    '2xl': 'w-10 h-10'
+    lg: 'w-10 h-10',
+    xl: 'w-11 h-11',
+    '2xl': 'w-12 h-12'
   }[breakpoint] || 'w-9 h-9';
 
   const searchWidth = {
@@ -143,8 +143,8 @@ const Navbar = ({ onMenuClick }) => {
           
           <Link to="/" className="flex items-center gap-2 group">
             <motion.img 
-              src="/logo.png" 
-              alt="ProspectRadar Logo" 
+              src="src\assets\logo.png" 
+              alt="prospectRadar Logo" 
               className={`${logoSize} object-contain`}
               whileHover={{ 
                 scale: 1.1, 

@@ -155,7 +155,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       <header className="relative z-10 bg-white border-b-2 border-gray-200 p-6 mb-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/logo.png" alt="ProspectRadar Logo" className="w-16 h-16 mr-4" />
+            <img src="src\assets\logo.png" alt="prospectRadar Logo" className="w-24 h-24 mr-6" />
             <div>
               <h1 className="text-3xl font-bold mb-1">
                 <span className="text-orange-500">prospect</span>
