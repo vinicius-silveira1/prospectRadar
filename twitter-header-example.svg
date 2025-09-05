@@ -1,0 +1,27 @@
+<svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1500" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6" />
+      <stop offset="1" stop-color="#a855f7" />
+    </linearGradient>
+    <pattern id="hexPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <polygon points="20,5 35,15 35,35 20,45 5,35 5,15" fill="#ffffff22" />
+    </pattern>
+  </defs>
+  <rect width="1500" height="500" fill="url(#bgGradient)" />
+  <rect width="1500" height="500" fill="url(#hexPattern)" />
+  <!-- Logo placeholder -->
+  <circle cx="120" cy="250" r="80" fill="#fff" stroke="#a855f7" stroke-width="8" />
+  <text x="120" y="265" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="60" font-weight="bold" fill="#3b82f6">PR</text>
+  <!-- Title -->
+  <text x="250" y="200" font-family="Inter, Helvetica, Arial, sans-serif" font-size="90" font-weight="bold" fill="#f59e42">prospect</text>
+  <text x="700" y="200" font-family="Inter, Helvetica, Arial, sans-serif" font-size="90" font-weight="bold" font-style="italic" fill="#a855f7">Radar</text>
+  <!-- Slogan -->
+  <text x="250" y="270" font-family="Inter, Helvetica, Arial, sans-serif" font-size="38" fill="#fff" font-weight="bold">Analisando o futuro do basquete, um prospect de cada vez.</text>
+  <text x="250" y="320" font-family="Inter, Helvetica, Arial, sans-serif" font-size="32" fill="#f59e42">Dados precisos. Análises profundas. Mock drafts profissionais.</text>
+  <!-- Radar chart icon -->
+  <g>
+    <polygon points="1200,320 1250,250 1300,320 1275,400 1225,400" fill="#fff" stroke="#3b82f6" stroke-width="5" opacity="0.7" />
+    <circle cx="1250" cy="320" r="30" fill="#a855f7" opacity="0.3" />
+  </g>
+</svg>

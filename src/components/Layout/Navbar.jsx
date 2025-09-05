@@ -66,13 +66,13 @@ const Navbar = ({ onMenuClick }) => {
 
   // Responsive configurations
   const logoSize = {
-    xs: 'w-7 h-7',
-    sm: 'w-8 h-8',
-    md: 'w-9 h-9',
-    lg: 'w-10 h-10',
-    xl: 'w-11 h-11',
-    '2xl': 'w-12 h-12'
-  }[breakpoint] || 'w-9 h-9';
+    xs: 'w-8 h-8',
+    sm: 'w-9 h-9',
+    md: 'w-10 h-10',
+    lg: 'w-11 h-11',
+    xl: 'w-12 h-12',
+    '2xl': 'w-14 h-14'
+  }[breakpoint] || 'w-10 h-10';
 
   const searchWidth = {
     md: 'max-w-sm',
@@ -143,7 +143,7 @@ const Navbar = ({ onMenuClick }) => {
           
           <Link to="/" className="flex items-center gap-2 group">
             <motion.img 
-              src="src\assets\logo.png" 
+              src="/logo.png" 
               alt="prospectRadar Logo" 
               className={`${logoSize} object-contain`}
               whileHover={{ 
