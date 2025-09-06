@@ -34,28 +34,64 @@ const POSITIONAL_GROUPS = {
 // - Valor = 0 → Score 0.0 (ruim)
 const STAT_NORMALIZATION_CONFIG = {
   // 🎓 CONTEXTO: College/Pré-NBA
-  // Baseado em prospects que se tornaram All-Stars (Luka, Trae, Zion, etc.)
+  // Baseado em prospects que se tornaram estrelas NBA (Luka, Trae, Zion, etc.)
   college: {
-    ppg: { max: 25.0 },     // 25+ PPG = elite (ex: Luka Dončić 21.6 PPG Real Madrid)
-    rpg: { max: 12.0 },     // 12+ RPG = elite (ex: Zion Williamson 8.9 RPG Duke)
-    apg: { max: 8.0 },      // 8+ APG = elite (ex: Trae Young 8.7 APG Oklahoma)
-    spg: { max: 2.5 },      // 2.5+ SPG = elite
-    bpg: { max: 3.0 },      // 3.0+ BPG = elite
-    fg_pct: { max: 0.600 }, // 60% FG = elite eficiência
-    three_pct: { max: 0.450 }, // 45% 3PT = shooter elite
-    ft_pct: { max: 0.900 }  // 90% FT = mecânica refinada
+    ppg: { max: 25.0 },
+    rpg: { max: 12.0 },
+    apg: { max: 8.0 },
+    spg: { max: 2.5 },
+    bpg: { max: 3.0 },
+    fg_pct: { max: 0.600 },
+    three_pct: { max: 0.450 },
+    ft_pct: { max: 0.900 }
+  },
+  // 🇧🇷 CONTEXTO: NBB (Brasil)
+  // Ajustado para o nível de competição do NBB (aprox. 85% do nível College de elite)
+  nbb: {
+    ppg: { max: 21.0 },
+    rpg: { max: 10.0 },
+    apg: { max: 7.0 },
+    spg: { max: 2.1 },
+    bpg: { max: 2.5 },
+    fg_pct: { max: 0.570 },
+    three_pct: { max: 0.425 },
+    ft_pct: { max: 0.900 } // FT% é mais universal
+  },
+  // 🏫 CONTEXTO: High School (EUA)
+  // Ajustado para o nível de competição de High School (aprox. 90% do nível College de elite)
+  high_school: {
+    ppg: { max: 22.5 },
+    rpg: { max: 11.0 },
+    apg: { max: 7.0 },
+    spg: { max: 2.3 },
+    bpg: { max: 2.7 },
+    fg_pct: { max: 0.580 },
+    three_pct: { max: 0.430 },
+    ft_pct: { max: 0.900 }
+  },
+  // ✨ CONTEXTO: Overtime Elite (OTE)
+  // Nível próximo ao College, mas com foco em desenvolvimento de talentos jovens
+  ote: {
+    ppg: { max: 22.0 },
+    rpg: { max: 10.0 },
+    apg: { max: 7.0 },
+    spg: { max: 2.2 },
+    bpg: { max: 2.5 },
+    fg_pct: { max: 0.580 },
+    three_pct: { max: 0.430 },
+    ft_pct: { max: 0.900 }
   },
   // 🏀 CONTEXTO: Carreira na NBA  
   // Baseado em superstars estabelecidos para comparações de ceiling
   nba: {
-    ppg: { max: 28.0 },     // 28+ PPG = elite NBA (Jordan, Kobe, LeBron territory)
-    rpg: { max: 13.0 },     // 13+ RPG = elite (Drummond, Dwight peak)
-    apg: { max: 10.0 },     // 10+ APG = elite (CP3, Stockton territory)
-    spg: { max: 2.2 },      // 2.2+ SPG = elite defensivo
-    bpg: { max: 2.5 },      // 2.5+ BPG = elite rim protector
-    fg_pct: { max: 0.650 }, // 65% FG = eficiência elite NBA
-    three_pct: { max: 0.480 }, // 48% 3PT = shooter histórico (Curry territory)
-    ft_pct: { max: 0.950 }  // 95% FT = precisão histórica
+    ppg: { max: 28.0 },
+    rpg: { max: 13.0 },
+    apg: { max: 10.0 },
+    spg: { max: 2.2 },
+    bpg: { max: 2.5 },
+    fg_pct: { max: 0.650 },
+    three_pct: { max: 0.480 },
+    ft_pct: { max: 0.950 }
   }
 };
 
@@ -174,7 +210,7 @@ export class ProspectRankingAlgorithm {
   /**
    * Normaliza uma estatística para uma escala de 0 a 10.
    * @param {number} value - O valor da estatística (ex: 15.5 ppg).
-   * @param {string} context - 'college' ou 'nba'.
+   * @param {string} context - 'college', 'nbb', 'high_school', 'ote', ou 'nba'.
    * @param {string} statName - O nome da estatística (ex: 'ppg').
    * @returns {number} - A estatística normalizada (0-10).
    */
@@ -191,7 +227,7 @@ export class ProspectRankingAlgorithm {
   parseHeightToInches(heightData) {
     if (heightData === null || typeof heightData === 'undefined') return null;
 
-    // Handle object format from prospect: { us: "6'5"", intl: 196 }
+    // Handle object format from prospect: { us: "6'5''", intl: 196 }
     if (typeof heightData === 'object' && heightData.us) {
         if (typeof heightData.us === 'string' && heightData.us.includes("'")) {
             const parts = heightData.us.split("'");
@@ -202,7 +238,7 @@ export class ProspectRankingAlgorithm {
         return parseFloat(heightData.us) || null;
     }
 
-    // Handle string format: "6'5"" or "6-5"
+    // Handle string format: "6'5''" or "6-5"
     if (typeof heightData === 'string') {
       if (heightData.includes("'")) {
         const parts = heightData.split("'");
@@ -228,7 +264,7 @@ export class ProspectRankingAlgorithm {
     return isNaN(numericValue) ? null : numericValue;
   }
 
-  // Helper to parse wingspan from text (e.g., "7'0"") to inches
+  // Helper to parse wingspan from text (e.g., "7'0''") to inches
   parseWingspanToInches(wingspanData) {
     if (wingspanData === null || typeof wingspanData === 'undefined') return null;
     
@@ -243,7 +279,7 @@ export class ProspectRankingAlgorithm {
       return parseFloat(wingspanData.us) || null;
     }
     
-    // Handle string format with feet/inches: "7'0" or "7'0""
+    // Handle string format with feet/inches: "7'0" or "7'0''"
     if (typeof wingspanData === 'string' && wingspanData.includes("'")) {
       const parts = wingspanData.split("'");
       const feet = parseInt(parts[0]);
@@ -356,12 +392,15 @@ export class ProspectRankingAlgorithm {
       let gamesPlayed = p.games_played || 0;  // Jogos para validação de dados
       let competitionMultiplier = 1.0;   // Multiplicador baseado na liga
 
-      // 🔍 DETECÇÃO INTELIGENTE DA FONTE DE DADOS
-      // 
-      // O algoritmo adapta-se automaticamente ao nível de dados disponíveis:
-      // - College/Pro: Estatísticas oficiais completas
-      // - High School: Dados limitados, algoritmo adaptado
-      // - OTE: Tratamento especial para esse pathway específico
+      // 🔍 DETECÇÃO DE CONTEXTO PARA NORMALIZAÇÃO
+      let prospectContext = 'college'; // Padrão
+      if (p.league === 'NBB') {
+        prospectContext = 'nbb';
+      } else if (p.league === 'Overtime Elite' || p.league === 'OTE') {
+        prospectContext = 'ote';
+      } else if (p.stats_source === 'high_school_total' && !(p.league === 'Overtime Elite' || p.league === 'OTE')) {
+        prospectContext = 'high_school';
+      }
       
       const hasCollegeStats = p.ppg > 0;
       const hasHighSchoolStats = p.high_school_stats && 
@@ -372,13 +411,7 @@ export class ProspectRankingAlgorithm {
 
       if (isHighSchoolData) {
         // 🏫 LÓGICA ESPECIALIZADA PARA DADOS DE HIGH SCHOOL
-        // 
-        // High school stats são menos confiáveis que college, então ajustamos
-        // os pesos para dar mais ênfase em atributos físicos e habilidades técnicas
-        
         const hsStats = p.high_school_stats?.season_total || {};
-        
-        // Para prospectos OTE, usar dados do nível superior se hsStats estiver vazio
         const useTopLevelStats = isOTE && (!hsStats.games_played || hsStats.games_played === 0);
         
         if (useTopLevelStats) {
@@ -387,15 +420,6 @@ export class ProspectRankingAlgorithm {
           gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
         }
 
-        // 🎯 REBALANCEAMENTO DE PESOS PARA HIGH SCHOOL
-        // 
-        // Para prospects de high school, as estatísticas são menos confiáveis
-        // devido à variação na qualidade da competição. Ajustamos os pesos:
-        // 
-        // ⬇️ Menos peso em stats (25% -> 10%) - dados menos confiáveis
-        // ⬆️ Mais peso em físico (20% -> 30%) - mais predictivo nessa idade
-        // ⬆️ Mais peso em habilidades (30% -> 35%) - fundamentais técnicos
-        
         currentWeights = {
           basicStats: { weight: 0.25, metrics: this.weights.basicStats.metrics },
           advancedStats: { weight: 0.10, metrics: this.weights.advancedStats.metrics },
@@ -403,13 +427,7 @@ export class ProspectRankingAlgorithm {
           technicalSkills: { weight: 0.35, metrics: this.weights.technicalSkills.metrics }
         };
 
-        // 📊 CÁLCULO DE ESTATÍSTICAS BÁSICAS - HIGH SCHOOL
         if (useTopLevelStats) {
-          // 🎓 CASOS ESPECIAIS: Prospectos OTE (Overtime Elite)
-          // 
-          // OTE é um programa profissional para jovens talentos que pula o college.
-          // Usamos dados do nível superior quando disponíveis.
-          
           basicStats = {
             ppg: p.total_points && gamesPlayed > 0 ? (p.total_points / gamesPlayed) : (p.ppg || 0),
             rpg: p.total_rebounds && gamesPlayed > 0 ? (p.total_rebounds / gamesPlayed) : (p.rpg || 0),
@@ -423,14 +441,12 @@ export class ProspectRankingAlgorithm {
             three_pt_attempts: p.three_pt_attempts || 0,
           };
           
-          // 3. Calcular as métricas avançadas possíveis para OTE
           const ts_denominator = 2 * (p.total_field_goal_attempts + 0.44 * p.ft_attempts);
           advancedStats.ts_percent = ts_denominator > 0 ? (p.total_points / ts_denominator) : 0;
           
           const efg_denominator = p.total_field_goal_attempts;
           advancedStats.efg_percent = efg_denominator > 0 ? ((p.two_pt_makes + p.three_pt_makes + 0.5 * p.three_pt_makes) / efg_denominator) : 0;
         } else {
-          // Lógica original para dados de high school
           basicStats = {
             ppg: hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0,
             rpg: hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0,
@@ -444,7 +460,6 @@ export class ProspectRankingAlgorithm {
             three_pt_attempts: hsStats['3pa'] || 0,
           };
           
-          // 3. Calcular as métricas avançadas possíveis (TS%, eFG%)
           const ts_denominator = 2 * (hsStats.fga + 0.44 * hsStats.fta);
           advancedStats.ts_percent = ts_denominator > 0 ? (hsStats.pts / ts_denominator) : 0;
           
@@ -572,6 +587,7 @@ export class ProspectRankingAlgorithm {
 
       const draftProjection = this.calculateDraftProjection(finalTotalScore, p, lowGamesRisk);
       const tier = this.calculateTier(finalTotalScore);
+      const prospectArchetypes = this.getArchetypeKeys(basicStats, p.position);
 
       return {
         totalScore: parseFloat(finalTotalScore.toFixed(2)),
@@ -581,7 +597,7 @@ export class ProspectRankingAlgorithm {
         tier: tier,
         draftProjection,
         nbaReadiness: this.assessNBAReadiness(finalTotalScore, flags, lowGamesRisk),
-        comparablePlayers: await this.findComparablePlayers(p, physical, basicStats),
+        comparablePlayers: await this.findComparablePlayers(p, physical, basicStats, prospectContext, prospectArchetypes),
         flags: flags,
         calculatedStats: {
           basic: basicStats,
@@ -602,6 +618,54 @@ export class ProspectRankingAlgorithm {
         calculatedStats: { basic: {}, advanced: {} }
       };
     }
+  }
+
+  /**
+   * Gera um conjunto de "badges" de arquétipo baseadas nas estatísticas de um jogador.
+   * @param {object} stats - Objeto com as estatísticas (ppg, apg, etc.).
+   * @param {string} position - A posição do jogador.
+   * @returns {Set<string>} - Um conjunto de chaves de arquétipo (ex: 'SNIPER').
+   */
+  getArchetypeKeys(stats, position) {
+    const keys = new Set();
+    if (!stats) return keys;
+
+    const pos = position || '';
+    const ast_tov_ratio = (stats.tov_per_game > 0) ? (stats.apg / stats.tov_per_game) : (stats.apg > 0 ? 99 : 0);
+
+    // --- Shooting Archetypes ---
+    if (stats.three_pct >= 0.35) {
+        keys.add('SHOOTER_THREAT');
+    }
+    if (stats.three_pct >= 0.38 && (stats.three_pt_attempts >= 25 || stats.ppg > 15)) {
+        keys.add('SHOOTER');
+    }
+    if (stats.three_pct >= 0.38 && stats.ft_pct < 0.70 && (stats.three_pt_attempts >= 25 || stats.ppg > 15)) {
+        keys.add('ENIGMATIC_SHOOTER');
+    }
+    if (stats.three_pct >= 0.40 && stats.ft_pct >= 0.85 && (stats.three_pt_attempts >= 40 || stats.ppg > 18)) {
+        keys.add('SNIPER');
+    }
+
+    // --- Playmaking Archetypes ---
+    if (stats.apg >= 4.0 && ast_tov_ratio >= 1.8 && pos.includes('G')) {
+        keys.add('PLAYMAKER');
+    }
+
+    // --- Defensive Archetypes ---
+    if (stats.spg >= 1.2 || stats.bpg >= 1.2) {
+        keys.add('DEFENSIVE_IMPACT');
+    }
+    if (stats.bpg >= 1.8 && (pos.includes('C') || pos.includes('F'))) {
+        keys.add('RIM_PROTECTOR');
+    }
+
+    // --- Scoring Archetype ---
+    if (stats.ppg >= 18 && stats.fg_pct < 0.44) {
+        keys.add('VOLUME_SCORER');
+    }
+
+    return keys;
   }
 
   generateProspectFlags(prospect, basicStats, advancedStats, physical) {
@@ -926,22 +990,34 @@ export class ProspectRankingAlgorithm {
    * Usa estatísticas normalizadas e pesos de arquétipo.
    * @param {object} prospectStats - Estatísticas do prospecto (college).
    * @param {object} nbaPlayerCareerStats - Estatísticas de carreira do jogador da NBA.
+   * @param {string} prospectContext - O contexto do prospecto ('college', 'nbb', etc.).
    * @returns {number} - Score de similaridade (0-1).
    */
-  calculateArchetypeSimilarity(prospectStats, nbaPlayerCareerStats) {
+  calculateArchetypeSimilarity(prospectStats, nbaPlayerCareerStats, prospectContext = 'college') {
     if (!prospectStats || !nbaPlayerCareerStats || Object.keys(nbaPlayerCareerStats).length === 0) return 0;
 
     let totalWeightedDifference = 0;
     let totalWeight = 0;
 
-    for (const statName in ARCHETYPE_WEIGHTS) {
-      const weight = ARCHETYPE_WEIGHTS[statName];
+    // Dynamic weights based on prospect's PPG
+    let currentArchetypeWeights = { ...ARCHETYPE_WEIGHTS };
+    if (prospectStats.ppg < 5.0) { // If prospect has low scoring volume
+        currentArchetypeWeights.ppg = 5; // Reduce PPG weight
+        currentArchetypeWeights.rpg = 5; // Reduce RPG weight
+        currentArchetypeWeights.apg = 5; // Reduce APG weight
+        currentArchetypeWeights.three_pct = 25; // Increase 3PT% weight significantly
+        currentArchetypeWeights.ft_pct = 20; // Increase FT% weight
+        currentArchetypeWeights.fg_pct = 15; // Adjust FG% weight
+    }
+
+    for (const statName in currentArchetypeWeights) { // Use dynamic weights
+      const weight = currentArchetypeWeights[statName];
       
       const prospectValue = prospectStats[statName];
       const nbaValue = nbaPlayerCareerStats[statName];
 
       if (prospectValue !== undefined && prospectValue !== null && nbaValue !== undefined && nbaValue !== null) {
-        const normalizedProspect = this.normalizeStat(prospectValue, 'college', statName);
+        const normalizedProspect = this.normalizeStat(prospectValue, prospectContext, statName);
         const normalizedNba = this.normalizeStat(nbaValue, 'nba', statName);
 
         const difference = Math.abs(normalizedProspect - normalizedNba);
@@ -1004,7 +1080,7 @@ export class ProspectRankingAlgorithm {
     return readiness;
   }
 
-  async findComparablePlayers(player, physical, stats) {
+  async findComparablePlayers(player, physical, stats, prospectContext = 'college', prospectArchetypes = new Set()) {
     if (!this.supabase || !player || !player.position || !physical || !stats) {
       return [];
     }
@@ -1055,13 +1131,23 @@ export class ProspectRankingAlgorithm {
         const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
         const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0);
 
-        const archetypeSimilarity = this.calculateArchetypeSimilarity(stats, nbaCareerStats);
+        const archetypeSimilarity = this.calculateArchetypeSimilarity(stats, nbaCareerStats, prospectContext);
 
         if (archetypeSimilarity === 0) {
             return { player: nbaPlayer, similarity: 0 };
         }
 
-        const totalSimilarity = (positionMatch * 0.25) + (heightSimilarity * 0.35) + (archetypeSimilarity * 0.40);
+        const nbaArchetypes = this.getArchetypeKeys(nbaCareerStats, nbaPlayer.position);
+        const intersection = new Set([...prospectArchetypes].filter(x => nbaArchetypes.has(x)));
+        
+        let styleModifier = 1.0; // Default: no change
+        if (prospectArchetypes.size > 0 && intersection.size > 0) {
+            styleModifier = 1.20 + ((intersection.size - 1) * 0.10);
+        } else if (prospectArchetypes.size > 0 && intersection.size === 0) {
+            styleModifier = 0.75;
+        }
+
+        const totalSimilarity = ((positionMatch * 0.25) + (heightSimilarity * 0.30) + (archetypeSimilarity * 0.45)) * styleModifier;
 
         return {
             player: nbaPlayer,

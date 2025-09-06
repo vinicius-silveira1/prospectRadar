@@ -3,8 +3,6 @@ import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
-const rankingAlgorithm = new ProspectRankingAlgorithm(supabase);
-
 export default function useProspect(id) {
   const [prospect, setProspect] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,6 +10,7 @@ export default function useProspect(id) {
 
   useEffect(() => {
     const fetchProspect = async () => {
+      const rankingAlgorithm = new ProspectRankingAlgorithm(supabase); // MOVIDO PARA CÁ
       try {
         setLoading(true);
         const { data, error: dbError } = await supabase.from('prospects').select('*').eq('id', id).single();

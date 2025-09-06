@@ -1,5 +1,14 @@
-/**
+// Helper function defined outside for best practice
+const parseHeight = (heightStr) => {
+  if (!heightStr || typeof heightStr !== 'string') return 0;
+  const parts = heightStr.replace('"', '').split("'");
+  if (parts.length === 2) {
+    return parseInt(parts[0], 10) * 12 + parseInt(parts[1], 10);
+  }
+  return 0;
+};
 
+/**
  * BADGE DEFINITIONS
  * ----------------------------------------------------------------
  * Each badge has a label, description, and icon. This provides a
@@ -109,6 +118,25 @@ export const badges = {
     description: 'Vive no limite de faltas! Pode ser um risco para a equipe.',
     icon: '🚨',
   },
+  // Situational Badges
+  ENIGMATIC_SHOOTER: {
+    key: 'ENIGMATIC_SHOOTER',
+    label: 'Arremessador Enigmático',
+    description: 'Apresenta um ótimo aproveitamento da linha de 3 pontos, mas seu baixo percentual de lances livres levanta questões sobre a consistência de sua mecânica a longo prazo.',
+    icon: '❓',
+  },
+  SLEEPING_GIANT: {
+    key: 'SLEEPING_GIANT',
+    label: 'Fera Adormecida',
+    description: 'Possui ferramentas físicas de elite, mas sua produção em quadra ainda não corresponde ao seu potencial físico. Um projeto de alto risco e alta recompensa.',
+    icon: '💎',
+  },
+  NICHE_SPECIALIST: {
+    key: 'NICHE_SPECIALIST',
+    label: 'Especialista de Nicho',
+    description: 'Jogador que possui uma única habilidade em nível de elite, mas com contribuições medianas nas outras áreas do jogo. Pode preencher um papel muito específico em um time.',
+    icon: '🧩',
+  },
 };
 
 /**
@@ -128,9 +156,7 @@ export const assignBadges = (prospect) => {
     const hs = prospect.high_school_stats?.season_total || {};
     const gp = Number(hs.games_played || 0);
     
-    // Para prospectos OTE sem high_school_stats, usar dados do nível superior
     if (isOTE && gp === 0) {
-      // Usar estatísticas do nível superior para prospectos OTE
       const gamesPlayed = Number(prospect.games_played || 0);
       const calculatedPPG = gamesPlayed > 0 ? (Number(prospect.total_points || 0) / gamesPlayed) : Number(prospect.ppg || 0);
       const calculatedRPG = gamesPlayed > 0 ? (Number(prospect.total_rebounds || 0) / gamesPlayed) : Number(prospect.rpg || 0);
@@ -147,8 +173,8 @@ export const assignBadges = (prospect) => {
         spg: calculatedSPG,
         bpg: calculatedBPG,
         tpg: gamesPlayed > 0 ? (Number(prospect.turnovers || 0) / gamesPlayed) : 0,
-        orpg: 0, // Não disponível
-        fpg: 0, // Não disponível
+        orpg: 0, 
+        fpg: 0,
         three_pct: Number(prospect.three_pct || 0),
         ft_pct: Number(prospect.ft_pct || 0),
         fg_pct: Number(prospect.fg_pct || 0),
@@ -165,9 +191,7 @@ export const assignBadges = (prospect) => {
     } else if (gp === 0) {
       return [];
     } else {
-      // Lógica original para prospectos com high_school_stats válidos
       const two_pt_attempts = Number(hs['2fga'] || 0);
-
       p = {
         ...prospect,
         is_hs: true,
@@ -225,15 +249,14 @@ export const assignBadges = (prospect) => {
     };
   }
 
-  // Debug para OTE prospects
+  p.height_in_inches = parseHeight(p.height);
+
   const assignedBadges = new Set();
-  
-  // Declarar position early para usar em todas as seções
-  const position = (p.position || '').trim(); // Limpar espaços e quebras de linha
+  const position = (p.position || '').trim();
 
   // --- Shooting Badges ---
-  const hs_elite_three_attempts = p.is_hs ? 45 : 75; // Ajustado: 50->45 (HS), 80->75 (College)
-  const hs_promising_three_attempts = p.is_hs ? 25 : 45; // Ajustado: 50->45 (College)
+  const hs_elite_three_attempts = p.is_hs ? 45 : 75;
+  const hs_promising_three_attempts = p.is_hs ? 25 : 45;
   const hs_promising_ft_attempts = p.is_hs ? 20 : 30;
   
   if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= hs_elite_three_attempts) {
@@ -256,17 +279,17 @@ export const assignBadges = (prospect) => {
   // --- Playmaking Badge ---
   const assistToTurnoverRatio = p.tpg > 0 ? p.apg / p.tpg : p.apg > 0 ? 99 : 0;
   if (p.is_hs) {
-    if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL); // Ajustado: 2.0->1.8, 4.0->4.2
+    if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
   } else {
     const advAssistToTurnoverRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : p.ast_percent;
-    if (advAssistToTurnoverRatio >= 1.4 && p.ast_percent >= 22) assignedBadges.add(badges.FLOOR_GENERAL); // Ajustado: 2.0->1.4, 20->22
+    if (advAssistToTurnoverRatio >= 1.4 && p.ast_percent >= 22) assignedBadges.add(badges.FLOOR_GENERAL);
   }
 
   // --- Scoring & Rebounding Badges ---
   if (p.ts_percent >= 0.62) assignedBadges.add(badges.EFFICIENT_SCORER);
   if (p.two_fg_pct >= 0.60 && p.two_pt_attempts >= (p.is_hs ? 50 : 100)) assignedBadges.add(badges.ELITE_FINISHER);
   if (p.is_hs) {
-    if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE); // Reduzido de 9.5 para 7.0
+    if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
   } else {
     if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
   }
@@ -288,29 +311,52 @@ export const assignBadges = (prospect) => {
   }
 
   // --- Archetype & Negative Badges ---
-  // Usar diferentes ratios para high school vs college
   const finalRatio = p.is_hs ? assistToTurnoverRatio : (p.tov_percent > 0 ? p.ast_percent / p.tov_percent : p.ast_percent);
-  const ratioThreshold = p.is_hs ? 1.5 : 1.2; // Threshold aumentado para college: 0.3->1.2
+  const ratioThreshold = p.is_hs ? 1.5 : 1.2;
   
   if (p.ts_percent >= 0.58 && finalRatio >= ratioThreshold && p.ppg < 15) assignedBadges.add(badges.THE_CONNECTOR);
   if (p.fpg >= 3.5) assignedBadges.add(badges.FOUL_MAGNET);
 
   // --- General Badges ---
   const contributions = p.is_hs ? 
-    [p.ppg >= 8, p.rpg >= 4, p.apg >= 2, p.spg >= 0.8, p.bpg >= 0.6] : // Thresholds para high school
-    [p.ppg >= 12, p.rpg >= 5, p.apg >= 3, p.spg >= 1.0, p.bpg >= 0.8]; // Thresholds para college
+    [p.ppg >= 8, p.rpg >= 4, p.apg >= 2, p.spg >= 0.8, p.bpg >= 0.6] :
+    [p.ppg >= 12, p.rpg >= 5, p.apg >= 3, p.spg >= 1.0, p.bpg >= 0.8];
   if (contributions.filter(Boolean).length >= 4) assignedBadges.add(badges.SWISS_ARMY_KNIFE);
   const pointsPer36 = p.minutes_played > 0 ? (p.total_points / p.minutes_played) * 36 : 0;
   if (pointsPer36 >= 25 && p.minutes_played > 80) assignedBadges.add(badges.MICROWAVE_SCORER);
   
-  // Iron Man badge com critérios diferenciados
   const minutesPerGame = p.games_played > 0 ? p.minutes_played / p.games_played : 0;
   if (p.is_hs) {
-    // High School: temporada mais curta, critérios mais flexíveis
     if (p.games_played >= 18 && minutesPerGame >= 24) assignedBadges.add(badges.IRON_MAN);
   } else {
-    // College/Pro: temporada mais longa, critérios mais rigorosos
     if (p.games_played >= 22 && minutesPerGame >= 26) assignedBadges.add(badges.IRON_MAN);
+  }
+
+  // --- Situational Badges (Proxy Logic) ---
+  const enigmatic_ft_attempts = 10; // Ajustado de 15 para 10
+  const enigmatic_three_attempts = p.is_hs ? 15 : 25; // Ajustado de 20/30
+  if (p.three_pct >= 0.39 && p.ft_pct <= 0.75 && p.three_pt_attempts >= enigmatic_three_attempts && p.ft_attempts >= enigmatic_ft_attempts) { // Ajustado ft_pct <= 0.75
+    if (!assignedBadges.has(badges.ELITE_SHOOTER) && !assignedBadges.has(badges.PROMISING_SHOOTER)) {
+        assignedBadges.add(badges.ENIGMATIC_SHOOTER);
+    }
+  }
+
+  const ppg_threshold_giant = p.is_hs ? 10 : 6;
+  const rpg_threshold_giant = p.is_hs ? 5 : 3;
+  if (p.height_in_inches >= 80 && p.ppg < ppg_threshold_giant && p.rpg < rpg_threshold_giant) {
+      assignedBadges.add(badges.SLEEPING_GIANT);
+  }
+
+  const high_rarity_keys = ['ELITE_SHOOTER', 'ELITE_DEFENDER', 'FLOOR_GENERAL', 'RIM_PROTECTOR', 'EFFICIENT_SCORER', 'ELITE_FINISHER', 'REBOUNDING_FORCE', 'EXPLOSIVO'];
+  let high_rarity_count = 0;
+  assignedBadges.forEach(badge => {
+      if (high_rarity_keys.includes(badge.key)) {
+          high_rarity_count++;
+      }
+  });
+
+  if (high_rarity_count === 1) {
+      assignedBadges.add(badges.NICHE_SPECIALIST);
   }
 
   return Array.from(assignedBadges);
@@ -347,6 +393,11 @@ export const BADGE_CATEGORIES = {
     name: 'Intangibles',
     color: 'from-cyan-500 to-teal-600',
     icon: '💎'
+  },
+  SITUATIONAL: {
+    name: 'Situational',
+    color: 'from-gray-500 to-gray-600',
+    icon: '⚠️'
   }
 };
 
@@ -399,7 +450,10 @@ const BADGE_CATEGORY_MAP = {
   THE_CONNECTOR: 'INTANGIBLES',
   SWISS_ARMY_KNIFE: 'INTANGIBLES',
   IRON_MAN: 'INTANGIBLES',
-  FOUL_MAGNET: 'INTANGIBLES'
+  FOUL_MAGNET: 'INTANGIBLES',
+  ENIGMATIC_SHOOTER: 'SITUATIONAL',
+  SLEEPING_GIANT: 'SITUATIONAL',
+  NICHE_SPECIALIST: 'SITUATIONAL'
 };
 
 // Mapeamento de badges para raridades  
@@ -414,11 +468,14 @@ const BADGE_RARITY_MAP = {
   ELITE_FINISHER: 'EPIC',
   REBOUNDING_FORCE: 'EPIC',
   EXPLOSIVO: 'EPIC',
+  SLEEPING_GIANT: 'EPIC',
   PROMISING_SHOOTER: 'RARE',
   HIGH_MOTOR: 'RARE',
   THE_CONNECTOR: 'RARE',
   MICROWAVE_SCORER: 'RARE',
   IRON_MAN: 'RARE',
+  ENIGMATIC_SHOOTER: 'RARE',
+  NICHE_SPECIALIST: 'RARE',
   FOUL_MAGNET: 'COMMON'
 };
 
