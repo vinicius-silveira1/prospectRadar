@@ -8,6 +8,20 @@ const parseHeight = (heightStr) => {
   return 0;
 };
 
+const getLeagueTier = (league) => {
+  if (!league) return 'ncaa'; // Default tier
+  const lowerLeague = league.toLowerCase();
+
+  if (lowerLeague.includes('nbb') || lowerLeague.includes('acb') || lowerLeague.includes('euroleague')) {
+    return 'pro';
+  }
+  if (lowerLeague.includes('ncaa')) {
+    return 'ncaa';
+  }
+  return 'ncaa'; // Default for other leagues
+};
+
+
 /**
  * BADGE DEFINITIONS
  * ----------------------------------------------------------------
@@ -28,12 +42,24 @@ export const badges = {
     description: 'Mostra um arremesso consistente e eficiente, com potencial para se tornar uma ameaça de elite. Olho nele!',
     icon: '🌟',
   },
+  BOMBER: {
+    key: 'BOMBER',
+    label: 'Bombardeiro',
+    description: 'Um arremessador de alto volume que estica a quadra, forçando a defesa a marcá-lo de muito longe.',
+    icon: '💣',
+  },
   // Playmaking
   FLOOR_GENERAL: {
     key: 'FLOOR_GENERAL',
     label: 'Cérebro da Quadra',
     description: 'O maestro da equipe! Dita o ritmo, enxerga jogadas que ninguém vê e faz todos jogarem melhor.',
     icon: '🧠',
+  },
+  ENGINE: {
+    key: 'ENGINE',
+    label: 'Motor da Equipe',
+    description: 'Comanda o ataque com um alto volume de criação de jogadas, sendo o principal catalisador ofensivo.',
+    icon: '⚙️',
   },
   // Defense
   ELITE_DEFENDER: {
@@ -50,9 +76,9 @@ export const badges = {
   },
   PERIMETER_DEFENDER: {
     key: 'PERIMETER_DEFENDER',
-    label: 'Chiclete',
-    description: 'Gruda no adversário e não solta mais! Marcação pegajosa que incomoda muito no perímetro.',
-    icon: '🍬',
+    label: 'Guardião do Perímetro',
+    description: 'Especialista em defender a linha de 3 pontos, pressionando arremessadores e fechando espaços.',
+    icon: '⚔️',
   },
   // Scoring & Efficiency
   EFFICIENT_SCORER: {
@@ -111,6 +137,60 @@ export const badges = {
     description: 'Sempre em quadra, nunca se machuca. Aguenta o tranco, joga todos os minutos e é a base da equipe.',
     icon: '🦾',
   },
+  JUMBO_CREATOR: {
+      key: 'JUMBO_CREATOR',
+      label: 'Armador Gigante',
+      description: 'Um criador primário com a altura de um ala, usando seu tamanho para ver por cima da defesa e criar vantagens.',
+      icon: '🦒',
+  },
+  THREE_AND_D: {
+      key: 'THREE_AND_D',
+      label: '3&D',
+      description: 'Especialista em arremessos de três e defesa de perímetro, o arquétipo de especialista mais cobiçado da liga.',
+      icon: ['🎯', '🔒'],
+  },
+  POINT_FORWARD: {
+    key: 'POINT_FORWARD',
+    label: 'Point Forward',
+    description: 'Um ala com a visão de jogo e a capacidade de passe de um armador, capaz de iniciar o ataque e criar para os companheiros.',
+    icon: '⏩',
+  },
+  TWO_WAY_PLAYER: {
+      key: 'TWO_WAY_PLAYER',
+      label: 'Ameaça Dupla',
+      description: 'Impacta o jogo nos dois lados da quadra, combinando poder de fogo ofensivo com excelência defensiva.',
+      icon: ['⚔️', '🔥'],
+  },
+  GLASS_CLEANER: {
+      key: 'GLASS_CLEANER',
+      label: 'Limpador de Vidros',
+      description: 'Domina a área pintada, não apenas pegando rebotes em um nível de elite, mas também convertendo-os em pontos fáceis.',
+      icon: '🧹',
+  },
+  UNICORN: {
+      key: 'UNICORN',
+      label: 'Unicórnio',
+      description: 'Um jogador com altura de pivô ("6\'10"+") que possui a habilidade de arremessar de longa distância, um arquétipo raro e revolucionário.',
+      icon: '🦄',
+  },
+  DEFENSIVE_PEST: {
+      key: 'DEFENSIVE_PEST',
+      label: 'Peste Defensiva',
+      description: 'Um defensor implacável no perímetro, que combina técnica e posicionamento com um motor incansável para sufocar o adversário.',
+      icon: '🦟',
+  },
+  STRETCH_BIG: {
+      key: 'STRETCH_BIG',
+      label: 'Stretch Big',
+      description: 'Um jogador de garrafão (PF/C) que pode espaçar a quadra com seu arremesso de três, tirando o protetor de aro adversário da área pintada.',
+      icon: '📏',
+  },
+  SLASHING_PLAYMAKER: {
+      key: 'SLASHING_PLAYMAKER',
+      label: 'Criador Infiltrador',
+      description: 'Um armador explosivo que ataca a cesta com força, sendo tanto uma ameaça de finalização quanto de criação para os outros.',
+      icon: ['👟 ', '💡'],
+  },
   // Negative Badge
   FOUL_MAGNET: {
     key: 'FOUL_MAGNET',
@@ -122,7 +202,7 @@ export const badges = {
   ENIGMATIC_SHOOTER: {
     key: 'ENIGMATIC_SHOOTER',
     label: 'Arremessador Enigmático',
-    description: 'Apresenta um ótimo aproveitamento da linha de 3 pontos, mas seu baixo percentual de lances livres levanta questões sobre a consistência de sua mecânica a longo prazo.',
+    description: 'Apresenta um ótimo aproveitamento da linha de 3 pontos, mas seu baixo percentual de lances livres levanta questões sobre a consistência de sua mecânica.',
     icon: '❓',
   },
   SLEEPING_GIANT: {
@@ -150,7 +230,7 @@ export const assignBadges = (prospect) => {
   const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
   const isHighSchoolData = prospect.stats_source === 'high_school_total' || isOTE;
   
-  let p = {}; // Unified prospect stats object.
+  let p = {}; // Unified prospect stats object. 
 
   if (isHighSchoolData) {
     const hs = prospect.high_school_stats?.season_total || {};
@@ -178,10 +258,8 @@ export const assignBadges = (prospect) => {
         three_pct: Number(prospect.three_pct || 0),
         ft_pct: Number(prospect.ft_pct || 0),
         fg_pct: Number(prospect.fg_pct || 0),
-        // Adicionar os campos necessários para badges
         ft_attempts: Number(prospect.ft_attempts || 0),
         three_pt_attempts: Number(prospect.three_pt_attempts || 0),
-        // Calcular estatísticas avançadas básicas
         ts_percent: Number(prospect.ts_percent || 0),
         games_played: gamesPlayed,
         minutes_played: Number(prospect.minutes_played || 0),
@@ -246,75 +324,158 @@ export const assignBadges = (prospect) => {
       total_points: Number(prospect.total_points || 0),
       minutes_played: Number(prospect.minutes_played || 0),
       games_played: gp,
+      dbpm: Number(prospect.ncaa_raw_stats?.advanced?.dbpm || prospect.dbpm || 0),
     };
   }
 
-  p.height_in_inches = parseHeight(p.height);
+  p.height_in_inches = parseHeight(p.height.us);
 
   const assignedBadges = new Set();
+  const leagueTier = isHighSchoolData ? 'hs' : getLeagueTier(p.league);
+  
+  // --- Consolidated Position Definitions ---
   const position = (p.position || '').trim();
+  const isPointGuard = position.includes('PG');
+  const isShootingGuard = position.includes('SG');
+  const isSmallForward = position.includes('SF');
+  const isPowerForward = position.includes('PF');
+  const isCenter = position.includes('C');
+  const isGuard = isPointGuard || isShootingGuard;
+  const isWing = isShootingGuard || isSmallForward;
+  const isForward = isSmallForward || isPowerForward;
+  const isBig = isPowerForward || isCenter;
 
   // --- Shooting Badges ---
-  const hs_elite_three_attempts = p.is_hs ? 45 : 75;
-  const hs_promising_three_attempts = p.is_hs ? 25 : 45;
-  const hs_promising_ft_attempts = p.is_hs ? 20 : 30;
-  
-  if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= hs_elite_three_attempts) {
-    assignedBadges.add(badges.ELITE_SHOOTER);
-  } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= hs_promising_three_attempts) || (p.ft_pct >= 0.82 && p.ft_attempts >= hs_promising_ft_attempts)) {
-    assignedBadges.add(badges.PROMISING_SHOOTER);
+  if (leagueTier === 'hs') {
+    if (p.games_played >= 7) {
+      if (p.three_pct >= 0.42 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 50) {
+        assignedBadges.add(badges.ELITE_SHOOTER);
+      } else if ((p.three_pct >= 0.40 && p.three_pt_attempts >= 30) || (p.ft_pct >= 0.82 && p.ft_attempts >= 25)) {
+        assignedBadges.add(badges.PROMISING_SHOOTER);
+      }
+      if (p.three_pt_attempts >= 70 && p.three_pct >= 0.35) {
+        assignedBadges.add(badges.BOMBER);
+      }
+    }
+  } else if (leagueTier === 'ncaa') {
+    if (p.minutes_played >= 400) {
+      if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
+        assignedBadges.add(badges.ELITE_SHOOTER);
+      } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 50) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) {
+        assignedBadges.add(badges.PROMISING_SHOOTER);
+      }
+      if (p.three_pt_attempts >= 120 && p.three_pct >= 0.35) {
+        assignedBadges.add(badges.BOMBER);
+      }
+    }
+  } else { // pro
+    if (p.minutes_played >= 400) {
+      if (p.three_pct >= 0.38 && p.ft_pct >= 0.84 && p.three_pt_attempts >= 90) {
+        assignedBadges.add(badges.ELITE_SHOOTER);
+      } else if ((p.three_pct >= 0.36 && p.three_pt_attempts >= 60) || (p.ft_pct >= 0.80 && p.ft_attempts >= 40)) {
+        assignedBadges.add(badges.PROMISING_SHOOTER);
+      }
+      if (p.three_pt_attempts >= 150 && p.three_pct >= 0.33) {
+        assignedBadges.add(badges.BOMBER);
+      }
+    }
   }
 
   // --- Defense Badges ---
-  if (p.is_hs) {
-    if (p.spg >= 1.8 && p.bpg >= 1.5) assignedBadges.add(badges.ELITE_DEFENDER);
-    if (p.bpg >= 1.8 && (position.includes('PF') || position.includes('C'))) assignedBadges.add(badges.RIM_PROTECTOR); // Aumentado de 1.3 para 1.8
-    if (p.spg >= 2.2 && (position.includes('PG') || position.includes('SG') || position.includes('SF'))) assignedBadges.add(badges.PERIMETER_DEFENDER); // Aumentado de 1.5 para 2.2
-  } else {
-    if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER); // Ajuste fino: 2.2->2.5, 1.5->2.0 para ser mais seletivo
-    if (p.blk_percent >= 3.5 && (position.includes('PF') || position.includes('C'))) assignedBadges.add(badges.RIM_PROTECTOR); // Reduzido de 5.0 para 3.5
-    if (p.stl_percent >= 1.3 && (position.includes('PG') || position.includes('SG') || position.includes('SF'))) assignedBadges.add(badges.PERIMETER_DEFENDER); // Reduzido de 3.0 para 1.3
+  if (leagueTier === 'hs') {
+    if (p.games_played >= 7) {
+      if (p.spg >= 1.8 && p.bpg >= 1.5) assignedBadges.add(badges.ELITE_DEFENDER);
+      if (p.bpg >= 1.8 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+      if (p.spg >= 2.2 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+    }
+  } else if (leagueTier === 'ncaa') {
+    if (p.minutes_played >= 400) {
+      if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER);
+      if (p.blk_percent >= 3.5 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+      if (p.stl_percent >= 2.0 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+    }
+  } else { // pro
+    if (p.minutes_played >= 400) {
+      if ((p.stl_percent >= 2.2 && p.blk_percent >= 1.8) || (p.dbpm >= 4.0)) assignedBadges.add(badges.ELITE_DEFENDER);
+      if (p.blk_percent >= 3.2 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+      if (p.stl_percent >= 1.8 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+    }
   }
 
-  // --- Playmaking Badge ---
-  const assistToTurnoverRatio = p.tpg > 0 ? p.apg / p.tpg : p.apg > 0 ? 99 : 0;
-  if (p.is_hs) {
-    if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
-  } else {
-    const advAssistToTurnoverRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : p.ast_percent;
-    if (advAssistToTurnoverRatio >= 1.4 && p.ast_percent >= 22) assignedBadges.add(badges.FLOOR_GENERAL);
+  
+  // --- Playmaking Badges ---
+  const assistToTurnoverRatio = p.tpg > 0 ? p.apg / p.tpg : (p.apg > 0 ? 99 : 0);
+  if (leagueTier === 'hs') {
+    if (p.games_played >= 7) {
+      if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
+      else if (p.apg >= 4.0 && assistToTurnoverRatio >= 1.2) assignedBadges.add(badges.ENGINE);
+    }
+  } else { // ncaa or pro
+      const advAstToTovRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : (p.ast_percent > 0 ? 99 : 0);
+      if (p.minutes_played >= 400) {
+          if (leagueTier === 'ncaa') {
+              if (advAstToTovRatio >= 1.6 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
+              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.2) assignedBadges.add(badges.ENGINE);
+          } else { // pro
+              if (advAstToTovRatio >= 1.8 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
+              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE); // Elite efficiency
+              else if (p.ast_percent >= 20 && p.usg_percent >= 18 && advAstToTovRatio >= 0.8) assignedBadges.add(badges.ENGINE); // High volume catalyst with acceptable efficiency
+          }
+      }
   }
 
   // --- Scoring & Rebounding Badges ---
-  if (p.ts_percent >= 0.62) assignedBadges.add(badges.EFFICIENT_SCORER);
-  if (p.two_fg_pct >= 0.60 && p.two_pt_attempts >= (p.is_hs ? 50 : 100)) assignedBadges.add(badges.ELITE_FINISHER);
-  if (p.is_hs) {
-    if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
+  if (p.ts_percent >= 0.62) {
+      if ((leagueTier === 'hs' && p.games_played >= 7)) {
+          assignedBadges.add(badges.EFFICIENT_SCORER);
+      }
+  }
+  if (leagueTier === 'hs') {
+    if(p.games_played >= 7) {
+        if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
+    }
+  } else if (leagueTier === 'ncaa') {
+    if (p.minutes_played >= 400) {
+        if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
+    }
+  } else { // pro
+    if (p.minutes_played >= 400) {
+        if (p.trb_percent >= 13) assignedBadges.add(badges.REBOUNDING_FORCE);
+    }
+  }
+  
+  if (leagueTier === 'pro') {
+      if (p.two_fg_pct >= 0.58 && p.two_pt_attempts >= 120) assignedBadges.add(badges.ELITE_FINISHER);
   } else {
-    if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
+      if (p.two_fg_pct >= 0.60 && p.two_pt_attempts >= (isHighSchoolData ? 50 : 100)) assignedBadges.add(badges.ELITE_FINISHER);
   }
 
+
   // --- Athleticism & Motor Badges ---
-  const isGuard = position.includes('PG') || position.includes('SG');
-  const isWing = position.includes('SF');
-  const isBig = position.includes('PF') || position.includes('C');
-  if (p.is_hs) {
-    if (isGuard && p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.EXPLOSIVO);
-    if (isWing && ((p.spg >= 1.2 && p.bpg >= 1.0) || p.orpg >= 2.5)) assignedBadges.add(badges.EXPLOSIVO);
-    if (isBig && p.bpg >= 2.0 && p.orpg >= 3.0) assignedBadges.add(badges.EXPLOSIVO);
-    if (p.orpg >= 2.8 && p.spg >= 1.2) assignedBadges.add(badges.HIGH_MOTOR);
-  } else {
-    if (isGuard && p.stl_percent >= 2.5 && p.blk_percent >= 1.0) assignedBadges.add(badges.EXPLOSIVO);
-    if (isWing && ((p.stl_percent >= 1.8 && p.blk_percent >= 1.5) || p.orb_percent >= 9.0)) assignedBadges.add(badges.EXPLOSIVO);
-    if (isBig && p.blk_percent >= 5.0 && p.orb_percent >= 10.0) assignedBadges.add(badges.EXPLOSIVO);
-    if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) assignedBadges.add(badges.HIGH_MOTOR);
+  if (leagueTier === 'hs') {
+    if (p.games_played >= 7) {
+      if (isGuard && p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.EXPLOSIVO);
+      if (isSmallForward && ((p.spg >= 1.2 && p.bpg >= 1.0) || p.orpg >= 2.5)) assignedBadges.add(badges.EXPLOSIVO);
+      if (isBig && p.bpg >= 2.0 && p.orpg >= 3.0) assignedBadges.add(badges.EXPLOSIVO);
+      if (p.orpg >= 2.8 && p.spg >= 1.2) assignedBadges.add(badges.HIGH_MOTOR);
+    }
+  } else if (leagueTier === 'ncaa') {
+    if (p.minutes_played >= 400) {
+      if (isGuard && p.stl_percent >= 2.5 && p.blk_percent >= 1.0) assignedBadges.add(badges.EXPLOSIVO);
+      if (isSmallForward && ((p.stl_percent >= 1.8 && p.blk_percent >= 1.5) || p.orb_percent >= 9.0)) assignedBadges.add(badges.EXPLOSIVO);
+      if (isBig && p.blk_percent >= 5.0 && p.orb_percent >= 10.0) assignedBadges.add(badges.EXPLOSIVO);
+      if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) assignedBadges.add(badges.HIGH_MOTOR);
+    }
+  } else { // pro
+    if (p.minutes_played >= 400) {
+      if (isGuard && p.stl_percent >= 2.2 && p.blk_percent >= 0.8) assignedBadges.add(badges.EXPLOSIVO);
+      if (isSmallForward && ((p.stl_percent >= 1.6 && p.blk_percent >= 1.3) || p.orb_percent >= 8.0)) assignedBadges.add(badges.EXPLOSIVO);
+      if (isBig && p.blk_percent >= 4.5 && p.orb_percent >= 9.0) assignedBadges.add(badges.EXPLOSIVO);
+      if (p.orb_percent >= 7.0 && p.stl_percent >= 1.8) assignedBadges.add(badges.HIGH_MOTOR);
+    }
   }
 
   // --- Archetype & Negative Badges ---
-  const finalRatio = p.is_hs ? assistToTurnoverRatio : (p.tov_percent > 0 ? p.ast_percent / p.tov_percent : p.ast_percent);
-  const ratioThreshold = p.is_hs ? 1.5 : 1.2;
-  
-  if (p.ts_percent >= 0.58 && finalRatio >= ratioThreshold && p.ppg < 15) assignedBadges.add(badges.THE_CONNECTOR);
   if (p.fpg >= 3.5) assignedBadges.add(badges.FOUL_MAGNET);
 
   // --- General Badges ---
@@ -322,20 +483,21 @@ export const assignBadges = (prospect) => {
     [p.ppg >= 8, p.rpg >= 4, p.apg >= 2, p.spg >= 0.8, p.bpg >= 0.6] :
     [p.ppg >= 12, p.rpg >= 5, p.apg >= 3, p.spg >= 1.0, p.bpg >= 0.8];
   if (contributions.filter(Boolean).length >= 4) assignedBadges.add(badges.SWISS_ARMY_KNIFE);
+  
   const pointsPer36 = p.minutes_played > 0 ? (p.total_points / p.minutes_played) * 36 : 0;
   if (pointsPer36 >= 25 && p.minutes_played > 80) assignedBadges.add(badges.MICROWAVE_SCORER);
   
   const minutesPerGame = p.games_played > 0 ? p.minutes_played / p.games_played : 0;
   if (p.is_hs) {
-    if (p.games_played >= 18 && minutesPerGame >= 24) assignedBadges.add(badges.IRON_MAN);
+    if (p.games_played >= 7 && minutesPerGame >= 24) assignedBadges.add(badges.IRON_MAN);
   } else {
     if (p.games_played >= 22 && minutesPerGame >= 26) assignedBadges.add(badges.IRON_MAN);
   }
 
   // --- Situational Badges (Proxy Logic) ---
-  const enigmatic_ft_attempts = 10; // Ajustado de 15 para 10
-  const enigmatic_three_attempts = p.is_hs ? 15 : 25; // Ajustado de 20/30
-  if (p.three_pct >= 0.39 && p.ft_pct <= 0.75 && p.three_pt_attempts >= enigmatic_three_attempts && p.ft_attempts >= enigmatic_ft_attempts) { // Ajustado ft_pct <= 0.75
+  const enigmatic_ft_attempts = 10; 
+  const enigmatic_three_attempts = p.is_hs ? 15 : 25; 
+  if (p.three_pct >= 0.39 && p.ft_pct <= 0.75 && p.three_pt_attempts >= enigmatic_three_attempts && p.ft_attempts >= enigmatic_ft_attempts) { 
     if (!assignedBadges.has(badges.ELITE_SHOOTER) && !assignedBadges.has(badges.PROMISING_SHOOTER)) {
         assignedBadges.add(badges.ENIGMATIC_SHOOTER);
     }
@@ -347,7 +509,50 @@ export const assignBadges = (prospect) => {
       assignedBadges.add(badges.SLEEPING_GIANT);
   }
 
-  const high_rarity_keys = ['ELITE_SHOOTER', 'ELITE_DEFENDER', 'FLOOR_GENERAL', 'RIM_PROTECTOR', 'EFFICIENT_SCORER', 'ELITE_FINISHER', 'REBOUNDING_FORCE', 'EXPLOSIVO'];
+  // --- Combination Badges (must run after all others) ---
+  
+  
+  const hasPlaymakingBadge = assignedBadges.has(badges.FLOOR_GENERAL) || assignedBadges.has(badges.ENGINE);
+  const hasShootingBadge = assignedBadges.has(badges.PROMISING_SHOOTER) || assignedBadges.has(badges.ELITE_SHOOTER) || assignedBadges.has(badges.BOMBER);
+  const hasEliteShootingBadge = assignedBadges.has(badges.ELITE_SHOOTER);
+  const hasPerimeterDBadge = assignedBadges.has(badges.PERIMETER_DEFENDER);
+  const hasRimProtectorBadge = assignedBadges.has(badges.RIM_PROTECTOR);
+  const hasEliteDefenseBadge = hasPerimeterDBadge || hasRimProtectorBadge || assignedBadges.has(badges.ELITE_DEFENDER);
+  const hasFinisherBadge = assignedBadges.has(badges.ELITE_FINISHER);
+  const hasReboundingBadge = assignedBadges.has(badges.REBOUNDING_FORCE);
+  const hasHighMotor = assignedBadges.has(badges.HIGH_MOTOR);
+  
+  if (hasPlaymakingBadge && isPointGuard && p.height_in_inches >= 76) { // 6'4"
+      assignedBadges.add(badges.JUMBO_CREATOR);
+  }
+  if (hasShootingBadge && hasPerimeterDBadge && isWing) {
+      assignedBadges.add(badges.THREE_AND_D);
+  }
+  if (isForward && hasPlaymakingBadge) {
+      assignedBadges.add(badges.POINT_FORWARD);
+  }
+  const hasEliteOffense = hasEliteShootingBadge || hasFinisherBadge;
+  if (hasEliteOffense && hasEliteDefenseBadge) {
+      assignedBadges.add(badges.TWO_WAY_PLAYER);
+  }
+  if (hasReboundingBadge && hasFinisherBadge) {
+      assignedBadges.add(badges.GLASS_CLEANER);
+  }
+  if (p.height_in_inches >= 82 && hasShootingBadge) { // 6'10"
+      assignedBadges.add(badges.UNICORN);
+  }
+  if (hasPerimeterDBadge && hasHighMotor) {
+      assignedBadges.add(badges.DEFENSIVE_PEST);
+  }
+  if (isBig && hasShootingBadge && !assignedBadges.has(badges.UNICORN)) {
+      assignedBadges.add(badges.STRETCH_BIG);
+  }
+  if (isGuard && hasPlaymakingBadge && hasFinisherBadge) {
+      assignedBadges.add(badges.SLASHING_PLAYMAKER);
+  }
+
+  // --- Final Badges ---
+  const high_rarity_keys = ['ELITE_SHOOTER', 'ELITE_DEFENDER', 'FLOOR_GENERAL', 'RIM_PROTECTOR', 'EFFICIENT_SCORER', 'ELITE_FINISHER', 'REBOUNDING_FORCE', 'EXPLOSIVO', 'UNICORN'];
   let high_rarity_count = 0;
   assignedBadges.forEach(badge => {
       if (high_rarity_keys.includes(badge.key)) {
@@ -355,8 +560,15 @@ export const assignBadges = (prospect) => {
       }
   });
 
-  if (high_rarity_count === 1) {
+  if (high_rarity_count === 1 && !assignedBadges.has(badges.SWISS_ARMY_KNIFE)) {
       assignedBadges.add(badges.NICHE_SPECIALIST);
+  }
+  
+  // THE_CONNECTOR logic depends on other badges not being present, so it runs late.
+  if (p.ts_percent >= 0.58 && (p.tov_percent > 0 ? p.ast_percent / p.tov_percent : 99) >= 1.2 && p.ppg < 15 && !hasPlaymakingBadge) { // Original criteria for balanced connectors
+    assignedBadges.add(badges.THE_CONNECTOR);
+  } else if (p.ts_percent >= 0.60 && p.usg_percent <= 10 && p.tov_percent <= 22 && !hasPlaymakingBadge) { // High efficiency, very low usage, acceptable turnover for off-ball
+    assignedBadges.add(badges.THE_CONNECTOR);
   }
 
   return Array.from(assignedBadges);
@@ -437,10 +649,12 @@ export const BADGE_RARITIES = {
 const BADGE_CATEGORY_MAP = {
   ELITE_SHOOTER: 'SHOOTING',
   PROMISING_SHOOTER: 'SHOOTING', 
+  BOMBER: 'SHOOTING',
   ELITE_DEFENDER: 'DEFENSE',
   RIM_PROTECTOR: 'DEFENSE',
   PERIMETER_DEFENDER: 'DEFENSE',
   FLOOR_GENERAL: 'PLAYMAKING',
+  ENGINE: 'PLAYMAKING',
   EFFICIENT_SCORER: 'SCORING',
   ELITE_FINISHER: 'SCORING',
   MICROWAVE_SCORER: 'SCORING',
@@ -450,6 +664,15 @@ const BADGE_CATEGORY_MAP = {
   THE_CONNECTOR: 'INTANGIBLES',
   SWISS_ARMY_KNIFE: 'INTANGIBLES',
   IRON_MAN: 'INTANGIBLES',
+  JUMBO_CREATOR: 'INTANGIBLES',
+  THREE_AND_D: 'INTANGIBLES',
+  POINT_FORWARD: 'INTANGIBLES',
+  TWO_WAY_PLAYER: 'INTANGIBLES',
+  GLASS_CLEANER: 'INTANGIBLES',
+  UNICORN: 'INTANGIBLES',
+  DEFENSIVE_PEST: 'INTANGIBLES',
+  STRETCH_BIG: 'INTANGIBLES',
+  SLASHING_PLAYMAKER: 'INTANGIBLES',
   FOUL_MAGNET: 'INTANGIBLES',
   ENIGMATIC_SHOOTER: 'SITUATIONAL',
   SLEEPING_GIANT: 'SITUATIONAL',
@@ -462,6 +685,7 @@ const BADGE_RARITY_MAP = {
   ELITE_DEFENDER: 'LEGENDARY',
   FLOOR_GENERAL: 'LEGENDARY',
   SWISS_ARMY_KNIFE: 'LEGENDARY',
+  UNICORN: 'LEGENDARY',
   RIM_PROTECTOR: 'EPIC',
   PERIMETER_DEFENDER: 'EPIC', 
   EFFICIENT_SCORER: 'EPIC',
@@ -469,7 +693,17 @@ const BADGE_RARITY_MAP = {
   REBOUNDING_FORCE: 'EPIC',
   EXPLOSIVO: 'EPIC',
   SLEEPING_GIANT: 'EPIC',
+  ENGINE: 'EPIC',
+  JUMBO_CREATOR: 'EPIC',
+  THREE_AND_D: 'EPIC',
+  POINT_FORWARD: 'EPIC',
+  TWO_WAY_PLAYER: 'EPIC',
+  GLASS_CLEANER: 'EPIC',
+  DEFENSIVE_PEST: 'EPIC',
+  STRETCH_BIG: 'EPIC',
+  SLASHING_PLAYMAKER: 'EPIC',
   PROMISING_SHOOTER: 'RARE',
+  BOMBER: 'RARE',
   HIGH_MOTOR: 'RARE',
   THE_CONNECTOR: 'RARE',
   MICROWAVE_SCORER: 'RARE',

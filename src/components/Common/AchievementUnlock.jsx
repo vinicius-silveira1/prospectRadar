@@ -132,6 +132,14 @@ const AchievementUnlock = ({ badge }) => {
     ));
   };
 
+  // Explicitly list the keys that require special styling for double emojis
+  const doubleEmojiKeys = ['THREE_AND_D', 'TWO_WAY_PLAYER', 'SLASHING_PLAYMAKER'];
+  const isDoubleEmoji = Array.isArray(badge.icon) && doubleEmojiKeys.includes(badge.key);
+
+  const containerClasses = isDoubleEmoji
+    ? `rounded-md w-auto h-10` // Auto width, fixed height for double emojis
+    : `rounded-lg w-10 h-10`; // Original size for single emojis
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -190,18 +198,32 @@ const AchievementUnlock = ({ badge }) => {
       <div className="px-3 py-4">
         <div className="flex items-start gap-3">
           <motion.div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-lg shadow-md relative flex-shrink-0"
-            style={{ background: getCategoryColor() }}
+            className={`flex items-center justify-center text-lg shadow-md relative flex-shrink-0 ${containerClasses}`}
+            // Revert background color to default gray
+            // style={{ background: getCategoryColor() }}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
           >
-            <span className="relative z-10 text-white">{badge.icon}</span>
+            {isDoubleEmoji ? (
+              <>
+                <span className="text-xl">
+                  {badge.icon[0]}
+                </span>
+                <span className="text-xl -ml-[0.8em]">
+                  {badge.icon[1]}
+                </span>
+              </>
+            ) : (
+              <span className="text-2xl">
+                {badge.icon}
+              </span>
+            )}
             
             {/* Anel orbital para raridades Epic+ */}
             {rarityInfo.stars >= 3 && (
               <motion.div
-                className={`absolute -inset-0.5 border ${rarityInfo.color} rounded-lg opacity-60`}
+                className={`absolute -inset-0.5 border ${rarityInfo.color} rounded-md opacity-60`}
                 animate={{ rotate: 360 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               />

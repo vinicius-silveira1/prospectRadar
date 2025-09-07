@@ -1,4 +1,5 @@
 import React from "react";
+import { getBadgeCategory } from '../../lib/badges'; // Import getBadgeCategory
 
 const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = false }) => {
   const handleClick = () => {
@@ -23,6 +24,7 @@ const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = f
     }
   };
 
+  // Function to get category color, similar to AchievementUnlock.jsx
   const getBadgeColorClass = (badge) => {
     switch (badge?.category) {
       case "SHOOTING":
@@ -42,16 +44,37 @@ const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = f
     }
   };
 
-  const colorClass = getBadgeColorClass(badge);
+  const colorClass = getBadgeColorClass(badge); // Re-introduce colorClass
+
+  const doubleEmojiKeys = ['THREE_AND_D', 'TWO_WAY_PLAYER', 'SLASHING_PLAYMAKER'];
+  const isDoubleEmoji = Array.isArray(badge.icon) && doubleEmojiKeys.includes(badge.key);
+
+  const containerClasses = isDoubleEmoji
+    ? `rounded-md p-1 w-auto h-5 md:h-6` // Auto width, fixed height for double emojis
+    : `rounded-full p-1 w-5 h-5 md:w-6 md:h-6`; // Original circle for single emojis
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-full p-1 w-5 h-5 md:w-6 md:h-6 cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${colorClass} ${className}`}
+      className={`relative flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${colorClass} ${containerClasses} ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
+      // style={{ background: getCategoryColor() }} // Remove this line
     >
-      <span className="text-sm md:text-base">{badge.icon}</span>
+      {isDoubleEmoji ? (
+        <>
+          <span className="text-base"> {/* Adjusted size for double emojis */}
+            {badge.icon[0]}
+          </span>
+          <span className="text-base -ml-[0.5em]"> {/* Adjusted margin for double emojis */}
+            {badge.icon[1]}
+          </span>
+        </>
+      ) : (
+        <span className="text-sm md:text-base">
+          {badge.icon}
+        </span>
+      )}
     </div>
   );
 };
