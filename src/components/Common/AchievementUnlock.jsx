@@ -200,7 +200,7 @@ const AchievementUnlock = ({ badge }) => {
           <motion.div 
             className={`flex items-center justify-center text-lg shadow-md relative flex-shrink-0 ${containerClasses}`}
             // Revert background color to default gray
-            // style={{ background: getCategoryColor() }}
+            style={{ background: getCategoryColor() }}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
