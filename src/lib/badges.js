@@ -328,7 +328,7 @@ export const assignBadges = (prospect) => {
     };
   }
 
-  p.height_in_inches = parseHeight(p.height.us);
+  p.height_in_inches = parseHeight(p.height?.us);
 
   const assignedBadges = new Set();
   const leagueTier = isHighSchoolData ? 'hs' : getLeagueTier(p.league);
