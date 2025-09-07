@@ -1,12 +1,11 @@
 import React from "react";
-import { getBadgeCategory } from '../../lib/badges'; // Import getBadgeCategory
+import { BADGE_CATEGORY_MAP } from '../../lib/badges';
 
 const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = false }) => {
   const handleClick = () => {
     if (onBadgeClick) {
       onBadgeClick(badge);
     }
-    // No mobile, também ativa o hover effect com tap
     if (isMobile && onBadgeHover) {
       onBadgeHover(badge);
     }
@@ -24,34 +23,38 @@ const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = f
     }
   };
 
-  // Function to get category color, similar to AchievementUnlock.jsx
-  const getBadgeColorClass = (badge) => {
-    switch (badge?.category) {
+  const getBadgeStyleClasses = (badge) => {
+    const categoryKey = badge ? BADGE_CATEGORY_MAP[badge.key] : null;
+    const baseClasses = 'border-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
+    
+    switch (categoryKey) {
       case "SHOOTING":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+        return `${baseClasses} border-green-500`;
       case "DEFENSE":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+        return `${baseClasses} border-blue-500`;
       case "PLAYMAKING":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+        return `${baseClasses} border-purple-500`;
       case "SCORING":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+        return `${baseClasses} border-yellow-500`;
       case "REBOUNDING":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+        return `${baseClasses} border-pink-500`;
       case "INTANGIBLES":
-        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
+        return `${baseClasses} border-cyan-500`;
+      case "SITUATIONAL":
+        return `${baseClasses} border-gray-500`;
       default:
-        return "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+        return `${baseClasses} border-gray-500`;
     }
   };
 
-  const colorClass = getBadgeColorClass(badge); // Re-introduce colorClass
+  const colorClass = getBadgeStyleClasses(badge);
 
   const doubleEmojiKeys = ['THREE_AND_D', 'TWO_WAY_PLAYER', 'SLASHING_PLAYMAKER'];
-  const isDoubleEmoji = Array.isArray(badge.icon) && doubleEmojiKeys.includes(badge.key);
+  const isDoubleEmoji = Array.isArray(badge?.icon) && doubleEmojiKeys.includes(badge?.key);
 
   const containerClasses = isDoubleEmoji
-    ? `rounded-md p-1 w-auto h-5 md:h-6` // Auto width, fixed height for double emojis
-    : `rounded-full p-1 w-5 h-5 md:w-6 md:h-6`; // Original circle for single emojis
+    ? `rounded-md p-1 w-auto h-5 md:h-6`
+    : `rounded-full p-1 w-5 h-5 md:w-6 md:h-6`;
 
   return (
     <div
@@ -59,20 +62,19 @@ const Badge = ({ badge, onBadgeClick, onBadgeHover, className = "", isMobile = f
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      // style={{ background: getCategoryColor() }} // Remove this line
     >
       {isDoubleEmoji ? (
         <>
-          <span className="text-base"> {/* Adjusted size for double emojis */}
+          <span className="text-base"> 
             {badge.icon[0]}
           </span>
-          <span className="text-base -ml-[0.5em]"> {/* Adjusted margin for double emojis */}
+          <span className="text-base -ml-[0.5em]">
             {badge.icon[1]}
           </span>
         </>
       ) : (
         <span className="text-sm md:text-base">
-          {badge.icon}
+          {badge?.icon}
         </span>
       )}
     </div>

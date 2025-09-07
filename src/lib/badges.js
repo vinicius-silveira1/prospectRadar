@@ -170,7 +170,7 @@ export const badges = {
   UNICORN: {
       key: 'UNICORN',
       label: 'Unicórnio',
-      description: 'Um jogador com altura de pivô ("6\'10"+") que possui a habilidade de arremessar de longa distância, um arquétipo raro e revolucionário.',
+      description: 'Um jogador com altura de pivô (\'6\\\'10"+) que possui a habilidade de arremessar de longa distância, um arquétipo raro e revolucionário.',
       icon: '🦄',
   },
   DEFENSIVE_PEST: {
@@ -358,10 +358,10 @@ export const assignBadges = (prospect) => {
       }
     }
   } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 350) { // Klafke fix: Lowered from 400
       if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
         assignedBadges.add(badges.ELITE_SHOOTER);
-      } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 50) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) {
+      } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 25) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) { // Klafke fix: Lowered 3PA from 50
         assignedBadges.add(badges.PROMISING_SHOOTER);
       }
       if (p.three_pt_attempts >= 120 && p.three_pct >= 0.35) {
@@ -555,7 +555,7 @@ export const assignBadges = (prospect) => {
   const high_rarity_keys = ['ELITE_SHOOTER', 'ELITE_DEFENDER', 'FLOOR_GENERAL', 'RIM_PROTECTOR', 'EFFICIENT_SCORER', 'ELITE_FINISHER', 'REBOUNDING_FORCE', 'EXPLOSIVO', 'UNICORN'];
   let high_rarity_count = 0;
   assignedBadges.forEach(badge => {
-      if (high_rarity_keys.includes(badge.key)) {
+      if (badge && high_rarity_keys.includes(badge.key)) {
           high_rarity_count++;
       }
   });
@@ -646,7 +646,7 @@ export const BADGE_RARITIES = {
 };
 
 // Mapeamento de badges para categorias
-const BADGE_CATEGORY_MAP = {
+export const BADGE_CATEGORY_MAP = {
   ELITE_SHOOTER: 'SHOOTING',
   PROMISING_SHOOTER: 'SHOOTING', 
   BOMBER: 'SHOOTING',
