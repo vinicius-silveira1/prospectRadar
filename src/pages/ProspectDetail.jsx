@@ -126,7 +126,7 @@ const ProspectDetail = () => {
   const displayStats = useMemo(() => {
     if (!prospect) return {};
 
-    const isHighSchool = prospect.stats_source === 'high_school_total';
+    const isHighSchool = prospect.source === 'high_school_total';
     const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
 
     if (isHighSchool && prospect.high_school_stats?.season_total) {

@@ -398,7 +398,7 @@ export class ProspectRankingAlgorithm {
         prospectContext = 'nbb';
       } else if (p.league === 'Overtime Elite' || p.league === 'OTE') {
         prospectContext = 'ote';
-      } else if (p.stats_source === 'high_school_total' && !(p.league === 'Overtime Elite' || p.league === 'OTE')) {
+      } else if (p.source === 'high_school_total' && !(p.league === 'Overtime Elite' || p.league === 'OTE')) {
         prospectContext = 'high_school';
       }
       

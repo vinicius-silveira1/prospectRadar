@@ -14,8 +14,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Caminho para o arquivo JSON de estatísticas
-const statsFilePath = path.join(process.cwd(), 'prospect_stats.json');
+// Corrigido o caminho para o arquivo JSON de estatísticas
+const statsFilePath = path.join(process.cwd(), 'prospects_stats.json');
 
 async function populateHighSchoolStats() {
   console.log('Iniciando o processo de população de estatísticas de high school (com UPSERT)...');
@@ -27,30 +27,41 @@ async function populateHighSchoolStats() {
       return;
     }
     const statsFileContent = fs.readFileSync(statsFilePath, 'utf-8');
-    const prospectsStats = JSON.parse(statsFileContent);
-    console.log(`Encontrados ${prospectsStats.length} prospectos no arquivo JSON.`);
+    const prospectsData = JSON.parse(statsFileContent);
+    const prospectNames = Object.keys(prospectsData);
+    console.log(`Encontrados ${prospectNames.length} prospectos no arquivo JSON.`);
 
     // 2. Iterar e fazer o upsert de cada prospecto no Supabase
-    for (const prospect of prospectsStats) {
-      if (!prospect.name || !prospect.stats) {
-        console.warn('Registro inválido no JSON, pulando:', prospect);
+    for (const name of prospectNames) {
+      const prospect = prospectsData[name];
+      
+      if (!prospect.season_total) {
+        console.warn('Registro inválido no JSON, faltando "season_total", pulando:', name);
         continue;
       }
 
-      console.log(`Processando (upsert): ${prospect.name}...`);
+      console.log(`Processando (upsert): ${name}...`);
+
+      // Monta o objeto de dados para o upsert
+      const { season_total, ...basicInfo } = prospect;
+      const upsertData = {
+        name: name,
+        ...basicInfo, // Adiciona informações básicas como position, height, etc.
+        high_school_stats: season_total // Adiciona o objeto de estatísticas
+      };
 
       const { data, error } = await supabase
         .from('prospects')
-        .upsert({ name: prospect.name, high_school_stats: prospect.stats }, { onConflict: 'name' })
+        .upsert(upsertData, { onConflict: 'name' })
         .select();
 
       if (error) {
-        console.error(`  ❌ Erro no upsert de ${prospect.name}:`, error.message);
+        console.error(`  ❌ Erro no upsert de ${name}:`, error.message);
       } else if (data && data.length > 0) {
-        console.log(`  ✅ Sucesso: ${prospect.name} inserido/atualizado.`);
+        console.log(`  ✅ Sucesso: ${name} inserido/atualizado.`);
       } else {
         // Este caso pode ocorrer se o RLS impedir o retorno dos dados, mas a operação foi bem-sucedida.
-        console.log(`  ⚠️ Operação para ${prospect.name} concluída, mas nenhum dado foi retornado. Verifique as políticas de RLS se a atualização não ocorreu.`);
+        console.log(`  ⚠️ Operação para ${name} concluída, mas nenhum dado foi retornado. Verifique as políticas de RLS se a atualização não ocorreu.`);
       }
     }
 
