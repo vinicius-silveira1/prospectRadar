@@ -4,20 +4,31 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, ChevronDown, Zap, Star, Lock, X, Crown } from 'lucide-react';
 import useProspects from '@/hooks/useProspects.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
-import { useAuth } from '@/context/AuthContext.jsx';
+import { useAuth } from '@/context/AuthContext.jsx'; // Import useAuth
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
+import { TIERS } from '@/lib/constants.js';
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import RangeSlider from '@/components/Common/RangeSlider.jsx';
 import DualInput from '../components/Common/DualInput';
 import HeightInput from '../components/Common/HeightInput';
-import { parseHeightToInches, parseWingspanToInches, parseWeightToLbs } from '@/utils/filterUtils.js';
+import { parseHeightToInches, parseWingspanToInches, formatInchesToFeet, parseWeightToLbs } from '@/utils/filterUtils.js';
 import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
 import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
 import ExportButtons from '@/components/Common/ExportButtons.jsx';
 import { useResponsive } from '@/hooks/useResponsive.js';
+import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 
+const nationalityMap = {
+  br: 'Brasil',
+  sn: 'Senegal',
+  de: 'Alemanha',
+  us: 'Estados Unidos',
+};
+
+// Extrair todas as badges únicas dos prospects carregados para o filtro
 const getAllAvailableBadges = (prospects) => {
   const badgeSet = new Set();
   prospects.forEach(prospect => {
@@ -27,25 +38,18 @@ const getAllAvailableBadges = (prospects) => {
   return Array.from(badgeSet).sort();
 };
 
-const nationalityDisplayMap = {
-  '🇧🇷': 'Brasil',
-  '🇺🇸': 'EUA',
-  '🇨🇦': 'Canadá',
-  '🇫🇷': 'França',
-  '🇷🇸': 'Sérvia',
-  '🇦🇺': 'Austrália',
-  '🇪🇸': 'Espanha',
-  '🇩🇪': 'Alemanha',
-  '🇸🇮': 'Eslovênia',
-  '🇬🇷': 'Grécia',
-  '🇳🇬': 'Nigéria',
-  '🇨🇩': 'RD Congo',
-  '🇸🇳': 'Senegal',
-};
-
+// Placeholder for Pro Features - Styled to match ProspectDetail
 const ProFeaturePlaceholder = ({ children, title, featureName }) => (
   <div className="relative min-h-48 sm:min-h-64 md:min-h-80">
     <div className="absolute inset-0 bg-white/70 dark:bg-super-dark-secondary/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4 sm:p-5 md:p-6 border border-purple-200/30 dark:border-super-dark-border">
+      {/* Gaming background pattern */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none rounded-xl">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 51, 234, 0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}></div>
+      </div>
+      
       <div className="relative z-10 text-center">
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
@@ -55,8 +59,13 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
         >
           <Lock className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 text-purple-600 dark:text-violet-400" />
         </motion.div>
-        <h3 className="text-base sm:text-lg font-gaming font-bold text-gray-800 dark:text-gray-200 mb-2 font-mono tracking-wide">{title}</h3>
-        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 font-mono">➤ Tenha acesso completo a {featureName} no plano Scout.</p>
+        
+        <h3 className="text-base sm:text-lg font-gaming font-bold text-gray-800 dark:text-gray-200 mb-2 font-mono tracking-wide">
+          {title}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 font-mono">
+          ➤ Tenha acesso completo a {featureName} no plano Scout.
+        </p>
         <Link 
           to="/pricing" 
           className="inline-flex items-center px-4 sm:px-5 py-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-gaming font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-mono tracking-wide text-sm"
@@ -72,35 +81,36 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
   </div>
 );
 
+
 const Prospects = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isMobile } = useResponsive();
+  const { user } = useAuth(); // Get user from AuthContext
+  const { isMobile, isTablet } = useResponsive();
   
-  const prospectsFilters = useMemo(() => ({ draftClass: '2026' }), []);
-  const { prospects: allProspects, loading, error } = useProspects(prospectsFilters);
+      const prospectsFilters = useMemo(() => ({ draftClass: '2026' }), []);
+  const { prospects: allProspects, loading, error } = useProspects(prospectsFilters); // Carrega todos os prospects
 
   const { watchlist, toggleWatchlist } = useWatchlist();
   
-  // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPosition, setSelectedPosition] = useState('all');
   const [selectedNationality, setSelectedNationality] = useState('all');
-  const [statsSource, setStatsSource] = useState('all');
-  const [sortBy, setSortBy] = useState('radar_score');
-
-  // --- UI States ---
   const [viewMode, setViewMode] = useState('grid');
+  const [sortBy, setSortBy] = useState('ranking');
+  const [searchParams] = useSearchParams();
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   
+  // User plan is now derived from the user object
   const userPlan = user?.subscription_tier?.toLowerCase() || 'free';
 
-  // --- Advanced Filter States ---
+  // State for advanced filters
   const [ageRange, setAgeRange] = useState({ min: 16, max: 25 });
   const [heightRange, setHeightRange] = useState({ min: 70, max: 90 });
   const [wingspanRange, setWingspanRange] = useState({ min: 70, max: 95 });
   const [weightRange, setWeightRange] = useState({ min: 160, max: 280 });
+  
+  // State for pro filters
   const [min3PTP, setMin3PTP] = useState('');
   const [minPPG, setMinPPG] = useState('');
   const [minRPG, setMinRPG] = useState('');
@@ -108,11 +118,37 @@ const Prospects = () => {
   const [selectedBadge, setSelectedBadge] = useState('all');
   const [hoveredBadgeByProspect, setHoveredBadgeByProspect] = useState({});
 
+  // Função para gerenciar conquistas na visualização em lista
+  const handleBadgeHover = (prospectId, badge) => {
+    if (isMobile) {
+      // No mobile, clique para alternar
+      setHoveredBadgeByProspect(prev => ({
+        ...prev,
+        [prospectId]: prev[prospectId]?.label === badge?.label ? null : badge
+      }));
+    } else {
+      // No desktop, hover
+      setHoveredBadgeByProspect(prev => ({
+        ...prev,
+        [prospectId]: badge
+      }));
+    }
+  };
+
+
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      setSearchTerm(query);
+    }
+  }, [searchParams]);
+
+  // Função para tratar o toggle da watchlist com erro
   const handleToggleWatchlist = async (prospectId) => {
     try {
       await toggleWatchlist(prospectId);
     } catch (error) {
-      if (error.message.includes('Limite de')) {
+      if (error.message.includes('Limite de') && error.message.includes('prospects na watchlist atingido')) {
         setIsUpgradeModalOpen(true);
       } else {
         console.error('Erro ao adicionar à watchlist:', error);
@@ -120,49 +156,179 @@ const Prospects = () => {
     }
   };
 
+  const handleCardClick = (prospectId, e) => {
+    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    if (isMobile && hoveredBadgeByProspect[prospectId] && !e.target.closest('.badge-container')) {
+      setHoveredBadgeByProspect(prev => ({ ...prev, [prospectId]: null }));
+      return;
+    }
+    
+    // Verifica se clicou em algum elemento interativo
+    const isButton = e.target.closest('button');
+    const isLink = e.target.closest('a');
+    const isInput = e.target.closest('input');
+    const isSelect = e.target.closest('select');
+    
+    // Se não clicou em elemento interativo, navega para a página do prospecto
+    if (!isButton && !isLink && !isInput && !isSelect) {
+      navigate(`/prospects/${prospectId}`);
+    }
+  };
+
+  const advancedFilterRanges = useMemo(() => {
+    const defaultRanges = {
+      age: { min: 16, max: 25 },
+      height: { min: 70, max: 90 },
+      wingspan: { min: 70, max: 95 },
+      weight: { min: 160, max: 280 },
+    };
+
+    if (allProspects.length === 0) {
+      return defaultRanges;
+    }
+
+    const ages = allProspects.map(p => p.age).filter(Boolean);
+    const heights = allProspects.map(p => parseHeightToInches(p.height)).filter(Boolean);
+    const wingspans = allProspects.map(p => parseWingspanToInches(p.wingspan)).filter(Boolean);
+    const weights = allProspects.map(p => parseWeightToLbs(p.weight)).filter(Boolean);
+
+    return {
+      age: { 
+        min: ages.length > 0 ? Math.floor(Math.min(...ages)) : defaultRanges.age.min, 
+        max: ages.length > 0 ? Math.ceil(Math.max(...ages)) : defaultRanges.age.max 
+      },
+      height: { 
+        min: heights.length > 0 ? Math.floor(Math.min(...heights)) : defaultRanges.height.min, 
+        max: heights.length > 0 ? Math.ceil(Math.max(...heights)) : defaultRanges.height.max 
+      },
+      wingspan: { 
+        min: wingspans.length > 0 ? Math.floor(Math.min(...wingspans)) : defaultRanges.wingspan.min, 
+        max: wingspans.length > 0 ? Math.ceil(Math.max(...wingspans)) : defaultRanges.wingspan.max 
+      },
+      weight: { 
+        min: weights.length > 0 ? Math.floor(Math.min(...weights)) : defaultRanges.weight.min, 
+        max: weights.length > 0 ? Math.ceil(Math.max(...weights)) : defaultRanges.weight.max 
+      },
+    };
+  }, [allProspects]);
+
+  // Calcular badges disponíveis dinamicamente
+  const availableBadges = useMemo(() => {
+    return getAllAvailableBadges(allProspects);
+  }, [allProspects]);
+
+  useEffect(() => {
+    setAgeRange({ min: advancedFilterRanges.age.min, max: advancedFilterRanges.age.max });
+    setHeightRange({ min: advancedFilterRanges.height.min, max: advancedFilterRanges.height.max });
+    setWingspanRange({ min: advancedFilterRanges.wingspan.min, max: advancedFilterRanges.wingspan.max });
+    setWeightRange({ min: advancedFilterRanges.weight.min, max: advancedFilterRanges.weight.max });
+  }, [advancedFilterRanges]);
+
+
   const filteredProspects = useMemo(() => {
     let filtered = allProspects.filter(prospect => {
-      const matchesSearch = (prospect.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (prospect.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (prospect.high_school_team || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPosition = selectedPosition === 'all' || prospect.position === selectedPosition;
       const matchesNationality = selectedNationality === 'all' || prospect.nationality === selectedNationality;
-      const matchesStatsSource = statsSource === 'all' || 
-                                 (statsSource === 'college_pro' && !prospect.stats_source?.startsWith('high_school')) ||
-                                 (statsSource === 'high_school' && prospect.stats_source?.startsWith('high_school'));
+      
+      if (userPlan === 'scout') {
+        const prospectHeight = parseHeightToInches(prospect.height);
+        const prospectWingspan = parseWingspanToInches(prospect.wingspan);
+        const prospectWeight = parseWeightToLbs(prospect.weight);
 
-      if (!matchesSearch || !matchesPosition || !matchesNationality || !matchesStatsSource) {
-        return false;
+        const matchesAge = !prospect.age || (prospect.age >= ageRange.min && prospect.age <= ageRange.max);
+        const matchesHeight = !prospectHeight || (prospectHeight >= heightRange.min && prospectHeight <= heightRange.max);
+        const matchesWingspan = !prospectWingspan || (prospectWingspan >= wingspanRange.min && prospectWingspan <= wingspanRange.max);
+        const matchesWeight = !prospectWeight || (prospectWeight >= weightRange.min && prospectWeight <= weightRange.max);
+
+        // Verificação dos dados de 3PT% - usando o campo correto
+        const threePtPct = prospect.three_pct; // Campo direto no prospect, não no evaluation
+        
+        // Simplificando a lógica: se não há filtro ou se o prospect tem % válido e maior que o mínimo
+        let matches3PTP = true;
+        if (min3PTP && min3PTP !== '' && min3PTP !== null && min3PTP !== undefined) {
+          // Validação mais rigorosa: valor deve existir, ser número válido e maior que 0
+          const isValidThreePct = threePtPct !== null && 
+                                 threePtPct !== undefined && 
+                                 !isNaN(threePtPct) && 
+                                 threePtPct > 0 && 
+                                 threePtPct <= 1; // percentual máximo 100% = 1.0
+          
+          if (isValidThreePct) {
+            // threePtPct já vem como decimal (0.385 = 38.5%), então dividimos min3PTP por 100
+            matches3PTP = threePtPct >= (min3PTP / 100);
+          } else {
+            matches3PTP = false; // Se não tem dados válidos de 3PT%, não passa no filtro
+          }
+        }
+        const matchesPPG = !minPPG || prospect.ppg >= minPPG;
+        const matchesRPG = !minRPG || prospect.rpg >= minRPG;
+        const matchesAPG = !minAPG || prospect.apg >= minAPG;
+        
+        // Usar badges reais dos cards em vez das flags
+        const prospectBadges = assignBadges(prospect);
+        const prospectBadgeLabels = prospectBadges.map(badge => badge.label);
+        const matchesBadge = selectedBadge === 'all' || prospectBadgeLabels.includes(selectedBadge);
+
+        return matchesSearch && matchesPosition && matchesNationality && matchesAge && matchesHeight && matchesWingspan && matchesWeight &&
+               matches3PTP && matchesPPG && matchesRPG && matchesAPG && matchesBadge;
       }
 
-      if (userPlan === 'scout' && showAdvancedFilters) {
-        // Advanced filter logic here...
-      }
-
-      return true;
+      // Default for 'free' plan
+      return matchesSearch && matchesPosition && matchesNationality;
     });
 
     if (sortBy === 'name') {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortBy === 'position') {
-      filtered.sort((a, b) => (a.position || '').localeCompare(b.position || ''));
+      filtered.sort((a, b) => a.position.localeCompare(b.position));
     } else if (sortBy === 'radar_score') {
+      filtered.sort((a, b) => (b.radar_score || 0) - (a.radar_score || 0)); // Sort descending by radar_score
+    } else {
+      // Fallback for default sort if radar_score is not available or selected
       filtered.sort((a, b) => (b.radar_score || 0) - (a.radar_score || 0));
     }
 
+    // Debug: mostrar quantos prospects passaram no filtro
+    if (min3PTP) {
+      console.log(`Prospects after 3PT% filter (${min3PTP}%):`, filtered.length);
+    }
+
     return filtered;
-  }, [allProspects, searchTerm, selectedPosition, selectedNationality, statsSource, sortBy, userPlan, showAdvancedFilters]);
+  }, [allProspects, searchTerm, selectedPosition, selectedNationality, sortBy, ageRange, heightRange, wingspanRange, weightRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge, userPlan]);
 
-  if (loading) return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
-  if (error) return <div className="text-center py-10 text-red-500 dark:text-red-400">Ocorreu um erro: {error.message}</div>;
+  const positions = [...new Set(allProspects.map(p => p.position))].filter(Boolean);
 
-  const positions = [...new Set(allProspects.map(p => p.position))].filter(Boolean).sort();
-  const nationalities = [...new Set(allProspects.map(p => p.nationality))].filter(Boolean).sort();
+  const availableNationalities = useMemo(() => {
+    const nationalities = new Set();
+    allProspects.forEach(p => {
+      if (p.nationality) nationalities.add(p.nationality);
+    });
+    return Array.from(nationalities).sort();
+  }, [allProspects]);
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-10 text-red-500 dark:text-red-400">Ocorreu um erro: {error}</div>;
+  }
 
   const clearAllFilters = () => {
     setSearchTerm('');
     setSelectedPosition('all');
     setSelectedNationality('all');
-    setStatsSource('all');
-    setSortBy('radar_score');
+    setAgeRange({ min: advancedFilterRanges.age.min, max: advancedFilterRanges.age.max });
+    setHeightRange({ min: advancedFilterRanges.height.min, max: advancedFilterRanges.height.max });
+    setWingspanRange({ min: advancedFilterRanges.wingspan.min, max: advancedFilterRanges.wingspan.max });
+    setWeightRange({ min: advancedFilterRanges.weight.min, max: advancedFilterRanges.weight.max });
+    setMin3PTP('');
+    setMinPPG('');
+    setMinRPG('');
+    setMinAPG('');
+    setSelectedBadge('all');
   };
   
   const inputBaseClasses = "w-full px-4 py-2 bg-gradient-to-r from-slate-50 to-white dark:from-super-dark-secondary dark:to-slate-800 border-2 border-slate-200 dark:border-super-dark-border hover:border-purple-300 dark:hover:border-purple-600 rounded-lg text-slate-900 dark:text-super-dark-text-primary focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:focus:ring-purple-400 dark:focus:border-purple-400 transition-all duration-200 shadow-sm hover:shadow-md font-mono text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 relative z-50";
@@ -179,6 +345,22 @@ const Prospects = () => {
           boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
         }}
       >
+        {/* Particles de fundo */}
+        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+          <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
+          <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
+          <div className="absolute bottom-6 left-16 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-400 rounded-full animate-pulse delay-700 group-hover:animate-bounce"></div>
+          <div className="absolute bottom-4 right-6 w-2 h-2 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-500 group-hover:animate-ping"></div>
+          <div className="absolute top-12 left-1/3 w-1 h-1 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse delay-1000 group-hover:animate-bounce"></div>
+          <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-500 rounded-full animate-pulse delay-200 group-hover:animate-ping"></div>
+        </div>
+        
+        {/* Grid de fundo */}
+        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
+          backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}></div>
+        
         <div className="relative z-10">
           <div className="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-1">
@@ -188,10 +370,16 @@ const Prospects = () => {
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="text-2xl sm:text-3xl font-gaming font-bold mb-2 leading-tight flex items-center font-mono tracking-wide"
               >
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
+                </motion.div>
                 <span>Todos os</span>
                 <span className="text-yellow-300 ml-3">prospects</span>
               </motion.h1>
+              
               <motion.p 
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -200,22 +388,62 @@ const Prospects = () => {
               >
                 ➤ Explore e analise {allProspects.length} prospects do Draft 2026
               </motion.p>
+              
+
             </div>
             <div className="flex flex-row items-center justify-between gap-2 sm:gap-4">
-              <ExportButtons prospects={filteredProspects} source="prospects" />
+              {/* Export Buttons - Gaming Style */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg blur-sm"></div>
+                <div className="relative">
+                  <ExportButtons prospects={filteredProspects} source="prospects" />
+                </div>
+              </motion.div>
+              
+              {/* View Mode Toggle - Gaming Enhanced */}
               <motion.div 
                 className="flex bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 rounded-lg p-1 flex-shrink-0 border border-slate-200 dark:border-slate-600 shadow-lg"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <motion.button 
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-all relative overflow-hidden ${viewMode === 'grid' ? 'bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 shadow-lg text-brand-purple dark:text-purple-400 border border-purple-200 dark:border-purple-800' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                  aria-label="Visualização em grade"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
+                  {viewMode === 'grid' && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
                   <Grid size={isMobile ? 16 : 18} className="relative z-10" />
                 </motion.button>
                 <motion.button 
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-all relative overflow-hidden ${viewMode === 'list' ? 'bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 shadow-lg text-brand-purple dark:text-purple-400 border border-purple-200 dark:border-purple-800' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600'}`}
+                  aria-label="Visualização em lista"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
+                  {viewMode === 'list' && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  )}
                   <List size={isMobile ? 16 : 18} className="relative z-10" />
                 </motion.button>
               </motion.div>
@@ -224,75 +452,138 @@ const Prospects = () => {
         </div>
       </motion.div>
 
-      <div className="py-4 md:py-6 relative z-10">
+      {/* Filtros e Alerta - Gaming Enhanced */}
+    <div className="py-4 md:py-6 relative z-10">
         <motion.div 
           className="bg-gradient-to-br from-white via-slate-50 to-white dark:from-super-dark-secondary dark:via-slate-900 dark:to-super-dark-secondary rounded-xl shadow-lg border-2 border-slate-200 dark:border-super-dark-border p-4 md:p-6 mb-4 md:mb-6 relative overflow-hidden"
+          whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(147, 51, 234, 0.1)" }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
+          {/* Gaming Background Pattern */}
+          <div className="absolute inset-0 opacity-5 dark:opacity-10">
+            <div className="absolute top-0 left-0 w-full h-full" style={{
+              backgroundImage: `radial-gradient(circle at 20% 20%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
+                               radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                               radial-gradient(circle at 40% 60%, rgba(168, 85, 247, 0.2) 0%, transparent 50%)`
+            }}></div>
+          </div>
+          
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 relative z-10">
-              <div className="flex items-center gap-2">
-                <Filter className="text-purple-500 dark:text-purple-400 flex-shrink-0 drop-shadow-sm" size={20} />
-                <h2 className="font-semibold text-slate-900 dark:text-super-dark-text-primary tracking-wide text-lg md:text-xl text-glow">
-                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">Filtros</span>
-                </h2>
-              </div>
+              <motion.div 
+                className="flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.2, 
+                    rotate: 15,
+                    boxShadow: "0 0 15px rgba(147, 51, 234, 0.4)"
+                  }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Filter className="text-purple-500 dark:text-purple-400 flex-shrink-0 drop-shadow-sm" size={20} />
+                </motion.div>
+                <motion.h2 
+                  className="font-semibold text-slate-900 dark:text-super-dark-text-primary tracking-wide text-lg md:text-xl text-glow"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
+                    Filtros
+                  </span>
+                </motion.h2>
+              </motion.div>
             <div className="flex-grow"></div>
             <div className="flex flex-col sm:flex-row gap-2">
               <motion.button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border border-purple-500/50 dark:border-purple-400/50 relative overflow-hidden"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 dark:from-purple-500 dark:to-blue-500 dark:hover:from-purple-600 dark:hover:to-blue-600 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border border-purple-500/50 dark:border-purple-400/50 relative overflow-hidden"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(147, 51, 234, 0.4)" }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <span className="relative z-10">{showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados</span>
-                <motion.div animate={{ rotate: showAdvancedFilters ? 180 : 0 }} transition={{ duration: 0.3 }} className="relative z-10">
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+                <span className="relative z-10">
+                  {showAdvancedFilters ? 'Esconder' : 'Mostrar'} Filtros Avançados
+                </span>
+                <motion.div
+                  animate={{ rotate: showAdvancedFilters ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative z-10"
+                >
                   <ChevronDown size={16} />
                 </motion.div>
               </motion.button>
               <motion.button 
                 onClick={clearAllFilters} 
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-white bg-purple-50 dark:bg-purple-900/20 hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-600 dark:hover:from-purple-500 dark:hover:to-blue-500 rounded-lg border border-purple-200 dark:border-purple-700 hover:border-transparent transition-all duration-200 shadow-sm hover:shadow-lg"
+                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-white bg-purple-50 dark:bg-purple-900/20 hover:bg-gradient-to-r hover:from-purple-600 hover:to-blue-600 dark:hover:from-purple-500 dark:hover:to-blue-500 rounded-lg border border-purple-200 dark:border-purple-700 hover:border-transparent transition-all duration-200 shadow-sm hover:shadow-lg relative overflow-hidden"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0"
+                  whileHover={{ opacity: 1, x: ['-100%', '100%'] }}
+                  transition={{ duration: 0.6 }}
+                />
                 <X size={14} className="mr-1 relative z-10" />
-                <span className="relative z-10">Limpar</span>
+                <span className="relative z-10">Limpar Filtros</span>
               </motion.button>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="sm:col-span-2 lg:col-span-4">
-              <label className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">Busca</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 dark:text-purple-500 z-10" size={18} />
-                <input type="text" placeholder="Buscar por nome..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={`${inputBaseClasses} pl-10 relative z-0`} />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">Posição</label>
-              <select value={selectedPosition} onChange={(e) => setSelectedPosition(e.target.value)} className={inputBaseClasses}>
-                <option className="text-black" value="all">Todas</option>
-                {positions.map(p => <option className="text-black" key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">Nacionalidade</label>
-              <select value={selectedNationality} onChange={(e) => setSelectedNationality(e.target.value)} className={inputBaseClasses}>
-                <option className="text-black" value="all">Todas</option>
-                {nationalities.map(n => <option className="text-black" key={n} value={n}>{nationalityDisplayMap[n] || n}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">Nível</label>
-              <select value={statsSource} onChange={(e) => setStatsSource(e.target.value)} className={inputBaseClasses}>
-                <option className="text-black" value="all">Todos</option>
-                <option className="text-black" value="college_pro">College/Pro</option>
-                <option className="text-black" value="high_school">High School</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-super-dark-text-secondary mb-1">Ordenar Por</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={inputBaseClasses}>
-                <option className="text-black" value="radar_score">Radar Score</option>
-                <option className="text-black" value="name">Nome</option>
-                <option className="text-black" value="position">Posição</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+            <motion.div 
+              className="lg:col-span-2 relative"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 dark:text-purple-500 z-10" size={18} />
+              <input 
+                type="text" 
+                placeholder={isMobile ? "Buscar prospects..." : "Buscar por nome ou universidade..."} 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className={`${inputBaseClasses} pl-10 relative z-0`} 
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-lg pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
+            </motion.div>
+            <motion.select 
+              value={selectedPosition} 
+              onChange={(e) => setSelectedPosition(e.target.value)} 
+              className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <option value="all" className="font-sans bg-white dark:bg-gray-800">Todas as Posições</option>
+              {positions.map(p => <option key={p} value={p} className="font-sans bg-white dark:bg-gray-800">{p}</option>)}
+            </motion.select>
+            <motion.select 
+              value={selectedNationality} 
+              onChange={(e) => setSelectedNationality(e.target.value)} 
+              className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <option value="all" className="font-sans bg-white dark:bg-gray-800">Todas as Nacionalidades</option>
+              {availableNationalities.map(n => <option key={n} value={n} className="font-sans bg-white dark:bg-gray-800">{nationalityMap[n] || n}</option>)}
+            </motion.select>
+            <motion.select 
+              value={sortBy} 
+              onChange={(e) => setSortBy(e.target.value)} 
+              className={inputBaseClasses}
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <option value="radar_score" className="font-sans bg-white dark:bg-gray-800">Por Radar Score</option>
+              <option value="name" className="font-sans bg-white dark:bg-gray-800">Por Nome</option>
+              <option value="position" className="font-sans bg-white dark:bg-gray-800">Por Posição</option>
+            </motion.select>
           </div>
           
           <AnimatePresence>
@@ -307,10 +598,10 @@ const Prospects = () => {
                 <div className="relative mt-6 pt-6 border-t border-slate-200 dark:border-super-dark-border">
                   {userPlan === 'free' ? (
                     <ProFeaturePlaceholder title="Filtros Avançados e de Estatísticas" featureName="os filtros avançados">
-                      <AdvancedFiltersContent ranges={filterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
+                      <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
                     </ProFeaturePlaceholder>
                   ) : (
-                     <AdvancedFiltersContent ranges={filterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
+                     <AdvancedFiltersContent ranges={advancedFilterRanges} handlers={{setHeightRange, setWingspanRange, setWeightRange, setAgeRange, setMin3PTP, setMinPPG, setMinRPG, setMinAPG, setSelectedBadge}} values={{heightRange, wingspanRange, weightRange, ageRange, min3PTP, minPPG, minRPG, minAPG, selectedBadge}} inputBaseClasses={inputBaseClasses} availableBadges={availableBadges} />
                   )}
                 </div>
               </motion.div>
@@ -336,7 +627,7 @@ const Prospects = () => {
           <motion.div
             initial="hidden"
             animate="visible"
-            variants={{
+            variants={{ 
               visible: { transition: { staggerChildren: 0.05 } }
             }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
@@ -351,11 +642,11 @@ const Prospects = () => {
               return (
                 <motion.div 
                   key={prospect.id} 
-                  variants={{
+                  variants={{ 
                     hidden: { opacity: 0, y: 20 },
                     visible: { opacity: 1, y: 0 }
                   }}
-                  whileHover={{
+                  whileHover={{ 
                     scale: 1.03, 
                     y: -8, 
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 30px rgba(139, 92, 246, 0.15)",
@@ -413,7 +704,7 @@ const Prospects = () => {
                       {prospect.radar_score && (
                         <motion.div 
                           className="inline-flex items-center space-x-2 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-3 py-1.5 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 relative overflow-hidden group"
-                          whileHover={{
+                          whileHover={{ 
                             scale: 1.05,
                             boxShadow: "0 0 20px rgba(147, 51, 234, 0.4)"
                           }}
@@ -501,7 +792,7 @@ const Prospects = () => {
                                 {isHighSchool && (
                                   <motion.span 
                                     className="relative inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 text-white border border-orange-300 dark:border-orange-400 shadow-md shadow-orange-500/30 dark:shadow-orange-400/20 overflow-hidden group"
-                                    whileHover={{
+                                    whileHover={{ 
                                       scale: 1.05,
                                       boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
                                     }}
@@ -518,7 +809,7 @@ const Prospects = () => {
                                 )}
                                 {(league || season) && !isHighSchool && (
                                   <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                                    {[league, (season || '').replace(/'/g, '')].filter(Boolean).join(' ')}
+                                    {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
                                   </span>
                                 )}
                               </div>
@@ -526,7 +817,7 @@ const Prospects = () => {
                             <div className="grid grid-cols-3 gap-4 text-center mt-2">
                               <motion.div
                                 className="relative p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group"
-                                whileHover={{
+                                whileHover={{ 
                                   scale: 1.05,
                                   boxShadow: "0 0 20px rgba(147, 51, 234, 0.3)"
                                 }}
@@ -544,7 +835,7 @@ const Prospects = () => {
                               </motion.div>
                               <motion.div
                                 className="relative p-2 rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/30 overflow-hidden group"
-                                whileHover={{
+                                whileHover={{ 
                                   scale: 1.05,
                                   boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)"
                                 }}
@@ -562,7 +853,7 @@ const Prospects = () => {
                               </motion.div>
                               <motion.div
                                 className="relative p-2 rounded-lg bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/30 overflow-hidden group"
-                                whileHover={{
+                                whileHover={{ 
                                   scale: 1.05,
                                   boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)"
                                 }}
@@ -598,7 +889,7 @@ const Prospects = () => {
                           navigate(`/prospects/${prospect.id}`);
                         }}
                         className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-sm font-medium relative overflow-hidden group"
-                        whileHover={{
+                        whileHover={{ 
                           scale: 1.02,
                           boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
                         }}
@@ -614,7 +905,7 @@ const Prospects = () => {
                           navigate(`/compare?add=${prospect.id}`);
                         }}
                         className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm relative overflow-hidden group"
-                        whileHover={{
+                        whileHover={{ 
                           scale: 1.02,
                           boxShadow: "0 4px 12px rgba(99, 102, 241, 0.2)"
                         }}
@@ -634,7 +925,7 @@ const Prospects = () => {
           <motion.div
             initial="hidden"
             animate="visible"
-            variants={{
+            variants={{ 
               visible: { transition: { staggerChildren: 0.05 } }
             }}
             className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border overflow-hidden"
@@ -662,7 +953,7 @@ const Prospects = () => {
                   return (
                     <motion.div
                       key={prospect.id}
-                      variants={{
+                      variants={{ 
                         hidden: { opacity: 0, y: 20 },
                         visible: { opacity: 1, y: 0 }
                       }}
@@ -716,7 +1007,7 @@ const Prospects = () => {
                             {prospect.radar_score ? (
                               <motion.div 
                                 className="inline-flex items-center space-x-1 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-2 py-1 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 text-xs relative overflow-hidden group"
-                                whileHover={{
+                                whileHover={{ 
                                   scale: 1.05,
                                   boxShadow: "0 0 15px rgba(147, 51, 234, 0.3)"
                                 }}
