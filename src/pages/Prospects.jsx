@@ -22,10 +22,10 @@ import { useResponsive } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 
 const nationalityMap = {
-  br: 'Brasil',
-  sn: 'Senegal',
-  de: 'Alemanha',
-  us: 'Estados Unidos',
+  '🇧🇷': 'Brasil',
+  '🇸🇳': 'Senegal',
+  '🇩🇪': 'Alemanha',
+  '🇺🇸': 'Estados Unidos',
 };
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
@@ -560,8 +560,8 @@ const Prospects = () => {
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <option value="all" className="font-sans bg-white dark:bg-gray-800">Todas as Posições</option>
-              {positions.map(p => <option key={p} value={p} className="font-sans bg-white dark:bg-gray-800">{p}</option>)}
+              <option value="all" className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Todas as Posições</option>
+              {positions.map(p => <option key={p} value={p} className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">{p}</option>)}
             </motion.select>
             <motion.select 
               value={selectedNationality} 
@@ -570,8 +570,8 @@ const Prospects = () => {
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <option value="all" className="font-sans bg-white dark:bg-gray-800">Todas as Nacionalidades</option>
-              {availableNationalities.map(n => <option key={n} value={n} className="font-sans bg-white dark:bg-gray-800">{nationalityMap[n] || n}</option>)}
+              <option value="all" className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Nacionalidade</option>
+              {availableNationalities.map(n => <option key={n} value={n} className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">{nationalityMap[n] || n}</option>)}
             </motion.select>
             <motion.select 
               value={sortBy} 
@@ -580,9 +580,9 @@ const Prospects = () => {
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <option value="radar_score" className="font-sans bg-white dark:bg-gray-800">Por Radar Score</option>
-              <option value="name" className="font-sans bg-white dark:bg-gray-800">Por Nome</option>
-              <option value="position" className="font-sans bg-white dark:bg-gray-800">Por Posição</option>
+              <option value="radar_score" className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Por Radar Score</option>
+              <option value="name" className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Por Nome</option>
+              <option value="position" className="font-sans bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Por Posição</option>
             </motion.select>
           </div>
           
