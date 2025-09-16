@@ -791,13 +791,7 @@ const ProspectDetail = () => {
                   >
                     <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                      {isScout ? (
-                        <div><RadarScoreChart data={evaluation.categoryScores} /></div>
-                      ) : (
-                        <ScoutFeaturePlaceholder title="Análise Gráfica do Radar Score" featureName="a análise gráfica detalhada">
-                          <div><RadarScoreChart data={evaluation.categoryScores} /></div>
-                        </ScoutFeaturePlaceholder>
-                      )}
+                      <div><RadarScoreChart data={evaluation.categoryScores} /></div>
                       <div className="space-y-4">
                         {/* Projeção de Draft */}
                         <motion.div 
@@ -950,85 +944,143 @@ const ProspectDetail = () => {
               </motion.div>
             )}
 
-            {/* SEÇÃO DE COMPARAÇÕES NBA (SCOUT) */}
-            {displayStats.hasStats && (
-              isScout ? (
-                comparablePlayers.length > 0 && (
+            {/* SEÇÃO DE COMPARAÇÕES NBA (TEASER) */}
+            {displayStats.hasStats && comparablePlayers.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
+                className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+              >
+                <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                  variants={{
+                    visible: { transition: { staggerChildren: 0.1 } }
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {/* Free Teaser - First Player */}
                   <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
-                    className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+                    variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                    className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group cursor-pointer"
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="relative z-10">
+                      <p className="font-bold text-purple-700 dark:text-purple-300 font-mono tracking-wide text-lg">{comparablePlayers[0].name}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <div>
+                          <p className="text-sm leading-normal text-purple-600 dark:text-purple-400">
+                            Similaridade: <span className="font-semibold font-mono">{comparablePlayers[0].similarity}%</span>
+                          </p>
+                          <p className="text-xs leading-normal text-purple-500 dark:text-purple-500 mt-1">
+                            Sucesso: <span className="font-bold">{comparablePlayers[0].careerSuccess}/10</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-12 h-2 bg-purple-200 dark:bg-purple-800/50 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-purple-500 rounded-full"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(comparablePlayers[0].careerSuccess / 10) * 100}%` }}
+                              transition={{ duration: 1, delay: 0.3 }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Scout Users - Other Players */}
+                  {isScout && comparablePlayers.slice(1).map((player, index) => (
                     <motion.div
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                      variants={{
-                        visible: { transition: { staggerChildren: 0.1 } }
-                      }}
-                      initial="hidden"
-                      animate="visible"
+                      key={index}
+                      variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                      className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group cursor-pointer"
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)" }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     >
-                      {comparablePlayers.map((player, index) => (
-                        <motion.div
-                          key={index}
-                          variants={{
-                            hidden: { opacity: 0, y: 20 },
-                            visible: { opacity: 1, y: 0 }
-                          }}
-                          className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30 overflow-hidden group cursor-pointer"
-                          whileHover={{ 
-                            scale: 1.05,
-                            boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)"
-                          }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        >
-                          {/* Background hover effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          
-                          {/* Content */}
-                          <div className="relative z-10">
-                            <p className="font-bold text-purple-700 dark:text-purple-300 font-mono tracking-wide text-lg">{player.name}</p>
-                            <div className="flex justify-between items-center mt-2">
-                              <div>
-                                <p className="text-sm leading-normal text-purple-600 dark:text-purple-400">
-                                  Similaridade: <span className="font-semibold font-mono">{player.similarity}%</span>
-                                </p>
-                                <p className="text-xs leading-normal text-purple-500 dark:text-purple-500 mt-1">
-                                  Sucesso: <span className="font-bold">{player.careerSuccess}/10</span>
-                                </p>
-                              </div>
-                              {/* Success indicator */}
-                              <div className="flex items-center">
-                                <div className="w-12 h-2 bg-purple-200 dark:bg-purple-800/50 rounded-full overflow-hidden">
-                                  <motion.div 
-                                    className="h-full bg-purple-500 rounded-full"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${(player.careerSuccess / 10) * 100}%` }}
-                                    transition={{ duration: 1, delay: 0.3 }}
-                                  />
-                                </div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative z-10">
+                        <p className="font-bold text-purple-700 dark:text-purple-300 font-mono tracking-wide text-lg">{player.name}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <div>
+                            <p className="text-sm leading-normal text-purple-600 dark:text-purple-400">
+                              Similaridade: <span className="font-semibold font-mono">{player.similarity}%</span>
+                            </p>
+                            <p className="text-xs leading-normal text-purple-500 dark:text-purple-500 mt-1">
+                              Sucesso: <span className="font-bold">{player.careerSuccess}/10</span>
+                            </p>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-12 h-2 bg-purple-200 dark:bg-purple-800/50 rounded-full overflow-hidden">
+                              <motion.div 
+                                className="h-full bg-purple-500 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(player.careerSuccess / 10) * 100}%` }}
+                                transition={{ duration: 1, delay: 0.3 }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Free Users - Placeholders */}
+                  {!isScout && Array.from({ length: Math.min(2, comparablePlayers.length - 1) }).map((_, index) => (
+                    <div key={index} className="relative">
+                      <div className="absolute inset-0 bg-white/70 dark:bg-super-dark-secondary/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-xl p-4 border border-purple-200/30 dark:border-super-dark-border">
+                        <div className="relative z-10 text-center">
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                            className="mx-auto flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 mb-3 border-2 border-purple-500/50 dark:border-violet-500/50"
+                          >
+                            <Lock className="w-5 h-5 text-purple-600 dark:text-violet-400" />
+                          </motion.div>
+                          <h3 className="text-sm font-gaming font-bold text-gray-800 dark:text-gray-200 mb-2 font-mono tracking-wide">
+                            Desbloquear Comparação
+                          </h3>
+                          <Link 
+                            to="/pricing" 
+                            className="inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-gaming font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-mono tracking-wide text-xs"
+                          >
+                            <Crown className="w-3 h-3 mr-1.5" />
+                            Upgrade
+                          </Link>
+                        </div>
+                      </div>
+                      <div className="opacity-20 blur-sm pointer-events-none">
+                        <div className="relative p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 border border-purple-200/50 dark:border-purple-700/30">
+                          <p className="font-bold text-purple-700 dark:text-purple-300 font-mono tracking-wide text-lg">Jogador Secreto</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <div>
+                              <p className="text-sm leading-normal text-purple-600 dark:text-purple-400">
+                                Similaridade: <span className="font-semibold font-mono">??%</span>
+                              </p>
+                              <p className="text-xs leading-normal text-purple-500 dark:text-purple-500 mt-1">
+                                Sucesso: <span className="font-bold">?/10</span>
+                              </p>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-12 h-2 bg-purple-200 dark:bg-purple-800/50 rounded-full overflow-hidden">
                               </div>
                             </div>
                           </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  </motion.div>
-                )
-              ) : (
-                <ScoutFeaturePlaceholder title="Comparações com Jogadores da NBA" featureName="as comparações com jogadores da NBA">
-                  <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6">
-                    <h2 className="text-xl font-bold text-black dark:text-white mb-4 font-mono tracking-wide">Comparações com Jogadores da NBA</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="bg-slate-50 dark:bg-super-dark-secondary p-4 rounded-lg border border-slate-200 dark:border-super-dark-border">
-                        <p className="font-bold text-slate-800 dark:text-super-dark-text-primary">Jogador Exemplo</p>
-                        <p className="text-sm">Similaridade: 85%</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ScoutFeaturePlaceholder>
-              )
+                  ))}
+                </motion.div>
+              </motion.div>
             )}
 
             {/* ANÁLISE DO JOGADOR (SCOUT) */}

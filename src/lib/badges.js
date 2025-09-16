@@ -346,6 +346,7 @@ export const assignBadges = (prospect) => {
   const isBig = isPowerForward || isCenter;
 
   // --- Shooting Badges ---
+  // Nível High School: Foco em aproveitamento quase perfeito, com volume menor.
   if (leagueTier === 'hs') {
     if (p.games_played >= 7) {
       if (p.three_pct >= 0.42 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 50) {
@@ -357,6 +358,7 @@ export const assignBadges = (prospect) => {
         assignedBadges.add(badges.BOMBER);
       }
     }
+  // Nível NCAA: Aumenta a exigência de volume, com aproveitamento ainda de elite.
   } else if (leagueTier === 'ncaa') {
     if (p.minutes_played >= 350) { // Klafke fix: Lowered from 400
       if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
@@ -368,6 +370,7 @@ export const assignBadges = (prospect) => {
         assignedBadges.add(badges.BOMBER);
       }
     }
+  // Nível Profissional: Contra defesas de elite, o volume é mais importante.
   } else { // pro
     if (p.minutes_played >= 400) {
       if (p.three_pct >= 0.38 && p.ft_pct >= 0.84 && p.three_pt_attempts >= 90) {
@@ -382,18 +385,21 @@ export const assignBadges = (prospect) => {
   }
 
   // --- Defense Badges ---
+  // Nível HS: usa a estatística simples de tocos por jogo (bpg).
   if (leagueTier === 'hs') {
     if (p.games_played >= 7) {
       if (p.spg >= 1.8 && p.bpg >= 1.5) assignedBadges.add(badges.ELITE_DEFENDER);
       if (p.bpg >= 1.8 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
       if (p.spg >= 2.2 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
     }
+  // Nível NCAA: muda para a estatística avançada de % de tocos (blk_percent).
   } else if (leagueTier === 'ncaa') {
     if (p.minutes_played >= 400) {
       if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER);
       if (p.blk_percent >= 3.5 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
       if (p.stl_percent >= 2.0 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
     }
+  // Nível Pro: a exigência no blk_percent é um pouco menor, mas ainda de elite.
   } else { // pro
     if (p.minutes_played >= 400) {
       if ((p.stl_percent >= 2.2 && p.blk_percent >= 1.8) || (p.dbpm >= 4.0)) assignedBadges.add(badges.ELITE_DEFENDER);

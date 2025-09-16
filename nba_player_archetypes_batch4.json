@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Frank Ntilikina",
+    "archetypes": ["Low-Usage Specialist"]
+  },
+  {
+    "name": "Giannis Antetokounmpo",
+    "archetypes": ["Unique / Generational Talent", "Versatile Forward / All-Around", "Elite Scorer / Volume Scorer", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Hakeem Olajuwon",
+    "archetypes": ["Unique / Generational Talent", "Defensive Anchor / Rim Protector", "Elite Scorer / Volume Scorer", "Rebounding Specialist"]
+  },
+  {
+    "name": "Jalen Green",
+    "archetypes": ["Elite Scorer / Volume Scorer", "Athletic Finisher / Slasher"]
+  },
+  {
+    "name": "Jan Vesely",
+    "archetypes": ["Athletic Finisher / Slasher", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Jimmer Fredette",
+    "archetypes": ["Low-Usage Specialist"]
+  },
+  {
+    "name": "John Stockton",
+    "archetypes": ["Primary Ball-Handler / Playmaker", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Jonas Valančiūnas",
+    "archetypes": ["Rebounding Specialist", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Kawhi Leonard",
+    "archetypes": ["Unique / Generational Talent", "3-and-D Wing", "Elite Scorer / Volume Scorer", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Kemba Walker",
+    "archetypes": ["Elite Scorer / Volume Scorer", "Primary Ball-Handler / Playmaker"]
+  }
+]

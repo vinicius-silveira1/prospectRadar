@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Marcus Morris Sr.",
+    "archetypes": ["Low-Usage Specialist", "3-and-D Wing"]
+  },
+  {
+    "name": "Marcus Smart",
+    "archetypes": ["Defensive Anchor / Rim Protector", "Primary Ball-Handler / Playmaker", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Markelle Fultz",
+    "archetypes": ["Primary Ball-Handler / Playmaker", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Markieff Morris",
+    "archetypes": ["Low-Usage Specialist"]
+  },
+  {
+    "name": "Michael Jordan",
+    "archetypes": ["Unique / Generational Talent", "Elite Scorer / Volume Scorer", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Paolo Banchero",
+    "archetypes": ["Versatile Forward / All-Around", "Elite Scorer / Volume Scorer", "Primary Ball-Handler / Playmaker"]
+  },
+  {
+    "name": "Patrick Ewing",
+    "archetypes": ["Defensive Anchor / Rim Protector", "Elite Scorer / Volume Scorer", "Rebounding Specialist"]
+  },
+  {
+    "name": "Reggie Miller",
+    "archetypes": ["Elite Scorer / Volume Scorer", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Scoot Henderson",
+    "archetypes": ["Primary Ball-Handler / Playmaker", "Athletic Finisher / Slasher", "Elite Scorer / Volume Scorer"]
+  },
+  {
+    "name": "Scottie Pippen",
+    "archetypes": ["Versatile Forward / All-Around", "Defensive Anchor / Rim Protector", "Primary Ball-Handler / Playmaker"]
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Dragan Bender",
+    "archetypes": ["Low-Usage Specialist"]
+  },
+  {
+    "name": "Andrei Kirilenko",
+    "archetypes": ["Versatile Forward / All-Around", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Anthony Edwards",
+    "archetypes": ["Elite Scorer / Volume Scorer", "Athletic Finisher / Slasher"]
+  },
+  {
+    "name": "Ben Simmons",
+    "archetypes": ["Primary Ball-Handler / Playmaker", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Cade Cunningham",
+    "archetypes": ["Primary Ball-Handler / Playmaker", "Elite Scorer / Volume Scorer"]
+  },
+  {
+    "name": "Charles Barkley",
+    "archetypes": ["Versatile Forward / All-Around", "Rebounding Specialist", "Elite Scorer / Volume Scorer"]
+  },
+  {
+    "name": "Chet Holmgren",
+    "archetypes": ["Defensive Anchor / Rim Protector", "Stretch Big", "Unique / Generational Talent"]
+  },
+  {
+    "name": "Dennis Rodman",
+    "archetypes": ["Rebounding Specialist", "Defensive Anchor / Rim Protector"]
+  },
+  {
+    "name": "Enes Freedom",
+    "archetypes": ["Rebounding Specialist", "Low-Usage Specialist"]
+  },
+  {
+    "name": "Evan Mobley",
+    "archetypes": ["Defensive Anchor / Rim Protector", "Versatile Forward / All-Around"]
+  }
+]
