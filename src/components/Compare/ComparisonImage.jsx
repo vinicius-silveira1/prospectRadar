@@ -120,7 +120,7 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
         <div className="flex items-center">
           <span className="text-4xl font-bold tracking-wide">
             <span className="text-orange-500">prospect</span>
-            <span className="text-blue-500">Radar</span>
+            <span className="text-brand-purple">Radar</span>
           </span>
         </div>
         <div className="text-right">
@@ -162,7 +162,7 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
                 <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center tracking-wide ${winners[0].isWinner ? winnerBg : defaultCellBg}`}>
                   <span>{isPct ? `${((winners[0].value || 0) * 100).toFixed(1)}%` : (winners[0].value || 0).toFixed(key === 'games_played' ? 0 : 1)}</span>
                 </div>
-                <div className={`font-bold text-xl text-center p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>
+                <div className={`font-bold text-2xl text-center p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>
                   <span>{label}</span>
                 </div>
                 <div className={`text-center text-3xl font-bold p-4 rounded-lg flex items-center justify-center tracking-wide ${winners[1].isWinner ? winnerBg : defaultCellBg}`}>
@@ -175,9 +175,9 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
           // 3 & 4-Player Layout
           <div className={`grid ${processedProspects.length === 3 ? 'grid-cols-4' : 'grid-cols-5'} gap-3`}>
             {/* Header Row */}
-            <div className={`font-bold text-lg p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>ESTATÍSTICA</div>
+            <div className={`font-bold text-xl p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>ESTATÍSTICA</div>
             {processedProspects.map(p => (
-              <div key={p.id} className={`font-bold text-lg p-4 rounded-lg flex items-center justify-center text-center text-balance tracking-wide ${statLabelBg}`}>{p.name}</div>
+              <div key={p.id} className={`font-bold text-2xl p-4 rounded-lg flex items-center justify-center text-center text-balance tracking-wide ${statLabelBg}`}>{p.name}</div>
             ))}
 
             {/* Stat Rows */}
@@ -185,7 +185,7 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
               const winners = getStatWinners(key);
               return (
                 <React.Fragment key={key}>
-                  <div className={`font-bold text-lg text-left p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>
+                  <div className={`font-bold text-xl text-left p-4 rounded-lg flex items-center justify-center tracking-wide ${statLabelBg}`}>
                     <span>{label}</span>
                   </div>
                   {processedProspects.map((prospect, index) => (
@@ -204,7 +204,7 @@ const ComparisonImage = forwardRef(({ prospects, isDark }, ref) => {
       <div className="relative z-10 mt-8 pt-6 text-center border-t-2 border-slate-200 dark:border-super-dark-border">
         <div className="bg-slate-100 dark:bg-super-dark-primary p-4 rounded-lg border-2 border-slate-200 dark:border-super-dark-border">
           <p className="text-lg font-bold tracking-wide text-slate-600 dark:text-slate-300">
-            🎯 Gerado por <span className="text-orange-500">prospect</span><span className="text-blue-500">Radar</span>.com
+            🎯 Gerado por <span className="text-orange-500">prospect</span><span className="text-brand-purple">Radar</span>.com.br
           </p>
           <p className="text-sm tracking-widest text-slate-500 dark:text-slate-400 mt-1">
             O FUTURO DO SCOUTING BRASILEIRO • ANÁLISE AVANÇADA • DADOS PRECISOS

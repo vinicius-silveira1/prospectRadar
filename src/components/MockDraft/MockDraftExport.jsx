@@ -34,6 +34,39 @@ const teamLogos = {
   'WAS': 'https://cdn.nba.com/logos/nba/1610612764/primary/L/logo.svg',
 };
 
+const teamFullNames = {
+  'ATL': 'Atlanta Hawks',
+  'BOS': 'Boston Celtics',
+  'BKN': 'Brooklyn Nets',
+  'CHA': 'Charlotte Hornets',
+  'CHI': 'Chicago Bulls',
+  'CLE': 'Cleveland Cavaliers',
+  'DAL': 'Dallas Mavericks',
+  'DEN': 'Denver Nuggets',
+  'DET': 'Detroit Pistons',
+  'GSW': 'Golden State Warriors',
+  'HOU': 'Houston Rockets',
+  'IND': 'Indiana Pacers',
+  'LAC': 'LA Clippers',
+  'LAL': 'Los Angeles Lakers',
+  'MEM': 'Memphis Grizzlies',
+  'MIA': 'Miami Heat',
+  'MIL': 'Milwaukee Bucks',
+  'MIN': 'Minnesota Timberwolves',
+  'NOP': 'New Orleans Pelicans',
+  'NYK': 'New York Knicks',
+  'OKC': 'Oklahoma City Thunder',
+  'ORL': 'Orlando Magic',
+  'PHI': 'Philadelphia 76ers',
+  'PHX': 'Phoenix Suns',
+  'POR': 'Portland Trail Blazers',
+  'SAC': 'Sacramento Kings',
+  'SAS': 'San Antonio Spurs',
+  'TOR': 'Toronto Raptors',
+  'UTA': 'Utah Jazz',
+  'WAS': 'Washington Wizards',
+};
+
 const getTeamLogo = (teamName) => teamLogos[teamName] || '/logo.svg';
 
 // Funções auxiliares para as imagens dos prospects
@@ -115,16 +148,14 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                 <img src={getTeamLogo(pick.team)} alt={pick.team} className="w-10 h-10 object-contain" />
               </div>
               
-              {/* Prospect Info - Apenas Nome */}
+              {/* Prospect Info */}
               <div className="flex-1 min-w-0">
                 {pick.prospect ? (
-                  <div className="flex items-center">
-                    {/* Nome Principal */}
-                    <div className="flex-1">
-                      <h3 className="font-bold text-3xl text-gray-900 leading-tight">
-                        {pick.prospect.name}
-                      </h3>
-                    </div>
+                  <div>
+                    <h3 className="font-bold text-3xl text-gray-900 leading-tight">
+                      {pick.prospect.name}
+                    </h3>
+                    <p className="text-lg text-gray-600 font-semibold">{teamFullNames[pick.team] || pick.team}</p>
                   </div>
                 ) : (
                   <div className="flex items-center">
@@ -159,7 +190,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
             <div>
               <h1 className="text-3xl font-bold mb-1">
                 <span className="text-orange-500">prospect</span>
-                <span className="text-gray-800">Radar</span>
+                <span className="text-brand-purple">Radar</span>
               </h1>
               <p className="text-gray-600 text-lg">Mock Draft Profissional</p>
             </div>
@@ -184,11 +215,11 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       <footer className="relative z-10 bg-white border-t-2 border-gray-200 text-center p-4">
         <div className="mb-2">
           <span className="text-xl font-bold text-orange-500">prospect</span>
-          <span className="text-xl font-bold text-gray-800">Radar</span>
+          <span className="text-xl font-bold text-brand-purple">Radar</span>
           <span className="text-gray-600 ml-2">• Análise Profissional de Prospects</span>
         </div>
         <div className="text-sm text-gray-500">
-          prospectradar.com • {new Date().toLocaleDateString('pt-BR')}
+          prospectradar.com.br • {new Date().toLocaleDateString('pt-BR')}
         </div>
       </footer>
     </div>
