@@ -113,8 +113,9 @@ const ROLES = {
   ATHLETIC_FINISHER: 'ATHLETIC_FINISHER',
   VERSATILE_FORWARD: 'VERSATILE_FORWARD',
   DEFENSIVE_ANCHOR: 'DEFENSIVE_ANCHOR',
-  PLAYMAKING_BIG: 'PLAYMAKING_BIG', // ADDED
+  PLAYMAKING_BIG: 'PLAYMAKING_BIG',
   LOW_USAGE_SPECIALIST: 'LOW_USAGE_SPECIALIST',
+  LOCKDOWN_DEFENDER: 'LOCKDOWN_DEFENDER', // NOVO
   ALL_AROUND: 'ALL_AROUND',
 };
 
@@ -131,8 +132,11 @@ function mapDescriptiveToRolesArray(descriptiveArchetypes) {
     if (descriptiveArchetypes.includes("3-and-D Wing")) {
         roles.add(ROLES.TWO_WAY_PLAYER);
         roles.add(ROLES.SHOOTING_SPECIALIST);
-    } else if (descriptiveArchetypes.includes("Elite Perimeter Defender")) {
+    } else if (descriptiveArchetypes.includes("Two-Way Player")) { // Mapeamento mais genérico
         roles.add(ROLES.TWO_WAY_PLAYER);
+    }
+    if (descriptiveArchetypes.includes("Elite Perimeter Defender")) { // NOVO MAPEAMENTO
+        roles.add(ROLES.LOCKDOWN_DEFENDER);
     }
     if (descriptiveArchetypes.includes("Athletic Finisher / Slasher")) roles.add(ROLES.ATHLETIC_FINISHER);
     if (descriptiveArchetypes.includes("Defensive Anchor / Rim Protector")) roles.add(ROLES.DEFENSIVE_ANCHOR);
@@ -171,6 +175,7 @@ const ROLE_WEIGHTS = {
   [ROLES.DEFENSIVE_ANCHOR]: { ...BASE_WEIGHTS, bpg: 25, rpg: 20, spg: 15, ppg: 5, apg: 5 },
   [ROLES.PLAYMAKING_BIG]: { ...BASE_WEIGHTS, apg: 40, rpg: 20, fg_pct: 20, ppg: 10, three_pct: 0, bpg: 10 },
   [ROLES.LOW_USAGE_SPECIALIST]: { ...BASE_WEIGHTS, three_pct: 25, ft_pct: 15, spg: 15, bpg: 15, ppg: 5, apg: 5, rpg: 5 },
+  [ROLES.LOCKDOWN_DEFENDER]: { ...BASE_WEIGHTS, spg: 35, bpg: 20, ppg: 5, apg: 5, fg_pct: 10, three_pct: 0 }, // NOVO
   [ROLES.ALL_AROUND]: BASE_WEIGHTS,
 };
 
@@ -1283,25 +1288,33 @@ export class ProspectRankingAlgorithm {
   calculateCareerSuccess(nbaPlayer) {
     if (!nbaPlayer) return 0;
     
-    const draftPick = nbaPlayer.draft_pick || 61;
     let score = 0;
+    const games = nbaPlayer.nba_games_played || 0;
+    const draftPick = nbaPlayer.draft_pick;
 
-    if (draftPick <= 14) score += 4;
-    else if (draftPick <= 30) score += 3;
-    else if (draftPick <= 60) score += 2;
+    // 1. Longevidade (Pontos por jogos disputados)
+    // Reflete a capacidade de se manter na liga.
+    if (games > 80) score += 1;   // Jogador estabelecido
+    if (games > 250) score += 2;  // Carreira sólida (Dort: 363 jogos -> 3 pts aqui)
+    if (games > 500) score += 1;  // Veterano de longo prazo
+    if (games > 800) score += 1;  // Longevidade de elite
 
-    const startYear = nbaPlayer.nba_career_start;
-    const endYear = nbaPlayer.nba_career_end || new Date().getFullYear();
-    if (startYear && endYear) {
-        const yearsInLeague = endYear - startYear;
-        if (yearsInLeague >= 10) score += 3;
-        else if (yearsInLeague >= 5) score += 2;
-        else if (yearsInLeague >= 3) score += 1;
+    // 2. Superar a Expectativa do Draft (O "Fator Lu Dort")
+    // Premia jogadores que superam as projeções.
+    if (draftPick === null && games > 80) { // Sucesso não-draftado
+        score += 3; // Bônus significativo (Dort: +3 pts aqui)
+    } else if (draftPick > 30 && games > 250) { // "Roubo" de 2ª rodada
+        score += 1.5;
     }
 
-    const allStarSelections = nbaPlayer.nba_all_star_selections || 0;
-    score += allStarSelections * 1.5;
+    // 3. Prêmios e Conquistas (Pico de performance)
+    score += (nbaPlayer.nba_all_star_selections || 0) * 1.5;
+    score += (nbaPlayer.nba_all_nba_selections || 0) * 2;
+    score += (nbaPlayer.nba_championships || 0) * 2;
+    score += (nbaPlayer.nba_dpoy || 0) * 2.5;
+    score += (nbaPlayer.nba_mvps || 0) * 3;
 
+    // Garante que o score final esteja entre 0 e 10.
     return Math.min(10, Math.max(0, parseFloat(score.toFixed(1))));
   }
 }
