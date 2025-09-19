@@ -109,10 +109,11 @@ const ROLES = {
   PURE_PLAYMAKER: 'PURE_PLAYMAKER',
   SCORING_LEAD_GUARD: 'SCORING_LEAD_GUARD',
   SHOOTING_SPECIALIST: 'SHOOTING_SPECIALIST',
-  TWO_WAY_PLAYER: 'TWO_WAY_PLAYER', // Renomeado de SLASHER
+  TWO_WAY_PLAYER: 'TWO_WAY_PLAYER',
   ATHLETIC_FINISHER: 'ATHLETIC_FINISHER',
   VERSATILE_FORWARD: 'VERSATILE_FORWARD',
-  DEFENSIVE_ANCHOR: 'DEFensive_ANCHOR',
+  DEFENSIVE_ANCHOR: 'DEFENSIVE_ANCHOR',
+  PLAYMAKING_BIG: 'PLAYMAKING_BIG', // ADDED
   LOW_USAGE_SPECIALIST: 'LOW_USAGE_SPECIALIST',
   ALL_AROUND: 'ALL_AROUND',
 };
@@ -127,7 +128,7 @@ function mapDescriptiveToRolesArray(descriptiveArchetypes) {
     if (descriptiveArchetypes.includes("Primary Ball-Handler / Playmaker")) roles.add(ROLES.PURE_PLAYMAKER);
     if (descriptiveArchetypes.includes("Elite Scorer / Volume Scorer")) roles.add(ROLES.SCORING_LEAD_GUARD);
     if (descriptiveArchetypes.includes("Elite Shooter")) roles.add(ROLES.SHOOTING_SPECIALIST);
-        if (descriptiveArchetypes.includes("3-and-D Wing")) {
+    if (descriptiveArchetypes.includes("3-and-D Wing")) {
         roles.add(ROLES.TWO_WAY_PLAYER);
         roles.add(ROLES.SHOOTING_SPECIALIST);
     } else if (descriptiveArchetypes.includes("Elite Perimeter Defender")) {
@@ -139,6 +140,7 @@ function mapDescriptiveToRolesArray(descriptiveArchetypes) {
     if (descriptiveArchetypes.includes("Rebounding Specialist")) roles.add(ROLES.DEFENSIVE_ANCHOR);
     if (descriptiveArchetypes.includes("Low-Usage Specialist")) roles.add(ROLES.LOW_USAGE_SPECIALIST);
     if (descriptiveArchetypes.includes("Versatile Forward / All-Around")) roles.add(ROLES.VERSATILE_FORWARD);
+    if (descriptiveArchetypes.includes("Playmaking Big")) roles.add(ROLES.PLAYMAKING_BIG);
     if (descriptiveArchetypes.includes("Connector")) roles.add(ROLES.ALL_AROUND);
 
     if (roles.size === 0) roles.add(ROLES.ALL_AROUND);
@@ -167,6 +169,7 @@ const ROLE_WEIGHTS = {
   [ROLES.ATHLETIC_FINISHER]: { ...BASE_WEIGHTS, fg_pct: 25, ppg: 20, rpg: 15, bpg: 10, apg: 5 },
   [ROLES.VERSATILE_FORWARD]: { ...BASE_WEIGHTS, ppg: 15, rpg: 15, apg: 15, spg: 10, bpg: 10 },
   [ROLES.DEFENSIVE_ANCHOR]: { ...BASE_WEIGHTS, bpg: 25, rpg: 20, spg: 15, ppg: 5, apg: 5 },
+  [ROLES.PLAYMAKING_BIG]: { ...BASE_WEIGHTS, apg: 40, rpg: 20, fg_pct: 20, ppg: 10, three_pct: 0, bpg: 10 },
   [ROLES.LOW_USAGE_SPECIALIST]: { ...BASE_WEIGHTS, three_pct: 25, ft_pct: 15, spg: 15, bpg: 15, ppg: 5, apg: 5, rpg: 5 },
   [ROLES.ALL_AROUND]: BASE_WEIGHTS,
 };
