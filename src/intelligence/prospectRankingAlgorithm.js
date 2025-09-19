@@ -25,6 +25,12 @@ const POSITIONAL_GROUPS = {
     'Forward-Center': 'Center',    // Híbridos tratados como Center
 };
 
+const POSITIONAL_SIMILARITY_MATRIX = {
+    Guard:   { Guard: 1.0, Forward: 0.2, Center: 0.0 },
+    Forward: { Guard: 0.2, Forward: 1.0, Center: 0.5 },
+    Center:  { Guard: 0.0, Forward: 0.5, Center: 1.0 },
+};
+
 // 📊 CONFIGURAÇÕES DE NORMALIZAÇÃO ESTATÍSTICA
 // 
 // Define os valores máximos para cada estatística, mapeando para uma escala de 0 a 1.0.
@@ -121,7 +127,12 @@ function mapDescriptiveToRolesArray(descriptiveArchetypes) {
     if (descriptiveArchetypes.includes("Primary Ball-Handler / Playmaker")) roles.add(ROLES.PURE_PLAYMAKER);
     if (descriptiveArchetypes.includes("Elite Scorer / Volume Scorer")) roles.add(ROLES.SCORING_LEAD_GUARD);
     if (descriptiveArchetypes.includes("Elite Shooter")) roles.add(ROLES.SHOOTING_SPECIALIST);
-    if (descriptiveArchetypes.includes("3-and-D Wing") || descriptiveArchetypes.includes("Elite Perimeter Defender")) roles.add(ROLES.TWO_WAY_PLAYER);
+        if (descriptiveArchetypes.includes("3-and-D Wing")) {
+        roles.add(ROLES.TWO_WAY_PLAYER);
+        roles.add(ROLES.SHOOTING_SPECIALIST);
+    } else if (descriptiveArchetypes.includes("Elite Perimeter Defender")) {
+        roles.add(ROLES.TWO_WAY_PLAYER);
+    }
     if (descriptiveArchetypes.includes("Athletic Finisher / Slasher")) roles.add(ROLES.ATHLETIC_FINISHER);
     if (descriptiveArchetypes.includes("Defensive Anchor / Rim Protector")) roles.add(ROLES.DEFENSIVE_ANCHOR);
     if (descriptiveArchetypes.includes("Stretch Big")) roles.add(ROLES.SHOOTING_SPECIALIST);
@@ -144,28 +155,7 @@ function calculateSetSimilarity(arrA, arrB) {
     return intersection.size / union.size;
 }
 
-// Função para mapear arquétipos descritivos do DB para os ROLES internos
-function mapDescriptiveArchetypesToRole(descriptiveArchetypes) {
-    if (!descriptiveArchetypes || descriptiveArchetypes.length === 0) return ROLES.ALL_AROUND;
 
-    // Lógica original que prioriza Playmaker
-    if (descriptiveArchetypes.includes("Primary Ball-Handler / Playmaker")) return ROLES.PURE_PLAYMAKER;
-    if (descriptiveArchetypes.includes("Elite Scorer / Volume Scorer")) return ROLES.SCORING_LEAD_GUARD;
-    if (descriptiveArchetypes.includes("Elite Shooter")) return ROLES.SHOOTING_SPECIALIST;
-    if (descriptiveArchetypes.includes("3-and-D Wing") || descriptiveArchetypes.includes("Elite Perimeter Defender")) return ROLES.TWO_WAY_PLAYER;
-    if (descriptiveArchetypes.includes("Athletic Finisher / Slasher")) return ROLES.ATHLETIC_FINISHER;
-    if (descriptiveArchetypes.includes("Defensive Anchor / Rim Protector")) return ROLES.DEFENSIVE_ANCHOR;
-    if (descriptiveArchetypes.includes("Stretch Big")) return ROLES.SHOOTING_SPECIALIST; // Para bigs que arremessam
-    if (descriptiveArchetypes.includes("Rebounding Specialist")) return ROLES.DEFENSIVE_ANCHOR; // Geralmente ligado a bigs
-    if (descriptiveArchetypes.includes("Low-Usage Specialist")) return ROLES.LOW_USAGE_SPECIALIST;
-    if (descriptiveArchetypes.includes("Versatile Forward / All-Around")) return ROLES.VERSATILE_FORWARD;
-    
-    // Fallback para casos menos específicos ou "Unique"
-    if (descriptiveArchetypes.includes("Unique / Generational Talent")) return ROLES.ALL_AROUND; 
-    if (descriptiveArchetypes.includes("Connector")) return ROLES.ALL_AROUND;
-
-    return ROLES.ALL_AROUND; // Fallback padrão
-}
 
 const BASE_WEIGHTS = { ppg: 15, rpg: 10, apg: 15, spg: 12, bpg: 8, fg_pct: 20, three_pct: 10, ft_pct: 10 };
 
@@ -1159,91 +1149,7 @@ export class ProspectRankingAlgorithm {
     return Math.max(0.0, Math.min(score / totalWeight, 1.0));
   }
 
-  /**
-   * Calcula a similaridade de arquétipo entre um prospecto e um jogador da NBA.
-   * Usa estatísticas normalizadas e pesos de arquétipo.
-   * @param {object} prospectStats - Estatísticas do prospecto (college).
-   * @param {object} nbaPlayerCareerStats - Estatísticas de carreira do jogador da NBA.
-   * @param {string} prospectContext - O contexto do prospecto ('college', 'nbb', etc.).
-   * @returns {number} - Score de similaridade (0-1).
-   */
-  calculateArchetypeSimilarity(prospectStats, nbaPlayerCareerStats, prospectRole, prospectContext, prospectQualitativeTraits, nbaPlayerQualitativeTraits, nbaPlayerFullObject) {
-    
-
-    if (!prospectStats || !nbaPlayerCareerStats || Object.keys(nbaPlayerCareerStats).length === 0) return 0;
-
-    const weights = ROLE_WEIGHTS[prospectRole] || ROLE_WEIGHTS.ALL_AROUND;
-    let totalWeightedDifference = 0;
-    let totalWeight = 0;
-
-    for (const statName in weights) {
-      const weight = weights[statName];
-      const prospectValue = prospectStats[statName];
-      const nbaValue = nbaPlayerCareerStats[statName];
-
-      if (prospectValue !== undefined && prospectValue !== null && nbaValue !== undefined && nbaValue !== null) {
-        const normalizedProspect = this.normalizeStat(prospectValue, prospectContext, statName);
-        const normalizedNba = this.normalizeStat(nbaValue, 'nba', statName);
-
-        const difference = Math.abs(normalizedProspect - normalizedNba);
-        totalWeightedDifference += difference * weight;
-        totalWeight += weight;
-      }
-    }
-
-    if (totalWeight === 0) return 0;
-
-    const averageWeightedDifference = totalWeightedDifference / totalWeight;
-    let finalSimilarityScore = Math.max(0, 1 - (averageWeightedDifference / 10));
-
-    // --- PENALIDADES POR GAP DE HABILIDADE (EXISTENTES) ---
-    
-    // 1. "Durant-Calderon" Problem: Penalize comparing non-shooters to elite shooters.
-    const prospectShooting = prospectStats.three_pct || 0;
-    const nbaShooting = nbaPlayerCareerStats.three_pct || 0;
-    if (nbaShooting > 0.37 && prospectShooting < 0.32) {
-      finalSimilarityScore *= 0.6; 
-    }
-
-    // 2. Volume Mismatch Penalty
-    const prospect3PA = prospectStats.three_pt_attempts || 0;
-    if (nbaShooting > 0.36 && prospect3PA < 50) {
-        finalSimilarityScore *= 0.9; 
-    }
-
-    // NOVA PENALIDADE: Forte penalidade se o prospectRole não corresponder ao arquétipo do NBA Player
-    const nbaPlayerRole = getProspectRole(nbaPlayerFullObject, nbaPlayerCareerStats, 'nba'); 
-    if (prospectRole !== nbaPlayerRole) {
-        finalSimilarityScore *= 0.5; 
-    }
-
-    // --- NOVA LÓGICA: PESO DOS TRAÇOS QUALITATIVOS ---
-    const prospectQ = prospectQualitativeTraits || {};
-    const nbaQ = nbaPlayerQualitativeTraits || {}; 
-
-    let qualitativeTraitImpact = 0; // Declaração movida para cima
-    let traitsCount = 0; // Declaração movida para cima
-
-    for (const trait in prospectQ) {
-      if (prospectQ[trait] === true) { 
-        traitsCount++;
-        if (nbaQ[trait] === true) { 
-          qualitativeTraitImpact += 0.15; // Strong bonus for matching trait
-        } else {
-          qualitativeTraitImpact -= 0.10; // Strong penalty for mismatch
-        }
-      }
-    }
-    
-    // Apply the qualitative trait impact
-    // Normalize by traitsCount to avoid huge swings if a player has many traits
-    if (traitsCount > 0) {
-        finalSimilarityScore += (qualitativeTraitImpact / traitsCount);
-    }
-
-    // Ensure score doesn't go below 0 or above 1
-    return Math.max(0, Math.min(finalSimilarityScore, 1));
-  }
+  
 
   calculateDraftProjection(totalScore, prospect, lowGamesRisk = false) {
     // Se o risco for alto, a projeção é mais conservadora
@@ -1296,6 +1202,8 @@ export class ProspectRankingAlgorithm {
       return [];
     }
 
+    console.log(`[DEBUG] Starting comparison for prospect: ${player.name}`);
+
     if (!this.nbaSuccessDatabase) {
       const { data, error } = await this.supabase.from('nba_players_historical').select('*, archetypes');
       if (error) {
@@ -1305,87 +1213,54 @@ export class ProspectRankingAlgorithm {
       this.nbaSuccessDatabase = data;
     }
 
-    const prospectQualitativeTraits = player.qualitative_traits || {};
-    const prospectRole = getProspectRole(player, stats, prospectContext, prospectQualitativeTraits);
-    const prospectBadges = assignBadges(player);
+    let prospectArchetypes;
+    if (player.qualitative_archetypes && player.qualitative_archetypes.length > 0) {
+        const isAlreadyRole = Object.values(ROLES).includes(player.qualitative_archetypes[0]);
+        if (isAlreadyRole) {
+            prospectArchetypes = player.qualitative_archetypes;
+        } else {
+            prospectArchetypes = mapDescriptiveToRolesArray(player.qualitative_archetypes);
+        }
+    } else {
+        prospectArchetypes = [getProspectRole(player, stats, prospectContext)];
+    }
+
     const physicalHeightInches = this.parseHeightToInches(player.height);
-    const prospectUsage = player.usage_rate || player.usg_percent || 0;
     const prospectPositionalGroup = POSITIONAL_GROUPS[player.position.trim()];
+
+    const debugPlayers = ['Mikal Bridges', 'Danny Green', 'Marcus Smart', 'Kobe Bryant', 'Reggie Miller'];
 
     const similarityScores = this.nbaSuccessDatabase.map(nbaPlayer => {
       if (!nbaPlayer.nba_career_ppg || isNaN(nbaPlayer.nba_games_played) || nbaPlayer.nba_games_played < 50) {
         return { player: nbaPlayer, similarity: -1 };
       }
 
-      const nbaCareerStats = {
-        ppg: parseFloat(nbaPlayer.nba_career_ppg),
-        rpg: parseFloat(nbaPlayer.nba_career_rpg),
-        apg: parseFloat(nbaPlayer.nba_career_apg),
-        spg: parseFloat(nbaPlayer.nba_career_spg),
-        bpg: parseFloat(nbaPlayer.nba_career_bpg),
-        fg_pct: parseFloat(nbaPlayer.nba_career_fg_pct),
-        three_pct: parseFloat(nbaPlayer.nba_career_three_pct),
-        ft_pct: parseFloat(nbaPlayer.nba_career_ft_pct),
-        usg_percent: parseFloat(nbaPlayer.usg_percent)
-      };
-      
-      const nbaPlayerRole = mapDescriptiveArchetypesToRole(nbaPlayer.archetypes);
+      const nbaPlayerArchetypes = mapDescriptiveToRolesArray(nbaPlayer.archetypes);
       const nbaPlayerPositionalGroup = POSITIONAL_GROUPS[nbaPlayer.position];
       const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
 
-      // --- Sistema de Pontuação Aditiva ---
-      let totalSimilarity = 0;
-
-      // 1. Similaridade de Arquétipo (Peso: 50%)
-      const archetypeSimilarity = this.calculateArchetypeSimilarity(
-        stats, nbaCareerStats, prospectRole, prospectContext,
-        prospectQualitativeTraits, inferQualitativeTraits(nbaCareerStats, 'nba'),
-        nbaPlayer
-      );
-      totalSimilarity += archetypeSimilarity * 0.50;
-
-      // 2. Bônus/Penalidade de Posição (Peso: 20%)
-      if (prospectPositionalGroup === nbaPlayerPositionalGroup) {
-        totalSimilarity += 0.20;
-      } else {
-        totalSimilarity -= 0.20; // Penalidade por grupo de posição diferente
-      }
-
-      // 3. Similaridade de Altura (Peso: 10%)
+      const archetypeSimilarity = calculateSetSimilarity(prospectArchetypes, nbaPlayerArchetypes);
+      const positionalSimilarity = POSITIONAL_SIMILARITY_MATRIX[prospectPositionalGroup]?.[nbaPlayerPositionalGroup] || 0.0;
       const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0);
-      totalSimilarity += heightSimilarity * 0.10;
 
-      // 4. Bônus de Armador Alto (Bônus Adicional de 15%)
-      const isProspectTallPlaymaker = (prospectRole === ROLES.PURE_PLAYMAKER && physicalHeightInches >= 76); // 6'4"
-      const isNbaPlayerTallPlaymaker = (nbaPlayerRole === ROLES.PURE_PLAYMAKER && historicalHeightInches >= 76);
-      if (isProspectTallPlaymaker && isNbaPlayerTallPlaymaker) {
-          totalSimilarity += 0.15;
-      }
-
-      // 5. Penalidade por Estilo de Playmaker Incompatível (Penalidade de 20%)
-      const isProspectDefensive = (player.qualitative_archetypes || []).includes("TWO_WAY_PLAYER");
-      const isNbaPlayerDefensive = (nbaPlayer.archetypes || []).includes("Elite Perimeter Defender");
-      if (prospectRole === ROLES.PURE_PLAYMAKER && isProspectDefensive !== isNbaPlayerDefensive) {
-          totalSimilarity -= 0.20;
-      }
-
-      // 6. Penalidade por Estilo de Infiltração Incompatível (Penalidade de 15%)
-      const isProspectSlasher = (player.qualitative_archetypes || []).includes("ATHLETIC_FINISHER");
-      const isNbaPlayerSlasher = (nbaPlayer.archetypes || []).includes("Athletic Finisher / Slasher");
-      if (prospectRole === ROLES.PURE_PLAYMAKER && isProspectSlasher !== isNbaPlayerSlasher) {
-          totalSimilarity -= 0.15;
-      }
+      let totalSimilarity = (archetypeSimilarity * 0.60) + (positionalSimilarity * 0.20) + (heightSimilarity * 0.20);
       
-      // 7. Bônus de Badges
-      const nbaBadges = assignBadges({ ...nbaPlayer, ...nbaCareerStats });
-      const prospectBadges = assignBadges(player);
-      const intersection = new Set([...prospectBadges].filter(badge => nbaBadges.some(nbaBadge => nbaBadge.label === badge.label)));
-      totalSimilarity += (intersection.size * 0.02);
-
-      // 8. Penalidade de Era
       const careerEndYear = nbaPlayer.nba_career_end || new Date().getFullYear();
-      if (careerEndYear < 2010) {
-        totalSimilarity -= (2010 - careerEndYear) * 0.01;
+      const modernBonus = (careerEndYear >= 2010) ? 0.10 : 0.0;
+      const shootingBonus = (prospectArchetypes.includes(ROLES.SHOOTING_SPECIALIST) && nbaPlayerArchetypes.includes(ROLES.SHOOTING_SPECIALIST)) ? 0.15 : 0.0;
+      const twoWayBonus = (prospectArchetypes.includes(ROLES.TWO_WAY_PLAYER) && nbaPlayerArchetypes.includes(ROLES.TWO_WAY_PLAYER)) ? 0.10 : 0.0;
+      
+      totalSimilarity += modernBonus + shootingBonus + twoWayBonus;
+
+      if (debugPlayers.includes(nbaPlayer.name)) {
+          console.log(`\n--- COMPARING WITH: ${nbaPlayer.name} ---`);
+          console.log(`Prospect Archetypes: ${prospectArchetypes.join(', ')}`);
+          console.log(`NBA Player Archetypes: ${nbaPlayerArchetypes.join(', ')}`);
+          console.log(`Archetype Score (Jaccard * 0.6): ${(archetypeSimilarity * 0.60).toFixed(3)}`);
+          console.log(`Positional Score (Matrix * 0.2): ${(positionalSimilarity * 0.20).toFixed(3)}`);
+          console.log(`Height Score (Diff * 0.2): ${(heightSimilarity * 0.20).toFixed(3)}`);
+          console.log(`Bonuses (Modern/Shooting/TwoWay): ${modernBonus.toFixed(2)} / ${shootingBonus.toFixed(2)} / ${twoWayBonus.toFixed(2)}`);
+          console.log(`FINAL SCORE: ${totalSimilarity.toFixed(3)}`);
       }
 
       return { player: nbaPlayer, similarity: totalSimilarity };
@@ -1396,7 +1271,7 @@ export class ProspectRankingAlgorithm {
       .slice(0, 3)
       .map(item => ({
         name: item.player.name,
-        similarity: Math.round(Math.max(0, item.similarity) * 100),
+        similarity: Math.round(Math.max(0, Math.min(item.similarity, 1.0)) * 100),
         draftPosition: item.player.draft_pick,
         careerSuccess: this.calculateCareerSuccess(item.player)
       }));
