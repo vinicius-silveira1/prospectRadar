@@ -7,28 +7,22 @@ import { assignBadges } from '../lib/badges.js';
  * baseado em estatísticas, desenvolvimento e potencial NBA.
  */
 
-// 🏀 MAPEAMENTO DE POSIÇÕES PARA COMPARAÇÕES PRECISAS
-// 
-// Define grupos posicionais para matching mais rigoroso entre prospects e jogadores NBA.
-// Isso evita comparar um armador (PG) com um pivô (C), garantindo análises mais relevantes.
-const POSITIONAL_GROUPS = {
-    'PG': 'Guard',    // Point Guard → Armador
-    'SG': 'Guard',    // Shooting Guard → Ala-armador  
-    'SF': 'Forward',  // Small Forward → Ala
-    'PF': 'Forward',  // Power Forward → Ala-pivô
-    'C': 'Center',    // Center → Pivô
-    'Guard': 'Guard',        // Para jogadores NBA com posição genérica 'Guard'
-    'Forward': 'Forward',    // Para jogadores NBA com posição genérica 'Forward'  
-    'Center': 'Center',      // Para jogadores NBA com posição genérica 'Center'
-    'Guard-Forward': 'Forward',    // Híbridos tratados como Forward
-    'Forward-Guard': 'Forward',    // Híbridos tratados como Forward
-    'Forward-Center': 'Center',    // Híbridos tratados como Center
-};
-
+// 🏀 MATRIZ DE SIMILARIDADE POSICIONAL DETALHADA
+//
+// Define a similaridade entre as cinco posições específicas do basquete.
+// Isso permite comparações mais refinadas, refletindo a fluidez do jogo moderno
+// onde jogadores desempenham múltiplos papéis.
+// Ex: Um SG (Shooting Guard) é muito similar a um PG e SF, mas pouco similar a um C (Center).
+// 🏀 MATRIZ DE SIMILARIDADE POSICIONAL ESTRITA
+//
+// Força as comparações a acontecerem apenas entre jogadores da MESMA posição.
+// A similaridade é 1.0 para posições idênticas e 0.0 para todas as outras.
 const POSITIONAL_SIMILARITY_MATRIX = {
-    Guard:   { Guard: 1.0, Forward: 0.2, Center: 0.0 },
-    Forward: { Guard: 0.2, Forward: 1.0, Center: 0.5 },
-    Center:  { Guard: 0.0, Forward: 0.5, Center: 1.0 },
+    PG: { PG: 1.0, SG: 0.0, SF: 0.0, PF: 0.0, C: 0.0 },
+    SG: { PG: 0.0, SG: 1.0, SF: 0.0, PF: 0.0, C: 0.0 },
+    SF: { PG: 0.0, SG: 0.0, SF: 1.0, PF: 0.0, C: 0.0 },
+    PF: { PG: 0.0, SG: 0.0, SF: 0.0, PF: 1.0, C: 0.0 },
+    C:  { PG: 0.0, SG: 0.0, SF: 0.0, PF: 0.0, C: 1.0 },
 };
 
 // 📊 CONFIGURAÇÕES DE NORMALIZAÇÃO ESTATÍSTICA
@@ -104,19 +98,26 @@ const STAT_NORMALIZATION_CONFIG = {
 };
 
 
-// --- NOVOS PESOS E ARQUÉTIPOS ---
+// --- ARQUÉTIPOS ---
 const ROLES = {
-  PURE_PLAYMAKER: 'PURE_PLAYMAKER',
-  SCORING_LEAD_GUARD: 'SCORING_LEAD_GUARD',
-  SHOOTING_SPECIALIST: 'SHOOTING_SPECIALIST',
-  TWO_WAY_PLAYER: 'TWO_WAY_PLAYER',
-  ATHLETIC_FINISHER: 'ATHLETIC_FINISHER',
-  VERSATILE_FORWARD: 'VERSATILE_FORWARD',
-  DEFENSIVE_ANCHOR: 'DEFENSIVE_ANCHOR',
-  PLAYMAKING_BIG: 'PLAYMAKING_BIG',
-  LOW_USAGE_SPECIALIST: 'LOW_USAGE_SPECIALIST',
-  LOCKDOWN_DEFENDER: 'LOCKDOWN_DEFENDER', // NOVO
-  ALL_AROUND: 'ALL_AROUND',
+  PURE_PLAYMAKER: 'PURE_PLAYMAKER',             // Especialista em criação
+  SCORING_LEAD_GUARD: 'SCORING_LEAD_GUARD',     // Armador/ala-armador com foco em pontuação
+  SHOOTING_SPECIALIST: 'SHOOTING_SPECIALIST',   // Especialista em arremesso
+  SHOT_CREATOR: 'SHOT_CREATOR',                 // Especialista em criar o próprio arremesso
+  SPOT_UP_SHOOTER: 'SPOT_UP_SHOOTER',           // Especialista em arremesso "imóvel"
+  PULL_UP_SHOOTER: 'PULL_UP_SHOOTER',           // Especialista em arremessos após o drible
+  TWO_WAY_PLAYER: 'TWO_WAY_PLAYER',             // Contribui no ataque e defesa 
+  ATHLETIC_FINISHER: 'ATHLETIC_FINISHER',       // Finalizador atlético
+  VERSATILE_FORWARD: 'VERSATILE_FORWARD',       // Ala versátil
+  DEFENSIVE_ANCHOR: 'DEFENSIVE_ANCHOR',         // Pilar defensivo
+  PLAYMAKING_BIG: 'PLAYMAKING_BIG',             // Pivô especialista em criação
+  LOW_USAGE_SPECIALIST: 'LOW_USAGE_SPECIALIST', // Jogador de baixo uso
+  LOCKDOWN_DEFENDER: 'LOCKDOWN_DEFENDER',       // Defensor implacável
+  ALL_AROUND: 'ALL_AROUND',                     // Jogador completo
+  MOVEMENT_SHOOTER: 'MOVEMENT_SHOOTER',         // Especialista em arremessar em movimento
+  REBOUNDING_ACE: 'REBOUNDING_ACE',             // Reboteiro de elite
+  POST_HUB: 'POST_HUB',                         // Pivô ofensivo que joga de costas para a cesta
+  CONNECTOR_PLAYER: 'CONNECTOR_PLAYER',         // Jogador de conexão, alto QI
 };
 
 // --- NOVAS FUNÇÕES HELPER PARA COMPARAÇÃO DE ARQUÉTIPOS ---
@@ -125,27 +126,43 @@ const ROLES = {
 function mapDescriptiveToRolesArray(descriptiveArchetypes) {
     const roles = new Set();
     if (!descriptiveArchetypes) return [];
-    
-    if (descriptiveArchetypes.includes("Primary Ball-Handler / Playmaker")) roles.add(ROLES.PURE_PLAYMAKER);
-    if (descriptiveArchetypes.includes("Elite Scorer / Volume Scorer")) roles.add(ROLES.SCORING_LEAD_GUARD);
-    if (descriptiveArchetypes.includes("Elite Shooter")) roles.add(ROLES.SHOOTING_SPECIALIST);
-    if (descriptiveArchetypes.includes("3-and-D Wing")) {
-        roles.add(ROLES.TWO_WAY_PLAYER);
-        roles.add(ROLES.SHOOTING_SPECIALIST);
-    } else if (descriptiveArchetypes.includes("Two-Way Player")) { // Mapeamento mais genérico
-        roles.add(ROLES.TWO_WAY_PLAYER);
+
+    for (const archetype of descriptiveArchetypes) {
+        // 1. Verifica se o arquétipo do banco de dados já é um ROLE válido
+        if (Object.values(ROLES).includes(archetype)) {
+            roles.add(archetype);
+            continue; // Pula para o próximo arquétipo
+        }
+
+        // 2. Se não for, tenta mapear a partir dos textos descritivos antigos
+        switch (archetype) {
+            case "Elite Scorer / Volume Scorer":
+                roles.add(ROLES.SCORING_LEAD_GUARD);
+                break;
+            case "Primary Ball-Handler / Playmaker":
+                roles.add(ROLES.PURE_PLAYMAKER);
+                break;
+            case "3-and-D Wing":
+                roles.add(ROLES.TWO_WAY_PLAYER);
+                roles.add(ROLES.SHOOTING_SPECIALIST);
+                break;
+            case "Two-Way Player":
+                roles.add(ROLES.TWO_WAY_PLAYER);
+                break;
+            case "Elite Perimeter Defender":
+                roles.add(ROLES.LOCKDOWN_DEFENDER);
+                break;
+            case "Athletic Finisher / Slasher":
+                roles.add(ROLES.ATHLETIC_FINISHER);
+                break;
+            case "Defensive Anchor / Rim Protector":
+                roles.add(ROLES.DEFENSIVE_ANCHOR);
+                break;
+            case "Stretch Big":
+                roles.add(ROLES.SHOOTING_SPECIALIST);
+                break;
+        }
     }
-    if (descriptiveArchetypes.includes("Elite Perimeter Defender")) { // NOVO MAPEAMENTO
-        roles.add(ROLES.LOCKDOWN_DEFENDER);
-    }
-    if (descriptiveArchetypes.includes("Athletic Finisher / Slasher")) roles.add(ROLES.ATHLETIC_FINISHER);
-    if (descriptiveArchetypes.includes("Defensive Anchor / Rim Protector")) roles.add(ROLES.DEFENSIVE_ANCHOR);
-    if (descriptiveArchetypes.includes("Stretch Big")) roles.add(ROLES.SHOOTING_SPECIALIST);
-    if (descriptiveArchetypes.includes("Rebounding Specialist")) roles.add(ROLES.DEFENSIVE_ANCHOR);
-    if (descriptiveArchetypes.includes("Low-Usage Specialist")) roles.add(ROLES.LOW_USAGE_SPECIALIST);
-    if (descriptiveArchetypes.includes("Versatile Forward / All-Around")) roles.add(ROLES.VERSATILE_FORWARD);
-    if (descriptiveArchetypes.includes("Playmaking Big")) roles.add(ROLES.PLAYMAKING_BIG);
-    if (descriptiveArchetypes.includes("Connector")) roles.add(ROLES.ALL_AROUND);
 
     if (roles.size === 0) roles.add(ROLES.ALL_AROUND);
     return Array.from(roles);
@@ -462,6 +479,23 @@ export class ProspectRankingAlgorithm {
     // Handle pure numeric string or number (assume inches)
     const numericValue = parseFloat(wingspanData);
     return isNaN(numericValue) ? null : numericValue;
+  }
+
+  // Helper to parse weight from text (e.g., "187 lb (85kg)") to lbs
+  parseWeightToLbs(weightData) {
+    if (!weightData) return null;
+    if (typeof weightData === 'string') {
+      const match = weightData.match(/(\d+(\.\d+)?)\s*lb/);
+      if (match && match[1]) {
+        return parseFloat(match[1]);
+      }
+      const numericValue = parseFloat(weightData);
+      return isNaN(numericValue) ? null : numericValue;
+    }
+    if (typeof weightData === 'number') {
+        return weightData;
+    }
+    return null;
   }
 
   getCompetitionMultiplier(league, conference) {
@@ -1234,7 +1268,7 @@ export class ProspectRankingAlgorithm {
     }
 
     const physicalHeightInches = this.parseHeightToInches(player.height);
-    const prospectPositionalGroup = POSITIONAL_GROUPS[player.position.trim()];
+    const prospectPosition = player.position.trim();
 
     const debugPlayers = ['Mikal Bridges', 'Danny Green', 'Marcus Smart', 'Kobe Bryant', 'Reggie Miller'];
 
@@ -1244,21 +1278,47 @@ export class ProspectRankingAlgorithm {
       }
 
       const nbaPlayerArchetypes = mapDescriptiveToRolesArray(nbaPlayer.archetypes);
-      const nbaPlayerPositionalGroup = POSITIONAL_GROUPS[nbaPlayer.position];
+      const nbaPlayerPosition = nbaPlayer.position;
       const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
 
       const archetypeSimilarity = calculateSetSimilarity(prospectArchetypes, nbaPlayerArchetypes);
-      const positionalSimilarity = POSITIONAL_SIMILARITY_MATRIX[prospectPositionalGroup]?.[nbaPlayerPositionalGroup] || 0.0;
-      const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 6.0);
+      const positionalSimilarity = POSITIONAL_SIMILARITY_MATRIX[prospectPosition]?.[nbaPlayerPosition] || 0.0;
 
-      let totalSimilarity = (archetypeSimilarity * 0.60) + (positionalSimilarity * 0.20) + (heightSimilarity * 0.20);
+      // Se a similaridade posicional for 0, a comparação é descartada.
+      if (positionalSimilarity === 0) {
+        return { player: nbaPlayer, similarity: -1 };
+      }
+      // Tolerância de ~10cm para altura
+      const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 4.0); 
+      
+      const prospectWeightLbs = this.parseWeightToLbs(player.weight);
+      const nbaPlayerWeightLbs = nbaPlayer.weight_kg ? (nbaPlayer.weight_kg * 2.20462) : null;
+      
+      // Tolerância de ~11kg para peso
+      const weightSimilarity = Math.max(0, 1.0 - Math.abs(prospectWeightLbs - nbaPlayerWeightLbs) / 25.0); 
+      
+      
+
+      let totalSimilarity = (archetypeSimilarity * 0.60) + (heightSimilarity * 0.20) + (weightSimilarity * 0.20);
       
       const careerEndYear = nbaPlayer.nba_career_end || new Date().getFullYear();
       const modernBonus = (careerEndYear >= 2010) ? 0.10 : 0.0;
       const shootingBonus = (prospectArchetypes.includes(ROLES.SHOOTING_SPECIALIST) && nbaPlayerArchetypes.includes(ROLES.SHOOTING_SPECIALIST)) ? 0.15 : 0.0;
       const twoWayBonus = (prospectArchetypes.includes(ROLES.TWO_WAY_PLAYER) && nbaPlayerArchetypes.includes(ROLES.TWO_WAY_PLAYER)) ? 0.10 : 0.0;
       
-      totalSimilarity += modernBonus + shootingBonus + twoWayBonus;
+      // Modificador de Compatibilidade de Uso
+      let usageCompatibilityModifier = 0.0;
+      const prospectIsLowUsage = prospectArchetypes.includes(ROLES.LOW_USAGE_SPECIALIST);
+      const playerIsLowUsage = nbaPlayerArchetypes.includes(ROLES.LOW_USAGE_SPECIALIST);
+      const playerIsHighUsage = nbaPlayerArchetypes.includes(ROLES.SCORING_LEAD_GUARD);
+
+      if (prospectIsLowUsage && playerIsLowUsage) {
+        usageCompatibilityModifier = 0.20; // Bônus por compatibilidade de baixo uso
+      } else if (prospectIsLowUsage && playerIsHighUsage) {
+        usageCompatibilityModifier = -0.25; // Penalidade por incompatibilidade de uso
+      }
+
+      totalSimilarity += modernBonus + shootingBonus + twoWayBonus + usageCompatibilityModifier;
 
       if (debugPlayers.includes(nbaPlayer.name)) {
           console.log(`\n--- COMPARING WITH: ${nbaPlayer.name} ---`);
@@ -1268,6 +1328,7 @@ export class ProspectRankingAlgorithm {
           console.log(`Positional Score (Matrix * 0.2): ${(positionalSimilarity * 0.20).toFixed(3)}`);
           console.log(`Height Score (Diff * 0.2): ${(heightSimilarity * 0.20).toFixed(3)}`);
           console.log(`Bonuses (Modern/Shooting/TwoWay): ${modernBonus.toFixed(2)} / ${shootingBonus.toFixed(2)} / ${twoWayBonus.toFixed(2)}`);
+          console.log(`Usage Modifier: ${usageCompatibilityModifier.toFixed(2)}`);
           console.log(`FINAL SCORE: ${totalSimilarity.toFixed(3)}`);
       }
 
