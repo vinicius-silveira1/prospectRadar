@@ -12,9 +12,10 @@ import { supabase } from '@/lib/supabaseClient.js';
 import { useResponsive } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveGrid, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
-
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { createPortalSession } from '@/services/stripe';
+import ProspectOfTheWeekCard from '@/components/ProspectOfTheWeekCard.jsx';
+import { prospectOfTheWeek } from '@/data/spotlight.js';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -57,6 +58,11 @@ const Dashboard = () => {
   } = useProspects(allProspectsFilters); // Passar o objeto memoizado
 
   const { watchlist, toggleWatchlist } = useWatchlist();
+
+  const featuredProspect = useMemo(() => {
+    if (!allProspects || allProspects.length === 0) return null;
+    return allProspects.find(p => p.id === prospectOfTheWeek.prospectId);
+  }, [allProspects]);
 
   // Derivar prospects brasileiros dos allProspects
   const brazilianProspects = useMemo(() => {
@@ -189,6 +195,15 @@ const Dashboard = () => {
           )}
         </div>
       </motion.div>
+
+      {/* Prospect of the Week */}
+      {isLoaded && featuredProspect && (
+        <ProspectOfTheWeekCard 
+          prospect={featuredProspect}
+          analysis={prospectOfTheWeek.spotlightAnalysis}
+          highlights={prospectOfTheWeek.highlights}
+        />
+      )}
 
       {/* Banner do Mock Draft */}
       <motion.div
