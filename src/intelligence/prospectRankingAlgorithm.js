@@ -654,14 +654,14 @@ export class ProspectRankingAlgorithm {
           advancedStats.efg_percent = efg_denominator > 0 ? ((p.two_pt_makes + p.three_pt_makes + 0.5 * p.three_pt_makes) / efg_denominator) : 0;
         } else {
           basicStats = {
-            ppg: hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0,
-            rpg: hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0,
-            apg: hsStats.ast && gamesPlayed > 0 ? (hsStats.ast / gamesPlayed) : 0,
-            spg: hsStats.stl && gamesPlayed > 0 ? (hsStats.stl / gamesPlayed) : 0,
-            bpg: hsStats.blk && gamesPlayed > 0 ? (hsStats.blk / gamesPlayed) : 0,
-            fg_pct: hsStats.fga > 0 ? (hsStats.fgm / hsStats.fga) : 0,
-            three_pct: hsStats['3pa'] > 0 ? (hsStats['3pm'] / hsStats['3pa']) : 0,
-            ft_pct: hsStats.fta > 0 ? (hsStats.ftm / hsStats.fta) : 0,
+            ppg: hsStats.ppg || (hsStats.pts && gamesPlayed > 0 ? (hsStats.pts / gamesPlayed) : 0),
+            rpg: hsStats.rpg || (hsStats.reb && gamesPlayed > 0 ? (hsStats.reb / gamesPlayed) : 0),
+            apg: hsStats.apg || (hsStats.ast && gamesPlayed > 0 ? (hsStats.ast / gamesPlayed) : 0),
+            spg: hsStats.spg || (hsStats.stl && gamesPlayed > 0 ? (hsStats.stl / gamesPlayed) : 0),
+            bpg: hsStats.bpg || (hsStats.blk && gamesPlayed > 0 ? (hsStats.blk / gamesPlayed) : 0),
+            fg_pct: hsStats.fg_pct ? hsStats.fg_pct / 100 : (hsStats.fga > 0 ? (hsStats.fgm / hsStats.fga) : 0),
+            three_pct: hsStats['3p_pct'] ? hsStats['3p_pct'] / 100 : (hsStats['3pa'] > 0 ? (hsStats['3pm'] / hsStats['3pa']) : 0),
+            ft_pct: hsStats.ft_pct ? hsStats.ft_pct / 100 : (hsStats.fta > 0 ? (hsStats.ftm / hsStats.fta) : 0),
             ft_attempts: hsStats.fta || 0,
             three_pt_attempts: hsStats['3pa'] || 0,
           };

@@ -29,19 +29,19 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
       const hs = prospect.high_school_stats.season_total;
       const gp = Number(hs.games_played || 0);
       
-      if (gp > 0) {
-        // Calcular estatísticas per game para high school
+      if (gp > 0 || hs.ppg) {
+        // Use existing stats from hs object, or calculate them
         stats.games_played = gp;
-        stats.ppg = Number(hs.pts || 0) / gp;
-        stats.rpg = Number(hs.reb || 0) / gp;
-        stats.apg = Number(hs.ast || 0) / gp;
-        stats.spg = Number(hs.stl || 0) / gp;
-        stats.bpg = Number(hs.blk || 0) / gp;
+        stats.ppg = hs.ppg || (Number(hs.pts || 0) / gp);
+        stats.rpg = hs.rpg || (Number(hs.reb || 0) / gp);
+        stats.apg = hs.apg || (Number(hs.ast || 0) / gp);
+        stats.spg = hs.spg || (Number(hs.stl || 0) / gp);
+        stats.bpg = hs.bpg || (Number(hs.blk || 0) / gp);
         
         // Calcular porcentagens
-        stats.fg_pct = Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0;
-        stats.ft_pct = Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0;
-        stats.three_pct = Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0;
+        stats.fg_pct = hs.fg_pct ? hs.fg_pct / 100 : (Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0);
+        stats.ft_pct = hs.ft_pct ? hs.ft_pct / 100 : (Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0);
+        stats.three_pct = hs['3p_pct'] ? hs['3p_pct'] / 100 : (Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0);
         
         // Calcular eFG%
         const fgm = Number(hs.fgm || 0);
@@ -50,15 +50,19 @@ const HeadToHeadComparison = ({ prospects, onRemove, onExport, isExporting }) =>
         
         if (fga > 0) {
           stats.efg_percent = (fgm + 0.5 * threeMade) / fga;
+        } else {
+            stats.efg_percent = 0;
         }
         
         // Calcular TS%
-        const pts = Number(hs.pts || 0);
+        const pts = hs.pts || stats.ppg * gp;
         const fta = Number(hs.fta || 0);
         const tsa = fga + 0.44 * fta;
         
         if (tsa > 0) {
           stats.ts_percent = pts / (2 * tsa);
+        } else {
+            stats.ts_percent = 0;
         }
       }
     } else {

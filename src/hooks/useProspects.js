@@ -89,14 +89,14 @@ export default function useProspects(filters = {}) {
             if (hsStats.season_total) {
               const totals = hsStats.season_total;
               const gp = totals.games_played;
-              if (gp > 0) {
+              if (gp > 0 || totals.ppg) {
                 finalStats = {
                   ...finalStats,
-                  ppg: parseFloat((totals.pts / gp).toFixed(1)),
-                  rpg: parseFloat((totals.reb / gp).toFixed(1)),
-                  apg: parseFloat((totals.ast / gp).toFixed(1)),
-                  bpg: parseFloat((totals.blk / gp).toFixed(1)),
-                  spg: parseFloat((totals.stl / gp).toFixed(1)),
+                  ppg: totals.ppg || parseFloat((totals.pts / gp).toFixed(1)),
+                  rpg: totals.rpg || parseFloat((totals.reb / gp).toFixed(1)),
+                  apg: totals.apg || parseFloat((totals.ast / gp).toFixed(1)),
+                  bpg: totals.bpg || parseFloat((totals.blk / gp).toFixed(1)),
+                  spg: totals.spg || parseFloat((totals.stl / gp).toFixed(1)),
                   fg_pct: totals.fg_pct,
                   three_pct: totals['3p_pct'],
                   ft_pct: totals.ft_pct,

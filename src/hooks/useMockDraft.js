@@ -347,6 +347,31 @@ const useMockDraft = (allProspects) => {
     return customDraftOrder || defaultDraftOrder;
   }, [customDraftOrder]);
 
+  const autocompleteDraft = useCallback(() => {
+    if (isDraftComplete) return;
+
+    setDraftBoard(prevBoard => {
+      const newBoard = [...prevBoard];
+      const newHistory = [...draftHistory];
+      let prospectsToAssign = [...availableProspects]; // Already sorted by rank
+
+      for (let i = currentPick; i <= draftSettings.totalPicks; i++) {
+        const pickIndex = newBoard.findIndex(p => p.pick === i);
+        if (pickIndex !== -1 && newBoard[pickIndex].prospect === null) {
+          const prospectToDraft = prospectsToAssign.shift(); // Get the best available
+          if (prospectToDraft) {
+            newBoard[pickIndex].prospect = prospectToDraft;
+            newHistory.push({ pick: i, prospect: prospectToDraft });
+          }
+        }
+      }
+      
+      setDraftHistory(newHistory);
+      setCurrentPick(draftSettings.totalPicks + 1);
+      return newBoard;
+    });
+  }, [isDraftComplete, currentPick, draftSettings.totalPicks, availableProspects, draftHistory]);
+
   const generateReportCardData = useCallback(() => {
     // FEATURE EM DESENVOLVIMENTO - LANÇAMENTO FUTURO
     /*
@@ -469,6 +494,7 @@ const useMockDraft = (allProspects) => {
     exportDraft,
     getDraftStats,
     tradePicks,
+    autocompleteDraft,
     generateReportCardData,
   };
 };

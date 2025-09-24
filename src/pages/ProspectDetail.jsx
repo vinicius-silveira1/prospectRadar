@@ -127,29 +127,39 @@ const ProspectDetail = () => {
   const displayStats = useMemo(() => {
     if (!prospect) return {};
 
-    const isHighSchool = prospect.source === 'high_school_total';
+    const isHighSchool = prospect.stats_source === 'high_school_total';
     const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
 
     if (isHighSchool && prospect.high_school_stats?.season_total) {
       const hs = prospect.high_school_stats.season_total;
       const gp = Number(hs.games_played || 0);
-      if (gp === 0) return { ...prospect, ppg: 0, hasStats: false };
 
-      const fg_pct = Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0;
-      const ft_pct = Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0;
-      const three_pct = Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0;
+      if (gp === 0 && !hs.ppg) return { ...prospect, ppg: 0, hasStats: false };
+
+      const fg_pct = hs.fg_pct ? hs.fg_pct / 100 : (Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0);
+      const ft_pct = hs.ft_pct ? hs.ft_pct / 100 : (Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0);
+      const three_pct = hs['3p_pct'] ? hs['3p_pct'] / 100 : (Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0);
+      
+      const ppg = hs.ppg || (gp > 0 ? (Number(hs.pts || 0) / gp) : 0);
+      const rpg = hs.rpg || (gp > 0 ? (Number(hs.reb || 0) / gp) : 0);
+      const apg = hs.apg || (gp > 0 ? (Number(hs.ast || 0) / gp) : 0);
+      const spg = hs.spg || (gp > 0 ? (Number(hs.stl || 0) / gp) : 0);
+      const bpg = hs.bpg || (gp > 0 ? (Number(hs.blk || 0) / gp) : 0);
+
+      const pts = hs.pts || ppg * gp;
+
       const ts_denominator = 2 * (Number(hs.fga || 0) + 0.44 * Number(hs.fta || 0));
-      const ts_percent = ts_denominator > 0 ? (Number(hs.pts || 0) / ts_denominator) : 0;
+      const ts_percent = ts_denominator > 0 ? (pts / ts_denominator) : 0;
 
       return {
         ...prospect,
         is_hs: true,
         hasStats: true,
-        ppg: (Number(hs.pts || 0) / gp),
-        rpg: (Number(hs.reb || 0) / gp),
-        apg: (Number(hs.ast || 0) / gp),
-        spg: (Number(hs.stl || 0) / gp),
-        bpg: (Number(hs.blk || 0) / gp),
+        ppg,
+        rpg,
+        apg,
+        spg,
+        bpg,
         fg_pct,
         ft_pct,
         three_pct,

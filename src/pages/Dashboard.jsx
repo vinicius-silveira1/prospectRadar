@@ -254,7 +254,7 @@ const Dashboard = () => {
                 </motion.h2>
               </div>
               <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
-                Teste suas habilidades de GM! Monte seu Mock Draft e receba uma nota do nosso algoritmo.
+                Teste suas habilidades de GM! Monte seu Mock Draft Completo, Loteria, Primeiro Round ou Top 5.
               </p>
               <div className="hidden md:flex items-center space-x-6 text-sm leading-normal text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">

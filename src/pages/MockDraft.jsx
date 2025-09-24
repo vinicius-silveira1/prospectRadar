@@ -41,7 +41,8 @@ const MockDraft = () => {
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
     setCustomTeamOrder, resetToDefaultOrder, shuffleTeamOrder, getCurrentDraftOrder,
-    generateReportCardData
+    generateReportCardData,
+    autocompleteDraft
   } = useMockDraft(allProspects);
 
   const [view, setView] = useState('draft');
@@ -565,6 +566,22 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                   )} 
                   <span className="relative z-10">{isExporting ? 'Exportando...' : 'Exportar'}</span>
                 </motion.button>
+
+                {currentPick > 10 && !isDraftComplete && (
+                  <motion.button
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={autocompleteDraft}
+                    className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg flex items-center justify-center text-xs sm:text-sm font-medium relative overflow-hidden group col-span-2"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Star className="h-4 w-4 mr-1 sm:mr-2 relative z-10" />
+                    <span className="relative z-10">Autocompletar</span>
+                  </motion.button>
+                )}
 
                 {/*
                 <motion.button 
