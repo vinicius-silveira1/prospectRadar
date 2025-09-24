@@ -66,13 +66,14 @@ const useMockDraft = (allProspects) => {
     if (filters.position !== 'ALL') {
       filtered = filtered.filter(prospect => prospect.position && prospect.position === filters.position);
     }
-    return filtered;
+    // Ordena os prospectos disponíveis pelo ranking para garantir que as recomendações sejam sempre os melhores disponíveis.
+    return filtered.sort((a, b) => a.ranking - b.ranking);
   }, [allProspects, draftBoard, filters.searchTerm, filters.position]);
 
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
     const orderToUse = customDraftOrder || defaultDraftOrder;
-    const initialBoard = orderToUse.map((pickInfo) => ({
+    const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo) => ({
       ...pickInfo,
       round: pickInfo.pick <= 30 ? 1 : 2,
       prospect: null,
@@ -81,7 +82,7 @@ const useMockDraft = (allProspects) => {
     setCurrentPick(1);
     setDraftHistory([]);
     setIsLoading(false);
-  }, [customDraftOrder]);
+  }, [customDraftOrder, draftSettings.totalPicks]);
 
   // Efeito para inicializar o draft quando prospects são carregados ou ordem é modificada
   useEffect(() => {
@@ -346,6 +347,94 @@ const useMockDraft = (allProspects) => {
     return customDraftOrder || defaultDraftOrder;
   }, [customDraftOrder]);
 
+  const generateReportCardData = useCallback(() => {
+    // FEATURE EM DESENVOLVIMENTO - LANÇAMENTO FUTURO
+    /*
+    if (draftHistory.length === 0) {
+      return null;
+    }
+
+    // Master list of prospects, sorted by rank, to determine expected pick position.
+    const sortedProspects = [...allProspects].sort((a, b) => a.ranking - b.ranking);
+    const rankToExpectedPick = new Map(sortedProspects.map((p, i) => [p.ranking, i + 1]));
+
+    let bestValuePick = null;
+    let worstValuePick = null;
+    let bestValue = -Infinity;
+    let worstValue = Infinity;
+    let totalValueScore = 0;
+    let topPicksCount = 0;
+
+    // Process picks in the order they were made.
+    const sortedHistory = [...draftHistory].sort((a, b) => a.pick - b.pick);
+
+    sortedHistory.forEach(pick => {
+      const prospect = pick.prospect;
+      if (!prospect || !prospect.ranking) return;
+
+      const expectedPick = rankToExpectedPick.get(prospect.ranking);
+
+      if (expectedPick) {
+        // Value is the actual pick number minus the prospect's expected pick number.
+        // A positive score is a "steal", a negative score is a "reach".
+        const stealScore = pick.pick - expectedPick;
+        totalValueScore += stealScore;
+
+        if (stealScore > bestValue) {
+          bestValue = stealScore;
+          bestValuePick = pick;
+        }
+        if (stealScore < worstValue) {
+          worstValue = stealScore;
+          worstValuePick = pick;
+        }
+      }
+
+      // Check if the prospect is in the top 10 of the big board.
+      const prospectBoardIndex = sortedProspects.findIndex(p => p.id === prospect.id);
+      if (prospectBoardIndex !== -1 && prospectBoardIndex < 10) {
+        topPicksCount++;
+      }
+    });
+
+    // Refined grading logic.
+    let gradePoints = 75; // Starts at a C+/B-
+    gradePoints += totalValueScore * 0.5; // Adjust points based on total steal/reach value.
+    gradePoints += topPicksCount * 1.5; // Add bonus for picking elite talent.
+
+    let grade = 'D';
+    let analysis = 'Abaixo da média. Tente encontrar mais valor nas próximas escolhas.';
+    if (gradePoints > 95) {
+      grade = 'A+';
+      analysis = 'Excelente! Você é um GM de elite, mestre em encontrar valor.';
+    } else if (gradePoints > 88) {
+      grade = 'A';
+      analysis = 'Ótimo trabalho! Você consistentemente encontrou talentos subvalorizados.';
+    } else if (gradePoints > 80) {
+      grade = 'B';
+      analysis = 'Bom draft. Você fez escolhas sólidas e encontrou algum valor.';
+    } else if (gradePoints > 70) {
+      grade = 'C';
+      analysis = 'Na média. Um draft seguro, mas com poucas escolhas de grande valor.';
+    } else if (gradePoints < 60) {
+      grade = 'F';
+      analysis = 'Muito abaixo da média. Suas escolhas parecem ter ignorado o valor disponível.';
+    } else {
+      grade = 'D';
+      analysis = 'Abaixo da média. Parece que você fez alguns \"reaches\" e deixou valor na mesa.';
+    }
+
+    return {
+      grade,
+      analysis,
+      bestValuePick,
+      worstValuePick,
+      totalValueScore,
+    };
+    */
+    return null;
+  }, [draftHistory, allProspects]);
+
   return {
     draftBoard,
     availableProspects,
@@ -356,10 +445,8 @@ const useMockDraft = (allProspects) => {
     draftHistory,
     isDraftComplete,
     progress,
-    // Novas propriedades para ordem customizada
     customDraftOrder,
     isOrderCustomized,
-    // Novas propriedades e funções
     savedDrafts,
     isSaving,
     isLoadingDrafts,
@@ -367,12 +454,10 @@ const useMockDraft = (allProspects) => {
     loadMockDraft,
     deleteMockDraft,
     listSavedDrafts,
-    // Funções de ordem dos times
     setCustomTeamOrder,
     resetToDefaultOrder,
     shuffleTeamOrder,
     getCurrentDraftOrder,
-    // Funções existentes
     draftProspect,
     undraftProspect,
     simulateLottery,
@@ -384,6 +469,7 @@ const useMockDraft = (allProspects) => {
     exportDraft,
     getDraftStats,
     tradePicks,
+    generateReportCardData,
   };
 };
 

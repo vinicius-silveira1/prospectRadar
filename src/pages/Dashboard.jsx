@@ -254,7 +254,7 @@ const Dashboard = () => {
                 </motion.h2>
               </div>
               <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-2 text-blue-100 dark:text-blue-200">
-                Simule seu próprio draft com {allProspects.length} <span className="font-semibold text-yellow-300">prospects</span> verificados!
+                Teste suas habilidades de GM! Monte seu Mock Draft e receba uma nota do nosso algoritmo.
               </p>
               <div className="hidden md:flex items-center space-x-6 text-sm leading-normal text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">

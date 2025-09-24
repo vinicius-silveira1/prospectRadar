@@ -4,7 +4,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
-  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw
+  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useProspectImage } from '@/hooks/useProspectImage';
@@ -21,6 +21,9 @@ import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toPng } from 'html-to-image';
+import DraftReportCard from '@/components/MockDraft/DraftReportCard';
+
 
 
 const MockDraft = () => {
@@ -37,7 +40,8 @@ const MockDraft = () => {
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
-    setCustomTeamOrder, resetToDefaultOrder, shuffleTeamOrder, getCurrentDraftOrder
+    setCustomTeamOrder, resetToDefaultOrder, shuffleTeamOrder, getCurrentDraftOrder,
+    generateReportCardData
   } = useMockDraft(allProspects);
 
   const [view, setView] = useState('draft');
@@ -88,6 +92,57 @@ const MockDraft = () => {
   const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
+  const [reportCardImage, setReportCardImage] = useState(null);
+  const [isReportCardModalOpen, setIsReportCardModalOpen] = useState(false);
+  const reportCardRef = useRef(null);
+
+  const generateReportImage = async (asDataUrl = true) => {
+    const reportData = generateReportCardData();
+    if (!reportData || !reportCardRef.current) {
+      setNotification({ type: 'error', message: 'Não foi possível gerar o relatório. O draft está vazio?' });
+      return null;
+    }
+
+    try {
+      const dataUrl = await toPng(reportCardRef.current, { quality: 0.95, pixelRatio: 2 });
+      if (asDataUrl) {
+        return dataUrl;
+      } else {
+        const link = document.createElement('a');
+        link.download = `prospectradar-report-card-${draftNameToSave.replace(/ /g, '-')}.png`;
+        link.href = dataUrl;
+        link.click();
+      }
+    } catch (error) {
+      console.error('Erro ao gerar imagem do relatório:', error);
+      setNotification({ type: 'error', message: 'Ocorreu um erro ao gerar a imagem do relatório.' });
+      return null;
+    }
+  };
+
+  const handleOpenReportModal = async () => {
+    const dataUrl = await generateReportImage(true);
+    if (dataUrl) {
+      setReportCardImage(dataUrl);
+      setIsReportCardModalOpen(true);
+    }
+  };
+
+  const handleDownloadReport = () => {
+    generateReportImage(false);
+  };
+
+  const shareOnTwitter = () => {
+    const reportData = generateReportCardData();
+    const grade = reportData?.grade || 'N/A';
+    const text = `Eu consegui a nota ${grade} no Mock Draft ${draftSettings.draftClass} do @prospectradar! 🏀
+
+Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-draft
+
+#NBADraft #ProspectRadar`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(twitterUrl, '_blank');
+  };
 
   const handleTradeClick = (pick) => {
     setSelectedPickForTrade(pick);
@@ -302,6 +357,11 @@ const MockDraft = () => {
           </div>
         </motion.div>
 
+        <DraftModeSelector 
+          currentTotalPicks={draftSettings.totalPicks} 
+          onModeChange={(newSize) => setDraftSettings(prev => ({ ...prev, totalPicks: newSize }))}
+        />
+
         {/* Barra de Progresso - Separada do banner */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -505,6 +565,23 @@ const MockDraft = () => {
                   )} 
                   <span className="relative z-10">{isExporting ? 'Exportando...' : 'Exportar'}</span>
                 </motion.button>
+
+                {/*
+                <motion.button 
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={handleOpenReportModal} 
+                  disabled={!isDraftComplete}
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-lg hover:from-cyan-600 hover:to-cyan-700 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xs sm:text-sm font-medium relative overflow-hidden group col-span-2"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-cyan-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <FileImage className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">Gerar Relatório do Draft</span>
+                </motion.button>
+                */}
               </div>
               {!user && <p className="text-xs text-center text-gray-500 mt-2">Faça login para salvar e carregar seus drafts.</p>}
             </div>
@@ -659,7 +736,71 @@ const MockDraft = () => {
 
         <div className="absolute left-[-9999px] top-0 z-[-10">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
+          {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
         </div>
+
+        {/*
+        <AnimatePresence>
+          {isReportCardModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center p-4"
+              onClick={() => setIsReportCardModalOpen(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 50, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.9, y: 50, opacity: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="bg-slate-800 rounded-xl shadow-2xl p-6 w-full max-w-2xl relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-2xl font-bold text-white text-center mb-2">Seu Relatório do Draft</h2>
+                <p className="text-center text-slate-300 text-sm mb-4">
+                  Baixe a imagem abaixo e compartilhe no Twitter para mostrar seu talento como GM!
+                </p>
+                {reportCardImage ? (
+                  <img src={reportCardImage} alt="Draft Report Card" className="rounded-lg mx-auto" />
+                ) : (
+                  <div className="flex justify-center items-center h-64">
+                    <LoadingSpinner />
+                  </div>
+                )}
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleDownloadReport}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-lg hover:bg-green-600 transition-colors"
+                  >
+                    <Download className="h-5 w-5" />
+                    Baixar Imagem
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={shareOnTwitter}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-sky-500 text-white font-semibold rounded-lg shadow-lg hover:bg-sky-600 transition-colors"
+                  >
+                    <Twitter className="h-5 w-5" />
+                    Compartilhar no Twitter
+                  </motion.button>
+                </div>
+                 <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsReportCardModalOpen(false)}
+                    className="w-full mt-4 px-6 py-2 bg-slate-600 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors"
+                  >
+                    Fechar
+                  </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        */}
 
         
       </div>
@@ -1157,6 +1298,47 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
         </motion.div>
       )}
     </AnimatePresence>
+  );
+};
+
+const DraftModeSelector = ({ currentTotalPicks, onModeChange }) => {
+  const modes = [
+    { name: 'Top 5', picks: 5 },
+    { name: 'Loteria', picks: 14 },
+    { name: '1ª Rodada', picks: 30 },
+    { name: 'Completo', picks: 60 },
+  ];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="bg-gradient-to-br from-white to-slate-50/30 dark:from-super-dark-secondary dark:to-slate-900/10 rounded-xl shadow-lg border border-slate-200/50 dark:border-slate-700/30 p-3 sm:p-4 backdrop-blur-sm"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <h3 className="text-sm font-semibold text-black dark:text-white font-mono tracking-wide flex-shrink-0">
+          Modo do Draft:
+        </h3>
+        <div className="flex flex-wrap items-center gap-2">
+          {modes.map(mode => (
+            <motion.button
+              key={mode.name}
+              onClick={() => onModeChange(mode.picks)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md ${
+                currentTotalPicks === mode.picks
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'
+              }`}
+            >
+              {mode.name}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
