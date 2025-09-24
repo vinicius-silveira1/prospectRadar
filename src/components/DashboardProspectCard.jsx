@@ -225,6 +225,68 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
               <span className="relative z-10 font-bold">Cincinnati Commit!</span>
             </motion.div>
           )}
+          {prospect.name === 'Reynan Santos' && (
+            <motion.div
+              className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white border-2 border-red-400 dark:border-red-300 shadow-lg shadow-red-500/40 dark:shadow-red-400/30 overflow-hidden group"
+              initial={{ scale: 1 }}
+              animate={{ 
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0 0 20px rgba(239, 68, 68, 0.4)",
+                  "0 0 30px rgba(239, 68, 68, 0.6)", 
+                  "0 0 20px rgba(239, 68, 68, 0.4)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              whileHover={{
+                scale: 1.1,
+                boxShadow: "0 0 40px rgba(239, 68, 68, 0.8)"
+              }}
+            >
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+              
+              {/* Pulsing background */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-red-400/30 to-red-600/30 rounded-full"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              <span className="relative z-10 font-bold">Campeão da LDB</span>
+            </motion.div>
+          )}
+          {prospect.name === 'Gabriel Landeira' && (
+            <motion.div
+              className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 border-2 border-yellow-400 dark:border-yellow-300 shadow-lg shadow-yellow-500/40 dark:shadow-yellow-400/30 overflow-hidden group"
+              initial={{ scale: 1 }}
+              animate={{ 
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0 0 20px rgba(234, 179, 8, 0.4)",
+                  "0 0 30px rgba(234, 179, 8, 0.6)", 
+                  "0 0 20px rgba(234, 179, 8, 0.4)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              whileHover={{
+                scale: 1.1,
+                boxShadow: "0 0 40px rgba(234, 179, 8, 0.8)"
+              }}
+            >
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+              
+              {/* Pulsing background */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 to-yellow-600/30 rounded-full"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              <span className="relative z-10 font-bold">MVP do Global Jam</span>
+            </motion.div>
+          )}
         </div>
         <div className="mt-4 border-t dark:border-super-dark-border pt-3">
           <AnimatePresence mode="wait">
