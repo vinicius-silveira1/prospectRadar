@@ -136,11 +136,7 @@ const MockDraft = () => {
   const shareOnTwitter = () => {
     const reportData = generateReportCardData();
     const grade = reportData?.grade || 'N/A';
-    const text = `Eu consegui a nota ${grade} no Mock Draft ${draftSettings.draftClass} do @prospectradar! 🏀
-
-Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-draft
-
-#NBADraft #ProspectRadar`;
+    const text = `Eu consegui a nota ${grade} no Mock Draft ${draftSettings.draftClass} do @prospectradar! 🏀\n\nCrie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-draft\n\n#NBADraft #ProspectRadar`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(twitterUrl, '_blank');
   };
@@ -317,7 +313,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
               
             {/* Pick Atual - Visível em todas as telas */}
             <motion.div 
-              animate={{ 
+              animate={{
                 scale: [1, 1.08, 1],
                 textShadow: [
                   "0 0 20px rgba(255, 215, 0, 0.3)",
@@ -471,7 +467,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
               </h3>
               <div className="grid grid-cols-2 gap-2 relative z-10">
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(249, 115, 22, 0.3)"
                   }} 
@@ -485,7 +481,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                 </motion.button>
                 
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
                   }} 
@@ -500,13 +496,13 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                 
                 {/* NOVO BOTÃO PARA CUSTOMIZAR ORDEM DOS TIMES */}
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
                   }} 
                   whileTap={{ scale: 0.95 }} 
                   onClick={() => setIsTeamOrderModalOpen(true)} 
-                  className={`w-full px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group ${
+                  className={`w-full px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group ${ 
                     isOrderCustomized 
                       ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700' 
                       : 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700'
@@ -519,7 +515,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                 
                 {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(168, 85, 247, 0.3)"
                   }} 
@@ -534,7 +530,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                 </motion.button>
                 
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(75, 85, 99, 0.3)"
                   }} 
@@ -549,7 +545,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                 </motion.button>
                 
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
                   }} 
@@ -585,7 +581,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
 
                 {/*
                 <motion.button 
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(2, 132, 199, 0.3)"
                   }} 
@@ -612,7 +608,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setView('draft')} 
-                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${ 
                     view === 'draft' 
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
                       : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
@@ -632,7 +628,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setView('bigboard')} 
-                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${ 
                     view === 'bigboard' 
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
                       : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
@@ -652,7 +648,7 @@ Crie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-dr
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setView('prospects')} 
-                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${
+                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${ 
                     view === 'prospects' 
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
                       : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
@@ -862,7 +858,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
             // REMOVIDO: layout (não queremos animar o slot em si, mas o conteúdo dele)
             transition={{ duration: 1.5, type: "spring"}}
             variants={itemVariants}
-            whileHover={{ 
+            whileHover={{
               scale: 1.03, 
               boxShadow: "0 8px 25px rgba(99, 102, 241, 0.15)",
               transition: { duration: 0.2 } 
@@ -1059,7 +1055,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
 
   return (
     <motion.div 
-      whileHover={{ 
+      whileHover={{
         y: -5, 
         boxShadow: "0px 20px 40px rgba(99, 102, 241, 0.15)", 
         scale: 1.02 
@@ -1150,7 +1146,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
                     {isHighSchool && (
                       <motion.span 
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg relative overflow-hidden group cursor-default"
-                        whileHover={{ 
+                        whileHover={{
                           scale: 1.05,
                           boxShadow: "0 0 20px rgba(249, 115, 22, 0.5)"
                         }}
@@ -1195,7 +1191,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
         <div className="flex flex-col gap-2 mt-auto w-full">
           {action && (
             <motion.button 
-              whileHover={{ 
+              whileHover={{
                 scale: 1.05,
                 boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
               }}
@@ -1211,7 +1207,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
             </motion.button>
           )}
           <Link 
-            to={`/prospects/${prospect.id}`}
+            to={`/prospects/${prospect.slug}`}
             className="w-full text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-xs sm:text-sm font-medium"
           >
             Ver Detalhes
@@ -1344,7 +1340,7 @@ const DraftModeSelector = ({ currentTotalPicks, onModeChange }) => {
               onClick={() => onModeChange(mode.picks)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md ${
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md ${ 
                 currentTotalPicks === mode.picks
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'

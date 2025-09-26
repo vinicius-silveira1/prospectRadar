@@ -144,7 +144,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <Link 
-                to={`/prospects/${prospect.id}`} 
+to={`/prospects/${prospect.slug}`} 
                 className="relative font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate block group font-mono tracking-wide"
               >
                 <span className="relative z-10">{prospect.name}</span>
@@ -411,7 +411,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           <Link 
-            to={`/prospects/${prospect.id}`} 
+            to={`/prospects/${prospect.slug}`} 
             className="relative w-full block text-center px-3 py-2 bg-gradient-to-r from-purple-100/50 via-purple-50 to-purple-100/50 dark:from-brand-purple/10 dark:via-brand-purple/5 dark:to-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:from-cyan-100/80 hover:via-cyan-50 hover:to-cyan-100/80 dark:hover:from-brand-cyan/20 dark:hover:via-brand-cyan/10 dark:hover:to-brand-cyan/20 transition-all duration-300 text-sm font-medium border border-purple-200/50 dark:border-purple-700/30 hover:border-cyan-300/50 dark:hover:border-cyan-600/30 overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-purple-500/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />

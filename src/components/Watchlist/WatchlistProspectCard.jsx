@@ -93,7 +93,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
             
             <div className="flex-grow"> 
               <Link 
-                to={`/prospects/${prospect.id}`} 
+                to={`/prospects/${prospect.slug}`} 
                 className="font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple transition-colors font-mono tracking-wide"
               >
                 {prospect.name}
@@ -243,7 +243,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
               className="flex-1"
             >
               <Link 
-                to={`/prospects/${prospect.id}`} 
+                to={`/prospects/${prospect.slug}`} 
                 className="block w-full text-center px-3 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 text-sm font-medium font-mono tracking-wide shadow-lg transform hover:scale-105"
               >
                 Ver Detalhes

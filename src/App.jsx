@@ -18,6 +18,8 @@ import RadarScoreExplained from './pages/RadarScoreExplained';
 import Pricing from './pages/Pricing';
 import Success from './pages/Success';
 import Welcome from './pages/Welcome'; 
+import BlogIndex from './pages/Blog/BlogIndex';
+import BlogPost from './pages/Blog/BlogPost';
 import OnboardingModal from './components/Onboarding/OnboardingModal'; 
 
 function GoogleAnalytics() {
@@ -72,6 +74,8 @@ function App() {
             <Route path="pricing" element={<Pricing />} />
             <Route path="success" element={<Success />} />
             <Route path="welcome" element={<Welcome />} />
+            <Route path="blog" element={<BlogIndex />} />
+            <Route path="blog/:slug" element={<BlogPost />} />
           </Route>
 
           {/* Rotas de autenticação (sem o layout principal) */}

@@ -657,7 +657,7 @@ const Prospects = () => {
                   {/* Clickable area for card navigation */}
                   <div 
                     className="cursor-pointer"
-                    onClick={() => navigate(`/prospects/${prospect.id}`)}
+                    onClick={() => navigate(`/prospects/${prospect.slug}`)}
                   >
                     {/* Header Image */}
                     <div className="relative">
@@ -694,7 +694,7 @@ const Prospects = () => {
                     {/* Name and Radar Score */}
                     <div className="space-y-2">
                       <Link 
-                        to={`/prospects/${prospect.id}`} 
+                        to={`/prospects/${prospect.slug}`} 
                         className="font-semibold text-slate-900 dark:text-super-dark-text-primary text-lg line-clamp-1 hover:text-brand-purple dark:hover:text-purple-400 transition-colors block font-mono tracking-wide"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -886,7 +886,7 @@ const Prospects = () => {
                       <motion.button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/prospects/${prospect.id}`);
+                          navigate(`/prospects/${prospect.slug}`);
                         }}
                         className="flex-1 text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-sm font-medium relative overflow-hidden group"
                         whileHover={{ 
@@ -902,7 +902,7 @@ const Prospects = () => {
                       <motion.button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/compare?add=${prospect.id}`);
+                          navigate(`/compare?add=${prospect.slug}`);
                         }}
                         className="px-3 py-2 border border-slate-200 dark:border-super-dark-border text-slate-600 dark:text-super-dark-text-primary rounded-lg hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors text-sm relative overflow-hidden group"
                         whileHover={{ 
@@ -961,7 +961,7 @@ const Prospects = () => {
                       transition={{ duration: 0.3 }}
                     >
                       <div className="px-4 md:px-6 py-4 hover:bg-slate-50 dark:hover:bg-super-dark-secondary transition-colors">
-                        <Link to={`/prospects/${prospect.id}`} className="block">
+                        <Link to={`/prospects/${prospect.slug}`} className="block">
                           <div className="grid grid-cols-4 md:grid-cols-12 gap-4 items-center">
                             {/* Nome (col-span-2 no mobile, col-span-2 no desktop) */}
                             <div className="col-span-2 md:col-span-2 flex items-center space-x-4">

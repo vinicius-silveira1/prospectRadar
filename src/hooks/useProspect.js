@@ -3,7 +3,8 @@ import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
-export default function useProspect(id) {
+// O hook agora aceita um 'slug' em vez de um 'id'
+export default function useProspect(slug) {
   const [prospect, setProspect] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +14,8 @@ export default function useProspect(id) {
       const rankingAlgorithm = new ProspectRankingAlgorithm(supabase); // MOVIDO PARA CÁ
       try {
         setLoading(true);
-        const { data, error: dbError } = await supabase.from('prospects').select('*').eq('id', id).single();
+        // A query agora filtra pela coluna 'slug'
+        const { data, error: dbError } = await supabase.from('prospects').select('*').eq('slug', slug).single();
         if (dbError) throw dbError;
 
         if (data) {
@@ -54,8 +56,8 @@ export default function useProspect(id) {
       }
     };
 
-    if (id) fetchProspect();
-  }, [id]);
+    if (slug) fetchProspect();
+  }, [slug]); // Array de dependência atualizado para 'slug'
 
   return { prospect, loading, error };
 }

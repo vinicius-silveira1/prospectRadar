@@ -544,7 +544,8 @@ export const assignBadges = (prospect) => {
   if (hasReboundingBadge && hasFinisherBadge) {
       assignedBadges.add(badges.GLASS_CLEANER);
   }
-  if (p.height_in_inches >= 82 && hasShootingBadge) { // 6'10"
+  // Verifica se o jogador é um "Unicórnio" (6'10" ou mais e com habilidade de arremesso)
+  if (p.height_in_inches >= 82 && hasShootingBadge) { 
       assignedBadges.add(badges.UNICORN);
   }
   if (hasPerimeterDBadge && hasHighMotor) {

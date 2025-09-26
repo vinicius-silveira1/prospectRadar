@@ -68,9 +68,9 @@ function Compare() {
   }, [maxComparisons]);
 
   useEffect(() => {
-    const prospectIdToAdd = searchParams.get('add');
-    if (prospectIdToAdd && prospects.length > 0) {
-      const prospectToAdd = allProspects.find(p => p.id === prospectIdToAdd);
+    const prospectSlugToAdd = searchParams.get('add');
+    if (prospectSlugToAdd && prospects.length > 0) {
+      const prospectToAdd = allProspects.find(p => p.slug === prospectSlugToAdd);
       if (prospectToAdd) {
         addProspect(prospectToAdd);
         if (selectedProspects.length === 0) setShowSearch(true);
