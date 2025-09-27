@@ -16,8 +16,9 @@ const BlogIndex = () => {
       const postModules = import.meta.glob('../../data/blog/*.md', { as: 'raw', eager: true });
       
       const fetchedPosts = Object.entries(postModules).map(([path, rawContent]) => {
-        const { data } = matter(rawContent); // Parse the raw content
-        return { frontmatter: data };
+        const slug = path.split('/').pop().replace(/\.md$/, '');
+        const { data } = matter(rawContent);
+        return { frontmatter: { ...data, slug } };
       });
 
       // Sort posts by date in descending order

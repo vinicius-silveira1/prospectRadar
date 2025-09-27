@@ -15,6 +15,8 @@ import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { createPortalSession } from '@/services/stripe';
 import ProspectOfTheWeekCard from '@/components/ProspectOfTheWeekCard.jsx';
+import BraziliansInNBA from '@/components/Dashboard/BraziliansInNBA.jsx';
+import BlogHighlight from '@/components/Dashboard/BlogHighlight.jsx';
 import { prospectOfTheWeek } from '@/data/spotlight.js';
 
 const Dashboard = () => {
@@ -121,7 +123,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Banner de Boas-Vindas */}
+      {/* 1. Banner de Boas-Vindas */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -131,7 +133,6 @@ const Dashboard = () => {
           boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
         }}
       >
-        {/* Particles de fundo */}
         <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
           <div className="absolute top-4 left-8 w-2 h-2 bg-blue-300 dark:bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
           <div className="absolute top-8 right-12 w-1 h-1 bg-purple-300 dark:bg-gray-500 rounded-full animate-pulse delay-300 group-hover:animate-ping"></div>
@@ -141,7 +142,6 @@ const Dashboard = () => {
           <div className="absolute bottom-8 right-1/4 w-1.5 h-1.5 bg-indigo-300 dark:bg-gray-500 rounded-full animate-pulse delay-200 group-hover:animate-ping"></div>
         </div>
         
-        {/* Grid de fundo */}
         <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300" style={{
           backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
           backgroundSize: '20px 20px'
@@ -176,8 +176,6 @@ const Dashboard = () => {
             >
               ➤ Sua plataforma completa para análise de jovens talentos do basquete
             </motion.p>
-            
-
           </div>
           {isScoutUser && (
             <motion.button
@@ -196,7 +194,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Prospect of the Week */}
+      {/* 2. Prospect of the Week */}
       {isLoaded && featuredProspect && (
         <ProspectOfTheWeekCard 
           prospect={featuredProspect}
@@ -205,7 +203,161 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Banner do Mock Draft */}
+      {/* 3. Prospects Brasileiros */}
+      {brazilianProspects.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+          className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <motion.h2 
+              className="text-base sm:text-lg font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                whileHover={{ 
+                  scale: 1.2, 
+                  rotate: 10,
+                  boxShadow: "0 0 15px rgba(34, 197, 94, 0.4)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Star className="h-5 w-5 text-green-600 mr-2 drop-shadow-sm" />
+              </motion.div>
+              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2 relative">
+                Prospects
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
+              </span>&nbsp;Brasileiros
+            </motion.h2>
+            <div className="flex items-center gap-3">
+              <motion.span 
+                className="text-xs sm:text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(34, 197, 94, 0.3)"
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                {brazilianProspects.length} <span className="font-semibold">prospects</span>
+              </motion.span>
+            </div>
+          </div>
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-4 md:mb-6 -mt-2">
+            Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
+          </p>
+          <ResponsiveGrid
+            minItemWidth="280px"
+            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+            className="gap-4 md:gap-6"
+          >
+            {brazilianProspects.map((prospect, index) => (
+              <motion.div
+                key={prospect.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: "easeOut" }}
+              >
+                <DashboardProspectCard
+                  prospect={prospect}
+                  isInWatchlist={watchlist.has(prospect.id)}
+                  onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                  onBadgeClick={handleBadgeClick}
+                />
+              </motion.div>
+            ))}
+          </ResponsiveGrid>
+        </motion.div>
+      )}
+
+      {/* 4. Seção: Brasileiros na NBA & Blog */}
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+        <BraziliansInNBA />
+        <BlogHighlight />
+      </div>
+
+      {/* 5. Top Prospects Gerais */}
+      {isLoaded && topProspects.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+          className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-4 sm:p-6"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 md:mb-6 gap-3">
+            <motion.h2 
+              className="text-base sm:text-lg md:text-xl font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                whileHover={{ 
+                  scale: 1.2, 
+                  rotate: 15,
+                  boxShadow: "0 0 20px rgba(234, 179, 8, 0.5)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 2, -2, 0],
+                    scale: [1, 1.05, 1]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    ease: "easeInOut" 
+                  }}
+                >
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 mr-2 drop-shadow-lg" />
+                </motion.div>
+              </motion.div>
+              <span className="flex items-center flex-wrap gap-1">
+                🏆 Top <span className="text-brand-orange dark:text-orange-400 relative">
+                  Prospects
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
+                </span>
+              </span>
+            </motion.h2>
+            <motion.span 
+              className="text-xs sm:text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded"
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 0 15px rgba(234, 179, 8, 0.3)"
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              Os melhores da classe
+            </motion.span>
+          </div>
+          
+          <ResponsiveGrid
+            minItemWidth="280px"
+            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+            className="gap-4 md:gap-6"
+          >
+            {topProspects.map((prospect, index) => (
+              <motion.div
+                key={prospect.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 + index * 0.1, ease: "easeOut" }}
+              >
+                <DashboardProspectCard
+                  prospect={prospect}
+                  isInWatchlist={watchlist.has(prospect.id)}
+                  onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                  onBadgeClick={handleBadgeClick}
+                />
+              </motion.div>
+            ))}
+          </ResponsiveGrid>
+        </motion.div>
+      )}
+
+      {/* 6. Banner do Mock Draft */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -215,7 +367,6 @@ const Dashboard = () => {
           boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
         }}
       >
-        {/* Hexagonal pattern background */}
         <div className="absolute inset-0 opacity-15 pointer-events-none">
           <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
             <pattern id="hexPattern-mockdraft" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
@@ -225,7 +376,6 @@ const Dashboard = () => {
           </svg>
         </div>
 
-        {/* Gaming shimmer effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-300/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1200 ease-out" />
 
         <div className="relative z-10 px-4 sm:px-6 md:px-8 py-4 sm:py-6 text-white">
@@ -313,161 +463,12 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-     
-
-      {/* Prospects Brasileiros */}
-      {brazilianProspects.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-          className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <motion.h2 
-              className="text-base sm:text-lg font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <motion.div
-                whileHover={{ 
-                  scale: 1.2, 
-                  rotate: 10,
-                  boxShadow: "0 0 15px rgba(34, 197, 94, 0.4)"
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Star className="h-5 w-5 text-green-600 mr-2 drop-shadow-sm" />
-              </motion.div>
-              🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2 relative">
-                Prospects
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
-              </span>&nbsp;Brasileiros
-            </motion.h2>
-            <div className="flex items-center gap-3">
-              <motion.span 
-                className="text-xs sm:text-sm text-green-700 dark:text-green-200 bg-green-200 dark:bg-green-800/50 px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 0 15px rgba(34, 197, 94, 0.3)"
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                {brazilianProspects.length} <span className="font-semibold">prospects</span>
-              </motion.span>
-            </div>
-          </div>
-          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-4 md:mb-6 -mt-2">
-            Comece explorando os perfis completos dos talentos brasileiros, já com estatísticas e análises detalhadas!
-          </p>
-          <ResponsiveGrid
-            minItemWidth="280px"
-            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
-            className="gap-4 md:gap-6"
-          >
-            {brazilianProspects.map((prospect, index) => (
-              <motion.div
-                key={prospect.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: "easeOut" }}
-              >
-                <DashboardProspectCard
-                  prospect={prospect}
-                  isInWatchlist={watchlist.has(prospect.id)}
-                  onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
-                  onBadgeClick={handleBadgeClick}
-                />
-              </motion.div>
-            ))}
-          </ResponsiveGrid>
-        </motion.div>
-      )}
-
+      {/* 7. Alerta da Temporada NCAA */}
       <AlertBox 
         type="info"
         title="Temporada NCAA 2025-26 em Breve!"
         message="Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
       />
-
-      {/* Top Prospects Gerais */}
-      {isLoaded && topProspects.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
-          className="bg-white dark:bg-super-dark-secondary dark:border dark:border-super-dark-border rounded-lg shadow-md p-4 sm:p-6"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 md:mb-6 gap-3">
-            <motion.h2 
-              className="text-base sm:text-lg md:text-xl font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <motion.div
-                whileHover={{ 
-                  scale: 1.2, 
-                  rotate: 15,
-                  boxShadow: "0 0 20px rgba(234, 179, 8, 0.5)"
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 2, -2, 0],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{ 
-                    duration: 3, 
-                    repeat: Infinity, 
-                    ease: "easeInOut" 
-                  }}
-                >
-                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 mr-2 drop-shadow-lg" />
-                </motion.div>
-              </motion.div>
-              <span className="flex items-center flex-wrap gap-1">
-                🏆 Top <span className="text-brand-orange dark:text-orange-400 relative">
-                  Prospects
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
-                </span>
-              </span>
-            </motion.h2>
-            <motion.span 
-              className="text-xs sm:text-sm text-gray-500 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/50 px-2 py-1 rounded"
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: "0 0 15px rgba(234, 179, 8, 0.3)"
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              Os melhores da classe
-            </motion.span>
-          </div>
-          
-          <ResponsiveGrid
-            minItemWidth="280px"
-            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
-            className="gap-4 md:gap-6"
-          >
-            {topProspects.map((prospect, index) => (
-              <motion.div
-                key={prospect.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 + index * 0.1, ease: "easeOut" }}
-              >
-                <DashboardProspectCard
-                  prospect={prospect}
-                  isInWatchlist={watchlist.has(prospect.id)}
-                  onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
-                  onBadgeClick={handleBadgeClick}
-                />
-              </motion.div>
-            ))}
-          </ResponsiveGrid>
-        </motion.div>
-      )}
 
       {/* Loading State */}
       {loading && (
