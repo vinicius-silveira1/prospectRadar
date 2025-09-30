@@ -72,6 +72,14 @@ const Dashboard = () => {
     return allProspects.filter(p => p.nationality === '🇧🇷');
   }, [allProspects]);
 
+  const internationalProspects = useMemo(() => {
+    if (!allProspects) return [];
+    const internationalLeague = ['EuroLeague', 'AUS NBL', 'NBL Blitz', 'NBL', 'LNB', 'G-BBL', 'ACB']
+    return allProspects
+      .filter(p => internationalLeague.includes(p.league))
+      .slice(0, 6);
+  }, [allProspects]);
+
   // Função para tratar o toggle da watchlist com erro
   const handleToggleWatchlist = async (prospectId) => {
     try {
@@ -203,7 +211,7 @@ const Dashboard = () => {
         />
       )}
 
-      {/* 3. Prospects Brasileiros */}
+      {/* 5. Prospects Brasileiros */}
       {brazilianProspects.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -272,13 +280,13 @@ const Dashboard = () => {
         </motion.div>
       )}
 
-      {/* 4. Seção: Brasileiros na NBA & Blog */}
+      {/* 6. Seção: Brasileiros na NBA & Blog */}
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         <BraziliansInNBA />
         <BlogHighlight />
       </div>
 
-      {/* 5. Top Prospects Gerais */}
+      {/* 3. Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -357,6 +365,76 @@ const Dashboard = () => {
         </motion.div>
       )}
 
+      {/* 4. Destaques Internacionais */}
+      {internationalProspects.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+          className="bg-white dark:bg-super-dark-secondary border dark:border-super-dark-border rounded-lg shadow-md p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <motion.h2 
+              className="text-base sm:text-lg font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center group tracking-wide"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                whileHover={{ 
+                  scale: 1.2, 
+                  rotate: 10,
+                  boxShadow: "0 0 15px rgba(59, 130, 246, 0.4)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Globe className="h-5 w-5 text-blue-600 mr-2 drop-shadow-sm" />
+              </motion.div>
+              🌍 <span className="text-brand-orange dark:text-orange-400 ml-2 relative">
+                Destaques
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
+              </span>&nbsp;Internacionais
+            </motion.h2>
+            <div className="flex items-center gap-3">
+              <motion.span 
+                className="text-xs sm:text-sm text-blue-700 dark:text-blue-200 bg-blue-200 dark:bg-blue-800/50 px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(59, 130, 246, 0.3)"
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                {internationalProspects.length} <span className="font-semibold">prospects</span>
+              </motion.span>
+            </div>
+          </div>
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-super-dark-text-secondary mb-4 md:mb-6 -mt-2">
+            Explore os principais talentos internacionais que estão no radar da NBA.
+          </p>
+          <ResponsiveGrid
+            minItemWidth="280px"
+            maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+            className="gap-4 md:gap-6"
+          >
+            {internationalProspects.map((prospect, index) => (
+              <motion.div
+                key={prospect.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: "easeOut" }}
+              >
+                <DashboardProspectCard
+                  prospect={prospect}
+                  isInWatchlist={watchlist.has(prospect.id)}
+                  onToggleWatchlist={() => handleToggleWatchlist(prospect.id)}
+                  onBadgeClick={handleBadgeClick}
+                />
+              </motion.div>
+            ))}
+          </ResponsiveGrid>
+        </motion.div>
+      )}
+
+      
       {/* 6. Banner do Mock Draft */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

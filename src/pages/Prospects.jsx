@@ -26,6 +26,11 @@ const nationalityMap = {
   '🇸🇳': 'Senegal',
   '🇩🇪': 'Alemanha',
   '🇺🇸': 'Estados Unidos',
+  '🇦🇺': 'Australia',
+  '🇫🇷': 'França',
+  '🇪🇸': 'Espanha',
+  '🇮🇹': 'Italia',
+  '🇲🇽': 'Mexico',
 };
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro

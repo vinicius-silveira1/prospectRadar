@@ -217,7 +217,9 @@ const ProspectDetail = () => {
       }
     }
     if (typeof parsedWeight === 'object' && parsedWeight !== null) {
-      return `${parsedWeight.us} lbs (${parsedWeight.intl} kg)`;
+      const us_val = String(parsedWeight.us || '').replace('lbs', '').trim();
+      const intl_val = String(parsedWeight.intl || '').replace('kg', '').trim();
+      return `${us_val} lbs (${intl_val} kg)`;
     }
     return weight || '—';
   };
