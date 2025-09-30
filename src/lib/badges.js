@@ -12,7 +12,9 @@ const getLeagueTier = (league) => {
   if (!league) return 'ncaa'; // Default tier
   const lowerLeague = league.toLowerCase();
 
-  if (lowerLeague.includes('nbb') || lowerLeague.includes('acb') || lowerLeague.includes('euroleague')) {
+  const proLeagues = ['nbb', 'acb', 'euroleague', 'nbl', 'aus nbl', 'jeep elite', 'lnb', 'g-bbl'];
+
+  if (proLeagues.some(proLeague => lowerLeague.includes(proLeague))) {
     return 'pro';
   }
   if (lowerLeague.includes('ncaa')) {
@@ -360,7 +362,7 @@ export const assignBadges = (prospect) => {
     }
   // Nível NCAA: Aumenta a exigência de volume, com aproveitamento ainda de elite.
   } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 350) { // Klafke fix: Lowered from 400
+    if (p.minutes_played >= 100) { // Klafke fix: Lowered from 400
       if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
         assignedBadges.add(badges.ELITE_SHOOTER);
       } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 25) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) { // Klafke fix: Lowered 3PA from 50
@@ -372,7 +374,7 @@ export const assignBadges = (prospect) => {
     }
   // Nível Profissional: Contra defesas de elite, o volume é mais importante.
   } else { // pro
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
       if (p.three_pct >= 0.38 && p.ft_pct >= 0.84 && p.three_pt_attempts >= 90) {
         assignedBadges.add(badges.ELITE_SHOOTER);
       } else if ((p.three_pct >= 0.36 && p.three_pt_attempts >= 60) || (p.ft_pct >= 0.80 && p.ft_attempts >= 40)) {
@@ -394,14 +396,14 @@ export const assignBadges = (prospect) => {
     }
   // Nível NCAA: muda para a estatística avançada de % de tocos (blk_percent).
   } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
       if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER);
       if (p.blk_percent >= 3.5 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
       if (p.stl_percent >= 2.0 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
     }
   // Nível Pro: a exigência no blk_percent é um pouco menor, mas ainda de elite.
   } else { // pro
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
       if ((p.stl_percent >= 2.2 && p.blk_percent >= 1.8) || (p.dbpm >= 4.0)) assignedBadges.add(badges.ELITE_DEFENDER);
       if (p.blk_percent >= 3.2 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
       if (p.stl_percent >= 1.8 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
@@ -410,22 +412,31 @@ export const assignBadges = (prospect) => {
 
   
   // --- Playmaking Badges ---
+  // A lógica muda de acordo com o nível de competição.
   const assistToTurnoverRatio = p.tpg > 0 ? p.apg / p.tpg : (p.apg > 0 ? 99 : 0);
+
+  // Nível High School
   if (leagueTier === 'hs') {
     if (p.games_played >= 7) {
       if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
+      // Para ser 'Motor', o foco é no alto volume de assistências por jogo (apg).
       else if (p.apg >= 4.0 && assistToTurnoverRatio >= 1.2) assignedBadges.add(badges.ENGINE);
     }
   } else { // ncaa or pro
       const advAstToTovRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : (p.ast_percent > 0 ? 99 : 0);
-      if (p.minutes_played >= 400) {
+      if (p.minutes_played >= 100) {
+          // Nível NCAA: Usamos stats avançadas como % de assistência (ast_percent).
           if (leagueTier === 'ncaa') {
               if (advAstToTovRatio >= 1.6 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
+              // 'Motor' aqui precisa de um alto volume de criação para o time.
               else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.2) assignedBadges.add(badges.ENGINE);
-          } else { // pro
+          } 
+          // Nível Profissional: A régua é ainda mais alta e complexa.
+          else { // pro
               if (advAstToTovRatio >= 1.8 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
-              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE); // Elite efficiency
-              else if (p.ast_percent >= 20 && p.usg_percent >= 18 && advAstToTovRatio >= 0.8) assignedBadges.add(badges.ENGINE); // High volume catalyst with acceptable efficiency
+              // Para 'Motor', consideramos dois perfis: o criador eficiente e o de altíssimo volume de uso (usg_percent).
+              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE);
+              else if (p.ast_percent >= 20 && p.usg_percent >= 18 && advAstToTovRatio >= 0.8) assignedBadges.add(badges.ENGINE);
           }
       }
   }
@@ -441,11 +452,11 @@ export const assignBadges = (prospect) => {
         if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
     }
   } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
         if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
     }
   } else { // pro
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
         if (p.trb_percent >= 13) assignedBadges.add(badges.REBOUNDING_FORCE);
     }
   }
@@ -466,14 +477,14 @@ export const assignBadges = (prospect) => {
       if (p.orpg >= 2.8 && p.spg >= 1.2) assignedBadges.add(badges.HIGH_MOTOR);
     }
   } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
       if (isGuard && p.stl_percent >= 2.5 && p.blk_percent >= 1.0) assignedBadges.add(badges.EXPLOSIVO);
       if (isSmallForward && ((p.stl_percent >= 1.8 && p.blk_percent >= 1.5) || p.orb_percent >= 9.0)) assignedBadges.add(badges.EXPLOSIVO);
       if (isBig && p.blk_percent >= 5.0 && p.orb_percent >= 10.0) assignedBadges.add(badges.EXPLOSIVO);
       if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) assignedBadges.add(badges.HIGH_MOTOR);
     }
   } else { // pro
-    if (p.minutes_played >= 400) {
+    if (p.minutes_played >= 100) {
       if (isGuard && p.stl_percent >= 2.2 && p.blk_percent >= 0.8) assignedBadges.add(badges.EXPLOSIVO);
       if (isSmallForward && ((p.stl_percent >= 1.6 && p.blk_percent >= 1.3) || p.orb_percent >= 8.0)) assignedBadges.add(badges.EXPLOSIVO);
       if (isBig && p.blk_percent >= 4.5 && p.orb_percent >= 9.0) assignedBadges.add(badges.EXPLOSIVO);

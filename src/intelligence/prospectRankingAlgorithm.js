@@ -521,19 +521,24 @@ export class ProspectRankingAlgorithm {
 
     // Mapeamento de ligas profissionais/internacionais (ATUALIZADO baseado na análise)
     const leagueTiers = {
-      'EuroLeague': 1.20, // Nível mais alto fora da NBA
-      'LNB Pro A': 1.15, // Liga francesa de alto nível (Wembanyama, Coulibaly)
-      'Liga ACB': 1.15, // Liga espanhola de alto nível
-      'NBL': 1.12, // Liga Australiana (LaMelo Ball path)
-      'NBL (Australia)': 1.12, // Variação do nome
-      'NBL (New Zealand)': 1.10, // Liga neozelandesa
-      'G League Ignite': 1.08, // Pathway direto para NBA
-      'Overtime Elite': 1.02, // OTE para jovens talentos
-      'OTE': 1.02, // Overtime Elite abreviado
-      'NBB': 0.85, // Liga Brasileira de Basquete
-      'default_pro': 0.95 // Outras ligas profissionais
+      'EuroLeague': 1.20,
+      'LNB Pro A': 1.15,
+      'Jeep Elite': 1.15,
+      'LNB': 1.15,
+      'Liga ACB': 1.15,
+      'ACB': 1.15,
+      'NBL': 1.12,
+      'AUS NBL': 1.12,
+      'NBL (Australia)': 1.12,
+      'G-BBL': 1.10, // Liga Alemã
+      'NBL (New Zealand)': 1.10,
+      'NBL Blitz': 1.08,
+      'G League Ignite': 1.08, 
+      'NBB': 0.95, 
+      'default_pro': 0.95,
+      'Overtime Elite': 0.90, 
+      'OTE': 0.90, 
     };
-
     // Se a conferência for especificada (NCAA), use o multiplicador dela
     if (conference) {
       return conferenceTiers[conference] || conferenceTiers['default_ncaa'];
@@ -781,24 +786,30 @@ export class ProspectRankingAlgorithm {
       const creativeGuardBonus = flags.some(flag => flag.message.includes('Guard criativo elite')) ? 0.02 : 0;
       let ageBonusAdjustment = (p.age && p.age <= 19.0 && potentialScore >= 0.60) ? 0.02 : 0;
 
-      const hasSufficientStats = gamesPlayed >= MIN_GAMES_THRESHOLD;
+      // O potentialScore (baseado puramente em estatísticas e físico) é a nossa base.
+      let baseScore = potentialScore;
+      
       const hasExternalRankings = externalRankingInfluence > 0;
-      let statWeight = 0.8, rankingWeight = 0.2;
-      if (!hasSufficientStats && hasExternalRankings) { statWeight = 0.05; rankingWeight = 0.95; }
-      else if (hasSufficientStats && !hasExternalRankings) { statWeight = 0.9; rankingWeight = 0.1; }
-      else if (!hasSufficientStats && !hasExternalRankings) { statWeight = 0.5; rankingWeight = 0.5; }
 
-      const baseScore = (potentialScore * statWeight) + (externalRankingInfluence * rankingWeight) - redFlagPenalty + creativeGuardBonus + ageBonusAdjustment;
+      // A influência do ranking externo é tratada como um ajuste, não como um componente primário.
+      // Para jogadores internacionais, a ausência de ranking é esperada e não acarreta penalidade.
+      if (hasExternalRankings) {
+          // Se há ranking, ele ajusta o score, com um peso de 20%.
+          baseScore = (baseScore * 0.8) + (externalRankingInfluence * 0.2);
+      }
+
+      // Aplicar bônus e penalidades de flags após o cálculo base.
+      baseScore = baseScore - redFlagPenalty + creativeGuardBonus + ageBonusAdjustment;
+
       const finalTotalScore = Math.max(0, Math.min(1, baseScore));
 
       const draftProjection = this.calculateDraftProjection(finalTotalScore, p, lowGamesRisk);
       const tier = this.calculateTier(finalTotalScore);
-      const prospectArchetypes = this.getArchetypeKeys(basicStats, p.position);
-
+      
       return {
         totalScore: parseFloat(finalTotalScore.toFixed(2)),
-        potentialScore: parseFloat(finalTotalScore.toFixed(2)),
-        confidenceScore: confidenceScore,
+        potentialScore: parseFloat(potentialScore.toFixed(2)), // Mantém o potencial puro
+        confidenceScore: confidenceScore, // Indica a confiabilidade dos dados
         categoryScores: scores,
         tier: tier,
         draftProjection,
