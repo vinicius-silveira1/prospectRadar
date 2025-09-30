@@ -230,7 +230,27 @@ const useMockDraft = (allProspects) => {
   
   const getProspectRecommendations = useCallback((pick) => {
     if (!pick || !availableProspects) return [];
-    return availableProspects.slice(0, 3);
+
+    const internationalLeagues = new Set(['EuroLeague', 'AUS NBL', 'NBL Blitz', 'NBL', 'LNB', 'G-BBL', 'ACB']);
+
+    const rankedProspects = availableProspects.filter(p => p.ranking != null);
+    const internationalProspects = availableProspects.filter(p => internationalLeagues.has(p.league) && p.ranking == null);
+
+    const recommendations = [];
+
+    // Add top 2 ranked, then top 1 international
+    recommendations.push(...rankedProspects.slice(0, 2));
+    if (internationalProspects.length > 0) {
+      recommendations.push(internationalProspects[0]);
+    }
+
+    // Fill up to 3 with remaining ranked prospects if needed
+    const needed = 3 - recommendations.length;
+    if (needed > 0) {
+      recommendations.push(...rankedProspects.slice(2, 2 + needed));
+    }
+    
+    return recommendations.slice(0, 3);
   }, [availableProspects]);
   
   const getDraftStats = useCallback(() => {
