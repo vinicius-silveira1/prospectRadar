@@ -3,7 +3,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Badge from '../Common/Badge';
 import AchievementUnlock from '../Common/AchievementUnlock';
 
-const NBAPlayerCard = ({ player, badges }) => {
+// Helper function to generate a color from a string
+const stringToColor = (str) => {
+  let hash = 0;
+  if (!str) return '#000000';
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+};
+
+// Helper function to get initials from a name
+const getInitials = (name) => {
+  if (!name) return '';
+  const names = name.split(' ').filter(n => n);
+  if (names.length > 1) {
+    return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+  }
+  if (names.length === 1 && names[0].length > 1) {
+    return names[0].substring(0, 2).toUpperCase();
+  }
+  return '';
+};
+
+const NBAPlayerCard = ({ player, badges, league }) => {
   if (!player) return null;
 
   const [hoveredBadge, setHoveredBadge] = useState(null);
@@ -12,8 +40,21 @@ const NBAPlayerCard = ({ player, badges }) => {
     setHoveredBadge(badge);
   };
 
-  const hasSeasonStats = player.nba_stats_seasons && player.nba_stats_seasons.length > 0;
-  const latestSeason = hasSeasonStats ? player.nba_stats_seasons[player.nba_stats_seasons.length - 1] : null;
+  let latestSeason = null;
+  if (player.nba_stats_seasons) {
+    try {
+      const seasons = typeof player.nba_stats_seasons === 'string'
+        ? JSON.parse(player.nba_stats_seasons)
+        : player.nba_stats_seasons;
+
+      if (Array.isArray(seasons) && seasons.length > 0) {
+        seasons.sort((a, b) => b.season.localeCompare(a.season));
+        latestSeason = seasons[0];
+      }
+    } catch (e) {
+      console.error("Failed to parse nba_stats_seasons:", e);
+    }
+  }
 
   const displayStats = {
     ppg: latestSeason ? latestSeason.ppg : player.nba_career_ppg,
@@ -22,6 +63,9 @@ const NBAPlayerCard = ({ player, badges }) => {
   };
 
   const statsTitle = latestSeason ? `Estatísticas (${latestSeason.season})` : 'Estatísticas (Carreira)';
+
+  const avatarColor = stringToColor(player.name);
+  const initials = getInitials(player.name);
 
   return (
     <motion.div 
@@ -40,15 +84,11 @@ const NBAPlayerCard = ({ player, badges }) => {
         <div className="flex items-center space-x-4 mb-4">
           <motion.div 
             className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-xl font-bold ring-2 ring-transparent group-hover:ring-blue-500/30 transition-all duration-300"
-            style={{ backgroundColor: '#051c2d' }} 
+            style={{ backgroundColor: avatarColor }} 
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <img 
-              src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.nba_id || '1630611'}.png`} 
-              alt={player.name}
-              className="w-full h-full object-cover"
-            />
+            {initials}
           </motion.div>
           <div className="flex-1 min-w-0">
             <motion.div

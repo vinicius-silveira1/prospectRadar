@@ -1,43 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
+import { LeagueContext } from '@/context/LeagueContext.jsx';
 
-// O hook agora aceita um 'slug' em vez de um 'id'
 export default function useProspect(slug) {
+  const { league } = useContext(LeagueContext);
   const [prospect, setProspect] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProspect = async () => {
-      const rankingAlgorithm = new ProspectRankingAlgorithm(supabase); // MOVIDO PARA CÁ
+      const rankingAlgorithm = new ProspectRankingAlgorithm(supabase);
       try {
         setLoading(true);
-        // A query agora filtra pela coluna 'slug'
         const { data, error: dbError } = await supabase.from('prospects').select('*').eq('slug', slug).single();
         if (dbError) throw dbError;
 
         if (data) {
-          // Gera dados de scouting se não existirem
           const scoutingData = data.strengths ? { strengths: data.strengths, weaknesses: data.weaknesses } : generateDataDrivenScoutingReport(data);
-          
-          // Combina os dados originais com os dados de scouting gerados
           const prospectWithScouting = { ...data, ...scoutingData };
 
-          // Aplica o algoritmo de ranking para obter a avaliação
-          const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting);
           
-          // **NOVO**: Combina o prospecto com a avaliação E as estatísticas calculadas
+          const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting, league);
+          
           let finalProspect = { 
             ...prospectWithScouting, 
             evaluation,
-            // Mescla as estatísticas básicas e avançadas calculadas para o nível superior do objeto
             ...(evaluation.calculatedStats?.basic || {}),
             ...(evaluation.calculatedStats?.advanced || {})
           };
 
-          // Special handling for High School prospects to ensure assignBadges works
           if (prospectWithScouting.high_school_stats && prospectWithScouting.high_school_stats.season_total) {
             finalProspect.stats_source = 'high_school_total';
             finalProspect.games_played = Number(prospectWithScouting.high_school_stats.season_total.games_played || 0);
@@ -57,7 +51,7 @@ export default function useProspect(slug) {
     };
 
     if (slug) fetchProspect();
-  }, [slug]); // Array de dependência atualizado para 'slug'
+  }, [slug, league]); 
 
   return { prospect, loading, error };
 }

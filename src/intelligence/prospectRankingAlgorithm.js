@@ -35,7 +35,7 @@ const POSITIONAL_SIMILARITY_MATRIX = {
 // - Valor = metade do threshold → Score 0.5 (médio)
 // - Valor = 0 → Score 0.0 (ruim)
 const STAT_NORMALIZATION_CONFIG = {
-  // 🎓 CONTEXTO: College/Pré-NBA
+  // 🎓 CONTEXTO: College/Pré-NBA (Masculino)
   // Baseado em prospects que se tornaram estrelas NBA (Luka, Trae, Zion, etc.)
   college: {
     ppg: { max: 25.0 },
@@ -45,6 +45,18 @@ const STAT_NORMALIZATION_CONFIG = {
     bpg: { max: 3.0 },
     fg_pct: { max: 0.600 },
     three_pct: { max: 0.450 },
+    ft_pct: { max: 0.900 }
+  },
+  // 🎓 CONTEXTO: NCAAW (Feminino)
+  // Baseado em pesquisa de estatísticas de estrelas da WNBA (Caitlin Clark, etc.)
+  ncaaw: {
+    ppg: { max: 22.0 },
+    rpg: { max: 11.0 },
+    apg: { max: 7.0 },
+    spg: { max: 2.5 },
+    bpg: { max: 3.0 },
+    fg_pct: { max: 0.580 },
+    three_pct: { max: 0.420 },
     ft_pct: { max: 0.900 }
   },
   // 🇧🇷 CONTEXTO: NBB (Brasil)
@@ -498,63 +510,50 @@ export class ProspectRankingAlgorithm {
     return null;
   }
 
-  getCompetitionMultiplier(league, conference) {
-    // Mapeamento de conferências para tiers de competição
-    const conferenceTiers = {
-      // Tier 1: Power Conferences
-      'SEC': 1.10,
-      'Big 12': 1.10,
-      'Big Ten': 1.08,
-      'ACC': 1.08,
-      'Pac-12': 1.07,
-      'Big East': 1.07,
-      // Tier 2: High-Major Conferences
-      'WCC': 1.05,
-      'AAC': 1.05,
-      'MWC': 1.04,
-      // Tier 3: Mid-Major Solid
-      'A-10': 1.02,
-      'CUSA': 1.0,
-      // Base
+  getCompetitionMultiplier(playerLeague, conference, leagueContext = 'NBA') {
+    // Mapeamento de conferências para tiers de competição (Masculino)
+    const mensConferenceTiers = {
+      'SEC': 1.10, 'Big 12': 1.10, 'Big Ten': 1.08, 'ACC': 1.08, 'Pac-12': 1.07, 'Big East': 1.07,
+      'WCC': 1.05, 'AAC': 1.05, 'MWC': 1.04,
+      'A-10': 1.02, 'CUSA': 1.0,
       'default_ncaa': 1.0
     };
 
-    // Mapeamento de ligas profissionais/internacionais (ATUALIZADO baseado na análise)
-    const leagueTiers = {
-      'EuroLeague': 1.20,
-      'LNB Pro A': 1.15,
-      'Jeep Elite': 1.15,
-      'LNB': 1.15,
-      'Liga ACB': 1.15,
-      'ACB': 1.15,
-      'NBL': 1.12,
-      'AUS NBL': 1.12,
-      'NBL (Australia)': 1.12,
-      'G-BBL': 1.10, // Liga Alemã
-      'NBL (New Zealand)': 1.10,
-      'NBL Blitz': 1.08,
-      'G League Ignite': 1.08, 
-      'NBB': 0.95, 
-      'default_pro': 0.95,
-      'Overtime Elite': 0.90, 
-      'OTE': 0.90, 
+    // Mapeamento de conferências para tiers de competição (Feminino) - INICIAL
+    const womensConferenceTiers = {
+      'SEC': 1.10, 'Big 12': 1.10, 'Big Ten': 1.08, 'ACC': 1.08, 'Pac-12': 1.07, 'Big East': 1.07, // Mesmos tiers por enquanto
+      'default_ncaa': 1.0
     };
-    // Se a conferência for especificada (NCAA), use o multiplicador dela
+
+    // Mapeamento de ligas profissionais/internacionais (Masculino)
+    const mensLeagueTiers = {
+      'EuroLeague': 1.20, 'LNB Pro A': 1.15, 'Jeep Elite': 1.15, 'LNB': 1.15, 'Liga ACB': 1.15, 'ACB': 1.15,
+      'NBL': 1.12, 'AUS NBL': 1.12, 'NBL (Australia)': 1.12, 'G-BBL': 1.10, 'NBL (New Zealand)': 1.10,
+      'NBL Blitz': 1.08, 'G League Ignite': 1.08, 'NBB': 0.95, 'default_pro': 0.95,
+      'Overtime Elite': 0.90, 'OTE': 0.90, 
+    };
+
+    // Mapeamento de ligas profissionais/internacionais (Feminino) - INICIAL
+    const womensLeagueTiers = {
+        'EuroLeague Women': 1.15, // Tier um pouco abaixo da masculina
+        'default_pro': 0.90
+    };
+
+    const conferenceTiers = leagueContext === 'WNBA' ? womensConferenceTiers : mensConferenceTiers;
+    const leagueTiers = leagueContext === 'WNBA' ? womensLeagueTiers : mensLeagueTiers;
+
     if (conference) {
       return conferenceTiers[conference] || conferenceTiers['default_ncaa'];
     }
 
-    // Se a liga for NCAA mas sem conferência, use o default da NCAA
-    if (league === 'NCAA') {
+    if (playerLeague === 'NCAA' || playerLeague === 'NCAAW') {
       return conferenceTiers['default_ncaa'];
     }
 
-    // Se for uma liga profissional, use o multiplicador dela
-    if (league) {
-      return leagueTiers[league] || leagueTiers['default_pro'];
+    if (playerLeague) {
+      return leagueTiers[playerLeague] || leagueTiers['default_pro'];
     }
 
-    // Fallback para o padrão da NCAA se nenhuma informação estiver disponível
     return 1.0;
   }
 
@@ -592,9 +591,10 @@ export class ProspectRankingAlgorithm {
    * - Análise de curva de desenvolvimento
    * 
    * @param {Object} player - Dados completos do prospect
+   * @param {string} league - O contexto da liga ('NBA' ou 'WNBA')
    * @returns {Object} - Avaliação completa com score, breakdown e análise
    */
-  async evaluateProspect(player) {
+  async evaluateProspect(player, league = 'NBA') {
     try {
       const p = player || {};
       let currentWeights = this.weights;  // Pesos padrão dos 4 pilares
@@ -605,7 +605,9 @@ export class ProspectRankingAlgorithm {
 
       // 🔍 DETECÇÃO DE CONTEXTO PARA NORMALIZAÇÃO
       let prospectContext = 'college'; // Padrão
-      if (p.league === 'NBB') {
+      if (league === 'WNBA') {
+        prospectContext = 'ncaaw';
+      } else if (p.league === 'NBB') {
         prospectContext = 'nbb';
       } else if (p.league === 'Overtime Elite' || p.league === 'OTE') {
         prospectContext = 'ote';
@@ -1255,16 +1257,22 @@ export class ProspectRankingAlgorithm {
       return [];
     }
 
-    console.log(`[DEBUG] Starting comparison for prospect: ${player.name}`);
+    const isWNBA = prospectContext === 'ncaaw';
+    const tableName = isWNBA ? 'wnba_players_historical' : 'nba_players_historical';
+    const cacheKey = isWNBA ? 'wnbaSuccessDatabase' : 'nbaSuccessDatabase';
 
-    if (!this.nbaSuccessDatabase) {
-      const { data, error } = await this.supabase.from('nba_players_historical').select('*, archetypes');
+    console.log(`[DEBUG] Starting comparison for prospect: ${player.name} in context: ${prospectContext}`);
+
+    if (!this[cacheKey]) {
+      const { data, error } = await this.supabase.from(tableName).select('*, archetypes');
       if (error) {
-        console.error('Erro ao buscar jogadores históricos:', error);
+        console.error(`Erro ao buscar jogadores históricos da ${tableName}:`, error);
         return [];
       }
-      this.nbaSuccessDatabase = data;
+      this[cacheKey] = data;
     }
+
+    const historicalDatabase = this[cacheKey];
 
     let prospectArchetypes;
     if (player.qualitative_archetypes && player.qualitative_archetypes.length > 0) {
@@ -1283,58 +1291,53 @@ export class ProspectRankingAlgorithm {
 
     const debugPlayers = ['Mikal Bridges', 'Danny Green', 'Marcus Smart', 'Kobe Bryant', 'Reggie Miller'];
 
-    const similarityScores = this.nbaSuccessDatabase.map(nbaPlayer => {
-      if (!nbaPlayer.nba_career_ppg || isNaN(nbaPlayer.nba_games_played) || nbaPlayer.nba_games_played < 50) {
-        return { player: nbaPlayer, similarity: -1 };
+    const similarityScores = historicalDatabase.map(historicalPlayer => {
+      if (!historicalPlayer.nba_career_ppg || isNaN(historicalPlayer.nba_games_played) || historicalPlayer.nba_games_played < 50) {
+        return { player: historicalPlayer, similarity: -1 };
       }
 
-      const nbaPlayerArchetypes = mapDescriptiveToRolesArray(nbaPlayer.archetypes);
-      const nbaPlayerPosition = nbaPlayer.position;
-      const historicalHeightInches = this.parseHeightToInches(nbaPlayer.height_cm);
+      const historicalPlayerArchetypes = mapDescriptiveToRolesArray(historicalPlayer.archetypes);
+      const historicalPlayerPosition = historicalPlayer.position;
+      const historicalHeightInches = this.parseHeightToInches(historicalPlayer.height_cm);
 
-      const archetypeSimilarity = calculateSetSimilarity(prospectArchetypes, nbaPlayerArchetypes);
-      const positionalSimilarity = POSITIONAL_SIMILARITY_MATRIX[prospectPosition]?.[nbaPlayerPosition] || 0.0;
+      const archetypeSimilarity = calculateSetSimilarity(prospectArchetypes, historicalPlayerArchetypes);
+      const positionalSimilarity = POSITIONAL_SIMILARITY_MATRIX[prospectPosition]?.[historicalPlayerPosition] || 0.0;
 
-      // Se a similaridade posicional for 0, a comparação é descartada.
       if (positionalSimilarity === 0) {
-        return { player: nbaPlayer, similarity: -1 };
+        return { player: historicalPlayer, similarity: -1 };
       }
-      // Tolerância de ~10cm para altura
-      const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 4.0); 
+
+      const heightSimilarity = Math.max(0, 1.0 - Math.abs(physicalHeightInches - historicalHeightInches) / 4.0);
       
       const prospectWeightLbs = this.parseWeightToLbs(player.weight);
-      const nbaPlayerWeightLbs = nbaPlayer.weight_kg ? (nbaPlayer.weight_kg * 2.20462) : null;
+      const historicalPlayerWeightLbs = historicalPlayer.weight_kg ? (historicalPlayer.weight_kg * 2.20462) : null;
       
-      // Tolerância de ~11kg para peso
-      const weightSimilarity = Math.max(0, 1.0 - Math.abs(prospectWeightLbs - nbaPlayerWeightLbs) / 25.0); 
-      
-      
+      const weightSimilarity = Math.max(0, 1.0 - Math.abs(prospectWeightLbs - historicalPlayerWeightLbs) / 25.0);
 
       let totalSimilarity = (archetypeSimilarity * 0.60) + (heightSimilarity * 0.20) + (weightSimilarity * 0.20);
       
-      const careerEndYear = nbaPlayer.nba_career_end || new Date().getFullYear();
+      const careerEndYear = historicalPlayer.nba_career_end || new Date().getFullYear();
       const modernBonus = (careerEndYear >= 2010) ? 0.10 : 0.0;
-      const shootingBonus = (prospectArchetypes.includes(ROLES.SHOOTING_SPECIALIST) && nbaPlayerArchetypes.includes(ROLES.SHOOTING_SPECIALIST)) ? 0.15 : 0.0;
-      const twoWayBonus = (prospectArchetypes.includes(ROLES.TWO_WAY_PLAYER) && nbaPlayerArchetypes.includes(ROLES.TWO_WAY_PLAYER)) ? 0.10 : 0.0;
+      const shootingBonus = (prospectArchetypes.includes(ROLES.SHOOTING_SPECIALIST) && historicalPlayerArchetypes.includes(ROLES.SHOOTING_SPECIALIST)) ? 0.15 : 0.0;
+      const twoWayBonus = (prospectArchetypes.includes(ROLES.TWO_WAY_PLAYER) && historicalPlayerArchetypes.includes(ROLES.TWO_WAY_PLAYER)) ? 0.10 : 0.0;
       
-      // Modificador de Compatibilidade de Uso
       let usageCompatibilityModifier = 0.0;
       const prospectIsLowUsage = prospectArchetypes.includes(ROLES.LOW_USAGE_SPECIALIST);
-      const playerIsLowUsage = nbaPlayerArchetypes.includes(ROLES.LOW_USAGE_SPECIALIST);
-      const playerIsHighUsage = nbaPlayerArchetypes.includes(ROLES.SCORING_LEAD_GUARD);
+      const playerIsLowUsage = historicalPlayerArchetypes.includes(ROLES.LOW_USAGE_SPECIALIST);
+      const playerIsHighUsage = historicalPlayerArchetypes.includes(ROLES.SCORING_LEAD_GUARD);
 
       if (prospectIsLowUsage && playerIsLowUsage) {
-        usageCompatibilityModifier = 0.20; // Bônus por compatibilidade de baixo uso
+        usageCompatibilityModifier = 0.20;
       } else if (prospectIsLowUsage && playerIsHighUsage) {
-        usageCompatibilityModifier = -0.25; // Penalidade por incompatibilidade de uso
+        usageCompatibilityModifier = -0.25;
       }
 
       totalSimilarity += modernBonus + shootingBonus + twoWayBonus + usageCompatibilityModifier;
 
-      if (debugPlayers.includes(nbaPlayer.name)) {
-          console.log(`\n--- COMPARING WITH: ${nbaPlayer.name} ---`);
+      if (debugPlayers.includes(historicalPlayer.name)) {
+          console.log(`\n--- COMPARING WITH: ${historicalPlayer.name} ---`);
           console.log(`Prospect Archetypes: ${prospectArchetypes.join(', ')}`);
-          console.log(`NBA Player Archetypes: ${nbaPlayerArchetypes.join(', ')}`);
+          console.log(`Historical Player Archetypes: ${historicalPlayerArchetypes.join(', ')}`);
           console.log(`Archetype Score (Jaccard * 0.6): ${(archetypeSimilarity * 0.60).toFixed(3)}`);
           console.log(`Positional Score (Matrix * 0.2): ${(positionalSimilarity * 0.20).toFixed(3)}`);
           console.log(`Height Score (Diff * 0.2): ${(heightSimilarity * 0.20).toFixed(3)}`);
@@ -1343,7 +1346,7 @@ export class ProspectRankingAlgorithm {
           console.log(`FINAL SCORE: ${totalSimilarity.toFixed(3)}`);
       }
 
-      return { player: nbaPlayer, similarity: totalSimilarity };
+      return { player: historicalPlayer, similarity: totalSimilarity };
     }).filter(item => item.similarity > 0);
 
     return similarityScores

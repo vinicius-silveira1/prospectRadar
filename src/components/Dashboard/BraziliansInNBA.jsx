@@ -1,24 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabaseClient';
 import NBAPlayerCard from './NBAPlayerCard';
 import { assignNBAPlayerBadges } from '../../lib/nba-badges.js';
 import { Globe } from 'lucide-react';
+import { LeagueContext } from '../../context/LeagueContext';
 
-const BraziliansInNBA = () => {
+const BraziliansInNBA = ({ className }) => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { league } = useContext(LeagueContext);
 
   useEffect(() => {
     const fetchBrazilians = async () => {
       setLoading(true);
+      const currentLeague = league === 'WNBA' ? 'WNBA' : 'NBA';
+      
       const { data, error } = await supabase
         .from('nba_players_historical')
         .select('*')
-        .eq('nationality', 'Brazil');
+        .eq('nationality', 'Brazil')
+        .eq('league', currentLeague)
+        .in('current_status_badge', ['Rookie', 'Veteran', 'Prospect', 'Rotation Player']);
 
       if (error) {
-        console.error('Error fetching Brazilian NBA players:', error);
+        console.error(`Error fetching Brazilian ${currentLeague} players:`, error);
       } else {
         setPlayers(data);
       }
@@ -26,10 +32,10 @@ const BraziliansInNBA = () => {
     };
 
     fetchBrazilians();
-  }, []);
+  }, [league]);
 
-  if (!players || players.length === 0) {
-    return null;
+  if (loading || !players || players.length === 0) {
+    return null; // Não renderiza nada se estiver carregando ou não houver jogadores
   }
 
   return (
@@ -56,24 +62,29 @@ const BraziliansInNBA = () => {
             <Globe className="h-5 w-5 text-blue-600 mr-2 drop-shadow-sm" />
           </motion.div>
           🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2 relative">
-            Brasileiros
+            {league === 'WNBA' ? 'Brasileiras' : 'Brasileiros'}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
-          </span>&nbsp;na NBA
+          </span>&nbsp;na {league === 'WNBA' ? 'WNBA' : 'NBA'}
         </motion.h2>
       </div>
 
-      {loading ? (
-          <div className="text-center py-4 text-gray-500 dark:text-gray-400">Carregando...</div>
-      ) : (
-        <div className="flex space-x-6">
-          {players.map(player => {
-            const playerBadges = assignNBAPlayerBadges(player);
-            return <NBAPlayerCard key={player.id} player={player} badges={playerBadges} />;
-          })}
-        </div>
-      )}
+      <div className="flex space-x-6 overflow-x-auto p-4">
+        {players.map(player => {
+          const playerBadges = assignNBAPlayerBadges(player);
+          const currentLeague = league === 'WNBA' ? 'WNBA' : 'NBA';
+          return (
+            <NBAPlayerCard 
+              key={player.id} 
+              player={player} 
+              badges={playerBadges} 
+              league={currentLeague}
+            />
+          );
+        })}
+      </div>
     </motion.div>
   );
 };
 
 export default BraziliansInNBA;
+;

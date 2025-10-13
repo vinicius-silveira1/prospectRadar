@@ -1,18 +1,16 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext'; // Importar o useAuth
-import { supabase } from '@/lib/supabaseClient'; // Importar o supabase client
+import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabaseClient';
+import { LeagueContext } from '@/context/LeagueContext';
 
-
-// Definição da ordem do draft padrão
+// Ordem do draft padrão da NBA
 const defaultDraftOrder = [
-    // Round 1
     { pick: 1, team: 'ATL' }, { pick: 2, team: 'WAS' }, { pick: 3, team: 'HOU' }, { pick: 4, team: 'SAS' }, { pick: 5, team: 'DET' },
     { pick: 6, team: 'CHA' }, { pick: 7, team: 'POR' }, { pick: 8, team: 'SAS' }, { pick: 9, team: 'MEM' }, { pick: 10, team: 'UTA' },
     { pick: 11, team: 'CHI' }, { pick: 12, team: 'OKC' }, { pick: 13, team: 'SAC' }, { pick: 14, team: 'POR' }, { pick: 15, team: 'MIA' },
     { pick: 16, team: 'PHI' }, { pick: 17, team: 'LAL' }, { pick: 18, team: 'ORL' }, { pick: 19, team: 'TOR' }, { pick: 20, team: 'CLE' },
     { pick: 21, team: 'NOP' }, { pick: 22, team: 'PHX' }, { pick: 23, team: 'MIL' }, { pick: 24, team: 'NYK' }, { pick: 25, team: 'NYK' },
     { pick: 26, team: 'WAS' }, { pick: 27, team: 'MIN' }, { pick: 28, team: 'DEN' }, { pick: 29, team: 'UTA' }, { pick: 30, team: 'BOS' },
-    // Round 2
     { pick: 31, team: 'TOR' }, { pick: 32, team: 'UTA' }, { pick: 33, team: 'MIL' }, { pick: 34, team: 'POR' }, { pick: 35, team: 'SAS' },
     { pick: 36, team: 'IND' }, { pick: 37, team: 'MIN' }, { pick: 38, team: 'NYK' }, { pick: 39, team: 'MEM' }, { pick: 40, team: 'POR' },
     { pick: 41, team: 'CHA' }, { pick: 42, team: 'MIA' }, { pick: 43, team: 'SAC' }, { pick: 44, team: 'HOU' }, { pick: 45, team: 'LAC' },
@@ -21,7 +19,19 @@ const defaultDraftOrder = [
     { pick: 56, team: 'DEN' }, { pick: 57, team: 'MEM' }, { pick: 58, team: 'DAL' }, { pick: 59, team: 'IND' }, { pick: 60, team: 'BOS' }
 ];
 
-// Função para embaralhar a ordem do draft
+// Ordem do draft padrão da WNBA (3 rounds, 12 times)
+const wnbaDraftOrder = [
+    { pick: 1, team: 'IND' }, { pick: 2, team: 'LAL' }, { pick: 3, team: 'CHI' }, { pick: 4, team: 'LAL' }, { pick: 5, team: 'DAL' },
+    { pick: 6, team: 'WAS' }, { pick: 7, team: 'MIN' }, { pick: 8, team: 'CHI' }, { pick: 9, team: 'DAL' }, { pick: 10, team: 'CON' },
+    { pick: 11, team: 'NYL' }, { pick: 12, team: 'ATL' },
+    { pick: 13, team: 'CHI' }, { pick: 14, team: 'SEA' }, { pick: 15, team: 'IND' }, { pick: 16, team: 'LVA' }, { pick: 17, team: 'NYL' },
+    { pick: 18, team: 'LVA' }, { pick: 19, team: 'CON' }, { pick: 20, team: 'ATL' }, { pick: 21, team: 'WAS' }, { pick: 22, team: 'CON' },
+    { pick: 23, team: 'CON' }, { pick: 24, team: 'LVA' },
+    { pick: 25, team: 'PHX' }, { pick: 26, team: 'SEA' }, { pick: 27, team: 'IND' }, { pick: 28, team: 'LAL' }, { pick: 29, team: 'PHX' },
+    { pick: 30, team: 'WAS' }, { pick: 31, team: 'DAL' }, { pick: 32, team: 'ATL' }, { pick: 33, team: 'DAL' }, { pick: 34, team: 'LVA' },
+    { pick: 35, team: 'NYL' }, { pick: 36, team: 'LVA' }
+];
+
 const shuffleArray = (array) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -31,26 +41,30 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
-const SAVE_LIMIT_FREE = 2; // Permite que usuários free salvem 2 drafts
+const SAVE_LIMIT_FREE = 2;
 
 const useMockDraft = (allProspects) => {
-  const { user } = useAuth(); // Pega o usuário do contexto de autenticação
+  const { user } = useAuth();
+  const { league } = useContext(LeagueContext);
 
-  const [draftSettings, setDraftSettings] = useState({ draftClass: 2026, totalPicks: 60 });
+  const [draftSettings, setDraftSettings] = useState({ 
+    draftClass: 2026, 
+    totalPicks: league === 'WNBA' ? 36 : 60 
+  });
   const [draftBoard, setDraftBoard] = useState([]);
   const [currentPick, setCurrentPick] = useState(1);
   const [draftHistory, setDraftHistory] = useState([]);
   const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL' });
   const [isLoading, setIsLoading] = useState(true);
-
-  // Novos estados para ordem customizada dos times
   const [customDraftOrder, setCustomDraftOrder] = useState(null);
   const [isOrderCustomized, setIsOrderCustomized] = useState(false);
-
-  // Novos estados para salvar/carregar
   const [savedDrafts, setSavedDrafts] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
+
+  const activeDraftOrder = useMemo(() => {
+    return league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
+  }, [league]);
 
   const availableProspects = useMemo(() => {
     const draftedProspectIds = new Set(draftBoard.filter(pick => pick.prospect).map(pick => pick.prospect.id));
@@ -66,32 +80,29 @@ const useMockDraft = (allProspects) => {
     if (filters.position !== 'ALL') {
       filtered = filtered.filter(prospect => prospect.position && prospect.position === filters.position);
     }
-    // Ordena os prospectos disponíveis pelo ranking para garantir que as recomendações sejam sempre os melhores disponíveis.
     return filtered.sort((a, b) => a.ranking - b.ranking);
   }, [allProspects, draftBoard, filters.searchTerm, filters.position]);
 
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
-    const orderToUse = customDraftOrder || defaultDraftOrder;
+    const orderToUse = customDraftOrder || activeDraftOrder;
     const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo) => ({
       ...pickInfo,
-      round: pickInfo.pick <= 30 ? 1 : 2,
+      round: league === 'WNBA' ? Math.floor((pickInfo.pick - 1) / 12) + 1 : (pickInfo.pick <= 30 ? 1 : 2),
       prospect: null,
     }));
     setDraftBoard(initialBoard);
     setCurrentPick(1);
     setDraftHistory([]);
     setIsLoading(false);
-  }, [customDraftOrder, draftSettings.totalPicks]);
+  }, [customDraftOrder, draftSettings.totalPicks, league, activeDraftOrder]);
 
-  // Efeito para inicializar o draft quando prospects são carregados ou ordem é modificada
   useEffect(() => {
     if (allProspects && allProspects.length > 0) {
       initializeDraft();
     }
   }, [allProspects, customDraftOrder, initializeDraft]);
 
-  // Função para buscar os drafts salvos do usuário
   const listSavedDrafts = useCallback(async () => {
     if (!user) return;
     setIsLoadingDrafts(true);
@@ -111,14 +122,6 @@ const useMockDraft = (allProspects) => {
     }
   }, [user]);
 
-  // Efeito para inicializar o draft quando prospects são carregados ou ordem é modificada
-  useEffect(() => {
-    if (allProspects && allProspects.length > 0) {
-      initializeDraft();
-    }
-  }, [allProspects, customDraftOrder]); // Removido initializeDraft da dependência
-
-  // Efeito para buscar os drafts quando o usuário é carregado
   useEffect(() => {
     listSavedDrafts();
   }, [listSavedDrafts]);
@@ -127,7 +130,6 @@ const useMockDraft = (allProspects) => {
   const saveMockDraft = useCallback(async (draftName) => {
     if (!user) throw new Error("Usuário não autenticado.");
 
-    // Regra de negócio para o plano Freemium
     if (user.subscription_tier === 'free' && savedDrafts.length >= SAVE_LIMIT_FREE) {
       throw new Error(`Limite de ${SAVE_LIMIT_FREE} drafts salvos atingido para usuários free. Faça o upgrade para salvar mais.`);
     }
@@ -138,6 +140,7 @@ const useMockDraft = (allProspects) => {
       currentPick,
       draftHistory,
       draftSettings,
+      league, // Salvar o contexto da liga
     };
 
     try {
@@ -152,7 +155,6 @@ const useMockDraft = (allProspects) => {
 
       if (error) throw error;
       
-      // Atualiza a lista de drafts salvos localmente para refletir a adição
       setSavedDrafts(prev => [data[0], ...prev]);
       return { success: true, newDraft: data[0] };
 
@@ -162,7 +164,7 @@ const useMockDraft = (allProspects) => {
     } finally {
       setIsSaving(false);
     }
-  }, [user, draftBoard, currentPick, draftHistory, draftSettings, savedDrafts]);
+  }, [user, draftBoard, currentPick, draftHistory, draftSettings, savedDrafts, league]);
 
   const loadMockDraft = useCallback(async (draftId) => {
     setIsLoading(true);
@@ -176,7 +178,9 @@ const useMockDraft = (allProspects) => {
 
       if (error) throw error;
 
-      const { draftBoard, currentPick, draftHistory, draftSettings } = data.draft_data;
+      const { draftBoard, currentPick, draftHistory, draftSettings, league: savedLeague } = data.draft_data;
+      // ATENÇÃO: A mudança de liga aqui pode causar efeitos colaterais se não for gerenciada no componente pai.
+      // Por enquanto, apenas carregamos os dados. O ideal seria o componente pai reagir a `savedLeague`.
       setDraftBoard(draftBoard);
       setCurrentPick(currentPick);
       setDraftHistory(draftHistory);
@@ -199,7 +203,6 @@ const useMockDraft = (allProspects) => {
 
       if (error) throw error;
 
-      // Remove o draft da lista local
       setSavedDrafts(prev => prev.filter(d => d.id !== draftId));
 
     } catch (error) {
@@ -209,8 +212,9 @@ const useMockDraft = (allProspects) => {
 
   
   const simulateLottery = useCallback(() => {
-    const lotteryPicksCount = 14;
-    const lotteryTeams = defaultDraftOrder.slice(0, lotteryPicksCount).map(pick => pick.team);
+    const lotteryPicksCount = league === 'WNBA' ? 4 : 14; // WNBA tem 4 picks na loteria
+    const order = league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
+    const lotteryTeams = order.slice(0, lotteryPicksCount).map(pick => pick.team);
     const shuffledLotteryTeams = shuffleArray(lotteryTeams);
     setDraftBoard(prevBoard => {
       const newBoard = [...prevBoard];
@@ -222,7 +226,7 @@ const useMockDraft = (allProspects) => {
     });
     setCurrentPick(1);
     setDraftHistory([]);
-  }, []);
+  }, [league]);
   
   const getBigBoard = useCallback(() => {
     return [...allProspects].sort((a, b) => a.ranking - b.ranking);
@@ -238,13 +242,11 @@ const useMockDraft = (allProspects) => {
 
     const recommendations = [];
 
-    // Add top 2 ranked, then top 1 international
     recommendations.push(...rankedProspects.slice(0, 2));
     if (internationalProspects.length > 0) {
       recommendations.push(internationalProspects[0]);
     }
 
-    // Fill up to 3 with remaining ranked prospects if needed
     const needed = 3 - recommendations.length;
     if (needed > 0) {
       recommendations.push(...rankedProspects.slice(2, 2 + needed));
@@ -307,8 +309,7 @@ const useMockDraft = (allProspects) => {
 
   const tradePicks = useCallback((pick1Number, pick2Number) => {
     setDraftBoard(prevBoard => {
-      const newBoard = [...prevBoard]; // Cria uma cópia rasa do array.
-
+      const newBoard = [...prevBoard];
       const pick1Index = newBoard.findIndex(pick => pick.pick === pick1Number);
       const pick2Index = newBoard.findIndex(pick => pick.pick === pick2Number);
 
@@ -317,25 +318,20 @@ const useMockDraft = (allProspects) => {
         return prevBoard;
       }
 
-      // Obtém os objetos pick (do estado anterior)
       const pick1 = prevBoard[pick1Index];
       const pick2 = prevBoard[pick2Index];
 
-      // Cria novos objetos pick com as propriedades trocadas
       let newPick1;
       let newPick2;
 
       if (pick1.prospect === null && pick2.prospect === null) {
-        // If both picks are empty, swap both prospect and team
         newPick1 = { ...pick1, prospect: pick2.prospect, team: pick2.team };
         newPick2 = { ...pick2, prospect: pick1.prospect, team: pick1.team };
       } else {
-        // Otherwise, only swap prospect
         newPick1 = { ...pick1, prospect: pick2.prospect };
         newPick2 = { ...pick2, prospect: pick1.prospect };
       }
 
-      // Atualiza o board com os novos objetos pick
       newBoard[pick1Index] = newPick1;
       newBoard[pick2Index] = newPick2;
 
@@ -343,29 +339,26 @@ const useMockDraft = (allProspects) => {
     });
   }, []);
 
-  // Função para customizar a ordem dos times
   const setCustomTeamOrder = useCallback((newOrder) => {
     setCustomDraftOrder(newOrder);
     setIsOrderCustomized(true);
   }, []);
 
-  // Função para resetar para ordem padrão
   const resetToDefaultOrder = useCallback(() => {
     setCustomDraftOrder(null);
     setIsOrderCustomized(false);
   }, []);
 
-  // Função para embaralhar a ordem dos times
   const shuffleTeamOrder = useCallback(() => {
-    const shuffledOrder = shuffleArray(defaultDraftOrder);
+    const order = league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
+    const shuffledOrder = shuffleArray(order);
     setCustomDraftOrder(shuffledOrder);
     setIsOrderCustomized(true);
-  }, []);
+  }, [league]);
 
-  // Função para obter a ordem atual (customizada ou padrão)
   const getCurrentDraftOrder = useCallback(() => {
-    return customDraftOrder || defaultDraftOrder;
-  }, [customDraftOrder]);
+    return customDraftOrder || (league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder);
+  }, [customDraftOrder, league]);
 
   const autocompleteDraft = useCallback(() => {
     if (isDraftComplete) return;
@@ -373,12 +366,12 @@ const useMockDraft = (allProspects) => {
     setDraftBoard(prevBoard => {
       const newBoard = [...prevBoard];
       const newHistory = [...draftHistory];
-      let prospectsToAssign = [...availableProspects]; // Already sorted by rank
+      let prospectsToAssign = [...availableProspects];
 
       for (let i = currentPick; i <= draftSettings.totalPicks; i++) {
         const pickIndex = newBoard.findIndex(p => p.pick === i);
         if (pickIndex !== -1 && newBoard[pickIndex].prospect === null) {
-          const prospectToDraft = prospectsToAssign.shift(); // Get the best available
+          const prospectToDraft = prospectsToAssign.shift();
           if (prospectToDraft) {
             newBoard[pickIndex].prospect = prospectToDraft;
             newHistory.push({ pick: i, prospect: prospectToDraft });
@@ -393,90 +386,6 @@ const useMockDraft = (allProspects) => {
   }, [isDraftComplete, currentPick, draftSettings.totalPicks, availableProspects, draftHistory]);
 
   const generateReportCardData = useCallback(() => {
-    // FEATURE EM DESENVOLVIMENTO - LANÇAMENTO FUTURO
-    /*
-    if (draftHistory.length === 0) {
-      return null;
-    }
-
-    // Master list of prospects, sorted by rank, to determine expected pick position.
-    const sortedProspects = [...allProspects].sort((a, b) => a.ranking - b.ranking);
-    const rankToExpectedPick = new Map(sortedProspects.map((p, i) => [p.ranking, i + 1]));
-
-    let bestValuePick = null;
-    let worstValuePick = null;
-    let bestValue = -Infinity;
-    let worstValue = Infinity;
-    let totalValueScore = 0;
-    let topPicksCount = 0;
-
-    // Process picks in the order they were made.
-    const sortedHistory = [...draftHistory].sort((a, b) => a.pick - b.pick);
-
-    sortedHistory.forEach(pick => {
-      const prospect = pick.prospect;
-      if (!prospect || !prospect.ranking) return;
-
-      const expectedPick = rankToExpectedPick.get(prospect.ranking);
-
-      if (expectedPick) {
-        // Value is the actual pick number minus the prospect's expected pick number.
-        // A positive score is a "steal", a negative score is a "reach".
-        const stealScore = pick.pick - expectedPick;
-        totalValueScore += stealScore;
-
-        if (stealScore > bestValue) {
-          bestValue = stealScore;
-          bestValuePick = pick;
-        }
-        if (stealScore < worstValue) {
-          worstValue = stealScore;
-          worstValuePick = pick;
-        }
-      }
-
-      // Check if the prospect is in the top 10 of the big board.
-      const prospectBoardIndex = sortedProspects.findIndex(p => p.id === prospect.id);
-      if (prospectBoardIndex !== -1 && prospectBoardIndex < 10) {
-        topPicksCount++;
-      }
-    });
-
-    // Refined grading logic.
-    let gradePoints = 75; // Starts at a C+/B-
-    gradePoints += totalValueScore * 0.5; // Adjust points based on total steal/reach value.
-    gradePoints += topPicksCount * 1.5; // Add bonus for picking elite talent.
-
-    let grade = 'D';
-    let analysis = 'Abaixo da média. Tente encontrar mais valor nas próximas escolhas.';
-    if (gradePoints > 95) {
-      grade = 'A+';
-      analysis = 'Excelente! Você é um GM de elite, mestre em encontrar valor.';
-    } else if (gradePoints > 88) {
-      grade = 'A';
-      analysis = 'Ótimo trabalho! Você consistentemente encontrou talentos subvalorizados.';
-    } else if (gradePoints > 80) {
-      grade = 'B';
-      analysis = 'Bom draft. Você fez escolhas sólidas e encontrou algum valor.';
-    } else if (gradePoints > 70) {
-      grade = 'C';
-      analysis = 'Na média. Um draft seguro, mas com poucas escolhas de grande valor.';
-    } else if (gradePoints < 60) {
-      grade = 'F';
-      analysis = 'Muito abaixo da média. Suas escolhas parecem ter ignorado o valor disponível.';
-    } else {
-      grade = 'D';
-      analysis = 'Abaixo da média. Parece que você fez alguns \"reaches\" e deixou valor na mesa.';
-    }
-
-    return {
-      grade,
-      analysis,
-      bestValuePick,
-      worstValuePick,
-      totalValueScore,
-    };
-    */
     return null;
   }, [draftHistory, allProspects]);
 

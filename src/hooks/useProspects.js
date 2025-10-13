@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { supabase } from '@/lib/supabaseClient.js';
 import { generateDataDrivenScoutingReport } from '@/services/scoutingDataGenerator.js';
 import { getTierByRanking } from '@/lib/constants.js';
-import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js'; // Import the algorithm
+import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js'; 
+import { LeagueContext } from '@/context/LeagueContext'; 
 
 export default function useProspects(filters = {}) {
+  const { league } = useContext(LeagueContext); 
   const [prospects, setProspects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +25,8 @@ export default function useProspects(filters = {}) {
         // 1. Busca a lista de prospectos do nosso banco de dados.
         let query = supabase
           .from('prospects')
-          .select('*');
+          .select('*')
+          .eq('category', league); // Filter by the current league
 
         // Aplica os filtros dinamicamente
         if (filters.draftClass) {
@@ -43,7 +46,7 @@ export default function useProspects(filters = {}) {
         const processedProspects = await Promise.all(dbProspects.map(async (prospect) => {
           const tier = getTierByRanking(prospect.ranking);
           const scoutingData = prospect.strengths ? {} : generateDataDrivenScoutingReport(prospect);
-          const evaluation = await algorithm.evaluateProspect(prospect);
+          const evaluation = await algorithm.evaluateProspect(prospect, league);
 
           // Define stats base e a fonte padrão
           let finalStats = {
@@ -162,7 +165,7 @@ export default function useProspects(filters = {}) {
     };
 
     fetchData();
-  }, [refreshTrigger, filters]); // Adicionado filters como dependência
+  }, [refreshTrigger, filters, league]); // Adicionado league como dependência
 
   return { prospects, loading, error, isLoaded, refresh };
 }

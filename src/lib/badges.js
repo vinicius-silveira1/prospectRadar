@@ -226,9 +226,10 @@ export const badges = {
  * BADGE ASSIGNMENT LOGIC
  * ----------------------------------------------------------------
  */
-export const assignBadges = (prospect) => {
+export const assignBadges = (prospect, league = 'NBA') => {
   if (!prospect) return [];
 
+  const isWomens = league === 'WNBA';
   const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
   const isHighSchoolData = prospect.stats_source === 'high_school_total' || isOTE;
   
@@ -348,147 +349,185 @@ export const assignBadges = (prospect) => {
   const isBig = isPowerForward || isCenter;
 
   // --- Shooting Badges ---
-  // Nível High School: Foco em aproveitamento quase perfeito, com volume menor.
-  if (leagueTier === 'hs') {
-    if (p.games_played >= 7) {
-      if (p.three_pct >= 0.42 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 50) {
+  if (isWomens) {
+    // Thresholds for NCAAW are slightly different, focusing on efficiency.
+    if (p.minutes_played >= 80) { 
+      if (p.three_pct >= 0.39 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 70) {
         assignedBadges.add(badges.ELITE_SHOOTER);
-      } else if ((p.three_pct >= 0.40 && p.three_pt_attempts >= 30) || (p.ft_pct >= 0.82 && p.ft_attempts >= 25)) {
+      } else if ((p.three_pct >= 0.37 && p.three_pt_attempts >= 20) || (p.ft_pct >= 0.82 && p.ft_attempts >= 30)) {
         assignedBadges.add(badges.PROMISING_SHOOTER);
       }
-      if (p.three_pt_attempts >= 70 && p.three_pct >= 0.35) {
+      if (p.three_pt_attempts >= 100 && p.three_pct >= 0.34) {
         assignedBadges.add(badges.BOMBER);
       }
     }
-  // Nível NCAA: Aumenta a exigência de volume, com aproveitamento ainda de elite.
-  } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 100) { // Klafke fix: Lowered from 400
-      if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
-        assignedBadges.add(badges.ELITE_SHOOTER);
-      } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 25) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) { // Klafke fix: Lowered 3PA from 50
-        assignedBadges.add(badges.PROMISING_SHOOTER);
+  } else {
+    // Nível High School: Foco em aproveitamento quase perfeito, com volume menor.
+    if (leagueTier === 'hs') {
+      if (p.games_played >= 7) {
+        if (p.three_pct >= 0.42 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 50) {
+          assignedBadges.add(badges.ELITE_SHOOTER);
+        } else if ((p.three_pct >= 0.40 && p.three_pt_attempts >= 30) || (p.ft_pct >= 0.82 && p.ft_attempts >= 25)) {
+          assignedBadges.add(badges.PROMISING_SHOOTER);
+        }
+        if (p.three_pt_attempts >= 70 && p.three_pct >= 0.35) {
+          assignedBadges.add(badges.BOMBER);
+        }
       }
-      if (p.three_pt_attempts >= 120 && p.three_pct >= 0.35) {
-        assignedBadges.add(badges.BOMBER);
+    // Nível NCAA: Aumenta a exigência de volume, com aproveitamento ainda de elite.
+    } else if (leagueTier === 'ncaa') {
+      if (p.minutes_played >= 100) { // Klafke fix: Lowered from 400
+        if (p.three_pct >= 0.40 && p.ft_pct >= 0.85 && p.three_pt_attempts >= 80) {
+          assignedBadges.add(badges.ELITE_SHOOTER);
+        } else if ((p.three_pct >= 0.38 && p.three_pt_attempts >= 25) || (p.ft_pct >= 0.82 && p.ft_attempts >= 35)) { // Klafke fix: Lowered 3PA from 50
+          assignedBadges.add(badges.PROMISING_SHOOTER);
+        }
+        if (p.three_pt_attempts >= 120 && p.three_pct >= 0.35) {
+          assignedBadges.add(badges.BOMBER);
+        }
       }
-    }
-  // Nível Profissional: Contra defesas de elite, o volume é mais importante.
-  } else { // pro
-    if (p.minutes_played >= 100) {
-      if (p.three_pct >= 0.38 && p.ft_pct >= 0.84 && p.three_pt_attempts >= 90) {
-        assignedBadges.add(badges.ELITE_SHOOTER);
-      } else if ((p.three_pct >= 0.36 && p.three_pt_attempts >= 60) || (p.ft_pct >= 0.80 && p.ft_attempts >= 40)) {
-        assignedBadges.add(badges.PROMISING_SHOOTER);
-      }
-      if (p.three_pt_attempts >= 150 && p.three_pct >= 0.33) {
-        assignedBadges.add(badges.BOMBER);
+    // Nível Profissional: Contra defesas de elite, o volume é mais importante.
+    } else { // pro
+      if (p.minutes_played >= 100) {
+        if (p.three_pct >= 0.38 && p.ft_pct >= 0.84 && p.three_pt_attempts >= 90) {
+          assignedBadges.add(badges.ELITE_SHOOTER);
+        } else if ((p.three_pct >= 0.36 && p.three_pt_attempts >= 60) || (p.ft_pct >= 0.80 && p.ft_attempts >= 40)) {
+          assignedBadges.add(badges.PROMISING_SHOOTER);
+        }
+        if (p.three_pt_attempts >= 150 && p.three_pct >= 0.33) {
+          assignedBadges.add(badges.BOMBER);
+        }
       }
     }
   }
 
   // --- Defense Badges ---
-  // Nível HS: usa a estatística simples de tocos por jogo (bpg).
-  if (leagueTier === 'hs') {
-    if (p.games_played >= 7) {
-      if (p.spg >= 1.8 && p.bpg >= 1.5) assignedBadges.add(badges.ELITE_DEFENDER);
-      if (p.bpg >= 1.8 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
-      if (p.spg >= 2.2 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+  if (isWomens) {
+    if (p.minutes_played >= 80) {
+      if ((p.stl_percent >= 2.8 && p.blk_percent >= 2.2) || (p.dbpm >= 4.2)) assignedBadges.add(badges.ELITE_DEFENDER);
+      if (p.blk_percent >= 4.0 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+      if (p.stl_percent >= 2.5 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
     }
-  // Nível NCAA: muda para a estatística avançada de % de tocos (blk_percent).
-  } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 100) {
-      if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER);
-      if (p.blk_percent >= 3.5 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
-      if (p.stl_percent >= 2.0 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
-    }
-  // Nível Pro: a exigência no blk_percent é um pouco menor, mas ainda de elite.
-  } else { // pro
-    if (p.minutes_played >= 100) {
-      if ((p.stl_percent >= 2.2 && p.blk_percent >= 1.8) || (p.dbpm >= 4.0)) assignedBadges.add(badges.ELITE_DEFENDER);
-      if (p.blk_percent >= 3.2 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
-      if (p.stl_percent >= 1.8 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+  } else {
+    // Nível HS: usa a estatística simples de tocos por jogo (bpg).
+    if (leagueTier === 'hs') {
+      if (p.games_played >= 7) {
+        if (p.spg >= 1.8 && p.bpg >= 1.5) assignedBadges.add(badges.ELITE_DEFENDER);
+        if (p.bpg >= 1.8 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+        if (p.spg >= 2.2 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+      }
+    // Nível NCAA: muda para a estatística avançada de % de tocos (blk_percent).
+    } else if (leagueTier === 'ncaa') {
+      if (p.minutes_played >= 100) {
+        if ((p.stl_percent >= 2.5 && p.blk_percent >= 2.0) || (p.dbpm >= 4.5)) assignedBadges.add(badges.ELITE_DEFENDER);
+        if (p.blk_percent >= 3.5 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+        if (p.stl_percent >= 2.0 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+      }
+    // Nível Pro: a exigência no blk_percent é um pouco menor, mas ainda de elite.
+    } else { // pro
+      if (p.minutes_played >= 100) {
+        if ((p.stl_percent >= 2.2 && p.blk_percent >= 1.8) || (p.dbpm >= 4.0)) assignedBadges.add(badges.ELITE_DEFENDER);
+        if (p.blk_percent >= 3.2 && isBig) assignedBadges.add(badges.RIM_PROTECTOR);
+        if (p.stl_percent >= 1.8 && (isGuard || isSmallForward)) assignedBadges.add(badges.PERIMETER_DEFENDER);
+      }
     }
   }
-
   
   // --- Playmaking Badges ---
-  // A lógica muda de acordo com o nível de competição.
   const assistToTurnoverRatio = p.tpg > 0 ? p.apg / p.tpg : (p.apg > 0 ? 99 : 0);
+  const advAstToTovRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : (p.ast_percent > 0 ? 99 : 0);
 
-  // Nível High School
-  if (leagueTier === 'hs') {
-    if (p.games_played >= 7) {
-      if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
-      // Para ser 'Motor', o foco é no alto volume de assistências por jogo (apg).
-      else if (p.apg >= 4.0 && assistToTurnoverRatio >= 1.2) assignedBadges.add(badges.ENGINE);
+  if (isWomens) {
+    if (p.minutes_played >= 80) {
+      if (advAstToTovRatio >= 1.7 && p.ast_percent >= 28) assignedBadges.add(badges.FLOOR_GENERAL);
+      else if (p.ast_percent >= 25 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE);
     }
-  } else { // ncaa or pro
-      const advAstToTovRatio = p.tov_percent > 0 ? p.ast_percent / p.tov_percent : (p.ast_percent > 0 ? 99 : 0);
-      if (p.minutes_played >= 100) {
-          // Nível NCAA: Usamos stats avançadas como % de assistência (ast_percent).
-          if (leagueTier === 'ncaa') {
-              if (advAstToTovRatio >= 1.6 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
-              // 'Motor' aqui precisa de um alto volume de criação para o time.
-              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.2) assignedBadges.add(badges.ENGINE);
-          } 
-          // Nível Profissional: A régua é ainda mais alta e complexa.
-          else { // pro
-              if (advAstToTovRatio >= 1.8 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
-              // Para 'Motor', consideramos dois perfis: o criador eficiente e o de altíssimo volume de uso (usg_percent).
-              else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE);
-              else if (p.ast_percent >= 20 && p.usg_percent >= 18 && advAstToTovRatio >= 0.8) assignedBadges.add(badges.ENGINE);
-          }
+  } else {
+    // Nível High School
+    if (leagueTier === 'hs') {
+      if (p.games_played >= 7) {
+        if (assistToTurnoverRatio >= 1.8 && p.apg >= 4.2) assignedBadges.add(badges.FLOOR_GENERAL);
+        else if (p.apg >= 4.0 && assistToTurnoverRatio >= 1.2) assignedBadges.add(badges.ENGINE);
       }
+    } else { // ncaa or pro
+        if (p.minutes_played >= 100) {
+            if (leagueTier === 'ncaa') {
+                if (advAstToTovRatio >= 1.6 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
+                else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.2) assignedBadges.add(badges.ENGINE);
+            } 
+            else { // pro
+                if (advAstToTovRatio >= 1.8 && p.ast_percent >= 25) assignedBadges.add(badges.FLOOR_GENERAL);
+                else if (p.ast_percent >= 22 && advAstToTovRatio >= 1.3) assignedBadges.add(badges.ENGINE);
+                else if (p.ast_percent >= 20 && p.usg_percent >= 18 && advAstToTovRatio >= 0.8) assignedBadges.add(badges.ENGINE);
+            }
+        }
+    }
   }
 
   // --- Scoring & Rebounding Badges ---
-  if (p.ts_percent >= 0.62) {
-      if ((leagueTier === 'hs' && p.games_played >= 7)) {
+  if (p.ts_percent >= (isWomens ? 0.60 : 0.62)) {
+      if ((leagueTier === 'hs' && p.games_played >= 7) || p.minutes_played >= 80) {
           assignedBadges.add(badges.EFFICIENT_SCORER);
       }
   }
-  if (leagueTier === 'hs') {
-    if(p.games_played >= 7) {
-        if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
+  
+  if (isWomens) {
+    if (p.minutes_played >= 80) {
+        if (p.trb_percent >= 16) assignedBadges.add(badges.REBOUNDING_FORCE);
     }
-  } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 100) {
-        if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
-    }
-  } else { // pro
-    if (p.minutes_played >= 100) {
-        if (p.trb_percent >= 13) assignedBadges.add(badges.REBOUNDING_FORCE);
+  } else {
+    if (leagueTier === 'hs') {
+      if(p.games_played >= 7) {
+          if (p.rpg >= 7.0) assignedBadges.add(badges.REBOUNDING_FORCE);
+      }
+    } else if (leagueTier === 'ncaa') {
+      if (p.minutes_played >= 100) {
+          if (p.trb_percent >= 15) assignedBadges.add(badges.REBOUNDING_FORCE);
+      }
+    } else { // pro
+      if (p.minutes_played >= 100) {
+          if (p.trb_percent >= 13) assignedBadges.add(badges.REBOUNDING_FORCE);
+      }
     }
   }
   
-  if (leagueTier === 'pro') {
-      if (p.two_fg_pct >= 0.58 && p.two_pt_attempts >= 120) assignedBadges.add(badges.ELITE_FINISHER);
-  } else {
-      if (p.two_fg_pct >= 0.60 && p.two_pt_attempts >= (isHighSchoolData ? 50 : 100)) assignedBadges.add(badges.ELITE_FINISHER);
+  const finisher_two_pct = isWomens ? 0.58 : 0.60;
+  const finisher_attempts = isWomens ? 80 : (isHighSchoolData ? 50 : 100);
+  if (p.two_fg_pct >= finisher_two_pct && p.two_pt_attempts >= finisher_attempts) {
+    assignedBadges.add(badges.ELITE_FINISHER);
   }
 
 
   // --- Athleticism & Motor Badges ---
-  if (leagueTier === 'hs') {
-    if (p.games_played >= 7) {
-      if (isGuard && p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.EXPLOSIVO);
-      if (isSmallForward && ((p.spg >= 1.2 && p.bpg >= 1.0) || p.orpg >= 2.5)) assignedBadges.add(badges.EXPLOSIVO);
-      if (isBig && p.bpg >= 2.0 && p.orpg >= 3.0) assignedBadges.add(badges.EXPLOSIVO);
-      if (p.orpg >= 2.8 && p.spg >= 1.2) assignedBadges.add(badges.HIGH_MOTOR);
+  if (isWomens) {
+    if (p.minutes_played >= 80) {
+      if (isGuard && p.stl_percent >= 2.8 && p.blk_percent >= 1.2) assignedBadges.add(badges.EXPLOSIVO);
+      if (isSmallForward && ((p.stl_percent >= 2.0 && p.blk_percent >= 1.8) || p.orb_percent >= 9.5)) assignedBadges.add(badges.EXPLOSIVO);
+      if (isBig && p.blk_percent >= 5.5 && p.orb_percent >= 11.0) assignedBadges.add(badges.EXPLOSIVO);
+      if (p.orb_percent >= 8.5 && p.stl_percent >= 2.2) assignedBadges.add(badges.HIGH_MOTOR);
     }
-  } else if (leagueTier === 'ncaa') {
-    if (p.minutes_played >= 100) {
-      if (isGuard && p.stl_percent >= 2.5 && p.blk_percent >= 1.0) assignedBadges.add(badges.EXPLOSIVO);
-      if (isSmallForward && ((p.stl_percent >= 1.8 && p.blk_percent >= 1.5) || p.orb_percent >= 9.0)) assignedBadges.add(badges.EXPLOSIVO);
-      if (isBig && p.blk_percent >= 5.0 && p.orb_percent >= 10.0) assignedBadges.add(badges.EXPLOSIVO);
-      if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) assignedBadges.add(badges.HIGH_MOTOR);
-    }
-  } else { // pro
-    if (p.minutes_played >= 100) {
-      if (isGuard && p.stl_percent >= 2.2 && p.blk_percent >= 0.8) assignedBadges.add(badges.EXPLOSIVO);
-      if (isSmallForward && ((p.stl_percent >= 1.6 && p.blk_percent >= 1.3) || p.orb_percent >= 8.0)) assignedBadges.add(badges.EXPLOSIVO);
-      if (isBig && p.blk_percent >= 4.5 && p.orb_percent >= 9.0) assignedBadges.add(badges.EXPLOSIVO);
-      if (p.orb_percent >= 7.0 && p.stl_percent >= 1.8) assignedBadges.add(badges.HIGH_MOTOR);
+  } else {
+    if (leagueTier === 'hs') {
+      if (p.games_played >= 7) {
+        if (isGuard && p.spg >= 1.8 && p.bpg >= 0.5) assignedBadges.add(badges.EXPLOSIVO);
+        if (isSmallForward && ((p.spg >= 1.2 && p.bpg >= 1.0) || p.orpg >= 2.5)) assignedBadges.add(badges.EXPLOSIVO);
+        if (isBig && p.bpg >= 2.0 && p.orpg >= 3.0) assignedBadges.add(badges.EXPLOSIVO);
+        if (p.orpg >= 2.8 && p.spg >= 1.2) assignedBadges.add(badges.HIGH_MOTOR);
+      }
+    } else if (leagueTier === 'ncaa') {
+      if (p.minutes_played >= 100) {
+        if (isGuard && p.stl_percent >= 2.5 && p.blk_percent >= 1.0) assignedBadges.add(badges.EXPLOSIVO);
+        if (isSmallForward && ((p.stl_percent >= 1.8 && p.blk_percent >= 1.5) || p.orb_percent >= 9.0)) assignedBadges.add(badges.EXPLOSIVO);
+        if (isBig && p.blk_percent >= 5.0 && p.orb_percent >= 10.0) assignedBadges.add(badges.EXPLOSIVO);
+        if (p.orb_percent >= 8.0 && p.stl_percent >= 2.0) assignedBadges.add(badges.HIGH_MOTOR);
+      }
+    } else { // pro
+      if (p.minutes_played >= 100) {
+        if (isGuard && p.stl_percent >= 2.2 && p.blk_percent >= 0.8) assignedBadges.add(badges.EXPLOSIVO);
+        if (isSmallForward && ((p.stl_percent >= 1.6 && p.blk_percent >= 1.3) || p.orb_percent >= 8.0)) assignedBadges.add(badges.EXPLOSIVO);
+        if (isBig && p.blk_percent >= 4.5 && p.orb_percent >= 9.0) assignedBadges.add(badges.EXPLOSIVO);
+        if (p.orb_percent >= 7.0 && p.stl_percent >= 1.8) assignedBadges.add(badges.HIGH_MOTOR);
+      }
     }
   }
 
@@ -496,16 +535,16 @@ export const assignBadges = (prospect) => {
   if (p.fpg >= 3.5) assignedBadges.add(badges.FOUL_MAGNET);
 
   // --- General Badges ---
-  const contributions = p.is_hs ? 
-    [p.ppg >= 8, p.rpg >= 4, p.apg >= 2, p.spg >= 0.8, p.bpg >= 0.6] :
-    [p.ppg >= 12, p.rpg >= 5, p.apg >= 3, p.spg >= 1.0, p.bpg >= 0.8];
+  const contributions = (isWomens || !p.is_hs) ? 
+    [p.ppg >= 12, p.rpg >= 5, p.apg >= 3, p.spg >= 1.0, p.bpg >= 0.8] :
+    [p.ppg >= 8, p.rpg >= 4, p.apg >= 2, p.spg >= 0.8, p.bpg >= 0.6];
   if (contributions.filter(Boolean).length >= 4) assignedBadges.add(badges.SWISS_ARMY_KNIFE);
   
   const pointsPer36 = p.minutes_played > 0 ? (p.total_points / p.minutes_played) * 36 : 0;
   if (pointsPer36 >= 25 && p.minutes_played > 80) assignedBadges.add(badges.MICROWAVE_SCORER);
   
   const minutesPerGame = p.games_played > 0 ? p.minutes_played / p.games_played : 0;
-  if (p.is_hs) {
+  if (p.is_hs && !isWomens) {
     if (p.games_played >= 7 && minutesPerGame >= 24) assignedBadges.add(badges.IRON_MAN);
   } else {
     if (p.games_played >= 22 && minutesPerGame >= 26) assignedBadges.add(badges.IRON_MAN);
@@ -513,15 +552,15 @@ export const assignBadges = (prospect) => {
 
   // --- Situational Badges (Proxy Logic) ---
   const enigmatic_ft_attempts = 10; 
-  const enigmatic_three_attempts = p.is_hs ? 15 : 25; 
+  const enigmatic_three_attempts = (p.is_hs && !isWomens) ? 15 : 25; 
   if (p.three_pct >= 0.39 && p.ft_pct <= 0.75 && p.three_pt_attempts >= enigmatic_three_attempts && p.ft_attempts >= enigmatic_ft_attempts) { 
     if (!assignedBadges.has(badges.ELITE_SHOOTER) && !assignedBadges.has(badges.PROMISING_SHOOTER)) {
         assignedBadges.add(badges.ENIGMATIC_SHOOTER);
     }
   }
 
-  const ppg_threshold_giant = p.is_hs ? 10 : 6;
-  const rpg_threshold_giant = p.is_hs ? 5 : 3;
+  const ppg_threshold_giant = (p.is_hs && !isWomens) ? 10 : 6;
+  const rpg_threshold_giant = (p.is_hs && !isWomens) ? 5 : 3;
   if (p.height_in_inches >= 80 && p.ppg < ppg_threshold_giant && p.rpg < rpg_threshold_giant) {
       assignedBadges.add(badges.SLEEPING_GIANT);
   }
@@ -539,7 +578,7 @@ export const assignBadges = (prospect) => {
   const hasReboundingBadge = assignedBadges.has(badges.REBOUNDING_FORCE);
   const hasHighMotor = assignedBadges.has(badges.HIGH_MOTOR);
   
-  if (hasPlaymakingBadge && isPointGuard && p.height_in_inches >= 76) { // 6'4"
+  if (hasPlaymakingBadge && isPointGuard && p.height_in_inches >= (isWomens ? 73 : 76)) { // 6'1" for W, 6'4" for M
       assignedBadges.add(badges.JUMBO_CREATOR);
   }
   if (hasShootingBadge && hasPerimeterDBadge && isWing) {
@@ -555,8 +594,8 @@ export const assignBadges = (prospect) => {
   if (hasReboundingBadge && hasFinisherBadge) {
       assignedBadges.add(badges.GLASS_CLEANER);
   }
-  // Verifica se o jogador é um "Unicórnio" (6'10" ou mais e com habilidade de arremesso)
-  if (p.height_in_inches >= 82 && hasShootingBadge) { 
+  // Unicorn: 6'10" for men, 6'5" for women
+  if (p.height_in_inches >= (isWomens ? 77 : 82) && hasShootingBadge) { 
       assignedBadges.add(badges.UNICORN);
   }
   if (hasPerimeterDBadge && hasHighMotor) {

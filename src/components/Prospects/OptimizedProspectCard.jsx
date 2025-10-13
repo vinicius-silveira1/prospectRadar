@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo, useContext } from 'react';
 import { Star, TrendingUp, TrendingDown, Minus, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LazyProspectImage from '../Common/LazyProspectImage';
 import Badge from '../Common/Badge';
 import { assignBadges } from '../../lib/badges';
-
+import { LeagueContext } from '../../context/LeagueContext';
 
 const OptimizedProspectCard = memo(({ 
   prospect, 
@@ -14,10 +14,12 @@ const OptimizedProspectCard = memo(({
   showBadges = true,
   compact = false 
 }) => {
+  const { league } = useContext(LeagueContext);
+
   // Memoize badges calculation
-  const badges = React.useMemo(() => 
-    showBadges ? assignBadges(prospect) : [], 
-    [prospect, showBadges]
+  const badges = useMemo(() => 
+    showBadges ? assignBadges(prospect, league) : [], 
+    [prospect, showBadges, league]
   );
 
   const getTrendingIcon = (trend) => {

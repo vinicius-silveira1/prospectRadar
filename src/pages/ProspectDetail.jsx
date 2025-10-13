@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock, Crown, Zap } from 'lucide-react';
@@ -6,6 +6,7 @@ import useProspect from '@/hooks/useProspect.js';
 import useProspects from '@/hooks/useProspects.js'; // Adicionado para buscar todos os prospects
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
+import { LeagueContext } from '@/context/LeagueContext.jsx';
 import useProspectImage from '@/hooks/useProspectImage.js';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
@@ -284,7 +285,8 @@ const ProspectDetail = () => {
   const flags = evaluation.flags || [];
   const comparablePlayers = evaluation.comparablePlayers || [];
   console.log('Prospect object in ProspectDetail:', prospect);
-  const badges = assignBadges(prospect);
+  const { league } = useContext(LeagueContext);
+  const badges = assignBadges(prospect, league);
 
   const getTierColor = (tier) => {
     const colors = { 
@@ -965,7 +967,7 @@ const ProspectDetail = () => {
                 transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
                 className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
               >
-                <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Users className="w-5 h-5 mr-2 text-brand-purple" />Comparações com Jogadores da NBA</h2>
+                <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Users className="w-5 h-5 mr-2 text-brand-purple" />{league === 'WNBA' ? 'Comparações com Jogadoras da WNBA' : 'Comparações com Jogadores da NBA'}</h2>
                 <motion.div
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                   variants={{

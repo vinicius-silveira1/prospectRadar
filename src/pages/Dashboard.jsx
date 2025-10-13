@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
 import useWatchlist from '../hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx';
+import { useLeague } from '@/context/LeagueContext.jsx'; // Import useLeague
 import DashboardProspectCard from '@/components/DashboardProspectCard.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import UpgradeModal from '@/components/Common/UpgradeModal.jsx';
@@ -19,8 +20,29 @@ import BraziliansInNBA from '@/components/Dashboard/BraziliansInNBA.jsx';
 import BlogHighlight from '@/components/Dashboard/BlogHighlight.jsx';
 import { prospectOfTheWeek } from '@/data/spotlight.js';
 
+// WNBA Prospect of the Week Data
+const wnbaProspectOfTheWeek = {
+  prospect: {
+    id: 'catarina-ferreira',
+    name: 'Catarina Ferreira',
+    position: 'PG',
+    team: 'South Florida Bulls',
+    class: '2025',
+    ranking: 1,
+    height_cm: 170,
+    badges: ['Playmaker', '3PT Specialist']
+  },
+  analysis: 'Catarina Ferreira é uma armadora com excelente visão de jogo e um arremesso de três pontos mortal. Sua capacidade de liderar o ataque e criar oportunidades para suas companheiras a torna uma das prospects mais promissoras para o próximo draft da WNBA.',
+  highlights: [
+    'Média de 15.5 pontos por jogo na última temporada',
+    '42% de aproveitamento nos arremessos de 3 pontos',
+    'Líder de assistências da sua conferência'
+  ]
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { league } = useLeague(); // Get league context
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [selectedBadgeData, setSelectedBadgeData] = useState(null);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
@@ -96,8 +118,12 @@ const Dashboard = () => {
   // Top prospects para a seção principal (6 melhores ranqueados)
   const topProspects = useMemo(() => {
     if (!allProspects) return [];
-    return allProspects.slice(0, 6); // A lista já vem ordenada por ranking do hook.
-  }, [allProspects]);
+    // No contexto WNBA, não mostrar brasileiras na lista de top prospects
+    const prospectsToFilter = league === 'WNBA' 
+      ? allProspects.filter(p => p.nationality !== '🇧🇷') 
+      : allProspects;
+    return prospectsToFilter.slice(0, 6); // A lista já vem ordenada por ranking do hook.
+  }, [allProspects, league]);
 
   // Estatísticas baseadas nos dados REAIS
   const dashboardStats = [
@@ -203,11 +229,18 @@ const Dashboard = () => {
       </motion.div>
 
       {/* 2. Prospect of the Week */}
-      {isLoaded && featuredProspect && (
+      {league === 'NBA' && isLoaded && featuredProspect && (
         <ProspectOfTheWeekCard 
           prospect={featuredProspect}
           analysis={prospectOfTheWeek.spotlightAnalysis}
           highlights={prospectOfTheWeek.highlights}
+        />
+      )}
+      {league === 'WNBA' && (
+        <ProspectOfTheWeekCard 
+          prospect={wnbaProspectOfTheWeek.prospect}
+          analysis={wnbaProspectOfTheWeek.analysis}
+          highlights={wnbaProspectOfTheWeek.highlights}
         />
       )}
 
@@ -238,7 +271,7 @@ const Dashboard = () => {
               🇧🇷 <span className="text-brand-orange dark:text-orange-400 ml-2 relative">
                 Prospects
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-orange/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
-              </span>&nbsp;Brasileiros
+              </span>&nbsp;{league === 'WNBA' ? 'Brasileiras' : 'Brasileiros'}
             </motion.h2>
             <div className="flex items-center gap-3">
               <motion.span 
@@ -282,8 +315,8 @@ const Dashboard = () => {
 
       {/* 6. Seção: Brasileiros na NBA & Blog */}
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-        <BraziliansInNBA />
-        <BlogHighlight />
+        <BraziliansInNBA className={league === 'WNBA' ? 'w-full' : ''} />
+        {league === 'NBA' && <BlogHighlight />}
       </div>
 
       {/* 3. Top Prospects Gerais */}

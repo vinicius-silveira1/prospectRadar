@@ -1,5 +1,6 @@
 // 🏀 MockDraft.jsx - Página principal do Mock Draft
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useContext } from 'react';
+import { LeagueContext } from '../context/LeagueContext';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
@@ -28,10 +29,11 @@ import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 
 const MockDraft = () => {
   const { user } = useAuth();
+  const { league } = useContext(LeagueContext);
   
-    const allProspectsFilters = useMemo(() => ({ draftClass: '2026' }), []); // Memoizar o objeto de filtro
+    const allProspectsFilters = useMemo(() => ({ draftClass: '2026', league }), [league]);
 
-  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters); // Passar o objeto memoizado
+  const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters);
 
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters, isLoading,
@@ -357,6 +359,7 @@ const MockDraft = () => {
         <DraftModeSelector 
           currentTotalPicks={draftSettings.totalPicks} 
           onModeChange={(newSize) => setDraftSettings(prev => ({ ...prev, totalPicks: newSize }))}
+          league={league}
         />
 
         {/* Barra de Progresso - Separada do banner */}
@@ -700,7 +703,7 @@ const MockDraft = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} />}
+                {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
                 {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
                 {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
               </motion.div>
@@ -740,13 +743,13 @@ const MockDraft = () => {
           draftBoard={draftBoard}
         />
 
-        <TeamOrderModal
-          isOpen={isTeamOrderModalOpen}
-          onClose={() => setIsTeamOrderModalOpen(false)}
-          onConfirmOrder={handleTeamOrderConfirm}
-          currentDraftOrder={getCurrentDraftOrder()}
-        />
-
+                <TeamOrderModal
+                  isOpen={isTeamOrderModalOpen}
+                  onClose={() => setIsTeamOrderModalOpen(false)}
+                  onConfirmOrder={handleTeamOrderConfirm}
+                  currentDraftOrder={getCurrentDraftOrder()}
+                  league={league}
+                />
         <div className="absolute left-[-9999px] top-0 z-[-10">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
           {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
@@ -822,7 +825,7 @@ const MockDraft = () => {
 };
 
 
-const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }) => {
+const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, league }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -840,6 +843,8 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
       opacity: 1,
     },
   };
+
+  const teamNames = league === 'WNBA' ? wnbaTeamFullNames : nbaTeamFullNames;
 
   return (
     <motion.div
@@ -909,7 +914,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick }
                 transition={{ duration: 0.5 }}
               >
                 <div className="text-xs text-slate-600 dark:text-super-dark-text-secondary mb-2 truncate">
-                  {teamFullNames[pick.team] || pick.team}
+                  {teamNames[pick.team] || pick.team}
                 </div>
                 {pick.prospect ? (
                   <motion.div layoutId={`prospect-card-${pick.prospect.id}`}>
@@ -1024,7 +1029,8 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
 
 const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
-  const badges = assignBadges(prospect);
+  const { league: currentLeague } = useContext(LeagueContext);
+  const badges = assignBadges(prospect, currentLeague);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const { isMobile } = useResponsive();
 
@@ -1163,7 +1169,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
                     )}
                     {(league || season) && !isHighSchool && (
                       <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                        {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                        {[league, (season || '').replace(/'/g, '')].filter(Boolean).join(' ')}
                       </span>
                     )}
                   </div>
@@ -1314,13 +1320,19 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
   );
 };
 
-const DraftModeSelector = ({ currentTotalPicks, onModeChange }) => {
-  const modes = [
-    { name: 'Top 5', picks: 5 },
-    { name: 'Loteria', picks: 14 },
-    { name: '1ª Rodada', picks: 30 },
-    { name: 'Completo', picks: 60 },
-  ];
+const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
+  const modes = league === 'WNBA' 
+    ? [
+        { name: 'Top 4 (Loteria)', picks: 4 },
+        { name: '1ª Rodada', picks: 12 },
+        { name: 'Completo', picks: 36 },
+      ]
+    : [
+        { name: 'Top 5', picks: 5 },
+        { name: 'Loteria', picks: 14 },
+        { name: '1ª Rodada', picks: 30 },
+        { name: 'Completo', picks: 60 },
+      ];
 
   return (
     <motion.div 
@@ -1358,7 +1370,7 @@ const DraftModeSelector = ({ currentTotalPicks, onModeChange }) => {
 // Modal de Upgrade para Mock Draft
 export default MockDraft;
 
-const teamFullNames = {
+const nbaTeamFullNames = {
   'ATL': 'Atlanta Hawks',
   'BKN': 'Brooklyn Nets',
   'BOS': 'Boston Celtics',
@@ -1389,4 +1401,19 @@ const teamFullNames = {
   'TOR': 'Toronto Raptors',
   'UTA': 'Utah Jazz',
   'WAS': 'Washington Wizards',
+};
+
+const wnbaTeamFullNames = {
+  'ATL': 'Atlanta Dream',
+  'CHI': 'Chicago Sky',
+  'CON': 'Connecticut Sun',
+  'DAL': 'Dallas Wings',
+  'IND': 'Indiana Fever',
+  'LVA': 'Las Vegas Aces',
+  'LAL': 'Los Angeles Sparks',
+  'MIN': 'Minnesota Lynx',
+  'NYL': 'New York Liberty',
+  'PHX': 'Phoenix Mercury',
+  'SEA': 'Seattle Storm',
+  'WAS': 'Washington Mystics',
 };

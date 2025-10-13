@@ -1,12 +1,13 @@
 import { Star, TrendingUp, TrendingDown, Minus, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { imageManager } from '../../utils/imageManagerV2.js';
 import { assignBadges } from '../../lib/badges';
 import Badge from '../Common/Badge';
 import AchievementUnlock from '../Common/AchievementUnlock';
 import { useResponsive } from '../../hooks/useResponsive';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LeagueContext } from '../../context/LeagueContext';
 
 const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   const [imageState, setImageState] = useState({
@@ -16,7 +17,8 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
   });
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const { isMobile } = useResponsive();
-  const badges = assignBadges(prospect);
+  const { league } = useContext(LeagueContext);
+  const badges = assignBadges(prospect, league);
 
   // Load image when component mounts
   useEffect(() => {

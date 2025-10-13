@@ -5,13 +5,15 @@ import { assignBadges } from '@/lib/badges';
 import Badge from './Common/Badge';
 import AchievementUnlock from './Common/AchievementUnlock';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from '@/hooks/useResponsive';
+import { LeagueContext } from '@/context/LeagueContext';
 
 const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
-  const badges = assignBadges(prospect);
+  const { league: currentLeague } = useContext(LeagueContext);
+  const badges = assignBadges(prospect, currentLeague);
   const [isAnimatingHeart, setIsAnimatingHeart] = useState(false);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const { isMobile } = useResponsive();

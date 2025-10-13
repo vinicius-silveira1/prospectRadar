@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveStack, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 import ThemeToggle from './ThemeToggle';
+import LeagueToggleButton from './LeagueToggleButton';
 import BetaBadge from '../Common/BetaBadge';
 import DeleteAccountModal from './DeleteAccountModal';
 
@@ -222,6 +223,9 @@ const Navbar = ({ onMenuClick }) => {
                 </Link>
               </motion.div>
             )}
+            <motion.div className="scale-90 sm:scale-100" whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+              <LeagueToggleButton />
+            </motion.div>
             <motion.div className="scale-90 sm:scale-100" whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
               <ThemeToggle />
             </motion.div>

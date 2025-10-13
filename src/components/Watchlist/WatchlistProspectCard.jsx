@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, FileText, Lock, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -10,12 +10,14 @@ import { assignBadges } from '@/lib/badges';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from '@/hooks/useResponsive';
+import { LeagueContext } from '@/context/LeagueContext';
 
 const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpenNotes, isNotesOpen, onBadgeClick }) => {
   const { user } = useAuth();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { hasNote } = useProspectNotes();
-  const badges = assignBadges(prospect);
+  const { league: currentLeague } = useContext(LeagueContext);
+  const badges = assignBadges(prospect, currentLeague);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const { isMobile } = useResponsive();
 
