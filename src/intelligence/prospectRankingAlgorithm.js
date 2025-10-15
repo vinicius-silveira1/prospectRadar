@@ -780,7 +780,9 @@ export class ProspectRankingAlgorithm {
 
       const potentialScore = totalAvailableWeight > 0 ? (totalWeightedScore / totalAvailableWeight) : 0;
 
-      const flags = this.generateProspectFlags(p, basicStats, advancedStats, physical);
+      const hasStats = gamesPlayed > 5 && (basicStats.ppg > 0 || (p.total_points && p.total_points > 0));
+      const flags = this.generateProspectFlags(p, basicStats, advancedStats, physical, prospectContext, hasStats);
+
       if (lowGamesRisk) {
         flags.push({ type: 'red', message: `Amostra de jogos pequena (${gamesPlayed} jogos) - Risco considerado.` });
       }
@@ -815,7 +817,7 @@ export class ProspectRankingAlgorithm {
         categoryScores: scores,
         tier: tier,
         draftProjection,
-        nbaReadiness: this.assessNBAReadiness(finalTotalScore, flags, lowGamesRisk),
+        nbaReadiness: this.assessNBAReadiness(finalTotalScore, flags, lowGamesRisk, league),
         comparablePlayers: await this.findComparablePlayers(p, physical, basicStats, prospectContext),
         flags: flags,
         calculatedStats: {
@@ -887,139 +889,186 @@ export class ProspectRankingAlgorithm {
     return keys;
   }
 
-  generateProspectFlags(prospect, basicStats, advancedStats, physical) {
+  generateProspectFlags(prospect, basicStats, advancedStats, physical, leagueContext = 'NBA', hasStats = true) {
     const p = prospect || {};
     const flags = [];
-    const safeAccess = (value, treatZeroAsUndefined = false) => {
-  if (treatZeroAsUndefined && value === 0) {
-    return undefined;
-  }
-  return (value === undefined || value === null) ? undefined : value;
-};
+    const isWNBA = leagueContext === 'WNBA';
 
-    // --- Green Flags (Pontos Positivos Notáveis) ---
+    const flagMessages = {
+      ELITE_WINGSPAN: { NBA: `Envergadura de elite (+${(this.parseWingspanToInches(p.wingspan) - this.parseHeightToInches(p.height)).toFixed(1)}" em relação à altura)`, WNBA: `Envergadura de elite (+${(this.parseWingspanToInches(p.wingspan) - this.parseHeightToInches(p.height)).toFixed(1)}" em relação à altura)` },
+      LIMITED_PHYSICAL: { NBA: 'Potencial físico limitado (envergadura curta)', WNBA: 'Potencial físico limitado (envergadura curta)' },
+      ADVANCED_AGE: { NBA: `Idade avançada para a classe (${p.age} anos)`, WNBA: `Idade avançada para a classe (${p.age} anos)` },
+      IMPROVEMENT: { NBA: 'Melhora significativa ano a ano', WNBA: 'Melhora significativa ano a ano' },
+      ELITE_FT_SHOOTER: { NBA: 'Cobrador de lance livre de elite', WNBA: 'Cobradora de lance livre de elite' },
+      ELITE_3PT_SHOOTER: { NBA: 'Arremessador de 3pt de elite', WNBA: 'Arremessadora de 3pt de elite' },
+      EFFICIENT_PLAYMAKER: { NBA: 'Playmaker de poucos erros e muito impacto', WNBA: 'Playmaker de poucos erros e muito impacto' },
+      EFFICIENT_OFFENSE: { NBA: 'Produção ofensiva extremamente eficiente (PER)', WNBA: 'Produção ofensiva extremamente eficiente (PER)' },
+      HIGH_REBOUND_GUARD: { NBA: 'Alto volume de rebotes para guard/ala', WNBA: 'Alto volume de rebotes para guard/ala' },
+      HIGH_DEFLECTION_GUARD: { NBA: 'Alto volume de roubos/tocos para guard/ala', WNBA: 'Alto volume de roubos/tocos para guard/ala' },
+      ELITE_CREATIVE_GUARD: { NBA: 'Guard criativo elite (alta assistência + uso)', WNBA: 'Guard criativa elite (alta assistência + uso)' },
+      RISKY_FORWARD: { NBA: 'Padrão de risco: Forward jovem com baixa produção', WNBA: 'Padrão de risco: Forward jovem com baixa produção' },
+      LIMITED_OFFENSE_BIG: { NBA: 'Grande com limitações ofensivas', WNBA: 'Grande com limitações ofensivas' },
+      QUESTIONABLE_MECHANICS: { NBA: 'Mecânica de arremesso questionável (Baixo FT%)', WNBA: 'Mecânica de arremesso questionável (Baixo FT%)' },
+      HIGH_VOLUME_LOW_EFFICIENCY: { NBA: 'Alto volume com baixa eficiência ofensiva', WNBA: 'Alto volume com baixa eficiência ofensiva' },
+      HIGH_TURNOVER_RATE: { NBA: 'Alto volume de erros (mais turnovers que assistências)', WNBA: 'Alto volume de erros (mais turnovers que assistências)' },
+      INEFFICIENT_SCORER: { NBA: 'Pontuador ineficiente (alto volume, baixa eficiência)', WNBA: 'Pontuadora ineficiente (alto volume, baixa eficiência)' },
+      HIGH_TOV_PERCENT: { NBA: 'Muitos turnovers (alta taxa de erros)', WNBA: 'Muitos turnovers (alta taxa de erros)' },
+      QUESTIONABLE_SHOOTING_GUARD: { NBA: 'Arremesso questionável (baixo FT% para guard)', WNBA: 'Arremesso questionável (baixo FT% para guard)' },
+      QUESTIONABLE_SHOOTING_BIG: { NBA: 'Arremesso questionável (baixo FT% para big)', WNBA: 'Arremesso questionável (baixo FT% para big)' },
+      LOW_REBOUND_BIG: { NBA: 'Baixa taxa de rebotes para pivô/ala-pivô', WNBA: 'Baixa taxa de rebotes para pivô/ala-pivô' },
+      HIGH_FOUL_RATE: { NBA: 'Alta taxa de faltas', WNBA: 'Alta taxa de faltas' },
+      LOW_ASSIST_PG: { NBA: 'Baixa taxa de assistências para armador principal', WNBA: 'Baixa taxa de assistências para armadora principal' },
+    };
+
+    const getMessage = (key) => (flagMessages[key] && flagMessages[key][isWNBA ? 'WNBA' : 'NBA']) || flagMessages[key]['NBA'];
+
+    // Define thresholds for each context
+    const thresholds = {
+      NBA: {
+        advancedAge: 22,
+        highAstToRatio: 2.5,
+        highApg: 4,
+        highPer: 25,
+        lowFtPct: 0.65,
+        minFtAttempts: 50,
+        highTsPctUsage: 25,
+        lowTsPct: 0.50,
+        lowAstToRatio: 1.0,
+        highTovUsage: 20,
+        lowFtGuard: 0.70,
+        lowFtBig: 0.65,
+        lowReboundBig: 7,
+        highFouls: 3.5,
+        lowApgPG: 3.5,
+        eliteShooter3Ppct: 0.40,
+        eliteShooter3Pa: 80,
+        eliteShooterFtPct: 0.90,
+        eliteShooterFtPa: 50,
+        highRpgGuard: 6,
+        highStlBlkGuard: 2.5,
+        lowPpgForward: 16,
+        lowFgPctForward: 0.45,
+        lowPpgBig: 13,
+        lowUsageBig: 20,
+        highUsageInefficient: 0.28,
+        lowTsInefficient: 0.53,
+        highTovPct: 0.18,
+      },
+      WNBA: { // Initial WNBA thresholds - can be refined
+        advancedAge: 23, // Slightly higher age threshold for WNBA draftees
+        highAstToRatio: 2.2,
+        highApg: 3.5,
+        highPer: 22,
+        lowFtPct: 0.65,
+        minFtAttempts: 40,
+        highTsPctUsage: 25,
+        lowTsPct: 0.50,
+        lowAstToRatio: 1.0,
+        highTovUsage: 20,
+        lowFtGuard: 0.70,
+        lowFtBig: 0.65,
+        lowReboundBig: 6, // Adjusted for WNBA
+        highFouls: 3.5,
+        lowApgPG: 3.0, // Adjusted for WNBA
+        eliteShooter3Ppct: 0.38,
+        eliteShooter3Pa: 70,
+        eliteShooterFtPct: 0.88,
+        eliteShooterFtPa: 40,
+        highRpgGuard: 5,
+        highStlBlkGuard: 2.2,
+        lowPpgForward: 14,
+        lowFgPctForward: 0.45,
+        lowPpgBig: 11,
+        lowUsageBig: 20,
+        highUsageInefficient: 0.28,
+        lowTsInefficient: 0.53,
+        highTovPct: 0.18,
+      }
+    };
+
+    const T = thresholds[isWNBA ? 'WNBA' : 'NBA'] || thresholds.NBA;
+    const assistToTurnoverRatio = this.calculateAssistToTurnoverRatio(p);
+
+    // --- Flags that DO NOT depend on stats ---
     const wingspanAdvantage = this.parseWingspanToInches(p.wingspan) - this.parseHeightToInches(p.height);
     if (wingspanAdvantage >= 5) {
-      flags.push({ type: 'green', message: `Envergadura de elite (+${wingspanAdvantage.toFixed(1)}" em relação à altura)` });
+      flags.push({ type: 'green', message: getMessage('ELITE_WINGSPAN') });
     }
-
-    if (basicStats.ft_pct >= 0.90 && basicStats.ft_attempts >= 50) {
-      flags.push({ type: 'green', message: 'Cobrador de lance livre de elite' });
-    }
-
-    if (basicStats.three_pct >= 0.40 && basicStats.three_pt_attempts >= 80) {
-      flags.push({ type: 'green', message: 'Arremessador de 3pt de elite' });
-    }
-
-    const assistToTurnoverRatio = this.calculateAssistToTurnoverRatio(p);
-    if (assistToTurnoverRatio >= 2.5 && safeAccess(p.apg) > 4) { // Usando apg para volume de assistências
-      flags.push({ type: 'green', message: 'Playmaker de poucos erros e muito impacto' });
-    }
-
-    if (advancedStats.per >= 25) {
-      flags.push({ type: 'green', message: 'Produção ofensiva extremamente eficiente (PER)' });
-    }
-
-    // New Green Flags
-    if (basicStats.three_pct >= 0.38 && basicStats.ft_pct >= 0.85 && basicStats.three_pt_attempts >= 100) {
-      flags.push({ type: 'green', message: 'Perfil de atirador elite (3PT% + FT%)' });
-    }
-
-    if (assistToTurnoverRatio >= 2.0 && basicStats.apg >= 4.0 && safeAccess(p.tov_percent) < 0.10) { // Added apg threshold for meaningful playmaking
-      flags.push({ type: 'green', message: 'Criador eficiente' });
-    }
-
-    if (safeAccess(p.stl_per_game) >= 1.5 && safeAccess(p.blk_per_game) >= 1.0) {
-      flags.push({ type: 'green', message: 'Motor defensivo' });
-    }
-
-    if (basicStats.three_pct >= 0.36 && advancedStats.dbpm > 3.0) {
-      flags.push({ type: 'green', message: 'Potencial "3&D"' });
-    }
-
-    if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && basicStats.rpg >= 6) {
-      flags.push({ type: 'green', message: 'Alto volume de rebotes para guard/ala' });
-    }
-
-    if ((p.position === 'PG' || p.position === 'SG' || p.position === 'SF') && (safeAccess(p.stl_per_game) > 2.5 || safeAccess(p.blk_per_game) > 1.5)) {
-      flags.push({ type: 'green', message: 'Alto volume de roubos/tocos para guard/ala' });
-    }
-
-    if (p.improvement >= 8) { // Assuming 8 is a high subjective score for improvement
-      flags.push({ type: 'green', message: 'Melhora significativa ano a ano' });
-    }
-
-    // NOVA FLAG baseada em análise 2018: Guards criativos elite (Trae Young, SGA pattern)
-    if ((p.position === 'PG' || p.position === 'SG') && basicStats.apg >= 7.0 && advancedStats.usage_rate >= 30) {
-      flags.push({ type: 'green', message: 'Guard criativo elite (alta assistência + uso)' });
-    }
-
-    // --- Red Flags (Pontos de Atenção) ---
-    if (p.age >= 22) {
-      flags.push({ type: 'red', message: `Idade avançada para a classe (${p.age} anos)` });
-    }
-
-    // NOVA FLAG baseada em análise 2018: Padrão de bust para forwards jovens com baixa produção (Knox, Jerome Robinson pattern)
-    if ((p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < 16 && basicStats.fg_pct < 0.45) {
-      flags.push({ type: 'red', message: 'Padrão de risco: Forward jovem com baixa produção' });
-    }
-
-    // NOVA FLAG: Grandes com limitações ofensivas (Mohamed Bamba pattern)
-    if ((p.position === 'C' || p.position === 'PF') && basicStats.ppg < 13 && advancedStats.usage_rate < 20) {
-      flags.push({ type: 'red', message: 'Grande com limitações ofensivas' });
-    }
-    
-    if (basicStats.ft_pct < 0.65 && basicStats.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: 'Mecânica de arremesso questionável (Baixo FT%)' });
-    }
-
-    if (advancedStats.ts_percent < 0.50 && advancedStats.usage_rate > 25) {
-      flags.push({ type: 'red', message: 'Alto volume com baixa eficiência ofensiva' });
-    }
-
-    if (assistToTurnoverRatio < 1.0 && advancedStats.usage_rate > 20) {
-      flags.push({ type: 'red', message: 'Alto volume de erros (mais turnovers que assistências)' });
-    }
-
-    // NOVA: Shooting Upside Detection (ajustado para Desmond Bane: 43.7% 3PT, 76% FT)
-    if (basicStats.three_pct >= 0.37 && basicStats.ft_pct >= 0.75 && (basicStats.three_pt_attempts >= 80 || basicStats.three_pct >= 0.40)) {
-      flags.push({ type: 'green', message: 'Perfil de atirador elite (3PT% + FT%)' });
-    }
-    
-    // NOVA: Versatile Scorer Detection (baseado em Maxey)
-    if (basicStats.ppg >= 14 && basicStats.three_pct >= 0.33 && advancedStats.ts_percent >= 0.54) {
-      flags.push({ type: 'green', message: 'Pontuador versátil e eficiente' });
-    }
-
-    // New Red Flags
-    if (advancedStats.usage_rate >= 0.28 && advancedStats.ts_percent < 0.53) {
-      flags.push({ type: 'red', message: 'Pontuador ineficiente (alto volume, baixa eficiência)' });
-    }
-
-    if (safeAccess(p.tov_percent) >= 0.18) { flags.push({ type: 'red', message: 'Muitos turnovers (alta taxa de erros)' }); }
-
-    if ((p.position === 'PG' || p.position === 'SG') && basicStats.ft_pct < 0.70 && basicStats.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: 'Arremesso questionável (baixo FT% para guard)' });
-    } else if ((p.position === 'SF' || p.position === 'PF' || p.position === 'C') && basicStats.ft_pct < 0.65 && basicStats.ft_attempts >= 50) {
-      flags.push({ type: 'red', message: 'Arremesso questionável (baixo FT% para big)' });
-    }
-
     if (physical.wingspan <= physical.height) {
-      flags.push({ type: 'red', message: 'Potencial físico limitado (envergadura curta)' });
+      flags.push({ type: 'red', message: getMessage('LIMITED_PHYSICAL') });
+    }
+    if (p.age >= T.advancedAge) {
+      flags.push({ type: 'red', message: getMessage('ADVANCED_AGE') });
+    }
+    if (p.improvement >= 8) {
+      flags.push({ type: 'green', message: getMessage('IMPROVEMENT') });
     }
 
-    if ((p.position === 'PF' || p.position === 'C') && basicStats.rpg < 7) {
-      flags.push({ type: 'red', message: 'Baixa taxa de rebotes para pivô/ala-pivô' });
-    }
+    // --- Flags that DEPEND on stats ---
+    if (hasStats) {
+      // --- Green Flags ---
+      if (basicStats.ft_pct >= T.eliteShooterFtPct && basicStats.ft_attempts >= T.eliteShooterFtPa) {
+        flags.push({ type: 'green', message: getMessage('ELITE_FT_SHOOTER') });
+      }
+      if (basicStats.three_pct >= T.eliteShooter3Ppct && basicStats.three_pt_attempts >= T.eliteShooter3Pa) {
+        flags.push({ type: 'green', message: getMessage('ELITE_3PT_SHOOTER') });
+      }
+      if (assistToTurnoverRatio >= T.highAstToRatio && p.apg > T.highApg) {
+        flags.push({ type: 'green', message: getMessage('EFFICIENT_PLAYMAKER') });
+      }
+      if (advancedStats.per >= T.highPer) {
+        flags.push({ type: 'green', message: getMessage('EFFICIENT_OFFENSE') });
+      }
+      if (p.position.includes('G') || p.position.includes('F')) {
+        if (basicStats.rpg >= T.highRpgGuard) {
+          flags.push({ type: 'green', message: getMessage('HIGH_REBOUND_GUARD') });
+        }
+        if ((p.stl_per_game > T.highStlBlkGuard || p.blk_per_game > 1.5)) {
+          flags.push({ type: 'green', message: getMessage('HIGH_DEFLECTION_GUARD') });
+        }
+      }
+      if ((p.position === 'PG' || p.position === 'SG') && basicStats.apg >= 7.0 && advancedStats.usage_rate >= 30) {
+        flags.push({ type: 'green', message: getMessage('ELITE_CREATIVE_GUARD') });
+      }
 
-    if (p.fouls_per_game > 3.5) {
-      flags.push({ type: 'red', message: 'Alta taxa de faltas' });
+      // --- Red Flags ---
+      if ((p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < T.lowPpgForward && basicStats.fg_pct < T.lowFgPctForward) {
+        flags.push({ type: 'red', message: getMessage('RISKY_FORWARD') });
+      }
+      if ((p.position === 'C' || p.position === 'PF') && basicStats.ppg < T.lowPpgBig && advancedStats.usage_rate < T.lowUsageBig) {
+        flags.push({ type: 'red', message: getMessage('LIMITED_OFFENSE_BIG') });
+      }
+      if (basicStats.ft_pct < T.lowFtPct && basicStats.ft_attempts >= T.minFtAttempts) {
+        flags.push({ type: 'red', message: getMessage('QUESTIONABLE_MECHANICS') });
+      }
+      if (advancedStats.ts_percent < T.lowTsPct && advancedStats.usage_rate > T.highTsPctUsage) {
+        flags.push({ type: 'red', message: getMessage('HIGH_VOLUME_LOW_EFFICIENCY') });
+      }
+      if (assistToTurnoverRatio < T.lowAstToRatio && advancedStats.usage_rate > T.highTovUsage) {
+        flags.push({ type: 'red', message: getMessage('HIGH_TURNOVER_RATE') });
+      }
+      if (advancedStats.usage_rate >= T.highUsageInefficient && advancedStats.ts_percent < T.lowTsInefficient) {
+        flags.push({ type: 'red', message: getMessage('INEFFICIENT_SCORER') });
+      }
+      if (p.tov_percent >= T.highTovPct) { 
+        flags.push({ type: 'red', message: getMessage('HIGH_TOV_PERCENT') }); 
+      }
+      if ((p.position.includes('G')) && basicStats.ft_pct < T.lowFtGuard && basicStats.ft_attempts >= T.minFtAttempts) {
+        flags.push({ type: 'red', message: getMessage('QUESTIONABLE_SHOOTING_GUARD') });
+      } else if ((p.position.includes('F') || p.position.includes('C')) && basicStats.ft_pct < T.lowFtBig && basicStats.ft_attempts >= T.minFtAttempts) {
+        flags.push({ type: 'red', message: getMessage('QUESTIONABLE_SHOOTING_BIG') });
+      }
+      if ((p.position === 'PF' || p.position === 'C') && basicStats.rpg < T.lowReboundBig) {
+        flags.push({ type: 'red', message: getMessage('LOW_REBOUND_BIG') });
+      }
+      if (p.fouls_per_game > T.highFouls) {
+        flags.push({ type: 'red', message: getMessage('HIGH_FOUL_RATE') });
+      }
+      if (p.position === 'PG' && basicStats.apg < T.lowApgPG) {
+        flags.push({ type: 'red', message: getMessage('LOW_ASSIST_PG') });
+      }
     }
-
-    if (p.position === 'PG' && basicStats.apg < 3.5) {
-      flags.push({ type: 'red', message: 'Baixa taxa de assistências para armador principal' });
-    }
-
+    
     return flags;
   }
 
@@ -1091,16 +1140,33 @@ export class ProspectRankingAlgorithm {
     };
   }
 
-  // Add evaluateHeightByPosition helper function
-  evaluateHeightByPosition(height, position) {
+  evaluateHeightByPosition(height, position, leagueContext = 'NBA') {
     if (!height || !position) return 0.5; // Neutral score if data is missing
 
-    let idealHeight = 75; // Default for guards (6'3")
-    if (position === 'SF') idealHeight = 79; // 6'7"
-    if (position === 'PF') idealHeight = 81; // 6'9"
-    if (position === 'C') idealHeight = 83; // 6'11"
+    const idealHeights = {
+      NBA: {
+        PG: 75, // 6'3"
+        SG: 77, // 6'5"
+        SF: 79, // 6'7"
+        PF: 81, // 6'9"
+        C: 83,  // 6'11"
+      },
+      WNBA: {
+        PG: 68, // 5'8"
+        SG: 70, // 5'10"
+        SF: 72, // 6'0"
+        PF: 74, // 6'2"
+        C: 77,  // 6'5"
+      }
+    };
+
+    const contextIdealHeights = idealHeights[leagueContext] || idealHeights.NBA;
+    // Handle combined positions like 'PG/SG' by taking the first one.
+    const primaryPosition = position.split('/')[0].trim();
+    const idealHeight = contextIdealHeights[primaryPosition] || (primaryPosition.includes('G') ? contextIdealHeights.SG : contextIdealHeights.C);
 
     const heightDifference = Math.abs(height - idealHeight);
+    // A diferença de 10 polegadas zera a pontuação.
     return Math.max(0, 1 - (heightDifference / 10));
   }
 
@@ -1156,14 +1222,14 @@ export class ProspectRankingAlgorithm {
     return Math.max(0.0, Math.min(1.0, finalScore));
   }
 
-  evaluatePhysicalAttributes(physical, position, weights) {
+  evaluatePhysicalAttributes(physical, position, weights, leagueContext) {
     if (!physical || Object.values(physical).every(v => v === undefined || v === null)) return undefined;
     
     const metrics = weights.physicalAttributes.metrics;
     let score = 0;
     let totalWeight = 0;
 
-    const heightScore = this.evaluateHeightByPosition(physical.height, position);
+    const heightScore = this.evaluateHeightByPosition(physical.height, position, leagueContext);
     if (heightScore !== undefined && heightScore !== null && !isNaN(heightScore)) {
       score += heightScore * metrics.height.weight;
       totalWeight += metrics.height.weight;
@@ -1232,20 +1298,20 @@ export class ProspectRankingAlgorithm {
     return 'Long-term Project';
   }
 
-  assessNBAReadiness(totalScore, flags, lowGamesRisk = false) {
+  assessNBAReadiness(totalScore, flags, lowGamesRisk = false, leagueContext = 'NBA') {
     if (lowGamesRisk) {
         return 'Projeto de Alto Risco';
     }
 
     let readiness = '';
-    if (totalScore >= 0.60) readiness = 'Pronto para NBA';
+    if (totalScore >= 0.60) readiness = leagueContext === 'WNBA' ? 'Pronta para a WNBA' : 'Pronto para NBA';
     else if (totalScore >= 0.45) readiness = '1-2 Anos de Desenvolvimento';
     else if (totalScore >= 0.30) readiness = '2-3 Anos de Desenvolvimento';
     else readiness = 'Projeto de Longo Prazo';
 
     // Downgrade readiness if critical red flags are present
     const hasRedFlags = flags.some(flag => flag.type === 'red');
-    if (hasRedFlags && readiness !== 'Pronto para NBA') {
+    if (hasRedFlags && readiness !== (leagueContext === 'WNBA' ? 'Pronta para a WNBA' : 'Pronto para NBA')) {
       return 'Projeto de Longo Prazo';
     }
 

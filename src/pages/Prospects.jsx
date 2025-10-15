@@ -5,6 +5,7 @@ import { Search, Filter, Grid, List, Heart, Users, Globe, GraduationCap, Chevron
 import useProspects from '@/hooks/useProspects.js';
 import useWatchlist from '@/hooks/useWatchlist.js';
 import { useAuth } from '@/context/AuthContext.jsx'; // Import useAuth
+import { useLeague } from '@/context/LeagueContext.jsx';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import { TIERS } from '@/lib/constants.js';
 import AlertBox from '@/components/Layout/AlertBox.jsx';
@@ -34,10 +35,10 @@ const nationalityMap = {
 };
 
 // Extrair todas as badges únicas dos prospects carregados para o filtro
-const getAllAvailableBadges = (prospects) => {
+const getAllAvailableBadges = (prospects, league) => {
   const badgeSet = new Set();
   prospects.forEach(prospect => {
-    const badges = assignBadges(prospect);
+    const badges = assignBadges(prospect, league);
     badges.forEach(badge => badgeSet.add(badge.label));
   });
   return Array.from(badgeSet).sort();
@@ -90,6 +91,7 @@ const ProFeaturePlaceholder = ({ children, title, featureName }) => (
 const Prospects = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); // Get user from AuthContext
+  const { league } = useLeague();
   const { isMobile, isTablet } = useResponsive();
   
       const prospectsFilters = useMemo(() => ({ draftClass: '2026' }), []);
@@ -219,8 +221,8 @@ const Prospects = () => {
 
   // Calcular badges disponíveis dinamicamente
   const availableBadges = useMemo(() => {
-    return getAllAvailableBadges(allProspects);
-  }, [allProspects]);
+    return getAllAvailableBadges(allProspects, league);
+  }, [allProspects, league]);
 
   useEffect(() => {
     setAgeRange({ min: advancedFilterRanges.age.min, max: advancedFilterRanges.age.max });
@@ -272,7 +274,7 @@ const Prospects = () => {
         const matchesAPG = !minAPG || prospect.apg >= minAPG;
         
         // Usar badges reais dos cards em vez das flags
-        const prospectBadges = assignBadges(prospect);
+        const prospectBadges = assignBadges(prospect, league);
         const prospectBadgeLabels = prospectBadges.map(badge => badge.label);
         const matchesBadge = selectedBadge === 'all' || prospectBadgeLabels.includes(selectedBadge);
 

@@ -628,7 +628,67 @@ export const assignBadges = (prospect, league = 'NBA') => {
     assignedBadges.add(badges.THE_CONNECTOR);
   }
 
-  return Array.from(assignedBadges);
+  const finalBadges = Array.from(assignedBadges);
+
+  // --- Feminize Badges for WNBA Context ---
+  if (isWomens) {
+    return finalBadges.map(badge => {
+      if (!badge) return badge;
+
+      let newLabel = badge.label;
+      let newDescription = badge.description;
+
+      // General description replacements that are safe across multiple badges
+      newDescription = newDescription.replace(/Um arremessador letal/g, 'Uma arremessadora letal');
+      newDescription = newDescription.replace(/Um arremessador de alto volume/g, 'Uma arremessadora de alto volume');
+      newDescription = newDescription.replace(/forçando a defesa a marcá-lo/g, 'forçando a defesa a marcá-la');
+      newDescription = newDescription.replace(/Olho nele!/g, 'Olho nela!');
+      newDescription = newDescription.replace(/O maestro da equipe!/g, 'A maestra da equipe!');
+      newDescription = newDescription.replace(/faz todos jogarem melhor/g, 'faz todas jogarem melhor');
+      newDescription = newDescription.replace(/sendo o principal catalisador ofensivo/g, 'sendo a principal catalisadora ofensiva');
+      newDescription = newDescription.replace(/Um pesadelo para o ataque adversário/g, 'Um pesadelo para o ataque adversário');
+      newDescription = newDescription.replace(/Ninguém esta sujeito à atacar a cesta sem levar um tocasso/g, 'Ninguém está sujeita a atacar a cesta sem levar um toco');
+      newDescription = newDescription.replace(/Especialista em defender a linha de 3 pontos, pressionando arremessadores/g, 'Especialista em defender a linha de 3 pontos, pressionando arremessadoras');
+      newDescription = newDescription.replace(/Um criador primário com a altura de um ala/g, 'Uma criadora primária com a altura de uma ala');
+      newDescription = newDescription.replace(/Um ala com a visão de jogo e a capacidade de passe de um armador, capaz de iniciar o ataque e criar para os companheiros/g, 'Uma ala com a visão de jogo e a capacidade de passe de uma armadora, capaz de iniciar o ataque e criar para as companheiras');
+      newDescription = newDescription.replace(/Um jogador com altura de pivô/g, 'Uma jogadora com altura de pivô');
+      newDescription = newDescription.replace(/Um defensor implacável no perímetro/g, 'Uma defensora implacável no perímetro');
+      newDescription = newDescription.replace(/para sufocar o adversário/g, 'para sufocar a adversária');
+      newDescription = newDescription.replace(/Um jogador de garrafão/g, 'Uma jogadora de garrafão');
+      newDescription = newDescription.replace(/tirando o protetor de aro adversário/g, 'tirando a protetora de aro adversária');
+      newDescription = newDescription.replace(/Um armador explosivo/g, 'Uma armadora explosiva');
+      newDescription = newDescription.replace(/sendo tanto uma ameaça de finalização quanto de criação para os outros/g, 'sendo tanto uma ameaça de finalização quanto de criação para as outras');
+      newDescription = newDescription.replace(/Jogador que possui uma única habilidade/g, 'Jogadora que possui uma única habilidade');
+      newDescription = newDescription.replace(/em um time/g, 'em uma equipe');
+      newDescription = newDescription.replace(/Jogador versátil/g, 'Jogadora versátil');
+
+      // Label-specific replacements
+      const labelReplacements = {
+        'Bombardeiro': 'Bombardeira',
+        'Calibrado': 'Calibrada',
+        'Demolidor': 'Demolidora',
+        'Guardião do Garrafão': 'Guardiã do Garrafão',
+        'Guardião do Perímetro': 'Guardiã do Perímetro',
+        'Armador Gigante': 'Armadora Gigante',
+        'Criador Infiltrador': 'Criadora Infiltradora',
+        'Canivete Suíço': 'Canivete Suíça',
+        'Arremessador Enigmático': 'Arremessadora Enigmática',
+        'Conector': 'Conectora',
+      };
+
+      if (labelReplacements[newLabel]) {
+        newLabel = labelReplacements[newLabel];
+      }
+
+      return {
+        ...badge,
+        label: newLabel,
+        description: newDescription,
+      };
+    });
+  }
+
+  return finalBadges;
 };
 
 // Sistema de Categorias Gaming

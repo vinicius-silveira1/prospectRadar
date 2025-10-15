@@ -5,11 +5,14 @@ import NBAPlayerCard from './NBAPlayerCard';
 import { assignNBAPlayerBadges } from '../../lib/nba-badges.js';
 import { Globe } from 'lucide-react';
 import { LeagueContext } from '../../context/LeagueContext';
+import { ResponsiveGrid } from '../Common/ResponsiveComponents.jsx';
+import { useResponsive } from '../../hooks/useResponsive.js';
 
-const BraziliansInNBA = ({ className }) => {
+const BraziliansInNBA = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { league } = useContext(LeagueContext);
+  const { isMobile, isTablet } = useResponsive();
 
   useEffect(() => {
     const fetchBrazilians = async () => {
@@ -68,7 +71,11 @@ const BraziliansInNBA = ({ className }) => {
         </motion.h2>
       </div>
 
-      <div className="flex space-x-6 overflow-x-auto p-4">
+      <ResponsiveGrid
+        minItemWidth="280px"
+        maxColumns={isMobile ? 1 : isTablet ? 2 : 3}
+        className="gap-4 md:gap-6"
+      >
         {players.map(player => {
           const playerBadges = assignNBAPlayerBadges(player);
           const currentLeague = league === 'WNBA' ? 'WNBA' : 'NBA';
@@ -81,10 +88,10 @@ const BraziliansInNBA = ({ className }) => {
             />
           );
         })}
-      </div>
+      </ResponsiveGrid>
     </motion.div>
   );
 };
 
 export default BraziliansInNBA;
-;
+

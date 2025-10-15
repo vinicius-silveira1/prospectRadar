@@ -314,10 +314,14 @@ const Dashboard = () => {
       )}
 
       {/* 6. Seção: Brasileiros na NBA & Blog */}
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-        <BraziliansInNBA className={league === 'WNBA' ? 'w-full' : ''} />
-        {league === 'NBA' && <BlogHighlight />}
-      </div>
+      {league === 'NBA' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <BraziliansInNBA />
+          <BlogHighlight />
+        </div>
+      ) : (
+        <BraziliansInNBA />
+      )}
 
       {/* 3. Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (

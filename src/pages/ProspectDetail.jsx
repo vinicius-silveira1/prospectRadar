@@ -86,6 +86,7 @@ const ScoutFeaturePlaceholder = ({ children, title, featureName }) => {
 const ProspectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { league } = useContext(LeagueContext);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -285,7 +286,6 @@ const ProspectDetail = () => {
   const flags = evaluation.flags || [];
   const comparablePlayers = evaluation.comparablePlayers || [];
   console.log('Prospect object in ProspectDetail:', prospect);
-  const { league } = useContext(LeagueContext);
   const badges = assignBadges(prospect, league);
 
   const getTierColor = (tier) => {
@@ -833,7 +833,7 @@ const ProspectDetail = () => {
                           transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          <h3 className="font-semibold text-purple-700 dark:text-purple-400 leading-normal relative z-10 font-mono tracking-wide">Prontidão para a NBA</h3>
+                          <h3 className="font-semibold text-purple-700 dark:text-purple-400 leading-normal relative z-10 font-mono tracking-wide">{league === 'WNBA' ? 'Prontidão para a WNBA' : 'Prontidão para a NBA'}</h3>
                           <p className="text-lg font-bold text-purple-800 dark:text-purple-300 font-mono tracking-wide relative z-10">{evaluation.nbaReadiness || 'N/A'}</p>
                         </motion.div>
 
