@@ -597,14 +597,13 @@ export class ProspectRankingAlgorithm {
   async evaluateProspect(player, league = 'NBA') {
     try {
       const p = player || {};
-      let currentWeights = this.weights;  // Pesos padrão dos 4 pilares
-      let basicStats = {};               // Estatísticas básicas processadas
-      let advancedStats = {};            // Métricas avançadas processadas  
-      let gamesPlayed = p.games_played || 0;  // Jogos para validação de dados
-      let competitionMultiplier = 1.0;   // Multiplicador baseado na liga
+      let currentWeights = this.weights;
+      let basicStats = {};
+      let advancedStats = {};
+      let gamesPlayed = p.games_played || 0;
+      let competitionMultiplier = 1.0;
 
-      // 🔍 DETECÇÃO DE CONTEXTO PARA NORMALIZAÇÃO
-      let prospectContext = 'college'; // Padrão
+      let prospectContext = 'college';
       if (league === 'WNBA') {
         prospectContext = 'ncaaw';
       } else if (p.league === 'NBB') {
@@ -623,14 +622,13 @@ export class ProspectRankingAlgorithm {
       const isHighSchoolData = (!hasCollegeStats && hasHighSchoolStats) || isOTE;
 
       if (isHighSchoolData) {
-        // 🏫 LÓGICA ESPECIALIZADA PARA DADOS DE HIGH SCHOOL
         const hsStats = p.high_school_stats?.season_total || {};
         const useTopLevelStats = isOTE && (!hsStats.games_played || hsStats.games_played === 0);
         
         if (useTopLevelStats) {
           gamesPlayed = p.games_played || 30;
         } else {
-          gamesPlayed = hsStats.games_played || 30; // Assumir 30 se não especificado
+          gamesPlayed = hsStats.games_played || 30;
         }
 
         currentWeights = {
@@ -680,11 +678,11 @@ export class ProspectRankingAlgorithm {
           advancedStats.efg_percent = efg_denominator > 0 ? ((hsStats.fgm + 0.5 * hsStats['3pm']) / efg_denominator) : 0;
         }
 
-        competitionMultiplier = 0.9; // Aplicar um multiplicador padrão para High School
+        competitionMultiplier = 0.9;
 
       } else {
-        // --- LÓGICA EXISTENTE PARA DADOS DE COLLEGE/PRO ---
-        gamesPlayed = p.games_played || 30;
+        // gamesPlayed is already initialized from p.games_played || 0 at the top of the function.
+        // If p.games_played is 0, it should be 0, not default to 30.
         const totalMakes = (p.two_pt_makes || 0) + (p.three_pt_makes || 0);
         const totalAttempts = (p.two_pt_attempts || 0) + (p.three_pt_attempts || 0);
 
@@ -714,14 +712,13 @@ export class ProspectRankingAlgorithm {
         competitionMultiplier = this.getCompetitionMultiplier(p.league, p.conference);
       }
 
-      // --- LÓGICA COMUM DE AVALIAÇÃO ---
-
       const MIN_GAMES_THRESHOLD = 15;
       let confidenceScore = 1.0;
       let lowGamesRisk = false;
       if (gamesPlayed < MIN_GAMES_THRESHOLD) {
         lowGamesRisk = true;
         confidenceScore = parseFloat((gamesPlayed / MIN_GAMES_THRESHOLD).toFixed(2));
+      } else {
       }
 
       const parsedHeight = this.parseHeightToInches(p.height);
@@ -762,9 +759,8 @@ export class ProspectRankingAlgorithm {
       if (has247Rank) externalRankingInfluence += (100 - p.ranking_247) / 100;
       if (hasEspnRank && has247Rank) externalRankingInfluence /= 2;
 
-      // Fallback de Ranking baseado no Tier para prospects de elite sem dados de ranking
       if (externalRankingInfluence === 0 && p.tier === 'Elite') {
-        externalRankingInfluence = (100 - 5) / 100; // Simula um ranking de top 5
+        externalRankingInfluence = (100 - 5) / 100;
       }
 
       let totalWeightedScore = 0;
@@ -790,19 +786,14 @@ export class ProspectRankingAlgorithm {
       const creativeGuardBonus = flags.some(flag => flag.message.includes('Guard criativo elite')) ? 0.02 : 0;
       let ageBonusAdjustment = (p.age && p.age <= 19.0 && potentialScore >= 0.60) ? 0.02 : 0;
 
-      // O potentialScore (baseado puramente em estatísticas e físico) é a nossa base.
       let baseScore = potentialScore;
       
       const hasExternalRankings = externalRankingInfluence > 0;
 
-      // A influência do ranking externo é tratada como um ajuste, não como um componente primário.
-      // Para jogadores internacionais, a ausência de ranking é esperada e não acarreta penalidade.
       if (hasExternalRankings) {
-          // Se há ranking, ele ajusta o score, com um peso de 20%.
           baseScore = (baseScore * 0.8) + (externalRankingInfluence * 0.2);
       }
 
-      // Aplicar bônus e penalidades de flags após o cálculo base.
       baseScore = baseScore - redFlagPenalty + creativeGuardBonus + ageBonusAdjustment;
 
       const finalTotalScore = Math.max(0, Math.min(1, baseScore));
@@ -812,8 +803,8 @@ export class ProspectRankingAlgorithm {
       
       return {
         totalScore: parseFloat(finalTotalScore.toFixed(2)),
-        potentialScore: parseFloat(potentialScore.toFixed(2)), // Mantém o potencial puro
-        confidenceScore: confidenceScore, // Indica a confiabilidade dos dados
+        potentialScore: parseFloat(potentialScore.toFixed(2)),
+        confidenceScore: confidenceScore,
         categoryScores: scores,
         tier: tier,
         draftProjection,

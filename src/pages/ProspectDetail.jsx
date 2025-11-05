@@ -129,10 +129,19 @@ const ProspectDetail = () => {
   const displayStats = useMemo(() => {
     if (!prospect) return {};
 
-    const isHighSchool = prospect.stats_source === 'high_school_total';
-    const isOTE = prospect.league === 'Overtime Elite' || prospect.league === 'OTE';
+    // If prospect.source is NCAA, use the top-level stats directly
+    if (prospect.source === 'NCAA') {
+      return {
+        ...prospect,
+        is_hs: false, // Not high school stats
+        hasStats: prospect.ppg != null, // Check if ppg exists to determine if stats are available
+        league: prospect.league,
+        'stats-season': prospect['stats-season'],
+      };
+    }
 
-    if (isHighSchool && prospect.high_school_stats?.season_total) {
+    // Fallback to High School stats
+    if (prospect.high_school_stats?.season_total) {
       const hs = prospect.high_school_stats.season_total;
       const gp = Number(hs.games_played || 0);
 
@@ -167,11 +176,13 @@ const ProspectDetail = () => {
         three_pct,
         ts_percent,
         efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
+        league: hs.league, // Use the league from high school stats
+        'stats-season': hs.season, // Use the season from high school stats
       };
     }
 
-    // Para prospectos OTE, usar estatísticas do nível superior
-    if (isOTE) {
+    // Fallback to OTE stats
+    if (prospect.league === 'Overtime Elite' || prospect.league === 'OTE') {
       const gamesPlayed = Number(prospect.games_played || 0);
       const calculatedPPG = gamesPlayed > 0 ? (Number(prospect.total_points || 0) / gamesPlayed) : Number(prospect.ppg || 0);
       const calculatedRPG = gamesPlayed > 0 ? (Number(prospect.total_rebounds || 0) / gamesPlayed) : Number(prospect.rpg || 0);
@@ -285,7 +296,6 @@ const ProspectDetail = () => {
   const evaluation = prospect.evaluation || {};
   const flags = evaluation.flags || [];
   const comparablePlayers = evaluation.comparablePlayers || [];
-  console.log('Prospect object in ProspectDetail:', prospect);
   const badges = assignBadges(prospect, league);
 
   const getTierColor = (tier) => {

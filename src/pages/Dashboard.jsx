@@ -23,20 +23,21 @@ import { prospectOfTheWeek } from '@/data/spotlight.js';
 // WNBA Prospect of the Week Data
 const wnbaProspectOfTheWeek = {
   prospect: {
-    id: 'catarina-ferreira',
-    name: 'Catarina Ferreira',
-    position: 'PG',
-    team: 'South Florida Bulls',
+    id: 'lauren-betts',
+    name: 'Lauren Betts',
+    position: 'C',
+    team: 'UCLA Bruins',
     class: '2025',
     ranking: 1,
-    height_cm: 170,
-    badges: ['Playmaker', '3PT Specialist']
+    height_cm: 201,
+    badges: ['Pivô Dominante', 'Protetora de Aro']
   },
-  analysis: 'Catarina Ferreira é uma armadora com excelente visão de jogo e um arremesso de três pontos mortal. Sua capacidade de liderar o ataque e criar oportunidades para suas companheiras a torna uma das prospects mais promissoras para o próximo draft da WNBA.',
+  analysis: 'Lauren Betts, pivô de UCLA, é uma força dominante no garrafão. Liderando a NCAA em aproveitamento de arremessos (.643) e sendo uma das principais bloqueadoras do país (2.9 BPG), ela é uma candidata de topo para o próximo Draft da WNBA.',
   highlights: [
-    'Média de 15.5 pontos por jogo na última temporada',
-    '42% de aproveitamento nos arremessos de 3 pontos',
-    'Líder de assistências da sua conferência'
+    '🥇 Liderou a NCAA com 64.3% de aproveitamento de quadra',
+    '🚫 Média de 2.9 tocos por jogo, 5ª melhor marca do país',
+    '🏆 Nomeada para o Top 10 do Lisa Leslie Center of the Year Award',
+    '⭐ Defensora do Ano e Primeiro Time da conferência Big Ten'
   ]
 };
 

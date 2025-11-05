@@ -26,7 +26,7 @@ async function updateAllNCAAProspects(draftClass) {
     const { data: prospects, error: fetchError } = await supabase
       .from('prospects')
       .select('id, name')
-      .eq('draft_class', draftClass)
+      .eq('draftClass', draftClass)
       // Adicione um filtro para 'scope' ou 'league' se tiver essa informação
       // .eq('scope', 'NCAA'); 
 

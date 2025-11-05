@@ -19,7 +19,8 @@ async function populateNCAAStats() {
     // 1. Buscar todos os prospects do banco de dados
     const { data: prospects, error: fetchError } = await supabase
       .from('prospects')
-      .select('id, name'); // Selecionar apenas o ID e o nome para o scraping
+      .select('id, name') // Selecionar apenas o ID e o nome para o scraping
+      .eq('scope', 'NCAA');
 
     if (fetchError) {
       console.error("Erro ao buscar prospects do Supabase:", fetchError);
