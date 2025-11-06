@@ -7,6 +7,7 @@ import Badge from '../Common/Badge';
 import AchievementUnlock from '../Common/AchievementUnlock';
 import { useResponsive } from '../../hooks/useResponsive';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatRelativeTime } from '../../utils/time';
 import { LeagueContext } from '../../context/LeagueContext';
 
 const ProspectCard = ({ prospect, onToggleWatchlist }) => {
@@ -277,6 +278,12 @@ const ProspectCard = ({ prospect, onToggleWatchlist }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {prospect.stats_last_updated_at && (
+        <div className="text-center text-xs text-slate-400 dark:text-gray-500 mt-2 pb-2">
+          Atualizado {formatRelativeTime(prospect.stats_last_updated_at)}
+        </div>
+      )}
     </div>
   );
 };

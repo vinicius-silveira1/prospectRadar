@@ -5,6 +5,7 @@ import { assignBadges } from '@/lib/badges';
 import Badge from './Common/Badge';
 import AchievementUnlock from './Common/AchievementUnlock';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import { formatRelativeTime } from '@/utils/time';
 import { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -420,6 +421,11 @@ to={`/prospects/${prospect.slug}`}
             <span className="relative z-10">Ver Detalhes</span>
           </Link>
         </motion.div>
+        {prospect.stats_last_updated_at && (
+          <div className="text-center text-xs text-slate-400 dark:text-gray-500 mt-2">
+            Atualizado {formatRelativeTime(prospect.stats_last_updated_at)}
+          </div>
+        )}
       </div>
     </motion.div>
   );

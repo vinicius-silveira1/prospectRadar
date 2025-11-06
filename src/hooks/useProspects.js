@@ -149,7 +149,8 @@ export default function useProspects(filters = {}) {
             tier,
             ...finalStats,
             radar_score: evaluation.totalScore,
-            evaluation: evaluation
+            evaluation: evaluation,
+            stats_last_updated_at: prospect.stats_last_updated_at
           };
         }));
 

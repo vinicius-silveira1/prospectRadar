@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext.jsx';
 import { LeagueContext } from '@/context/LeagueContext.jsx';
 import useProspectImage from '@/hooks/useProspectImage.js';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
+import { formatRelativeTime } from '../utils/time.js';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import RadarScoreChart from '@/components/Intelligence/RadarScoreChart.jsx';
 import AdvancedStatsExplanation from '@/components/Common/AdvancedStatsExplanation.jsx';
@@ -384,6 +385,9 @@ const ProspectDetail = () => {
                 <div className="flex items-center whitespace-nowrap"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{displayStats.age} anos</div>
                 <div className="flex items-center whitespace-nowrap"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getHeightDisplay(displayStats.height)}</div>
                 <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(displayStats.weight)}</div>
+                {displayStats.stats_last_updated_at && (
+                  <div className="flex items-center whitespace-nowrap"><Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />Atualizado {formatRelativeTime(displayStats.stats_last_updated_at)}</div>
+                )}
               </div>
             </div>
           </div>
