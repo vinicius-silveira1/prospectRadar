@@ -101,7 +101,7 @@ const WatchlistProspectCard = ({ prospect, toggleWatchlist, isInWatchlist, onOpe
                 {prospect.name}
               </Link>
               <p className="text-sm text-slate-500 dark:text-super-dark-text-secondary font-mono">
-                {prospect.position} • {prospect.high_school_team || 'N/A'}
+                {prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}
               </p>
               
               <div className="mt-2 flex flex-wrap gap-1 badge-container">

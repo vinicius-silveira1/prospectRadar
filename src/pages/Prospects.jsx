@@ -640,10 +640,10 @@ const Prospects = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {filteredProspects.map((prospect, index) => {
-              const isInWatchList = watchlist.has(prospect.id);
-              const badges = assignBadges(prospect);
+              const isInWatchList = watchlist.has(prospect.id);              
+              const badges = assignBadges(prospect, league);
               const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
-              const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
+              const prospectLeague = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
               const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
               
               return (
@@ -761,7 +761,7 @@ const Prospects = () => {
                     <div className="space-y-2 text-sm text-slate-600 dark:text-super-dark-text-secondary">
                       <div className="flex items-center gap-2">
                         <GraduationCap size={14} />
-                        <span className="line-clamp-1">{prospect.high_school_team || 'N/A'}</span>
+                        <span className="line-clamp-1">{prospect.team || prospect.high_school_team || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Globe size={14} />
@@ -953,7 +953,7 @@ const Prospects = () => {
             <div className="divide-y divide-slate-100 dark:divide-super-dark-border">
               <AnimatePresence>
                 {filteredProspects.map((prospect, index) => {
-                  const isInWatchList = watchlist.has(prospect.id);
+                  const isInWatchList = watchlist.has(prospect.id);                  
                   const badges = assignBadges(prospect);
                   const hoveredBadge = hoveredBadgeByProspect[prospect.id];
                   
@@ -974,7 +974,7 @@ const Prospects = () => {
                             <div className="col-span-2 md:col-span-2 flex items-center space-x-4">
                               <div className="space-y-1">
                                 <div className="font-medium text-slate-900 dark:text-super-dark-text-primary font-mono tracking-wide">{prospect.name}</div>
-                                <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.high_school_team || 'N/A'}</div>
+                                <div className="text-sm text-slate-500 dark:text-super-dark-text-secondary md:hidden">{prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}</div>
                               </div>
                             </div>
 
@@ -1063,7 +1063,7 @@ const Prospects = () => {
                             </motion.div>
 
                             {/* Universidade */}
-                            <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.high_school_team || 'N/A'}</div>
+                            <div className="hidden md:block md:col-span-1 text-slate-600 dark:text-super-dark-text-secondary line-clamp-1 text-sm">{prospect.team || prospect.high_school_team || 'N/A'}</div>
 
                             {/* Ações */}
                             <div className="col-span-1 flex justify-end md:justify-center">

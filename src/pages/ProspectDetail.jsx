@@ -126,24 +126,36 @@ const ProspectDetail = () => {
 
   const isScout = user?.subscription_tier?.toLowerCase() === 'scout';
 
-  // Data Unification Layer
   const displayStats = useMemo(() => {
     if (!prospect) return {};
+    console.log('--- ProspectDetail: useMemo displayStats ---');
+    console.log('Raw prospect object:', prospect);
 
-    // If prospect.source is NCAA, use the top-level stats directly
-    if (prospect.source === 'NCAA') {
+    // 🎯 LÓGICA DE PRIORIDADE DE ESTATÍSTICAS
+    // Prioriza dados da NCAA se existirem (verificando campos específicos),
+    // caso contrário, usa o fallback para High School ou OTE.
+    // Isso corrige o bug onde a fonte era sobrescrita incorretamente.
+    const hasNCAAStats = (prospect.two_pt_attempts !== null && prospect.two_pt_attempts !== undefined && prospect.two_pt_attempts > 0) || 
+                         (prospect.three_pt_attempts !== null && prospect.three_pt_attempts !== undefined && prospect.three_pt_attempts > 0);
+    console.log('hasNCAAStats check (two_pt_attempts, three_pt_attempts):', prospect.two_pt_attempts, prospect.three_pt_attempts);
+    console.log('Resulting hasNCAAStats:', hasNCAAStats);
+
+    if (hasNCAAStats) {
       return {
         ...prospect,
-        is_hs: false, // Not high school stats
-        hasStats: prospect.ppg != null, // Check if ppg exists to determine if stats are available
+        is_hs: false,
+        hasStats: prospect.ppg != null,
         league: prospect.league,
         'stats-season': prospect['stats-season'],
+        games_played: prospect.games_played, // Ensure top-level games_played is used
       };
     }
 
     // Fallback to High School stats
+    console.log('Falling back to High School stats check...');
     if (prospect.high_school_stats?.season_total) {
       const hs = prospect.high_school_stats.season_total;
+
       const gp = Number(hs.games_played || 0);
 
       if (gp === 0 && !hs.ppg) return { ...prospect, ppg: 0, hasStats: false };
@@ -151,7 +163,7 @@ const ProspectDetail = () => {
       const fg_pct = hs.fg_pct ? hs.fg_pct / 100 : (Number(hs.fga) > 0 ? (Number(hs.fgm) / Number(hs.fga)) : 0);
       const ft_pct = hs.ft_pct ? hs.ft_pct / 100 : (Number(hs.fta) > 0 ? (Number(hs.ftm) / Number(hs.fta)) : 0);
       const three_pct = hs['3p_pct'] ? hs['3p_pct'] / 100 : (Number(hs['3pa']) > 0 ? (Number(hs['3pm'] || 0) / Number(hs['3pa'])) : 0);
-      
+
       const ppg = hs.ppg || (gp > 0 ? (Number(hs.pts || 0) / gp) : 0);
       const rpg = hs.rpg || (gp > 0 ? (Number(hs.reb || 0) / gp) : 0);
       const apg = hs.apg || (gp > 0 ? (Number(hs.ast || 0) / gp) : 0);
@@ -179,18 +191,21 @@ const ProspectDetail = () => {
         efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
         league: hs.league, // Use the league from high school stats
         'stats-season': hs.season, // Use the season from high school stats
+        games_played: gp
       };
     }
+    console.log('No High School stats, falling back to OTE stats check...');
 
     // Fallback to OTE stats
     if (prospect.league === 'Overtime Elite' || prospect.league === 'OTE') {
+      console.log('Using OTE stats logic.');
       const gamesPlayed = Number(prospect.games_played || 0);
       const calculatedPPG = gamesPlayed > 0 ? (Number(prospect.total_points || 0) / gamesPlayed) : Number(prospect.ppg || 0);
       const calculatedRPG = gamesPlayed > 0 ? (Number(prospect.total_rebounds || 0) / gamesPlayed) : Number(prospect.rpg || 0);
       const calculatedAPG = gamesPlayed > 0 ? (Number(prospect.total_assists || 0) / gamesPlayed) : Number(prospect.apg || 0);
-      const calculatedSPG = gamesPlayed > 0 ? (Number(prospect.total_steals || 0) / gamesPlayed) : Number(prospect.spg || 0);
+      const calculatedSPG = gamesPlayed > 0 ? (Number(prospect.total_steals || 0) / gamesPlayed) : Number(prospect.spg || 0);      
       const calculatedBPG = gamesPlayed > 0 ? (Number(prospect.total_blocks || 0) / gamesPlayed) : Number(prospect.bpg || 0);
-      
+
       // Verificar se tem estatísticas válidas
       const hasValidStats = calculatedPPG > 0 || calculatedRPG > 0 || calculatedAPG > 0 || gamesPlayed > 0;
       
@@ -207,11 +222,13 @@ const ProspectDetail = () => {
         ft_pct: Number(prospect.ft_attempts || 0) > 0 ? (Number(prospect.ft_makes || 0) / Number(prospect.ft_attempts || 0)) : 0,
         three_pct: Number(prospect.three_pct || 0),
         ts_percent: Number(prospect.ts_percent || prospect.fg_pct || 0),
-        efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null,
+        efg_percent: null, per: null, usg_percent: null, ortg: null, drtg: null, tov_percent: null, ast_percent: null, trb_percent: null, stl_percent: null, blk_percent: null, // Reset advanced stats if not available
+        games_played: gamesPlayed,
       };
     }
-
+    
     // For Pro players or players without HS stats
+    console.log('Using final fallback logic (Pro players or no specific stats source).');
     return {
       ...prospect,
       is_hs: false,
@@ -220,6 +237,8 @@ const ProspectDetail = () => {
       ft_pct: prospect.ft_attempts > 0 ? (prospect.ft_makes / prospect.ft_attempts) : 0,
     };
   }, [prospect]);
+
+  console.log('Final displayStats.games_played:', displayStats.games_played);
 
   const getWeightDisplay = (weight) => {
     let parsedWeight = weight;
@@ -658,6 +677,14 @@ const ProspectDetail = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <motion.p className="text-lg sm:text-xl font-mono font-bold text-yellow-600 dark:text-yellow-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>{(displayStats.ft_pct * 100)?.toFixed(1) + '%' ?? '—'}</motion.p>
                     <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">FT%</p>
+                  </motion.div>                  <motion.div className="group relative p-3 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-800/10 border border-gray-200/50 dark:border-gray-700/30 overflow-hidden cursor-pointer col-span-2 sm:col-span-2"
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(107, 114, 128, 0.3)' }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <motion.p className="text-lg sm:text-xl font-mono font-bold text-gray-600 dark:text-gray-400 relative z-10 tracking-wide text-center" whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>
+                      {displayStats.games_played ?? '—'}
+                    </motion.p>
+                    <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">Jogos</p>
                   </motion.div>
                 </motion.div>
               </div>
@@ -1326,6 +1353,9 @@ const ProspectDetail = () => {
                       {renderStat('FG%', (displayStats.fg_pct * 100)?.toFixed(1) + '%', 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)')}
                       {renderStat('FT%', (displayStats.ft_pct * 100)?.toFixed(1) + '%', 'text-violet-600 dark:text-violet-400', 'bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-900/20 dark:to-violet-800/10', 'border-violet-200/50 dark:border-violet-700/30', 'rgba(139, 92, 246, 0.3)')}
                       {renderStat('3P%', (displayStats.three_pct * 100)?.toFixed(1) + '%', 'text-teal-600 dark:text-teal-400', 'bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10', 'border-teal-200/50 dark:border-teal-700/30', 'rgba(20, 184, 166, 0.3)')}
+                      <motion.div
+                        className="relative p-3 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-900/20 dark:to-gray-800/10 border border-gray-200/50 dark:border-gray-700/30 overflow-hidden group cursor-pointer col-span-2"
+                        whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(107, 114, 128, 0.3)' }}                        transition={{ type: "spring", stiffness: 300, damping: 20 }}>                        <div className="absolute inset-0 bg-gradient-to-r from-gray-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />                        <motion.p                          className="text-lg font-mono font-bold text-gray-600 dark:text-gray-400 relative z-10 tracking-wide text-center"                          whileHover={{ scale: 1.1 }}                          transition={{ type: "spring", stiffness: 400, damping: 17 }}                        >                          {displayStats.games_played ?? '—'}                        </motion.p>                        <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">Jogos</p>                      </motion.div>
                     </>
                   );
                 })()}

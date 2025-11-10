@@ -61,6 +61,11 @@ export default function useProspects(filters = {}) {
             stats_source: prospect.ppg ? 'ncaa_professional' : null
           };
 
+          // If prospect has games_played from NCAA/professional, use it
+          if (prospect.games_played) {
+            finalStats.games_played = prospect.games_played;
+          }
+
           // Lógica de Fallback para estatísticas de High School
           if (!finalStats.ppg && prospect.high_school_stats) {
             let hsStats = prospect.high_school_stats;
@@ -103,6 +108,7 @@ export default function useProspects(filters = {}) {
                   fg_pct: totals.fg_pct,
                   three_pct: totals['3p_pct'],
                   ft_pct: totals.ft_pct,
+                  games_played: gp, // Set games_played from HS stats
                   stats_source: 'high_school_total',
                   league: league,
                   'stats-season': season
@@ -135,6 +141,7 @@ export default function useProspects(filters = {}) {
                   fg_pct: totals.fg_pct,
                   three_pct: totals.fg3_pct,
                   ft_pct: totals.ft_pct,
+                  games_played: gp, // Set games_played from HS stats
                   stats_source: 'high_school_total', // Keep this to show (HS)
                   league: league,
                   'stats-season': season

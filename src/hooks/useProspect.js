@@ -32,9 +32,15 @@ export default function useProspect(slug) {
             ...(evaluation.calculatedStats?.advanced || {})
           };
 
-          if (prospectWithScouting.high_school_stats && prospectWithScouting.high_school_stats.season_total) {
+          if (prospectWithScouting.ncaa_raw_stats && prospectWithScouting.ncaa_raw_stats.totals && prospectWithScouting.ncaa_raw_stats.totals.games !== undefined) {
+            finalProspect.stats_source = 'ncaa_total';
+            finalProspect.games_played = Number(prospectWithScouting.ncaa_raw_stats.totals.games);
+          } else if (prospectWithScouting.high_school_stats && prospectWithScouting.high_school_stats.season_total && prospectWithScouting.high_school_stats.season_total.games_played !== undefined) {
             finalProspect.stats_source = 'high_school_total';
-            finalProspect.games_played = Number(prospectWithScouting.high_school_stats.season_total.games_played || 0);
+            finalProspect.games_played = Number(prospectWithScouting.high_school_stats.season_total.games_played);
+          } else {
+            // Fallback to the games_played value directly from the database if neither NCAA nor high school stats are explicitly set
+            finalProspect.games_played = Number(data.games_played || 0);
           }
 
           setProspect(finalProspect);

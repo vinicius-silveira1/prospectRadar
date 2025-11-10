@@ -67,7 +67,7 @@ const CompareProspectCard = ({ prospect, onRemove }) => {
             >
               {prospect.name}
             </motion.h3>
-            <p className="text-sm text-gray-600 dark:text-slate-400 font-mono">{prospect.position} • {prospect.high_school_team}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-400 font-mono">{prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}</p>
           </div>
         </div>
       </Link>

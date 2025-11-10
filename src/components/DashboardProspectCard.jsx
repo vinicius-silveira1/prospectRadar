@@ -10,6 +10,7 @@ import { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResponsive } from '@/hooks/useResponsive';
 import { LeagueContext } from '@/context/LeagueContext';
+import { useMemo } from 'react';
 
 const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, className, style, onBadgeClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
@@ -58,10 +59,23 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
   // 
   // Determina se os dados vêm de high school ou college/pro para
   // exibir as informações corretas na interface
-  const isHighSchool = prospect.stats_source && prospect.stats_source.startsWith('high_school');
-  const league = isHighSchool ? prospect.high_school_stats?.season_total?.league : prospect.league;
-  const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
+  const displayProspect = useMemo(() => {
+    const needsHighSchoolFallback = !prospect.ppg && !prospect.rpg && !prospect.apg && prospect.high_school_stats?.season_total;
+    
+    if (needsHighSchoolFallback) {
+      const hsStats = prospect.high_school_stats.season_total;
+      return {
+        ...prospect,
+        ppg: hsStats.ppg || 0,
+        rpg: hsStats.rpg || 0,
+        apg: hsStats.apg || 0,
+        isHighSchool: true,
+      };
+    }
+    return { ...prospect, isHighSchool: false };
+  }, [prospect]);
 
+  const { isHighSchool, ppg, rpg, apg } = displayProspect;
   return (
     <motion.div 
       className={`bg-gradient-to-br from-white via-gray-50 to-blue-50/30 dark:from-super-dark-secondary dark:via-gray-900/80 dark:to-black/40 rounded-xl shadow-lg border dark:border-gray-700/50 hover:border-brand-purple dark:hover:border-brand-purple hover:shadow-2xl hover:-translate-y-2 transform transition-all duration-300 ease-out group ${className}`} 
@@ -124,7 +138,7 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {isLoading ? (
+            {isLoading && !imageUrl ? (
               <motion.div 
                 className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"
                 animate={{ opacity: [0.5, 1, 0.5] }}
@@ -147,22 +161,21 @@ const DashboardProspectCard = ({ prospect, isInWatchlist, onToggleWatchlist, cla
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <Link 
-to={`/prospects/${prospect.slug}`} 
+                to={`/prospects/${prospect.slug}`} 
                 className="relative font-bold text-lg text-slate-900 dark:text-super-dark-text-primary hover:text-brand-purple dark:hover:text-brand-purple truncate block group font-mono tracking-wide"
               >
-                <span className="relative z-10">{prospect.name}</span>
+                <span className="relative z-10">{displayProspect.name}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-purple/10 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded" />
               </Link>
             </motion.div>
-            <motion.p 
-              className="text-sm text-slate-500 dark:text-super-dark-text-secondary truncate"
-              initial={{ opacity: 0.7 }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              {prospect.position} • {prospect.high_school_team || 'N/A'}
-            </motion.p>
-            {/* Badges */}
+                          <motion.p 
+                            className="text-sm text-slate-500 dark:text-super-dark-text-secondary truncate"
+                            initial={{ opacity: 0.7 }}
+                            whileHover={{ opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {displayProspect.position} • {displayProspect.team || displayProspect.high_school_team || 'N/A'}
+                          </motion.p>            {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1 badge-container">
               {badges.map((badge, index) => (
                 <Badge 
@@ -177,7 +190,7 @@ to={`/prospects/${prospect.slug}`}
           </div>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          {prospect.radar_score && (
+          {displayProspect.radar_score && (
             <motion.div 
               className="relative inline-flex items-center space-x-2 bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 dark:from-slate-800/50 dark:via-slate-700/30 dark:to-slate-800/50 border border-purple-300/50 dark:border-slate-600/50 text-purple-800 dark:text-slate-200 px-3 py-1.5 rounded-full shadow-lg shadow-purple-400/20 dark:shadow-slate-900/40 overflow-hidden group"
               whileHover={{ 
@@ -192,12 +205,12 @@ to={`/prospects/${prospect.slug}`}
                 whileHover={{ scale: 1.1 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                {prospect.radar_score.toFixed(2)}
+                {displayProspect.radar_score.toFixed(2)}
               </motion.span>
               <span className="text-xs relative z-10 text-purple-700 dark:text-slate-400">Radar Score</span>
             </motion.div>
           )}
-          {prospect.name === 'Lucas Atauri' && (
+          {displayProspect.name === 'Lucas Atauri' && (
             <motion.div
               className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white border-2 border-blue-400 dark:border-blue-300 shadow-lg shadow-blue-500/40 dark:shadow-blue-400/30 overflow-hidden group"
               initial={{ scale: 1 }}
@@ -228,7 +241,7 @@ to={`/prospects/${prospect.slug}`}
               <span className="relative z-10 font-bold">Cincinnati Commit!</span>
             </motion.div>
           )}
-          {prospect.name === 'Reynan Santos' && (
+          {displayProspect.name === 'Reynan Santos' && (
             <motion.div
               className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white border-2 border-red-400 dark:border-red-300 shadow-lg shadow-red-500/40 dark:shadow-red-400/30 overflow-hidden group"
               initial={{ scale: 1 }}
@@ -259,7 +272,7 @@ to={`/prospects/${prospect.slug}`}
               <span className="relative z-10 font-bold">Campeão da LDB</span>
             </motion.div>
           )}
-          {prospect.name === 'Gabriel Landeira' && (
+          {displayProspect.name === 'Gabriel Landeira' && (
             <motion.div
               className="relative inline-flex items-center px-4 py-2 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 text-gray-900 border-2 border-yellow-400 dark:border-yellow-300 shadow-lg shadow-yellow-500/40 dark:shadow-yellow-400/30 overflow-hidden group"
               initial={{ scale: 1 }}
@@ -274,7 +287,7 @@ to={`/prospects/${prospect.slug}`}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               whileHover={{
                 scale: 1.1,
-                boxShadow: "0 0 40px rgba(234, 179, 8, 0.8)"
+                boxShadow: "0 0 40px rgba(3, 13, 102, 0.8)"
               }}
             >
               {/* Shimmer effect */}
@@ -287,7 +300,7 @@ to={`/prospects/${prospect.slug}`}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               />
               
-              <span className="relative z-10 font-bold">MVP do Global Jam</span>
+              <span className="relative z-10 font-bold">Georgetown commit!</span>
             </motion.div>
           )}
         </div>
@@ -339,9 +352,9 @@ to={`/prospects/${prospect.slug}`}
                         <span className="relative z-10 font-semibold">High School</span>
                       </motion.span>
                     )}
-                    {(league || season) && !isHighSchool && (
+                    {(displayProspect.league || displayProspect['stats-season']) && !isHighSchool && (
                       <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">
-                        {[league, (season || '').replace(/"/g, '')].filter(Boolean).join(' ')}
+                        {[displayProspect.league, (displayProspect['stats-season'] || '').replace(/"/g, '')].filter(Boolean).join(' ')}
                       </span>
                     )}
                   </div>
@@ -361,7 +374,7 @@ to={`/prospects/${prospect.slug}`}
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      {prospect.ppg?.toFixed(1) || '-'}
+                      {ppg?.toFixed(1) || '-'}
                     </motion.p>
                     <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">PPG</p>
                   </motion.div>
@@ -379,7 +392,7 @@ to={`/prospects/${prospect.slug}`}
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      {prospect.rpg?.toFixed(1) || '-'}
+                      {rpg?.toFixed(1) || '-'}
                     </motion.p>
                     <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">RPG</p>
                   </motion.div>
@@ -397,7 +410,7 @@ to={`/prospects/${prospect.slug}`}
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      {prospect.apg?.toFixed(1) || '-'}
+                      {apg?.toFixed(1) || '-'}
                     </motion.p>
                     <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10">APG</p>
                   </motion.div>
@@ -421,9 +434,9 @@ to={`/prospects/${prospect.slug}`}
             <span className="relative z-10">Ver Detalhes</span>
           </Link>
         </motion.div>
-        {prospect.stats_last_updated_at && (
+        {displayProspect.stats_last_updated_at && (
           <div className="text-center text-xs text-slate-400 dark:text-gray-500 mt-2">
-            Atualizado {formatRelativeTime(prospect.stats_last_updated_at)}
+            Atualizado {formatRelativeTime(displayProspect.stats_last_updated_at)}
           </div>
         )}
       </div>

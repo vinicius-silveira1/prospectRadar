@@ -104,7 +104,60 @@ export async function scrapeNCAAStats(playerName, directUrl = null) {
     console.log(`Página do jogador carregada: ${page.url()}`);
     console.log('Extraindo estatísticas detalhadas...');
 
+    const bioData = await page.evaluate(() => {
+      const extractText = (selector) => {
+        const element = document.querySelector(selector);
+        return element ? element.textContent.trim() : null;
+      };
 
+      const positionElement = document.evaluate(
+        "//p[strong[contains(text(), 'Position:')]]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      const position = positionElement ? positionElement.textContent.replace('Position:', '').trim() : null;
+
+      const heightWeightElement = document.evaluate(
+        "//p[strong[contains(text(), 'Position:')]]/following-sibling::p[1]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      const heightWeightText = heightWeightElement ? heightWeightElement.textContent.trim() : null;
+
+      let height = null, weight = null;
+      if (heightWeightText) {
+        // Regex to capture height (e.g., 6-9) and weight (e.g., 235lb)
+        const heightMatch = heightWeightText.match(/(\d+-\d+)/);
+        const weightMatch = heightWeightText.match(/(\d+)\s*lb/);
+
+        if (heightMatch) {
+          height = heightMatch[1];
+        }
+        if (weightMatch) {
+          weight = `${weightMatch[1]}lb`;
+        }
+      }
+
+      const highSchoolElement = document.evaluate(
+        "//p[strong[contains(text(), 'High School:')]]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      const highSchool = highSchoolElement ? highSchoolElement.textContent.replace('High School:', '').trim() : null;
+
+      return {
+        position,
+        height,
+        weight,
+        highSchool,
+      };
+    });
 
     await page.waitForSelector('#players_per_game tbody tr');
 
@@ -157,12 +210,17 @@ export async function scrapeNCAAStats(playerName, directUrl = null) {
       };
     });
 
-    if (allStats && ( (allStats.perGame && Object.keys(allStats.perGame).length > 0) || (allStats.totals && Object.keys(allStats.totals).length > 0) || (allStats.advanced && Object.keys(allStats.advanced).length > 0))) {
-      console.log('✅ Sucesso! Estatísticas detalhadas extraídas:');
-      console.log(JSON.stringify(allStats, null, 2));
-      return allStats;
+    const combinedData = {
+      ...allStats,
+      ...bioData
+    };
+
+    if (combinedData && ( (combinedData.perGame && Object.keys(combinedData.perGame).length > 0) || (combinedData.totals && Object.keys(combinedData.totals).length > 0) || (combinedData.advanced && Object.keys(combinedData.advanced).length > 0) || combinedData.position || combinedData.height || combinedData.weight || combinedData.highSchool)) {
+      console.log('✅ Sucesso! Dados detalhados extraídos:');
+      console.log(JSON.stringify(combinedData, null, 2));
+      return combinedData;
     } else {
-      console.log('Não foi possível encontrar nenhuma estatística detalhada.');
+      console.log('Não foi possível encontrar nenhum dado detalhado.');
       return null;
     }
 

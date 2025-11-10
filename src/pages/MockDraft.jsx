@@ -925,7 +925,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                       {pick.prospect.position} • {pick.prospect.nationality || 'N/A'}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">
-                      {pick.prospect.high_school_team || 'N/A'}
+                      {pick.prospect.team || pick.prospect.high_school_team || 'N/A'}
                     </div>
                   </motion.div>
                 ) : (
@@ -1086,7 +1086,7 @@ const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
             <p className="font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">
               {prospect.name}
             </p>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.high_school_team || 'N/A'}</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1 badge-container">
               {badges.slice(0, 4).map((badge, index) => (

@@ -3,6 +3,7 @@ import { supabase } from '../src/lib/supabaseClient.js';
 import { scrapeNCAAStats } from './scrapeNCAAStats.mjs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { ncaaScrapingExceptions } from './ncaaScrapingExceptions.mjs';
 
 const execPromise = promisify(exec);
 
@@ -14,6 +15,8 @@ const execPromise = promisify(exec);
  * Exemplo: node scripts/updateAllNCAAProspects.mjs 2026
  */
 async function updateAllNCAAProspects(draftClass) {
+  const successfulUpdates = [];
+  const failedUpdates = [];
   if (!draftClass) {
     console.error('❌ Erro: Forneça a classe do draft como argumento. Ex: 2026');
     return;
@@ -45,8 +48,25 @@ async function updateAllNCAAProspects(draftClass) {
       console.log(`\n----------------------------------------------------`);
       console.log(`Buscando dados para: ${prospect.name} (ID: ${prospect.id})`);
 
-      // 2. Chamar o scraper para cada um
-      const rawStats = await scrapeNCAAStats(prospect.name);
+      let rawStats = null;
+      let usedException = false;
+
+      // 1. Tentar com URL de exceção primeiro, se existir
+      if (ncaaScrapingExceptions[prospect.id]) {
+        const directUrl = ncaaScrapingExceptions[prospect.id];
+        console.log(`ℹ️ Tentando com URL de exceção para ${prospect.name}: ${directUrl}`);
+        rawStats = await scrapeNCAAStats(prospect.name, directUrl);
+        usedException = true;
+      }
+
+      // 2. Se não usou exceção ou se a exceção falhou, tentar com o nome
+      if (!rawStats && !usedException) {
+        console.log(`ℹ️ Tentando busca padrão para ${prospect.name}...`);
+        rawStats = await scrapeNCAAStats(prospect.name);
+      } else if (!rawStats && usedException) {
+        console.log(`⚠️ Busca com URL de exceção falhou para ${prospect.name}. Tentando busca padrão...`);
+        rawStats = await scrapeNCAAStats(prospect.name);
+      }
 
       if (rawStats) {
         // 3. Salvar os dados brutos no Supabase
@@ -58,6 +78,7 @@ async function updateAllNCAAProspects(draftClass) {
 
         if (updateRawError) {
           console.error(`❌ Erro ao salvar dados brutos para ${prospect.name}: ${updateRawError.message}`);
+          failedUpdates.push(`${prospect.name} (Erro ao salvar dados brutos)`);
           continue; // Pula para o próximo prospecto
         }
         console.log(`✅ Dados brutos salvos para ${prospect.name}.`);
@@ -69,19 +90,30 @@ async function updateAllNCAAProspects(draftClass) {
           console.log('Saída do processamento:', stdout);
           if (stderr) {
             console.error('Erro no processamento:', stderr);
+            failedUpdates.push(`${prospect.name} (Erro no processamento)`);
+            continue;
           }
           console.log(`✅ Processamento concluído para ${prospect.name}.`);
+          successfulUpdates.push(prospect.name);
         } catch (procError) {
           console.error(`❌ Falha ao executar o script de processamento para ${prospect.name}:`, procError);
+          failedUpdates.push(`${prospect.name} (Falha no script de processamento)`);
         }
 
       } else {
-        console.log(`⚠️ Não foram encontrados dados de scraping para ${prospect.name}. Pulando.`);
+        console.log(`❌ Não foi possível encontrar dados de scraping para ${prospect.name}. Pulando.`);
+        failedUpdates.push(`${prospect.name} (Dados de scraping não encontrados)`);
       }
     }
 
     console.log(`\n----------------------------------------------------`);
     console.log(`🎉 Atualização em lote concluída para a classe de ${draftClass}!`);
+    console.log(`\n--- Sumário ---`);
+    console.log(`✅ Prospectos atualizados com sucesso (${successfulUpdates.length}):`);
+    successfulUpdates.forEach(name => console.log(`  - ${name}`));
+    console.log(`❌ Prospectos com falha (${failedUpdates.length}):`);
+    failedUpdates.forEach(name => console.log(`  - ${name}`));
+    console.log(`-----------------`);
 
   } catch (error) {
     console.error(`❌ Ocorreu um erro geral no script orquestrador: ${error.message}`);
