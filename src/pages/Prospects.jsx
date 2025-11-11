@@ -727,7 +727,6 @@ const Prospects = () => {
                     {/* Position and Tier */}
                     <div className="flex items-center gap-2">
                       <span className={`badge-position ${prospect.position}`}>{prospect.position}</span>
-                      <span className="text-xs text-slate-500 dark:text-super-dark-text-secondary">{prospect.tier}</span>
                     </div>
 
                     {/* Badges */}
