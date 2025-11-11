@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, ArrowUp, ArrowDown, Clock } from 'lucide-react';
+import { TrendingUp, ArrowUp, ArrowDown, Clock, BarChartHorizontalBig, SearchX } from 'lucide-react';
 import useTrendingProspects from '../hooks/useTrendingProspects';
 import TrendingProspectCard from '../components/Trending/TrendingProspectCard'; // Corrected path
 import LoadingSpinner from '@/components/Layout/LoadingSpinner'; // Corrected path
@@ -167,7 +167,7 @@ const Trending = () => {
         transition={{ duration: 0.5, delay: 0.3 }}
         className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border border-gray-200 dark:border-super-dark-border p-4 sm:p-6"
       >
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <h2 className="text-xl font-gaming font-bold text-gray-900 dark:text-white mb-4 flex items-center tracking-wider">
           <ArrowUp className="h-6 w-6 text-green-500 mr-2" /> Em Alta
         </h2>
         {trendingUp.length > 0 ? (
@@ -177,7 +177,11 @@ const Trending = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 dark:text-gray-400">Nenhum prospect em alta neste período.</p>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <SearchX className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p className="font-semibold">Nenhum prospecto em alta.</p>
+            <p className="text-sm">Tente alterar o período ou o filtro de posição.</p>
+          </div>
         )}
       </motion.div>
 
@@ -188,7 +192,7 @@ const Trending = () => {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="bg-white dark:bg-super-dark-secondary rounded-lg shadow-md border border-gray-200 dark:border-super-dark-border p-4 sm:p-6"
       >
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+        <h2 className="text-xl font-gaming font-bold text-gray-900 dark:text-white mb-4 flex items-center tracking-wider">
           <ArrowDown className="h-6 w-6 text-red-500 mr-2" /> Em Baixa
         </h2>
         {trendingDown.length > 0 ? (
@@ -198,7 +202,11 @@ const Trending = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 dark:text-gray-400">Nenhum prospect em baixa neste período.</p>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <BarChartHorizontalBig className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p className="font-semibold">Nenhum prospecto em baixa.</p>
+            <p className="text-sm">Todos os jogadores estão estáveis ou subindo!</p>
+          </div>
         )}
       </motion.div>
     </div>

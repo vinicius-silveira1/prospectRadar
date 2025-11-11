@@ -15,5 +15,6 @@ export const ncaaScrapingExceptions = {
   "darius-acuff-espn-2025": "https://www.sports-reference.com/cbb/players/darius-acuff-jr-1.html",
   "dewayne-brown-2025": "https://www.sports-reference.com/cbb/players/dewayne-brown-ii-1.html",
   "jordan-scott-2025": "https://www.sports-reference.com/cbb/players/jordan-scott-3.html",
+  "patrick-ngongba": "https://www.sports-reference.com/cbb/players/patrick-ngongba-2.html"
   // Adicione outros prospectos que falham aqui
 };

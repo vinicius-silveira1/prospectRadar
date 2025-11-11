@@ -52,7 +52,7 @@ const useTrendingProspects = (timeframe = '7_days') => {
           // 2. Fetch all prospect details in a single query
           const { data: prospectsData, error: prospectsError } = await supabase
             .from('prospects')
-            .select('id, name, team, image, totalscore, slug')
+            .select('id, name, team, image, totalscore, slug, position')
             .in('id', prospectIds);
 
           if (prospectsError) throw prospectsError;
