@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient'; // Assuming supabaseClient is in src/lib
+import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js';
 
-const useTrendingProspects = (timeframe = '7_days') => {
+const useTrendingProspects = (timeframe = '7_days', league = 'NBA') => {
   const [trendingProspects, setTrendingProspects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,94 +11,98 @@ const useTrendingProspects = (timeframe = '7_days') => {
     const fetchTrendingProspects = async () => {
       setLoading(true);
       setError(null);
+
+      // Mapeia o timeframe do UI para a coluna correta no banco de dados.
+      const trendColumn = {
+        today: 'trending_today',
+        '7_days': 'trending_7_days',
+        '30_days': 'trending_30_days',
+      }[timeframe];
+
+      if (!trendColumn) {
+        setError(new Error('Timeframe inválido.'));
+        setLoading(false);
+        return;
+      }
+
       try {
-        let dateFilter;
-        const now = new Date();
-        if (timeframe === '7_days') {
-          dateFilter = new Date(now.setDate(now.getDate() - 7)).toISOString();
-        } else if (timeframe === 'today') {
-          // Fetch data from the last 2 days to compare today with yesterday
-          dateFilter = new Date(now.setDate(now.getDate() - 2)).toISOString();
-        } else if (timeframe === '30_days') {
-          dateFilter = new Date(now.setMonth(now.getMonth() - 1)).toISOString();
-        } else {
-          // Default to all time or a reasonable default if timeframe is not recognized
-          dateFilter = new Date(0).toISOString(); // Epoch start
-        }
+        const threshold = 0.02;
 
-        // Fetch historical data for all prospects within the specified timeframe
-        const { data: historyData, error: historyError } = await supabase
-          .from('prospect_stats_history')
-          .select('prospect_id, captured_at, radar_score, ppg, rpg, apg')
-          .gte('captured_at', dateFilter) // Filter by date
-          .order('captured_at', { ascending: false });
+        // 🎯 CORREÇÃO: Acessa o campo 'radar_score_change' dentro da coluna JSONB.
+        const trendField = `${trendColumn}->>radar_score_change`;
 
-        if (historyError) throw historyError;
+        // 1. Busca os prospectos que estão em alta (trend > threshold)
+        const { data: upData, error: upError } = await supabase
+          .from('prospects')
+          .select('*, evaluation') // Busca a avaliação completa
+          .eq('category', league) // Garante que a categoria seja filtrada
+          .gt(trendField, threshold)
+          .order(trendField, { ascending: false });
 
-        // Group history data by prospect_id
-        const groupedHistory = historyData.reduce((acc, entry) => {
-          if (!acc[entry.prospect_id]) {
-            acc[entry.prospect_id] = [];
+        if (upError) throw upError;
+
+        // 2. Busca os prospectos que estão em baixa (trend < -threshold)
+        const { data: downData, error: downError } = await supabase
+          .from('prospects')
+          .select('*, evaluation') // Busca a avaliação completa
+          .eq('category', league)
+          .lt(trendField, 0) // 🎯 CORREÇÃO: Busca qualquer valor negativo
+          .order(trendField, { ascending: true }); // 🎯 CORREÇÃO: Ordena do menor (mais negativo) para o maior
+
+        if (downError) throw downError;
+
+        // 🕵️‍♂️ DEBUG LOG 1: O que o Supabase está retornando para "em baixa"?
+        console.log('[DEBUG] Raw downData from Supabase:', JSON.parse(JSON.stringify(downData)));
+
+        // 3. Combina os resultados e adiciona a direção da tendência
+        const processData = (data, direction) => {
+          return data.map(p => {
+            const trendData = p[trendColumn] || {};
+            return {
+              ...p,
+              trend_direction: direction,
+              trend_change: trendData.radar_score_change || 0,
+              stat_changes: trendData, // Passa o objeto completo de mudanças
+            };
+          });
+        };
+
+        const trendingUpProcessed = processData(upData, 'up');
+        const trendingDownProcessed = processData(downData, 'down');
+        // 🕵️‍♂️ DEBUG LOG 2: Como os dados "em baixa" se parecem após o processamento inicial?
+        console.log('[DEBUG] Processed trendingDown data:', JSON.parse(JSON.stringify(trendingDownProcessed)));
+
+        const combinedTrends = [...trendingUpProcessed, ...trendingDownProcessed];
+
+        const algorithm = new ProspectRankingAlgorithm();
+
+        // 4. Formata os dados para o componente do card, simulando o histórico para o gráfico
+        const finalTrends = await Promise.all(combinedTrends.map(async (p) => {
+          // 🎯 CORREÇÃO: Adiciona a lógica de fallback para calcular a avaliação se ela não existir.
+          let finalEvaluation = p.evaluation;
+          if (!finalEvaluation || finalEvaluation.totalScore == null) {
+            console.log(`[Trending] Calculando avaliação de fallback para: ${p.name}`);
+            finalEvaluation = await algorithm.evaluateProspect(p, league);
           }
-          acc[entry.prospect_id].push(entry);
-          return acc;
-        }, {});
 
-        const trends = [];
+          const currentScore = finalEvaluation?.totalScore || 0;
+          const trendChange = p.stat_changes?.radar_score_change || 0; // Usa o valor já processado
+          const previousScore = currentScore - trendChange;
 
-        // 1. Get all prospect IDs that have enough history
-        const prospectIds = Object.keys(groupedHistory).filter(id => groupedHistory[id].length >= 2);
-        
-        if (prospectIds.length > 0) {
-          // 2. Fetch all prospect details in a single query
-          const { data: prospectsData, error: prospectsError } = await supabase
-            .from('prospects')
-            .select('id, name, team, image, totalscore, slug, position')
-            .in('id', prospectIds);
+          return {
+            ...p,
+            evaluation: finalEvaluation, // Garante que a avaliação (calculada ou não) esteja no objeto
+            // Simula o histórico para o gráfico sparkline no card
+            radar_score_history: [
+              { date: 'anterior', score: previousScore },
+              { date: 'atual', score: currentScore }
+            ],
+            previous_radar_score: previousScore,
+            // As estatísticas ppg, rpg, apg já vêm do objeto `p` (prospect)
+          };
+        }));
 
-          if (prospectsError) throw prospectsError;
-
-          // 3. Create a map for easy lookup
-          const prospectsMap = prospectsData.reduce((acc, p) => {
-            acc[p.id] = p;
-            // Map totalscore to totalScore for consistency
-            const { totalscore, ...rest } = p;
-            acc[p.id] = { ...rest, totalScore: totalscore };
-            return acc; 
-          }, {});
-
-          // 4. Process trends using the map (much faster)
-          for (const prospectId of prospectIds) {
-            const prospectHistory = groupedHistory[prospectId];
-            const prospectDetails = prospectsMap[prospectId];
-
-            if (!prospectDetails) continue; // Skip if prospect details not found
-
-            const current = prospectHistory[0];
-            const previous = prospectHistory[1];
-            const trendChange = current.radar_score - previous.radar_score;
-
-            let trendDirection = 'stable';
-            const threshold = 0.02; 
-
-            if (trendChange > threshold) trendDirection = 'up';
-            else if (trendChange < -threshold) trendDirection = 'down';
-
-            trends.push({
-              ...prospectDetails,
-              trend_direction: trendDirection,
-              // Reverse history for charting (oldest to newest)
-              radar_score_history: prospectHistory.map(h => ({ date: h.captured_at, score: h.radar_score })).reverse(),
-              trend_change: trendChange,
-              current_radar_score: current.radar_score,
-              previous_radar_score: previous.radar_score,
-              ppg: current.ppg,
-              rpg: current.rpg,
-              apg: current.apg,
-            });
-          }
-        }
-        setTrendingProspects(trends);
+        setTrendingProspects(finalTrends);
 
       } catch (err) {
         console.error('Error fetching trending prospects:', err);
@@ -108,7 +113,7 @@ const useTrendingProspects = (timeframe = '7_days') => {
     };
 
     fetchTrendingProspects();
-  }, [timeframe]); // Re-run effect if timeframe changes
+  }, [timeframe, league]); // Re-run effect if timeframe or league changes
 
   return { trendingProspects, loading, error };
 };

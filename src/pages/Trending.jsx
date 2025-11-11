@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, ArrowUp, ArrowDown, Clock, BarChartHorizontalBig, SearchX } from 'lucide-react';
 import useTrendingProspects from '../hooks/useTrendingProspects';
@@ -7,12 +7,14 @@ import LoadingSpinner from '@/components/Layout/LoadingSpinner'; // Corrected pa
 import AlertBox from '@/components/Layout/AlertBox';
 import TrendingProspectCardSkeleton from '@/components/Trending/TrendingProspectCardSkeleton';
 import { SlidersHorizontal } from 'lucide-react';
+import { LeagueContext } from '@/context/LeagueContext';
 
 const Trending = () => {
   const [timeframe, setTimeframe] = useState('today'); // Default timeframe
   const [positionFilter, setPositionFilter] = useState('all');
+  const { league } = useContext(LeagueContext);
 
-  const { trendingProspects, loading, error } = useTrendingProspects(timeframe);
+  const { trendingProspects, loading, error } = useTrendingProspects(timeframe, league);
 
   const filteredProspects = useMemo(() => {
     if (positionFilter === 'all') return trendingProspects;

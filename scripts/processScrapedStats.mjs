@@ -38,6 +38,16 @@ const parseWeight = (weightStr) => {
     return { us, intl };
 };
 
+const createSlug = (name) => {
+  if (!name) return null;
+  const normalizedName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return normalizedName.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '') // Remove caracteres especiais (exceto hífen)
+    .replace(/--+/g, '-')      // Remove hífens duplicados
+    .replace(/^-+|-+$/g, '');   // Remove hífens do início e do fim
+};
+
 
 
 // Helper function to safely parse numeric stats
@@ -78,17 +88,20 @@ async function processScrapedStats(prospectId) {
     const advanced = rawStats.advanced || {};
     const totals = rawStats.totals || {}; // Access the totals object
 
-    // Determine category and league based on team name (more reliable)
-    const teamName = perGame.team_name_abbr || rawStats.school || '';
+    // Determine category and league based on collegeSchools text (most reliable for women's teams)
+    const collegeSchoolsText = rawStats.collegeSchools || '';
     let category = 'NBA';
     let league = prospect.league || 'NCAA';
-    if (teamName.toLowerCase().includes('(women)')) {
+
+    if (collegeSchoolsText.toLowerCase().includes('(women)')) {
       category = 'WNBA';
       league = 'NCAAW';
+    } else if (prospect.league === 'NCAAW') { // Preserve existing NCAAW if already set
+      category = 'WNBA';
     }
 
     const statsUpdate = {
-      slug: prospectId, // Add slug here
+      slug: createSlug(prospect.name), // Correctly generate slug from name
       category: category, // Add category here
       ppg: parseNumericStat(perGame.pts_per_g),
       rpg: parseNumericStat(perGame.trb_per_g),
@@ -131,11 +144,11 @@ async function processScrapedStats(prospectId) {
       turnovers: parseNumericStat(totals.tov),
       total_blocks: parseNumericStat(totals.blk),
       total_steals: parseNumericStat(totals.stl),
-      stats_last_updated_at: new Date().toISOString(),
       position: mapPositionAbbreviation(rawStats.position || prospect.position),
       height: parseHeight(rawStats.height) || prospect.height || null,
       weight: parseWeight(rawStats.weight) || prospect.weight || null,
       school: rawStats.highSchool || prospect.school || null,
+      nationality: rawStats.nationality || prospect.nationality || null, // NEW: Add nationality
     };
 
     // Instantiate ProspectRankingAlgorithm
@@ -152,11 +165,13 @@ async function processScrapedStats(prospectId) {
     const qualitativeArchetypes = evaluationResult.qualitativeArchetypes;
 
     // Ensure comparablePlayers and qualitativeArchetypes are not in statsUpdate for the 'prospects' table
-    // as they are intended for 'prospect_stats_history' or dynamic calculation.
 
     const { error: updateError } = await supabase
       .from('prospects')
-      .update(statsUpdate)
+      .update({
+        ...statsUpdate, // Atualiza ppg, rpg, etc.
+        evaluation: evaluationResult // Salva o objeto de avaliação completo na coluna JSONB
+      })
       .eq('id', prospectId);
 
     if (updateError) {
@@ -200,14 +215,8 @@ async function processScrapedStats(prospectId) {
           blk_percent: statsUpdate.blk_percent,
           team: statsUpdate.team,
           league: statsUpdate.league,
-          conference: statsUpdate.conference,
-          stats_season: statsUpdate.stats_season,
           games_played: statsUpdate.games_played,
           minutes_played: statsUpdate.minutes_played,
-          position: statsUpdate.position,
-          height: statsUpdate.height,
-          weight: statsUpdate.weight,
-          school: statsUpdate.school,
         },
         { onConflict: 'prospect_id, captured_date' }
       );

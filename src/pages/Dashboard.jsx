@@ -16,6 +16,7 @@ import ProspectRankingAlgorithm from '@/intelligence/prospectRankingAlgorithm.js
 import AlertBox from '@/components/Layout/AlertBox.jsx';
 import { createPortalSession } from '@/services/stripe';
 import ProspectOfTheWeekCard from '@/components/ProspectOfTheWeekCard.jsx';
+import TrendingHighlight from '@/components/Dashboard/TrendingHighlight.jsx';
 import BraziliansInNBA from '@/components/Dashboard/BraziliansInNBA.jsx';
 import BlogHighlight from '@/components/Dashboard/BlogHighlight.jsx';
 import { prospectOfTheWeek } from '@/data/spotlight.js';
@@ -226,20 +227,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* 2. Prospect of the Week */}
-      {league === 'NBA' && isLoaded && featuredProspect && (
-        <ProspectOfTheWeekCard 
-          prospect={featuredProspect}
-          analysis={prospectOfTheWeek.spotlightAnalysis}
-          highlights={prospectOfTheWeek.highlights}
-        />
-      )}
-      {league === 'WNBA' && (
-        <ProspectOfTheWeekCard 
-          prospect={wnbaProspectOfTheWeek.prospect}
-          analysis={wnbaProspectOfTheWeek.analysis}
-          highlights={wnbaProspectOfTheWeek.highlights}
-        />
-      )}
+      <TrendingHighlight />
 
       {/* 5. Prospects Brasileiros */}
       {brazilianProspects.length > 0 && (

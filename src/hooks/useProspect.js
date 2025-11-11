@@ -22,8 +22,13 @@ export default function useProspect(slug) {
           const scoutingData = data.strengths ? { strengths: data.strengths, weaknesses: data.weaknesses } : generateDataDrivenScoutingReport(data);
           const prospectWithScouting = { ...data, ...scoutingData };
 
-          
-          const evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting, league);
+          let evaluation;
+          // Check if evaluation data already exists and is up-to-date
+          if (prospectWithScouting.evaluation && prospectWithScouting.evaluation.totalScore != null) {
+            evaluation = prospectWithScouting.evaluation;
+          } else {
+            evaluation = await rankingAlgorithm.evaluateProspect(prospectWithScouting, league);
+          }
           
           let finalProspect = { 
             ...prospectWithScouting, 

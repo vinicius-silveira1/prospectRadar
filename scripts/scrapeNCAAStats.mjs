@@ -4,6 +4,80 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 puppeteer.use(StealthPlugin());
 
+// Helper function to map country/state to flag emoji
+const countryToEmojiMap = {
+  "USA": "🇺🇸",
+  "Germany": "🇩🇪",
+  "Canada": "🇨🇦",
+  "France": "🇫🇷",
+  "Spain": "🇪🇸",
+  "Australia": "🇦🇺",
+  "Brazil": "🇧🇷",
+  "Serbia": "🇷🇸",
+  "Croatia": "🇭🇷",
+  "Lithuania": "🇱🇹",
+  "Slovenia": "🇸🇮",
+  "Greece": "🇬🇷",
+  "Turkey": "🇹🇷",
+  "Argentina": "🇦🇷",
+  "Nigeria": "🇳🇬",
+  "Mali": "🇲🇱",
+  "Congo": "🇨🇩", // Democratic Republic of the Congo
+  "DR Congo": "🇨🇩",
+  "Latvia": "🇱🇻",
+  "Estonia": "🇪🇪",
+  "Finland": "🇫🇮",
+  "Sweden": "🇸🇪",
+  "Denmark": "🇩🇰",
+  "UK": "🇬🇧",
+  "England": "🇬🇧",
+  "Scotland": "🇬🇧",
+  "Ireland": "🇮🇪",
+  "Italy": "🇮🇹",
+  "Mexico": "🇲🇽",
+  "Dominican Republic": "🇩🇴",
+  "Puerto Rico": "🇵🇷",
+  "Bahamas": "🇧🇸",
+  "New Zealand": "🇳🇿",
+  "China": "🇨🇳",
+  "Japan": "🇯🇵",
+  "South Korea": "🇰🇷",
+  "Philippines": "🇵🇭",
+  // Add more countries as needed
+};
+
+// List of US state abbreviations for implicit USA nationality
+const usStateAbbreviations = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
+
+function getNationalityFromHometown(hometownText) {
+  if (!hometownText) return null;
+
+  const parts = hometownText.split(',').map(p => p.trim());
+  const lastPart = parts[parts.length - 1];
+
+  // 1. Check if the last part is a US state abbreviation
+  if (usStateAbbreviations.includes(lastPart.toUpperCase())) {
+    return countryToEmojiMap["USA"];
+  }
+
+  // 2. Check if the last part is a known country name
+  for (const country in countryToEmojiMap) {
+    if (lastPart.toLowerCase() === country.toLowerCase()) {
+      return countryToEmojiMap[country];
+    }
+  }
+
+  // 3. If the hometown has multiple parts, try the second to last part for countries like "Würzburg, Germany"
+  if (parts.length > 1) {
+    const potentialCountry = parts[parts.length - 1]; // e.g., "Germany"
+    if (countryToEmojiMap[potentialCountry]) {
+      return countryToEmojiMap[potentialCountry];
+    }
+  }
+
+  return null; // If no match found
+}
+
 export async function scrapeNCAAStats(playerName, directUrl = null) {
   if (!playerName) {
     console.error('❌ Erro: Por favor, forneça o nome do jogador como um argumento entre aspas.');
@@ -150,12 +224,34 @@ export async function scrapeNCAAStats(playerName, directUrl = null) {
         null
       ).singleNodeValue;
       const highSchool = highSchoolElement ? highSchoolElement.textContent.replace('High School:', '').trim() : null;
+      
+      // NEW: Extract Hometown
+      const hometownElement = document.evaluate(
+        "//p[strong[contains(text(), 'Hometown:')]]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      const hometown = hometownElement ? hometownElement.textContent.replace('Hometown:', '').trim() : null;
+
+      // NEW: Extract full college school names to check for "(Women)"
+      const collegeSchoolsElement = document.evaluate(
+        "//p[strong[contains(text(), 'Schools:')]]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
+      const collegeSchools = collegeSchoolsElement ? collegeSchoolsElement.textContent.trim() : null;
 
       return {
         position,
         height,
         weight,
         highSchool,
+        hometown, // NEW: Add hometown
+        collegeSchools, // NEW: Add this to bioData
       };
     });
 
@@ -214,6 +310,7 @@ export async function scrapeNCAAStats(playerName, directUrl = null) {
       ...allStats,
       ...bioData
     };
+    combinedData.nationality = getNationalityFromHometown(combinedData.hometown); // Add nationality
 
     if (combinedData && ( (combinedData.perGame && Object.keys(combinedData.perGame).length > 0) || (combinedData.totals && Object.keys(combinedData.totals).length > 0) || (combinedData.advanced && Object.keys(combinedData.advanced).length > 0) || combinedData.position || combinedData.height || combinedData.weight || combinedData.highSchool)) {
       console.log('✅ Sucesso! Dados detalhados extraídos:');

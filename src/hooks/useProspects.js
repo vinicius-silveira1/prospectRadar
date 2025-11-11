@@ -46,7 +46,14 @@ export default function useProspects(filters = {}) {
         const processedProspects = await Promise.all(dbProspects.map(async (prospect) => {
           const tier = getTierByRanking(prospect.ranking);
           const scoutingData = prospect.strengths ? {} : generateDataDrivenScoutingReport(prospect);
-          const evaluation = await algorithm.evaluateProspect(prospect, league);
+
+          let evaluation;
+          // Check if evaluation data already exists and is up-to-date
+          if (prospect.evaluation && prospect.evaluation.totalScore != null) {
+            evaluation = prospect.evaluation;
+          } else {
+            evaluation = await algorithm.evaluateProspect(prospect, league);
+          }
 
           // Define stats base e a fonte padrão
           let finalStats = {
