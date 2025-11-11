@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LineChart, Tooltip, Line } from 'recharts';
 import { getInitials, getColorFromName } from '../../utils/imageUtils'; // Adjust path as needed
 
 const TrendingProspectCard = ({ prospect }) => {
@@ -14,6 +15,7 @@ const TrendingProspectCard = ({ prospect }) => {
     trend_direction,
     trend_change,
     current_radar_score,
+    radar_score_history,
     previous_radar_score,
     ppg,
     rpg,
@@ -77,6 +79,19 @@ const TrendingProspectCard = ({ prospect }) => {
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mt-1">
               <span>Anterior:</span>
               <span>{previous_radar_score.toFixed(2)}</span>
+            </div>
+          )}
+          
+          {/* Sparkline Chart */}
+          {radar_score_history && radar_score_history.length > 1 && (
+            <div className="mt-3 h-12">
+              <LineChart width={180} height={48} data={radar_score_history}>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.7)', border: 'none', fontSize: '12px' }} 
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Line type="monotone" dataKey="score" stroke={trendColorClass} strokeWidth={2} dot={false} />
+              </LineChart>
             </div>
           )}
         </div>

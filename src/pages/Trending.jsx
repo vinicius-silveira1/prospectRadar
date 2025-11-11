@@ -3,32 +3,50 @@ import { motion } from 'framer-motion';
 import { TrendingUp, ArrowUp, ArrowDown, Clock } from 'lucide-react';
 import useTrendingProspects from '../hooks/useTrendingProspects';
 import TrendingProspectCard from '../components/Trending/TrendingProspectCard'; // Corrected path
-import LoadingSpinner from '@/components/Layout/LoadingSpinner';
+import LoadingSpinner from '@/components/Layout/LoadingSpinner'; // Corrected path
 import AlertBox from '@/components/Layout/AlertBox';
+import TrendingProspectCardSkeleton from '@/components/Trending/TrendingProspectCardSkeleton';
+import { SlidersHorizontal } from 'lucide-react';
 
 const Trending = () => {
-  const [timeframe, setTimeframe] = useState('7_days'); // Default timeframe
+  const [timeframe, setTimeframe] = useState('today'); // Default timeframe
+  const [positionFilter, setPositionFilter] = useState('all');
 
   const { trendingProspects, loading, error } = useTrendingProspects(timeframe);
 
+  const filteredProspects = useMemo(() => {
+    if (positionFilter === 'all') return trendingProspects;
+    return trendingProspects.filter(p => p.position === positionFilter);
+  }, [trendingProspects, positionFilter]);
+
   const trendingUp = useMemo(() => {
-    return trendingProspects.filter(p => p.trend_direction === 'up').sort((a, b) => b.trend_change - a.trend_change);
-  }, [trendingProspects]);
+    return filteredProspects.filter(p => p.trend_direction === 'up').sort((a, b) => b.trend_change - a.trend_change);
+  }, [filteredProspects]);
 
   const trendingDown = useMemo(() => {
-    return trendingProspects.filter(p => p.trend_direction === 'down').sort((a, b) => a.trend_change - b.trend_change);
-  }, [trendingProspects]);
+    return filteredProspects.filter(p => p.trend_direction === 'down').sort((a, b) => a.trend_change - b.trend_change);
+  }, [filteredProspects]);
 
   const timeframeOptions = [
+    { label: 'Hoje', value: 'today' },
     { label: 'Últimos 7 dias', value: '7_days' },
     { label: 'Últimos 30 dias', value: '30_days' },
     // Add more options if needed, e.g., 'all_time'
   ];
 
+  const positionOptions = [
+    { label: 'Todas', value: 'all' },
+    { label: 'Guards', value: 'G' },
+    { label: 'Forwards', value: 'F' },
+    { label: 'Centers', value: 'C' },
+  ];
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner />
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:p-6">
+          {Array.from({ length: 8 }).map((_, i) => <TrendingProspectCardSkeleton key={i} />)}
+        </div>
       </div>
     );
   }
@@ -102,24 +120,44 @@ const Trending = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex items-center justify-center sm:justify-start gap-3 bg-white dark:bg-super-dark-secondary p-3 rounded-lg shadow-sm border border-gray-200 dark:border-super-dark-border"
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-super-dark-secondary p-3 rounded-lg shadow-sm border border-gray-200 dark:border-super-dark-border"
       >
-        <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-        {timeframeOptions.map((option) => (
-          <motion.button
-            key={option.value}
-            onClick={() => setTimeframe(option.value)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              timeframe === option.value
-                ? 'bg-brand-purple text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {option.label}
-          </motion.button>
-        ))}
+        <div className="flex items-center gap-3">
+          <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          {timeframeOptions.map((option) => (
+            <motion.button
+              key={option.value}
+              onClick={() => setTimeframe(option.value)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                timeframe === option.value
+                  ? 'bg-brand-purple text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {option.label}
+            </motion.button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <SlidersHorizontal className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          {positionOptions.map((option) => (
+            <motion.button
+              key={option.value}
+              onClick={() => setPositionFilter(option.value)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                positionFilter === option.value
+                  ? 'bg-brand-orange text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {option.label}
+            </motion.button>
+          ))}
+        </div>
       </motion.div>
 
       {/* Trending Up Section */}

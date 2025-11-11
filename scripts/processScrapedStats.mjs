@@ -78,8 +78,14 @@ async function processScrapedStats(prospectId) {
     const advanced = rawStats.advanced || {};
     const totals = rawStats.totals || {}; // Access the totals object
 
-    // Determine category based on league
-    const category = prospect.league === 'NCAAW' ? 'WNBA' : 'NBA';
+    // Determine category and league based on team name (more reliable)
+    const teamName = perGame.team_name_abbr || rawStats.school || '';
+    let category = 'NBA';
+    let league = prospect.league || 'NCAA';
+    if (teamName.toLowerCase().includes('(women)')) {
+      category = 'WNBA';
+      league = 'NCAAW';
+    }
 
     const statsUpdate = {
       slug: prospectId, // Add slug here
@@ -93,7 +99,7 @@ async function processScrapedStats(prospectId) {
       three_pct: parseNumericStat(perGame.fg3_pct),
       ft_pct: parseNumericStat(perGame.ft_pct),
       team: perGame.team_name_abbr,
-      ts_percent: parseNumericStat(advanced.ts_pct),
+      ts_percent: parseNumericStat(advanced.ts_pct), // Ensure ts_percent is parsed
       usg_percent: parseNumericStat(advanced.usg_pct),
       per: parseNumericStat(advanced.per),
       win_shares: parseNumericStat(advanced.ws),
@@ -107,7 +113,7 @@ async function processScrapedStats(prospectId) {
       stl_percent: parseNumericStat(advanced.stl_pct),
       blk_percent: parseNumericStat(advanced.blk_pct),
       source: 'NCAA', // Atualiza a fonte das estatísticas
-      league: 'NCAA',
+      league: league, // Use the determined league
       conference: perGame.conf_abbr,
       "stats-season": perGame.year_id,
       games_played: parseNumericStat(totals.games),

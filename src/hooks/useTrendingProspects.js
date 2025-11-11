@@ -15,6 +15,9 @@ const useTrendingProspects = (timeframe = '7_days') => {
         const now = new Date();
         if (timeframe === '7_days') {
           dateFilter = new Date(now.setDate(now.getDate() - 7)).toISOString();
+        } else if (timeframe === 'today') {
+          // Fetch data from the last 2 days to compare today with yesterday
+          dateFilter = new Date(now.setDate(now.getDate() - 2)).toISOString();
         } else if (timeframe === '30_days') {
           dateFilter = new Date(now.setMonth(now.getMonth() - 1)).toISOString();
         } else {
@@ -44,12 +47,12 @@ const useTrendingProspects = (timeframe = '7_days') => {
 
         // 1. Get all prospect IDs that have enough history
         const prospectIds = Object.keys(groupedHistory).filter(id => groupedHistory[id].length >= 2);
-
+        
         if (prospectIds.length > 0) {
           // 2. Fetch all prospect details in a single query
           const { data: prospectsData, error: prospectsError } = await supabase
             .from('prospects')
-            .select('id, name, team, image, totalScore, slug')
+            .select('id, name, team, image, totalscore, slug')
             .in('id', prospectIds);
 
           if (prospectsError) throw prospectsError;
@@ -57,7 +60,10 @@ const useTrendingProspects = (timeframe = '7_days') => {
           // 3. Create a map for easy lookup
           const prospectsMap = prospectsData.reduce((acc, p) => {
             acc[p.id] = p;
-            return acc;
+            // Map totalscore to totalScore for consistency
+            const { totalscore, ...rest } = p;
+            acc[p.id] = { ...rest, totalScore: totalscore };
+            return acc; 
           }, {});
 
           // 4. Process trends using the map (much faster)
@@ -72,7 +78,7 @@ const useTrendingProspects = (timeframe = '7_days') => {
             const trendChange = current.radar_score - previous.radar_score;
 
             let trendDirection = 'stable';
-            const threshold = 0.02; // Lowered threshold for more realistic trend detection
+            const threshold = 0.02; 
 
             if (trendChange > threshold) trendDirection = 'up';
             else if (trendChange < -threshold) trendDirection = 'down';
@@ -80,6 +86,8 @@ const useTrendingProspects = (timeframe = '7_days') => {
             trends.push({
               ...prospectDetails,
               trend_direction: trendDirection,
+              // Reverse history for charting (oldest to newest)
+              radar_score_history: prospectHistory.map(h => ({ date: h.captured_at, score: h.radar_score })).reverse(),
               trend_change: trendChange,
               current_radar_score: current.radar_score,
               previous_radar_score: previous.radar_score,
