@@ -297,17 +297,17 @@ const Dashboard = () => {
           </ResponsiveGrid>
         </motion.div>
       )}
-
+    
       {/* 6. Seção: Brasileiros na NBA & Blog */}
-      {league === 'NBA' ? (
+      {/*league === 'NBA' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           <BraziliansInNBA />
           <BlogHighlight />
         </div>
       ) : (
         <BraziliansInNBA />
-      )}
-
+      )*/}
+    
       {/* 3. Top Prospects Gerais */}
       {isLoaded && topProspects.length > 0 && (
         <motion.div
@@ -564,11 +564,11 @@ const Dashboard = () => {
       </motion.div>
 
       {/* 7. Alerta da Temporada NCAA */}
-      <AlertBox 
+      {/*<AlertBox 
         type="info"
         title="Temporada NCAA 2025-26 em Breve!"
         message="Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
-      />
+      />*/}
 
       {/* Loading State */}
       {loading && (

@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, ArrowUp, ArrowDown } from 'lucide-react';
 import useTrendingProspects from '@/hooks/useTrendingProspects';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import { LeagueContext } from '@/context/LeagueContext';
 
 const TrendingHighlight = () => {
-  const { trendingProspects, loading, error } = useTrendingProspects('7_days');
+  const { league } = useContext(LeagueContext);
+  const { trendingProspects, loading, error } = useTrendingProspects('7_days', league);
 
   const trendingUp = useMemo(() => {
     return trendingProspects
@@ -26,8 +28,11 @@ const TrendingHighlight = () => {
     return <TrendingSkeleton />;
   }
 
-  if (error || (trendingUp.length === 0 && trendingDown.length === 0)) {
-    return null; // Não renderiza nada se houver erro ou não houver dados
+  // Apenas retorna nulo se houver um erro.
+  // Se não houver dados, o componente renderizará os estados vazios.
+  if (error) {
+    console.error("Erro ao buscar tendências para o Dashboard:", error);
+    return null; 
   }
 
   return (
@@ -44,9 +49,13 @@ const TrendingHighlight = () => {
           🔥 Em Alta
         </h2>
         <div className="space-y-4">
-          {trendingUp.map(prospect => (
-            <ProspectHighlightCard key={prospect.id} prospect={prospect} />
-          ))}
+          {trendingUp.length > 0 ? (
+            trendingUp.map(prospect => (
+              <ProspectHighlightCard key={prospect.id} prospect={prospect} />
+            ))
+          ) : (
+            <EmptyState message="Nenhum prospecto em alta nos últimos 7 dias." />
+          )}
         </div>
       </div>
 
@@ -57,9 +66,13 @@ const TrendingHighlight = () => {
           🧊 Em Baixa
         </h2>
         <div className="space-y-4">
-          {trendingDown.map(prospect => (
-            <ProspectHighlightCard key={prospect.id} prospect={prospect} />
-          ))}
+          {trendingDown.length > 0 ? (
+            trendingDown.map(prospect => (
+              <ProspectHighlightCard key={prospect.id} prospect={prospect} />
+            ))
+          ) : (
+            <EmptyState message="Nenhum prospecto em baixa nos últimos 7 dias." />
+          )}
         </div>
       </div>
     </motion.div>
@@ -126,6 +139,12 @@ const ProspectHighlightCard = ({ prospect }) => {
     </Link>
   );
 };
+
+const EmptyState = ({ message }) => (
+  <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+    <p>{message}</p>
+  </div>
+);
 
 const TrendingSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
