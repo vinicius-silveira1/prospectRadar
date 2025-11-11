@@ -12,11 +12,11 @@ function ResponsiveSidebar({ isOpen, onClose }) {
     { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
+    { path: '/trending', icon: TrendingUp, label: 'Em Destaque' },
     { path: '/blog', icon: BookText, label: 'Blog' },
     { path: '/radar-score-explained', icon: Lightbulb, label: 'Radar Score' },
     { path: '/pricing', icon: CreditCard, label: 'Planos', isSpecial: true },
     { path: '/about', icon: Info, label: 'Sobre' },
-    { path: '/trending', icon: TrendingUp, label: 'Em Alta' },
     { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
   ];
 
