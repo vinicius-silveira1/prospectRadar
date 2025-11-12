@@ -4,22 +4,27 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { getInitials, getColorFromName } from '@/utils/imageUtils';
-import { Send, Loader2 } from 'lucide-react';
+import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
+import { Send, Loader2, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CornerDownRight } from 'lucide-react';
+import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
 
 // Componente para um único comentário
-const CommentCard = ({ comment }) => {
+const CommentCard = ({ comment, onReply, onDelete }) => {
   const author = comment.author || {};
   const authorName = author.username || 'Usuário Anônimo';
+  const { user } = useAuth();
+  const isAuthor = user?.id === comment.user_id;
 
   return (
-    <div className="flex items-start space-x-3 py-3">
+    <div className="flex items-start space-x-3 py-2">
       <div
         className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-xs"
         style={{ backgroundColor: getColorFromName(authorName) }}
       >
         {author.avatar_url ? (
-          <img src={author.avatar_url} alt={authorName} className="w-full h-full rounded-full object-cover" />
+          <img src={getAvatarPublicUrl(author.avatar_url)} alt={authorName} className="w-full h-full rounded-full object-cover" />
         ) : (
           getInitials(authorName)
         )}
@@ -27,17 +32,37 @@ const CommentCard = ({ comment }) => {
       <div className="flex-1">
         <div className="bg-gray-100 dark:bg-super-dark-border rounded-lg px-3 py-2">
           <div className="flex items-center justify-between">
-            <p className="font-semibold text-sm text-gray-900 dark:text-white">{authorName}</p>
+            <Link to={`/user/${author.username}`} className="font-semibold text-sm text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
+              {authorName}
+            </Link>
+            {isAuthor && (
+              <motion.button onClick={() => onDelete(comment.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                <Trash2 size={14} />
+              </motion.button>
+            )}
           </div>
           <p className="text-sm text-gray-700 dark:text-gray-300">{comment.comment_text}</p>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1">
-          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ptBR })}
-        </p>
+        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1">
+          <span>{formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ptBR })}</span>
+          {user && <button onClick={() => onReply(comment)} className="font-semibold hover:underline">Responder</button>}
+        </div>
       </div>
     </div>
   );
 };
+
+// Componente para renderizar um comentário e suas respostas
+const CommentThread = ({ comment, onReply, onDelete }) => (
+  <div>
+    <CommentCard comment={comment} onReply={onReply} onDelete={onDelete} />
+    {comment.replies && comment.replies.length > 0 && (
+      <div className="ml-6 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+        {comment.replies.map(reply => <CommentThread key={reply.id} comment={reply} onReply={onReply} onDelete={onDelete} />)}
+      </div>
+    )}
+  </div>
+);
 
 // Componente principal da seção de comentários
 const CommentSection = ({ reportId }) => {
@@ -46,19 +71,35 @@ const CommentSection = ({ reportId }) => {
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [isConfirmDeleteCommentOpen, setIsConfirmDeleteCommentOpen] = useState(false);
+  const [commentToDeleteId, setCommentToDeleteId] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null); // Estado para saber a qual comentário estamos respondendo
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('report_comments')
-      .select(`*, author:profiles!inner(username, avatar_url)`)
+      .select(`*, author:profiles(username, avatar_url)`)
       .eq('report_id', reportId)
       .order('created_at', { ascending: true });
 
     if (error) {
       console.error('Erro ao buscar comentários:', error);
     } else {
-      setComments(data);
+      // Estrutura os comentários em uma árvore (threads)
+      const commentsById = {};
+      const rootComments = [];
+      data.forEach(comment => {
+        commentsById[comment.id] = { ...comment, replies: [] };
+      });
+      data.forEach(comment => {
+        if (comment.parent_comment_id && commentsById[comment.parent_comment_id]) {
+          commentsById[comment.parent_comment_id].replies.push(commentsById[comment.id]);
+        } else {
+          rootComments.push(commentsById[comment.id]);
+        }
+      });
+      setComments(rootComments);
     }
     setLoading(false);
   }, [reportId]);
@@ -76,13 +117,14 @@ const CommentSection = ({ reportId }) => {
     const newCommentData = {
       report_id: reportId,
       user_id: user.id,
-      comment_text: newComment.trim(), // CORREÇÃO: Usando o nome correto da coluna
+      comment_text: newComment.trim(),
+      parent_comment_id: replyingTo ? replyingTo.id : null, // Adiciona o ID do pai se for uma resposta
     };
 
     const { data, error } = await supabase
       .from('report_comments')
       .insert(newCommentData)
-      .select('*, author:profiles!inner(username, avatar_url)')
+      .select('*, author:profiles(username, avatar_url)')
       .single(); // Espera um único resultado
 
     if (error) {
@@ -91,10 +133,35 @@ const CommentSection = ({ reportId }) => {
     } else {
       // Adiciona o novo comentário diretamente ao estado local, sem precisar de uma nova busca
       setComments(prevComments => [...prevComments, data]);
+      await fetchComments(); // Re-busca para reconstruir a árvore corretamente
       setNewComment('');
+      setReplyingTo(null); // Limpa o estado de resposta
     }
     setIsPosting(false);
   };
+
+  const handleDeleteRequest = (commentId) => {
+    setCommentToDeleteId(commentId);
+    setIsConfirmDeleteCommentOpen(true);
+  };
+
+  const confirmCommentDelete = useCallback(async () => {
+    if (!commentToDeleteId) return;
+
+    try {
+      const { error } = await supabase.from('report_comments').delete().match({ id: commentToDeleteId });
+      if (error) throw error;
+      
+      await fetchComments(); // Re-busca para reconstruir a árvore corretamente
+    } catch (err) {
+      console.error('Erro ao excluir comentário:', err);
+      alert('Não foi possível excluir o comentário.');
+    } finally {
+      // Fecha o modal e limpa o estado
+      setIsConfirmDeleteCommentOpen(false);
+      setCommentToDeleteId(null);
+    }
+  }, [commentToDeleteId, fetchComments]);
 
   return (
     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-super-dark-border">
@@ -102,16 +169,22 @@ const CommentSection = ({ reportId }) => {
       
       <AnimatePresence>
         <div className="space-y-2">
-          {comments.map(comment => (
-            <motion.div key={comment.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <CommentCard comment={comment} />
-            </motion.div>
-          ))}
+          {comments.map(comment => <CommentThread key={comment.id} comment={comment} onReply={setReplyingTo} onDelete={handleDeleteRequest} />)}
         </div>
       </AnimatePresence>
 
       {user && (
-        <form onSubmit={handlePostComment} className="flex items-start space-x-3 mt-4">
+        <form onSubmit={handlePostComment} className="mt-4">
+          {replyingTo && (
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <CornerDownRight size={14} />
+                <span>Respondendo a <strong>{replyingTo.author.username}</strong></span>
+              </div>
+              <button type="button" onClick={() => setReplyingTo(null)} className="font-semibold text-red-500 hover:underline">Cancelar</button>
+            </div>
+          )}
+          <div className="flex items-start space-x-3">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -122,8 +195,18 @@ const CommentSection = ({ reportId }) => {
           <motion.button type="submit" disabled={isPosting || !newComment.trim()} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-2 bg-brand-purple text-white rounded-full disabled:opacity-50">
             {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           </motion.button>
+          </div>
         </form>
       )}
+
+      {/* Modal de confirmação para exclusão de comentário */}
+      <ConfirmationModal
+        isOpen={isConfirmDeleteCommentOpen}
+        onClose={() => setIsConfirmDeleteCommentOpen(false)}
+        onConfirm={confirmCommentDelete}
+        title="Confirmar Exclusão"
+        message="Tem certeza de que deseja excluir este comentário?"
+      />
     </div>
   );
 };

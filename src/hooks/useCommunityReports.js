@@ -28,6 +28,9 @@ const useCommunityReports = (prospectId) => {
           ),
           report_votes!left (
             user_id
+          ),
+          report_comments (
+            count
           )
         `)
         .eq('prospect_id', prospectId)
@@ -42,12 +45,17 @@ const useCommunityReports = (prospectId) => {
         throw fetchError;
       }
 
+      console.log('Raw data from Supabase in useCommunityReports:', data); // Debug log: Veja o que o Supabase retorna
+
       // Mapeia os resultados para incluir a contagem de votos e se o usuário atual votou
       const processedReports = (data || []).map(report => ({
         ...report,
         // vote_count agora vem diretamente da coluna na tabela community_reports
+        comment_count: report.report_comments[0]?.count || 0,
         user_has_voted: user ? report.report_votes.some(vote => vote.user_id === user.id) : false,
       }));
+
+      console.log('Processed reports with comment_count:', processedReports); // Debug log: Veja o comment_count final
 
       setReports(processedReports);
 

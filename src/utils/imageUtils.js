@@ -1,6 +1,7 @@
-// Color palette for dynamic backgrounds
+import { supabase } from '@/lib/supabaseClient';
+
 const colorPalette = [
-  '#EF4444', // red-500
+ '#EF4444', // red-500
   '#F97316', // orange-500
   '#EAB308', // yellow-500
   '#22C55E', // green-500
@@ -31,6 +32,16 @@ export const getInitials = (name) => {
     return parts[0].charAt(0).toUpperCase();
   }
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+};
+
+export const getAvatarPublicUrl = (avatarPath) => {
+  if (!avatarPath) return null;
+
+  const { data } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(avatarPath);
+
+  return data?.publicUrl;
 };
 
 // Helper to get a dynamic color based on name

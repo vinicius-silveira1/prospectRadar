@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogOut, User, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import { Search, Menu, LogOut, User, Trash2, Settings } from 'lucide-react'; // Adicionado Settings
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
@@ -100,6 +100,24 @@ const UserMenu = ({ user, onLogout, onDelete }) => {
           <div className="p-3 border-b dark:border-super-dark-border">
             <p className="text-sm font-medium text-slate-800 dark:text-super-dark-text-primary truncate">{user.email.split('@')[0]}</p>
             <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">{user.email}</p>
+          </div>
+          <div className="p-2 border-b dark:border-super-dark-border">
+            <Link
+              to={`/user/${user.username}`}
+              onClick={() => setIsUserMenuOpen(false)}
+              className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-100 dark:hover:bg-super-dark-primary rounded-md transition-colors"
+            >
+              <User size={16} />
+              <span>Meu Perfil</span>
+            </Link>
+            <Link
+              to="/settings/profile"
+              onClick={() => setIsUserMenuOpen(false)}
+              className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-100 dark:hover:bg-super-dark-primary rounded-md transition-colors"
+            >
+              <Settings size={16} />
+              <span>Configurações de Perfil</span>
+            </Link>
           </div>
           <div className="p-2">
             <button

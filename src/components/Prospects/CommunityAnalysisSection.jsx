@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react';
+import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react'; // Mantido para referência
 import useCommunityReports from '@/hooks/useCommunityReports';
-import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
 import ReportRenderer from '@/components/Prospects/ReportRenderer.jsx';
 import ReportEditor from '@/components/Prospects/ReportEditor';
 import { useAuth } from '@/context/AuthContext';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
+import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
@@ -22,7 +23,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      whileHover={{ y: -2, boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}
       className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-md border dark:border-super-dark-border p-4"
     >
       <div className="flex items-start space-x-4">
@@ -31,20 +32,22 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
           style={{ backgroundColor: getColorFromName(authorName) }}
         >
           {author.avatar_url ? (
-            <img src={author.avatar_url} alt={authorName} className="w-full h-full rounded-full object-cover" />
+            <img src={getAvatarPublicUrl(author.avatar_url)} alt={authorName} className="w-full h-full rounded-full object-cover" />
           ) : (
             getInitials(authorName)
           )}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <p className="font-semibold text-gray-900 dark:text-white">{authorName}</p>
+            <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
+              {authorName}
+            </Link>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })}
             </p>
           </div>
-          <div className="flex items-center justify-between mt-1">
-            <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1">{report.title}</h4>
+          <div className="flex items-start justify-between mt-1">
+            <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1 flex-1 mr-4">{report.title}</h4>
             <div className="flex items-center gap-4">
               {isAuthor && (
                 <div className="flex items-center gap-3">
@@ -68,6 +71,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${isCommentsVisible ? 'bg-blue-100 text-blue-600 dark:bg-blue-800/50 dark:text-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-super-dark-border dark:text-gray-400 dark:hover:bg-gray-700'}`}
               >
                 <MessageCircle size={16} />
+                <span>{report.comment_count}</span>
               </motion.button>
             </div>
           </div>
