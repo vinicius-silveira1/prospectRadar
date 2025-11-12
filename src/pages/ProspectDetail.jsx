@@ -19,6 +19,8 @@ import { assignBadges } from '@/lib/badges';
 import Badge from '@/components/Common/Badge';
 import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet';
+import CompleteProfileModal from '@/components/Common/CompleteProfileModal';
+import CommunityAnalysisSection from '@/components/Prospects/CommunityAnalysisSection'; // Importar a nova seção
 import { useResponsive } from '@/hooks/useResponsive';
 
 
@@ -90,6 +92,8 @@ const ProspectDetail = () => {
   const { league } = useContext(LeagueContext);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [actionToPerform, setActionToPerform] = useState(null);
 
   // Detectar se é mobile
   useEffect(() => {
@@ -123,6 +127,25 @@ const ProspectDetail = () => {
   const { user } = useAuth();
   const { watchlist, toggleWatchlist } = useWatchlist();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
+  const [isCommunitySectionVisible, setIsCommunitySectionVisible] = useState(false);
+
+  const handleCommunityAction = (action) => {
+    console.log('handleCommunityAction foi chamada!');
+    if (!user) {
+      navigate('/login'); // Redireciona para o login se não estiver logado
+      return;
+    }
+    // Verifica se o perfil está completo
+    if (!user.username) {
+      console.log('Abrindo CompleteProfileModal...');
+      setActionToPerform(() => action); // Salva a ação que o usuário quer fazer
+      setIsProfileModalOpen(true); // Abre o modal para completar o perfil
+    } else {
+      action(); // Se o perfil já está completo, executa a ação imediatamente
+    }
+  };
+
+
 
   const isScout = user?.subscription_tier?.toLowerCase() === 'scout';
 
@@ -455,6 +478,13 @@ const ProspectDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            >
+              <CommunityAnalysisSection prospectId={prospect.id} onAddAnalysis={handleCommunityAction} />
+            </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1450,6 +1480,17 @@ const ProspectDetail = () => {
         </div>
         
       </div>
+
+      {/* MODAL PARA COMPLETAR O PERFIL */}
+      <CompleteProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onProfileComplete={() => {
+          setIsProfileModalOpen(false);
+          if (actionToPerform) actionToPerform(); // Executa a ação pendente
+          setActionToPerform(null); // Limpa a ação
+        }}
+      />
       
     </div>
   );

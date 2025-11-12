@@ -1,0 +1,171 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, User, PlusCircle, Trash2 } from 'lucide-react';
+import useCommunityReports from '@/hooks/useCommunityReports';
+import { getInitials, getColorFromName } from '@/utils/imageUtils';
+import { formatDistanceToNow } from 'date-fns';
+import ReportRenderer from '@/components/Prospects/ReportRenderer.jsx';
+import ReportEditor from '@/components/Prospects/ReportEditor';
+import { useAuth } from '@/context/AuthContext';
+import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
+import { supabase } from '@/lib/supabaseClient';
+import { ptBR } from 'date-fns/locale';
+
+const CommunityReportCard = ({ report, currentUser, onDelete }) => {
+  const author = report.author || {};
+  const authorName = author.username || `Usuário Anônimo`;
+  const isAuthor = currentUser?.id === report.user_id;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-md border dark:border-super-dark-border p-4"
+    >
+      <div className="flex items-start space-x-4">
+        <div 
+          className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold"
+          style={{ backgroundColor: getColorFromName(authorName) }}
+        >
+          {author.avatar_url ? (
+            <img src={author.avatar_url} alt={authorName} className="w-full h-full rounded-full object-cover" />
+          ) : (
+            getInitials(authorName)
+          )}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-gray-900 dark:text-white">{authorName}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1">{report.title}</h4>
+            {isAuthor && (
+              <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                <Trash2 size={16} />
+              </motion.button>
+            )}
+          </div>
+          <div className="mt-2">
+            <ReportRenderer data={report.content} />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
+  const { reports, loading, error, refresh } = useCommunityReports(prospectId);
+  const { user } = useAuth();
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState(null);
+
+ useEffect(() => {
+    // Log para verificar se a função está sendo recebida
+    console.log('CommunityAnalysisSection recebeu onAddAnalysis:', typeof onAddAnalysis);
+  }, [onAddAnalysis]);
+
+  const handleDeleteRequest = (reportId) => {
+    setReportToDelete(reportId);
+    setIsConfirmModalOpen(true);
+ };
+
+  const confirmDelete = useCallback(async () => {
+    if (!reportToDelete) return;
+
+    try {
+      const { error } = await supabase.from('community_reports').delete().match({ id: reportToDelete });
+ if (error) throw error;
+      refresh();
+    } catch (err) {
+      alert('Não foi possível excluir a análise. Tente novamente.');
+    } finally {
+      // Fecha o modal e limpa o estado
+      setIsConfirmModalOpen(false);
+      setReportToDelete(null);
+    }
+  }, [reportToDelete, refresh]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.8 }}
+      className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-black dark:text-white flex items-center font-mono tracking-wide">
+          <MessageSquare className="w-5 h-5 mr-2 text-brand-purple" />
+          Análises da Comunidade
+        </h2>
+        <motion.button
+          onClick={() => onAddAnalysis(() => setIsEditorOpen(true))}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-brand-purple to-indigo-600 rounded-lg shadow-md hover:brightness-110 transition-all"
+        >
+          <PlusCircle size={16} />
+          Adicionar sua Análise
+        </motion.button>
+      </div>
+
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="mt-2 text-gray-500">Carregando análises...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center py-8 text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="space-y-4">
+          {reports.length > 0 ? (
+            reports.map(report => (
+              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} />
+            ))
+          ) : (
+            <div className="text-center py-12 border-2 border-dashed dark:border-super-dark-border rounded-lg">
+              <User className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                Nenhuma análise ainda
+              </h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Seja o primeiro a compartilhar sua visão sobre este prospecto!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* O editor de análise como um modal */}
+      <ReportEditor
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        prospectId={prospectId}
+        onSaveSuccess={refresh}
+      />
+
+      {/* Modal de confirmação para exclusão */}
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirmar Exclusão"
+        message="Tem certeza de que deseja excluir esta análise? Esta ação não pode ser desfeita."
+      />
+    </motion.div>
+
+  );
+};
+
+export default CommunityAnalysisSection;
