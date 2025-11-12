@@ -6,12 +6,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import { Send, Loader2, Trash2, Link as LinkIcon } from 'lucide-react';
+import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
 import { CornerDownRight } from 'lucide-react';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
 
 // Componente para um único comentário
-const CommentCard = ({ comment, onReply, onDelete }) => {
+const CommentCard = ({ comment, onReply, onDelete, onBadgeClick }) => {
   const author = comment.author || {};
   const authorName = author.username || 'Usuário Anônimo';
   const { user } = useAuth();
@@ -32,9 +33,14 @@ const CommentCard = ({ comment, onReply, onDelete }) => {
       <div className="flex-1">
         <div className="bg-gray-100 dark:bg-super-dark-border rounded-lg px-3 py-2">
           <div className="flex items-center justify-between">
-            <Link to={`/user/${author.username}`} className="font-semibold text-sm text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
-              {authorName}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to={`/user/${author.username}`} className="font-semibold text-sm text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
+                {authorName}
+              </Link>
+              {comment.author?.user_badges?.slice(0, 2).map(({ badge }) => ( // Não passamos onClick aqui
+                <BadgeIcon key={badge.id} badge={badge} size={12} />
+              ))}
+            </div>
             {isAuthor && (
               <motion.button onClick={() => onDelete(comment.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
                 <Trash2 size={14} />

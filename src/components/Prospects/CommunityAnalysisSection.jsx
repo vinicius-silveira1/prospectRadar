@@ -1,23 +1,40 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react'; // Mantido para referência
+import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
 import ReportRenderer from '@/components/Prospects/ReportRenderer.jsx';
 import ReportEditor from '@/components/Prospects/ReportEditor';
 import { useAuth } from '@/context/AuthContext';
+import { useResponsive } from '@/hooks/useResponsive';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
+import AchievementUnlock from '@/components/Common/AchievementUnlock';
+import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
-const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) => {
+const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, onBadgeClick }) => {
   const author = report.author || {};
   const authorName = author.username || `Usuário Anônimo`;
   const isAuthor = currentUser?.id === report.user_id;
+  const [hoveredBadge, setHoveredBadge] = useState(null);
   const [isCommentsVisible, setIsCommentsVisible] = useState(false);
+  const { isMobile } = useResponsive();
+
+  const handleBadgeHover = (badge) => {
+    if (isMobile) {
+      if (hoveredBadge && hoveredBadge.id === badge?.id) {
+        setHoveredBadge(null);
+      } else {
+        setHoveredBadge(badge);
+      }
+    } else {
+      setHoveredBadge(badge);
+    }
+  };
 
   return (
     <motion.div
@@ -39,9 +56,18 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
-              {authorName}
-            </Link>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
+              <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
+                {authorName}
+              </Link>
+              {report.author?.user_badges?.slice(0, 3).map(({ badge }) => (
+                <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)}>
+                  <BadgeIcon badge={badge} size={14} />
+                </div>
+              ))}
+            </div>
+            </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })}
             </p>
@@ -75,9 +101,24 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
               </motion.button>
             </div>
           </div>
-          <div className="mt-2">
-            <ReportRenderer data={report.content} />
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={hoveredBadge ? `badge-${hoveredBadge.id}` : 'content'}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="mt-2"
+            >
+              {hoveredBadge ? (
+                <div className="py-2">
+                  <AchievementUnlock badge={hoveredBadge} isUserBadge={true} />
+                </div>
+              ) : (
+                <ReportRenderer data={report.content} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
       <AnimatePresence>

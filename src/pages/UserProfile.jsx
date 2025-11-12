@@ -4,18 +4,22 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner';
-import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
-import { BarChart3, Star, MessageSquare, Edit } from 'lucide-react';
+import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils.js';
+import { BarChart3, Star, MessageSquare, Edit, Award, Info } from 'lucide-react';
 import ReportRenderer from '@/components/Prospects/ReportRenderer';
 import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; 
+import BadgeIcon from '@/components/Common/BadgeIcon';
+import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import { ptBR } from 'date-fns/locale';
+import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 
 const fetchUserProfile = async (username) => {
   // 1. Busca o perfil pelo username
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('*')
+    .select('*, user_badges(badge:badges(*))') // Pede as badges junto com o perfil
     .eq('username', username)
     .single();
 
@@ -32,7 +36,15 @@ const fetchUserProfile = async (username) => {
 
   if (reportsError) throw new Error('Não foi possível carregar as análises.');
 
-  return { profile, reports };
+  // Ordena as badges por uma prioridade implícita (gold > silver > bronze)
+  const badgeOrder = { gold: 1, silver: 2, bronze: 3 };
+  const sortedBadges = profile.user_badges.sort((a, b) => {
+    const orderA = badgeOrder[a.badge.color] || 99;
+    const orderB = badgeOrder[b.badge.color] || 99;
+    return orderA - orderB;
+  });
+
+  return { profile: { ...profile, user_badges: sortedBadges }, reports };
 };
 
 const UserReportCard = ({ report }) => (
@@ -56,6 +68,7 @@ const UserReportCard = ({ report }) => (
 
 const UserProfile = () => {
   const { username } = useParams();
+  const [hoveredUserBadge, setHoveredUserBadge] = useState(null);
   const { user } = useAuth(); // Obter o usuário logado do contexto de autenticação
   const { data, isLoading, error } = useQuery({
     queryKey: ['userProfile', username],
@@ -132,6 +145,42 @@ const UserProfile = () => {
           )}
         </div>
       </motion.div>
+
+      {/* Badges Section */}
+      {profile.user_badges && profile.user_badges.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-super-dark-secondary p-6 rounded-xl shadow-md border dark:border-super-dark-border mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <Award className="w-6 h-6 mr-3 text-yellow-500" />
+            Conquistas
+          </h2>
+          <div 
+            className="flex flex-wrap gap-4"
+            onMouseLeave={() => setHoveredUserBadge(null)} // Limpa ao sair da área
+          >
+            {profile.user_badges.map(({ badge }) => (
+              <div key={badge.id} onMouseEnter={() => setHoveredUserBadge(badge)}>
+                <BadgeIcon badge={badge} size={24} />
+              </div>
+            ))}
+          </div>
+          {/* Área para exibir o AchievementUnlock */}
+          <AnimatePresence>
+            {hoveredUserBadge && (
+              <motion.div 
+                className="mt-6"
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+              >
+                <AchievementUnlock badge={hoveredUserBadge} isUserBadge={true} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
 
       {/* User's Reports */}
       <div>

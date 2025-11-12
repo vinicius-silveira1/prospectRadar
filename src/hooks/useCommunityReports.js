@@ -24,7 +24,8 @@ const useCommunityReports = (prospectId) => {
           *,
           author:profiles (
             username,
-            avatar_url
+            avatar_url,
+            user_badges!left(badge:badges(id, name, icon, color, description))
           ),
           report_votes!left (
             user_id
