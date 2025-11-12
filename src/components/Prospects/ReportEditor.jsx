@@ -7,15 +7,16 @@ import List from '@editorjs/list';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
 
-const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess }) => {
+const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess, initialData = null }) => {
   const { user } = useAuth();
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialData?.title || '');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const editorInstance = useRef(null);
   const editorContainerId = `editorjs-container-${prospectId}`;
 
   const initializeEditor = useCallback(() => {
+    if (!isOpen) return;
     if (editorInstance.current) {
       editorInstance.current.destroy();
     }
@@ -38,6 +39,7 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess }) => {
         },
       },
       placeholder: 'Comece a escrever sua análise aqui. Destaque pontos fortes, fracos e o potencial do jogador.',
+      data: initialData?.content || {},
       onReady: () => {
         console.log('Editor.js está pronto para uso!');
       },
@@ -46,11 +48,12 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess }) => {
       },
     });
     editorInstance.current = editor;
-  }, [editorContainerId]);
+  }, [isOpen, editorContainerId, initialData]);
 
   useEffect(() => {
     if (isOpen) {
       // A inicialização precisa de um pequeno delay para garantir que o DOM esteja pronto
+      setTitle(initialData?.title || '');
       setTimeout(initializeEditor, 100);
     }
 
@@ -60,7 +63,7 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess }) => {
         editorInstance.current = null;
       }
     };
-  }, [isOpen, initializeEditor]);
+  }, [isOpen, initializeEditor, initialData]);
 
   const handleSave = async () => {
     if (!editorInstance.current) return;
@@ -81,16 +84,28 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess }) => {
         throw new Error('O conteúdo da análise não pode estar vazio.');
       }
 
-      const { error: insertError } = await supabase
-        .from('community_reports')
-        .insert({
-          prospect_id: prospectId,
-          user_id: user.id,
-          title: title,
-          content: content,
-        });
+      const reportData = {
+        prospect_id: prospectId,
+        user_id: user.id,
+        title: title.trim(),
+        content: content,
+        status: 'published',
+      };
 
-      if (insertError) throw insertError;
+      let upsertError;
+
+      if (initialData) {
+        // Modo de Edição: Atualiza o registro existente
+        const { error } = await supabase.from('community_reports').update(reportData).match({ id: initialData.id });
+        upsertError = error;
+      } else {
+        // Modo de Criação: Insere um novo registro
+        const { error } = await supabase.from('community_reports').insert(reportData);
+        upsertError = error;
+      }
+
+
+      if (upsertError) throw upsertError;
 
       onSaveSuccess(); // Chama a função para refrescar a lista de análises
       onClose(); // Fecha o modal

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2 } from 'lucide-react';
+import { MessageSquare, User, PlusCircle, Trash2, Edit } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,7 +11,7 @@ import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
-const CommunityReportCard = ({ report, currentUser, onDelete }) => {
+const CommunityReportCard = ({ report, currentUser, onDelete, onEdit }) => {
   const author = report.author || {};
   const authorName = author.username || `Usuário Anônimo`;
   const isAuthor = currentUser?.id === report.user_id;
@@ -44,9 +44,14 @@ const CommunityReportCard = ({ report, currentUser, onDelete }) => {
           <div className="flex items-center justify-between">
             <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1">{report.title}</h4>
             {isAuthor && (
-              <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
-                <Trash2 size={16} />
-              </motion.button>
+              <div className="flex items-center gap-3">
+                <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                  <Edit size={16} />
+                </motion.button>
+                <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                  <Trash2 size={16} />
+                </motion.button>
+              </div>
             )}
           </div>
           <div className="mt-2">
@@ -62,6 +67,7 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
   const { reports, loading, error, refresh } = useCommunityReports(prospectId);
   const { user } = useAuth();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState(null);
 
@@ -69,6 +75,11 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
     // Log para verificar se a função está sendo recebida
     console.log('CommunityAnalysisSection recebeu onAddAnalysis:', typeof onAddAnalysis);
   }, [onAddAnalysis]);
+
+  const handleEditRequest = (report) => {
+    setEditingReport(report);
+    setIsEditorOpen(true);
+  };
 
   const handleDeleteRequest = (reportId) => {
     setReportToDelete(reportId);
@@ -131,7 +142,7 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
         <div className="space-y-4">
           {reports.length > 0 ? (
             reports.map(report => (
-              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} />
+              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} onEdit={handleEditRequest} />
             ))
           ) : (
             <div className="text-center py-12 border-2 border-dashed dark:border-super-dark-border rounded-lg">
@@ -150,9 +161,13 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
       {/* O editor de análise como um modal */}
       <ReportEditor
         isOpen={isEditorOpen}
-        onClose={() => setIsEditorOpen(false)}
+        onClose={() => {
+          setIsEditorOpen(false);
+          setEditingReport(null); // Limpa o estado de edição ao fechar
+        }}
         prospectId={prospectId}
         onSaveSuccess={refresh}
+        initialData={editingReport}
       />
 
       {/* Modal de confirmação para exclusão */}
