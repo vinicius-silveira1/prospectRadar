@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
@@ -8,13 +8,15 @@ import ReportRenderer from '@/components/Prospects/ReportRenderer.jsx';
 import ReportEditor from '@/components/Prospects/ReportEditor';
 import { useAuth } from '@/context/AuthContext';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
+import CommentSection from './CommentSection';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
-const CommunityReportCard = ({ report, currentUser, onDelete, onEdit }) => {
+const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) => {
   const author = report.author || {};
   const authorName = author.username || `Usuário Anônimo`;
   const isAuthor = currentUser?.id === report.user_id;
+  const [isCommentsVisible, setIsCommentsVisible] = useState(false);
 
   return (
     <motion.div
@@ -41,24 +43,44 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit }) => {
               {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })}
             </p>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-1">
             <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1">{report.title}</h4>
-            {isAuthor && (
-              <div className="flex items-center gap-3">
-                <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
-                  <Edit size={16} />
-                </motion.button>
-                <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
-                  <Trash2 size={16} />
-                </motion.button>
-              </div>
-            )}
+            <div className="flex items-center gap-4">
+              {isAuthor && (
+                <div className="flex items-center gap-3">
+                  <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                    <Edit size={16} />
+                  </motion.button>
+                  <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                    <Trash2 size={16} />
+                  </motion.button>
+                </div>
+              )}
+              <motion.button
+                onClick={() => onVote(report.id, report.user_has_voted)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
+              >
+                <ArrowUp size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
+                <span>{report.vote_count}</span>
+              </motion.button>
+              <motion.button
+                onClick={() => setIsCommentsVisible(!isCommentsVisible)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${isCommentsVisible ? 'bg-blue-100 text-blue-600 dark:bg-blue-800/50 dark:text-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-super-dark-border dark:text-gray-400 dark:hover:bg-gray-700'}`}
+              >
+                <MessageCircle size={16} />
+              </motion.button>
+            </div>
           </div>
           <div className="mt-2">
             <ReportRenderer data={report.content} />
           </div>
         </div>
       </div>
+      <AnimatePresence>
+        {isCommentsVisible && (
+          <CommentSection reportId={report.id} />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -85,6 +107,30 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
     setReportToDelete(reportId);
     setIsConfirmModalOpen(true);
  };
+
+  const handleVote = useCallback(async (reportId, userHasVoted) => {
+    if (!user) {
+      // ou redirecionar para o login
+      alert('Você precisa estar logado para votar.');
+      return;
+    }
+
+    try {
+      if (userHasVoted) {
+        // Remove o voto
+        const { error } = await supabase.from('report_votes').delete().match({ report_id: reportId, user_id: user.id });
+        if (error) throw error;
+      } else {
+        // Adiciona o voto
+        const { error } = await supabase.from('report_votes').insert({ report_id: reportId, user_id: user.id });
+        if (error) throw error;
+      }
+      refresh(); // Re-busca os dados para atualizar a contagem e o estado do voto
+    } catch (err) {
+      console.error('Erro ao registrar voto:', err);
+      alert('Não foi possível registrar seu voto. Tente novamente.');
+    }
+  }, [user, refresh]);
 
   const confirmDelete = useCallback(async () => {
     if (!reportToDelete) return;
@@ -142,7 +188,7 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
         <div className="space-y-4">
           {reports.length > 0 ? (
             reports.map(report => (
-              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} onEdit={handleEditRequest} />
+              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} onEdit={handleEditRequest} onVote={handleVote} />
             ))
           ) : (
             <div className="text-center py-12 border-2 border-dashed dark:border-super-dark-border rounded-lg">
