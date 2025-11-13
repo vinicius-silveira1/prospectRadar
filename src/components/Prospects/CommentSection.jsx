@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient'; // Certifique-se de que esta importação está correta
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -10,6 +10,8 @@ import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizad
 import { Link } from 'react-router-dom';
 import { CornerDownRight } from 'lucide-react';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
+
+const COMMENT_PAGE_SIZE = 5; // Define quantos comentários carregar por vez
 
 // Componente para um único comentário
 const CommentCard = ({ comment, onReply, onDelete, onBadgeClick }) => {
@@ -137,9 +139,9 @@ const CommentSection = ({ reportId }) => {
       console.error('Erro ao postar comentário:', error);
       alert('Não foi possível postar seu comentário.');
     } else {
-      // Adiciona o novo comentário diretamente ao estado local, sem precisar de uma nova busca
-      setComments(prevComments => [...prevComments, data]);
-      await fetchComments(); // Re-busca para reconstruir a árvore corretamente
+      // Adiciona o novo comentário e re-busca para garantir a ordem correta e a estrutura de thread
+      // Para otimização futura, poderíamos inserir diretamente na árvore se não houver paginação ativa
+      await fetchComments(true); 
       setNewComment('');
       setReplyingTo(null); // Limpa o estado de resposta
     }
@@ -157,7 +159,7 @@ const CommentSection = ({ reportId }) => {
     try {
       const { error } = await supabase.from('report_comments').delete().match({ id: commentToDeleteId });
       if (error) throw error;
-      
+
       await fetchComments(); // Re-busca para reconstruir a árvore corretamente
     } catch (err) {
       console.error('Erro ao excluir comentário:', err);
@@ -173,7 +175,7 @@ const CommentSection = ({ reportId }) => {
     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-super-dark-border">
       {loading && <p className="text-sm text-gray-500">Carregando comentários...</p>}
       
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         <div className="space-y-2">
           {comments.map(comment => <CommentThread key={comment.id} comment={comment} onReply={setReplyingTo} onDelete={handleDeleteRequest} />)}
         </div>

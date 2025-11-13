@@ -104,3 +104,35 @@
     overflow: hidden;
   }
 }
+
+/* Estilização da Barra de Rolagem Personalizada */
+/* Funciona em navegadores baseados em WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Fundo da trilha da barra de rolagem */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* O "polegar" ou a parte móvel da barra de rolagem */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(147, 51, 234, 0.3); /* Cor roxa da marca com transparência */
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Efeito de hover no "polegar" */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(147, 51, 234, 0.6); /* Roxo mais forte no hover */
+}
+
+/* Estilização para Firefox */
+/* A partir da versão 64, o Firefox suporta as propriedades padrão */
+* {
+  scrollbar-width: thin; /* 'auto', 'thin', ou 'none' */
+  scrollbar-color: rgba(147, 51, 234, 0.6) transparent; /* cor do polegar e cor da trilha */
+}

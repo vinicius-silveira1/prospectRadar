@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle } from 'lucide-react';
+import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle, Loader2, Share2 } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,7 +16,7 @@ import CommentSection from './CommentSection';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
-const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, onBadgeClick }) => {
+const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) => {
   const author = report.author || {};
   const authorName = author.username || `Usuário Anônimo`;
   const isAuthor = currentUser?.id === report.user_id;
@@ -55,72 +55,80 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
           )}
         </div>
         <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
-              <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
-                {authorName}
-              </Link>
-              {report.author?.user_badges?.slice(0, 3).map(({ badge }) => (
-                <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)}>
-                  <BadgeIcon badge={badge} size={14} />
+          <div className="flex flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+              <div className="flex items-center gap-2 min-w-0" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
+                <div className="flex items-center gap-2 truncate">
+                  <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate">
+                    {authorName}
+                  </Link>
+                  {report.author?.user_badges?.slice(0, 3).map(({ badge }) => (
+                    <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)} className="flex-shrink-0">
+                      <BadgeIcon badge={badge} size={14} />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })} 
+              </p>
             </div>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {formatDistanceToNow(new Date(report.created_at), { addSuffix: true, locale: ptBR })}
-            </p>
-          </div>
-          <div className="flex items-start justify-between mt-1">
-            <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1 flex-1 mr-4">{report.title}</h4>
-            <div className="flex items-center gap-4">
-              {isAuthor && (
-                <div className="flex items-center gap-3">
-                  <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
-                    <Edit size={16} />
-                  </motion.button>
-                  <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
-                    <Trash2 size={16} />
-                  </motion.button>
-                </div>
-              )}
-              <motion.button
-                onClick={() => onVote(report.id, report.user_has_voted)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
-              >
-                <ArrowUp size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
-                <span>{report.vote_count}</span>
+            <div className="flex flex-wrap items-start justify-between mt-1 gap-y-2 gap-x-4">
+              <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1 flex-grow min-w-0 pr-4">{report.title}</h4>
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                {isAuthor && ( 
+                  <div className="flex items-center gap-3">
+                    <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                      <Edit size={16} />
+                    </motion.button>
+                    <motion.button onClick={() => onDelete(report.id)} whileHover={{ scale: 1.1, color: 'rgb(239 68 68)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
+                      <Trash2 size={16} />
+                    </motion.button>
+                  </div>
+                )}
+                <motion.button
+                  onClick={() => onVote(report.id, report.user_has_voted)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
+                >
+                  <ArrowUp size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
+                  <span>{report.vote_count}</span>
+                </motion.button>
+                <motion.button
+                  onClick={() => setIsCommentsVisible(!isCommentsVisible)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${isCommentsVisible ? 'bg-blue-100 text-blue-600 dark:bg-blue-800/50 dark:text-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-super-dark-border dark:text-gray-400 dark:hover:bg-gray-700'}`}
+                >
+                  <MessageCircle size={16} />
+                  <span>{report.comment_count}</span>
               </motion.button>
               <motion.button
-                onClick={() => setIsCommentsVisible(!isCommentsVisible)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${isCommentsVisible ? 'bg-blue-100 text-blue-600 dark:bg-blue-800/50 dark:text-blue-300' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-super-dark-border dark:text-gray-400 dark:hover:bg-gray-700'}`}
+                onClick={() => window.open(`https://twitter.com/intent/tweet?text=Confira minha análise sobre ${report.prospect.name}: "${report.title}"&url=${window.location.href}&via=prospectradar_`, '_blank')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-super-dark-border dark:text-gray-400 dark:hover:bg-gray-700"
               >
-                <MessageCircle size={16} />
-                <span>{report.comment_count}</span>
-              </motion.button>
+                <Share2 size={16} />
+                  </motion.button>
+              </div>
             </div>
           </div>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={hoveredBadge ? `badge-${hoveredBadge.id}` : 'content'}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="mt-2"
-            >
-              {hoveredBadge ? (
-                <div className="py-2">
-                  <AchievementUnlock badge={hoveredBadge} isUserBadge={true} />
-                </div>
-              ) : (
-                <ReportRenderer data={report.content} />
-              )}
-            </motion.div>
-          </AnimatePresence>
         </div>
       </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={hoveredBadge ? `badge-${hoveredBadge.id}` : 'content'}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="mt-2"
+        >
+          {hoveredBadge ? ( 
+            <div className="py-2">
+              <AchievementUnlock badge={hoveredBadge} isUserBadge={true} />
+            </div>
+          ) : (
+            <ReportRenderer data={report.content} />
+          )}
+        </motion.div>
+      </AnimatePresence>
       <AnimatePresence>
         {isCommentsVisible && (
           <CommentSection reportId={report.id} />
@@ -131,7 +139,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
 };
 
 const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
-  const { reports, loading, error, refresh } = useCommunityReports(prospectId);
+  const { reports, loading, loadingMore, error, hasMore, loadMore, refresh } = useCommunityReports(prospectId);
   const { user } = useAuth();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingReport, setEditingReport] = useState(null);
@@ -246,6 +254,20 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Botão para carregar mais análises */}
+      {!loading && hasMore && (
+        <div className="mt-6 text-center">
+          <motion.button
+            onClick={loadMore}
+            disabled={loadingMore}
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center justify-center gap-2 mx-auto px-6 py-2 text-sm font-semibold text-brand-purple bg-purple-100 dark:bg-purple-900/50 dark:text-purple-300 rounded-lg shadow-sm hover:bg-purple-200 dark:hover:bg-purple-900 transition-all disabled:opacity-60"
+          >
+            {loadingMore ? <><Loader2 className="animate-spin" size={16} /> Carregando...</> : 'Carregar Mais Análises'}
+          </motion.button>
         </div>
       )}
 

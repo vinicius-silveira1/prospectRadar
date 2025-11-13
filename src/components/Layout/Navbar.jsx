@@ -197,7 +197,7 @@ const Navbar = ({ onMenuClick }) => {
           <div className="flex items-center gap-2">
             <button 
               onClick={onMenuClick}
-              className="lg:hidden p-1.5 sm:p-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary"
+              className="p-1.5 sm:p-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary"
             >
               <Menu className={isMobile ? 'h-5 w-5' : 'h-6 w-6'} />
             </button>

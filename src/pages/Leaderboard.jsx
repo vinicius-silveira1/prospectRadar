@@ -49,8 +49,8 @@ const LeaderboardItem = ({ profile, rank, stat, statLabel }) => {
       transition={{ delay: rank * 0.05 }}
       className="p-3 bg-white dark:bg-super-dark-secondary rounded-lg shadow-sm border dark:border-super-dark-border hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:shadow-lg transition-all duration-200"
     >
-      <div className="flex items-center">
-        <div className="flex items-center gap-4 flex-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="flex items-center gap-4 flex-1 w-full">
           <span className="font-bold text-lg text-gray-400 dark:text-gray-500 w-8 text-center">#{rank + 1}</span>
           <div
             className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold"
@@ -62,18 +62,20 @@ const LeaderboardItem = ({ profile, rank, stat, statLabel }) => {
               getInitials(profile.username)
             )}
           </div>
-          <div className="flex items-center gap-2" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
-            <Link to={`/user/${profile.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
-              {profile.username}
-            </Link>
-            {profile.user_badges?.slice(0, 3).map(({ badge }) => (
-              <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)}>
-                <BadgeIcon badge={badge} size={14} />
-              </div>
-            ))}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
+              <Link to={`/user/${profile.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate">
+                {profile.username}
+              </Link>
+              {profile.user_badges?.slice(0, 2).map(({ badge }) => (
+                <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)}>
+                  <BadgeIcon badge={badge} size={14} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-right w-full sm:w-auto mt-2 sm:mt-0">
           <p className="font-bold text-lg text-brand-purple dark:text-purple-400">{stat}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">{statLabel}</p>
         </div>
