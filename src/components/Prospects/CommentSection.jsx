@@ -73,7 +73,7 @@ const CommentThread = ({ comment, onReply, onDelete }) => (
 );
 
 // Componente principal da seção de comentários
-const CommentSection = ({ reportId }) => {
+const CommentSection = ({ reportId, onCommentPosted }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +141,7 @@ const CommentSection = ({ reportId }) => {
     } else {
       // Adiciona o novo comentário e re-busca para garantir a ordem correta e a estrutura de thread
       // Para otimização futura, poderíamos inserir diretamente na árvore se não houver paginação ativa
-      await fetchComments(true); 
+      if (onCommentPosted) onCommentPosted();
       setNewComment('');
       setReplyingTo(null); // Limpa o estado de resposta
     }

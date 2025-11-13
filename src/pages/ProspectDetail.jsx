@@ -424,7 +424,6 @@ const ProspectDetail = () => {
               </div>
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-4 text-blue-100 text-sm sm:text-base lg:text-lg">
                 <div className="flex items-center whitespace-nowrap"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" /><span className="truncate">{displayStats.team || 'N/A'}</span></div>
-                <div className="flex items-center whitespace-nowrap"><Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{displayStats.age} anos</div>
                 <div className="flex items-center whitespace-nowrap"><Ruler className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getHeightDisplay(displayStats.height)}</div>
                 <div className="flex items-center whitespace-nowrap"><Weight className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 flex-shrink-0" />{getWeightDisplay(displayStats.weight)}</div>
                 {displayStats.stats_last_updated_at && (
@@ -509,7 +508,7 @@ const ProspectDetail = () => {
                   initial="hidden"
                   animate="visible"
                 >
-                  {displayStats.nationality === '🇧🇷' && (
+                  {displayStats.nationality && (
                     <motion.div 
                       variants={{
                         hidden: { opacity: 0, x: -20 },
@@ -522,8 +521,10 @@ const ProspectDetail = () => {
                       <div className="min-w-0">
                         <div className="text-xs sm:text-sm leading-normal text-green-600 dark:text-green-400 font-mono tracking-wide">Nacionalidade</div>
                         <div className="font-medium text-gray-800 dark:text-super-dark-text-primary flex items-center flex-wrap">
-                          🇧🇷 Brasil
-                          <span className="ml-2 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs font-bold font-mono">BR</span>
+                          {displayStats.nationality}
+                          {displayStats.nationality === '🇧🇷' && (
+                            <span className="ml-2 bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs font-bold font-mono">BR</span>
+                          )}
                         </div>
                       </div>
                     </motion.div>
@@ -541,21 +542,6 @@ const ProspectDetail = () => {
                     <div className="min-w-0">
                       <div className="text-xs sm:text-sm leading-normal text-blue-600 dark:text-blue-400 font-mono tracking-wide">Time Atual</div>
                       <div className="font-medium text-gray-800 dark:text-super-dark-text-primary break-words font-mono">{displayStats.team || 'N/A'}</div>
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: { opacity: 1, x: 0 }
-                    }}
-                    className="flex items-start p-3 rounded-lg bg-gradient-to-r from-purple-50 to-violet-100/50 dark:from-purple-900/20 dark:to-violet-800/10 border border-purple-200/50 dark:border-purple-700/30 hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-all duration-300"
-                    whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(168, 85, 247, 0.2)" }}
-                  >
-                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 dark:text-purple-400 mr-2 sm:mr-3 mt-0.5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-xs sm:text-sm leading-normal text-purple-600 dark:text-purple-400 font-mono tracking-wide">Idade</div>
-                      <div className="font-medium text-gray-800 dark:text-super-dark-text-primary font-mono">{displayStats.age} anos</div>
                     </div>
                   </motion.div>
                   

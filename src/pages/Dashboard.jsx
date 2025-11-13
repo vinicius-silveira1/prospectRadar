@@ -121,7 +121,7 @@ const Dashboard = () => {
   // Top prospects para a seção principal (6 melhores ranqueados)
   const topProspects = useMemo(() => {
     if (!allProspects) return [];
-    return allProspects.slice(0, 6); // A lista já vem ordenada por ranking do hook.
+    return allProspects.slice(0, 8); // A lista já vem ordenada por ranking do hook.
   }, [allProspects, league]);
 
   // Estatísticas baseadas nos dados REAIS

@@ -61,7 +61,7 @@ const CommunityHighlights = () => {
     >
       <h2 className="text-lg font-gaming font-bold text-gray-900 dark:text-super-dark-text-primary flex items-center mb-4 tracking-wide">
         <MessageSquare className="h-5 w-5 text-brand-purple mr-2" />
-        Análises Recentes da Comunidade
+        Análises recentes da comunidade
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {reports.map((report, index) => (

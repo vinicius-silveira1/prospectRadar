@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
 
-const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) => {
+const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, onCommentPosted }) => {
   const author = report.author || {};
   const authorName = author.username || `Usuário Anônimo`;
   const isAuthor = currentUser?.id === report.user_id;
@@ -128,7 +128,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
       </AnimatePresence>
       <AnimatePresence>
         {isCommentsVisible && (
-          <CommentSection reportId={report.id} />
+          <CommentSection reportId={report.id} onCommentPosted={onCommentPosted} />
         )}
       </AnimatePresence>
     </motion.div>
@@ -238,7 +238,14 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
         <div className="space-y-4">
           {reports.length > 0 ? (
             reports.map(report => (
-              <CommunityReportCard key={report.id} report={report} currentUser={user} onDelete={handleDeleteRequest} onEdit={handleEditRequest} onVote={handleVote} />
+              <CommunityReportCard 
+                key={report.id} 
+                report={report} 
+                currentUser={user} 
+                onDelete={handleDeleteRequest} 
+                onEdit={handleEditRequest} 
+                onVote={handleVote} 
+                onCommentPosted={refresh} />
             ))
           ) : (
             <div className="text-center py-12 border-2 border-dashed dark:border-super-dark-border rounded-lg">
