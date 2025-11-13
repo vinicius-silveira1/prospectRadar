@@ -20,6 +20,7 @@ import TrendingHighlight from '@/components/Dashboard/TrendingHighlight.jsx';
 import BraziliansInNBA from '@/components/Dashboard/BraziliansInNBA.jsx';
 import BlogHighlight from '@/components/Dashboard/BlogHighlight.jsx';
 import { prospectOfTheWeek } from '@/data/spotlight.js';
+import CommunityHighlights from '@/components/Dashboard/CommunityHighlights'; // Importar o novo componente
 
 // WNBA Prospect of the Week Data
 const wnbaProspectOfTheWeek = {
@@ -228,6 +229,9 @@ const Dashboard = () => {
 
       {/* 2. Prospect of the Week */}
       <TrendingHighlight />
+
+      {/* NOVA SEÇÃO: Destaques da Comunidade */}
+      <CommunityHighlights />
 
       {/* 5. Prospects Brasileiros */}
       {brazilianProspects.length > 0 && (
