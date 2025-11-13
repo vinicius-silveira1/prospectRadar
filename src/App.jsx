@@ -21,6 +21,9 @@ import Welcome from './pages/Welcome';
 import BlogIndex from './pages/Blog/BlogIndex';
 import BlogPost from './pages/Blog/BlogPost';
 import OnboardingModal from './components/Onboarding/OnboardingModal'; 
+import UserProfile from './pages/UserProfile';
+import ProfileSettings from './pages/ProfileSettings';
+import Leaderboard from './pages/Leaderboard'; // Importar a nova página
 
 function GoogleAnalytics() {
   useEffect(() => {
@@ -76,6 +79,9 @@ function App() {
             <Route path="welcome" element={<Welcome />} />
             <Route path="blog" element={<BlogIndex />} />
             <Route path="blog/:slug" element={<BlogPost />} />
+            <Route path="/user/:username" element={<UserProfile />} />
+            <Route path="/settings/profile" element={<ProfileSettings />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
           </Route>
 
           {/* Rotas de autenticação (sem o layout principal) */}

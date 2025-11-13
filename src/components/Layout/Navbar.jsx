@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogOut, User, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import { Search, Menu, LogOut, User, Trash2, Settings } from 'lucide-react'; // Adicionado Settings
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveStack, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell'; // Importar o novo componente
 import LeagueToggleButton from './LeagueToggleButton';
 import BetaBadge from '../Common/BetaBadge';
 import DeleteAccountModal from './DeleteAccountModal';
@@ -101,6 +102,24 @@ const UserMenu = ({ user, onLogout, onDelete }) => {
             <p className="text-sm font-medium text-slate-800 dark:text-super-dark-text-primary truncate">{user.email.split('@')[0]}</p>
             <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">{user.email}</p>
           </div>
+          <div className="p-2 border-b dark:border-super-dark-border">
+            <Link
+              to={`/user/${user.username}`}
+              onClick={() => setIsUserMenuOpen(false)}
+              className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-100 dark:hover:bg-super-dark-primary rounded-md transition-colors"
+            >
+              <User size={16} />
+              <span>Meu Perfil</span>
+            </Link>
+            <Link
+              to="/settings/profile"
+              onClick={() => setIsUserMenuOpen(false)}
+              className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-super-dark-text-primary hover:bg-slate-100 dark:hover:bg-super-dark-primary rounded-md transition-colors"
+            >
+              <Settings size={16} />
+              <span>Configurações de Perfil</span>
+            </Link>
+          </div>
           <div className="p-2">
             <button
               onClick={() => { setIsUserMenuOpen(false); onLogout(); }}
@@ -179,7 +198,7 @@ const Navbar = ({ onMenuClick }) => {
           <div className="flex items-center gap-2">
             <button 
               onClick={onMenuClick}
-              className="lg:hidden p-1.5 sm:p-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary"
+              className="p-1.5 sm:p-2 text-slate-600 dark:text-super-dark-text-primary hover:text-brand-orange dark:hover:text-orange-400 transition-colors active:scale-95 rounded-lg hover:bg-slate-100 dark:hover:bg-super-dark-secondary"
             >
               <Menu className={isMobile ? 'h-5 w-5' : 'h-6 w-6'} />
             </button>
@@ -229,6 +248,7 @@ const Navbar = ({ onMenuClick }) => {
             <motion.div className="scale-90 sm:scale-100" whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
               <ThemeToggle />
             </motion.div>
+            {user && <NotificationBell />}
             {user ? (
               <UserMenu user={user} onLogout={handleLogout} onDelete={() => setIsDeleteModalOpen(true)} />
             ) : (

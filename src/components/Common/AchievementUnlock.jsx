@@ -2,12 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { getBadgeCategory, getBadgeRarity } from '../../lib/badges';
 
-const AchievementUnlock = ({ badge }) => {
+const AchievementUnlock = ({ badge, isUserBadge = false }) => {
   if (!badge) return null;
 
-  const categoryInfo = getBadgeCategory(badge);
-  const rarityInfo = getBadgeRarity(badge);
+  // Adapta para a estrutura de badges de usuário
+  const badgeData = isUserBadge ? {
+    key: badge.id,
+    label: badge.name,
+    description: badge.description,
+    icon: badge.icon,
+  } : badge;
 
+  const categoryInfo = getBadgeCategory(badgeData);
+  const rarityInfo = getBadgeRarity(badgeData);
   const getCategoryColor = () => {
     switch (categoryInfo.name) {
       case 'Shooting':
@@ -133,13 +140,13 @@ const AchievementUnlock = ({ badge }) => {
   };
 
   // Explicitly list the keys that require special styling for double emojis
-  const doubleEmojiKeys = ['THREE_AND_D', 'TWO_WAY_PLAYER', 'SLASHING_PLAYMAKER'];
-  const isDoubleEmoji = Array.isArray(badge.icon) && doubleEmojiKeys.includes(badge.key);
+  const doubleEmojiKeys = ['THREE_AND_D', 'TWO_WAY_PLAYER', 'SLASHING_PLAYMAKER']; 
+  const isDoubleEmoji = Array.isArray(badgeData.icon) && doubleEmojiKeys.includes(badgeData.key);
 
   const containerClasses = isDoubleEmoji
     ? `rounded-md w-auto h-10` // Auto width, fixed height for double emojis
     : `rounded-lg w-10 h-10`; // Original size for single emojis
-
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -196,46 +203,48 @@ const AchievementUnlock = ({ badge }) => {
 
       {/* Conteúdo compacto */}
       <div className="px-3 py-4">
-        <div className="flex items-start gap-3">
-          <motion.div 
-            className={`flex items-center justify-center text-lg shadow-md relative flex-shrink-0 ${containerClasses}`}
-            // Revert background color to default gray
-            style={{ background: getCategoryColor() }}
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          >
-            {isDoubleEmoji ? (
-              <>
-                <span className="text-xl">
-                  {badge.icon[0]}
+        <div className={`flex items-start ${!isUserBadge ? 'gap-3' : ''}`}>
+          {!isUserBadge && (
+            <motion.div 
+              className={`flex items-center justify-center text-lg shadow-md relative flex-shrink-0 ${containerClasses}`}
+              // Revert background color to default gray
+              style={{ background: getCategoryColor() }}
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              {isDoubleEmoji ? (
+                <>
+                  <span className="text-xl"> 
+                    {badgeData.icon[0]}
+                  </span>
+                  <span className="text-xl -ml-[0.8em]">
+                    {badgeData.icon[1]}
+                  </span>
+                </>
+              ) : (
+                <span className="text-2xl"> 
+                  {badgeData.icon}
                 </span>
-                <span className="text-xl -ml-[0.8em]">
-                  {badge.icon[1]}
-                </span>
-              </>
-            ) : (
-              <span className="text-2xl">
-                {badge.icon}
-              </span>
-            )}
-            
-            {/* Anel orbital para raridades Epic+ */}
-            {rarityInfo.stars >= 3 && (
-              <motion.div
-                className={`absolute -inset-0.5 border ${rarityInfo.color} rounded-md opacity-60`}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              />
-            )}
-          </motion.div>
+              )}
+              
+              {/* Anel orbital para raridades Epic+ */}
+              {rarityInfo.stars >= 3 && (
+                <motion.div
+                  className={`absolute -inset-0.5 border ${rarityInfo.color} rounded-md opacity-60`}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+              )}
+            </motion.div>
+          )}
           
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-sm text-gray-900 dark:text-super-dark-text-primary mb-2 leading-tight">
-              {badge.label}
+              {badgeData.label}
             </h3>
             <p className="text-sm text-gray-700 dark:text-super-dark-text-primary leading-relaxed font-medium">
-              {badge.description}
+              {badgeData.description}
             </p>
           </div>
         </div>

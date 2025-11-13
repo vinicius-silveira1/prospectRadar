@@ -15,6 +15,9 @@
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
+    "@editorjs/editorjs": "^2.31.0",
+    "@editorjs/header": "^2.8.8",
+    "@editorjs/list": "^2.0.8",
     "@stripe/stripe-js": "^7.8.0",
     "@supabase/supabase-js": "^2.52.1",
     "@tanstack/react-query": "^5.81.5",

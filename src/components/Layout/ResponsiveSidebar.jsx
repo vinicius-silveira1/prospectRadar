@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookText, Calendar, CreditCard, GitCompare, Home, Info, Lightbulb, Star, TrendingUp, Trophy, Users, X } from 'lucide-react';
+import { BookText, Calendar, CreditCard, GitCompare, Home, Info, Lightbulb, Star, TrendingUp, Trophy, Users, X, BarChart2 } from 'lucide-react';
 
 function ResponsiveSidebar({ isOpen, onClose }) {
   const location = useLocation();
@@ -12,12 +12,12 @@ function ResponsiveSidebar({ isOpen, onClose }) {
     { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
+    { path: '/leaderboard', icon: BarChart2, label: 'Leaderboard' },
     { path: '/trending', icon: TrendingUp, label: 'Em Destaque' },
     { path: '/blog', icon: BookText, label: 'Blog' },
     { path: '/radar-score-explained', icon: Lightbulb, label: 'Radar Score' },
     { path: '/pricing', icon: CreditCard, label: 'Planos', isSpecial: true },
     { path: '/about', icon: Info, label: 'Sobre' },
-    { path: '/draft-history', icon: Calendar, label: 'Histórico do Draft' },
   ];
 
   return (

@@ -40,8 +40,8 @@ const BlogIndex = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-2xl mb-12 border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group"
+        transition={{ duration: 0.5, ease: "easeOut" }} 
+        className="relative flex flex-col sm:flex-row items-center text-center sm:text-left justify-between gap-6 bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-6 rounded-xl shadow-2xl shadow-purple-500/10 border border-blue-200/20 dark:border-gray-700 mb-8 overflow-hidden"
         whileHover={{
           boxShadow: "0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(59, 130, 246, 0.3)"
         }}
@@ -51,23 +51,21 @@ const BlogIndex = () => {
           backgroundSize: '20px 20px'
         }}></div>
         
-        <div className="relative z-10">
+        <div className="relative z-10 text-center">
           <motion.h1 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-2xl sm:text-4xl font-gaming font-bold mb-2 leading-tight flex items-center justify-center font-mono tracking-wide"
+            className="text-3xl font-gaming font-bold text-white font-mono tracking-wide flex items-center justify-center sm:justify-start gap-3"
           >
             <Rss className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
-            <span>Blog do </span>
-            <span className="text-yellow-300 ml-2">prospect</span>
-            <span>Radar</span>
+            Blog do prospectRadar
           </motion.h1>
           <motion.p 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wide"
+            className="text-blue-100 dark:text-gray-300 mt-1"
           >
             Análises, notícias e tudo sobre o universo do scouting de basquete.
           </motion.p>
