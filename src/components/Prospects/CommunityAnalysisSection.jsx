@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, PlusCircle, Trash2, Edit, ArrowUp, MessageCircle, Loader2, Share2 } from 'lucide-react';
+import { MessageSquare, User, PlusCircle, Trash2, Edit, Dribbble, MessageCircle, Loader2, Share2 } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
+
 
 const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) => {
   const author = report.author || {};
@@ -90,8 +91,8 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
                   onClick={() => onVote(report.id, report.user_has_voted)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
                 >
-                  <ArrowUp size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
-                  <span>{report.vote_count}</span>
+                <Dribbble size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
+                <span>{report.user_has_voted ? 'Cravado!' : 'Cravada'} ({report.vote_count})</span>
                 </motion.button>
                 <motion.button
                   onClick={() => setIsCommentsVisible(!isCommentsVisible)}

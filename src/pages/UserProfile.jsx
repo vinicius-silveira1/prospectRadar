@@ -124,8 +124,8 @@ const UserProfile = () => {
               <p className="text-xs text-blue-200 dark:text-gray-400">Análises</p>
             </div>
             <div className="text-center">
-              <p className="font-bold text-lg">{profile.total_upvotes_received || 0}</p>
-              <p className="text-xs text-blue-200 dark:text-gray-400">Upvotes</p>
+              <p className="font-bold text-lg">{profile.total_assists || 0}</p>
+              <p className="text-xs text-blue-200 dark:text-gray-400">Assistências</p>
             </div>
           </div>
 

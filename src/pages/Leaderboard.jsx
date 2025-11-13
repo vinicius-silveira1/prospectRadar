@@ -14,9 +14,9 @@ import { useResponsive } from '@/hooks/useResponsive';
 const fetchLeaderboardData = async () => {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, avatar_url, total_analyses, total_upvotes_received, user_badges(badge:badges(id, name, icon, color, description))')
-    .gt('total_analyses', 0) // Apenas perfis com pelo menos uma análise
-    .order('total_upvotes_received', { ascending: false })
+    .select('id, username, avatar_url, total_analyses, total_assists, user_badges(badge:badges(id, name, icon, color, description))')
+    .or('total_analyses.gt.0,total_assists.gt.0') // Apenas perfis com pelo menos uma análise OU uma assistência
+    .order('total_assists', { ascending: false })
     .limit(50); // Limita a busca aos top 50 para performance
 
   if (error) {
@@ -103,7 +103,7 @@ const Leaderboard = () => {
 
   const sortedByUpvotes = useMemo(() => {
     if (!profiles) return [];
-    return [...profiles].sort((a, b) => (b.total_upvotes_received || 0) - (a.total_upvotes_received || 0));
+    return [...profiles].sort((a, b) => (b.total_assists || 0) - (a.total_assists || 0));
   }, [profiles]);
 
   const sortedByAnalyses = useMemo(() => {
@@ -136,7 +136,7 @@ const Leaderboard = () => {
           onClick={() => setActiveTab('upvotes')}
           className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'upvotes' ? 'bg-brand-purple text-white shadow' : 'text-gray-600 dark:text-gray-300'}`}
         >
-          🏆 Mais Votados
+          🏆 Mais Assistências
         </button>
         <button
           onClick={() => setActiveTab('analyses')}
@@ -165,8 +165,8 @@ const Leaderboard = () => {
               key={profile.id}
               profile={profile}
               rank={index}
-              stat={activeTab === 'upvotes' ? profile.total_upvotes_received : profile.total_analyses}
-              statLabel={activeTab === 'upvotes' ? 'Upvotes' : 'Análises'}
+              stat={activeTab === 'upvotes' ? profile.total_assists : profile.total_analyses}
+              statLabel={activeTab === 'upvotes' ? 'Assistências' : 'Análises'}
             />
           ))}
         </motion.div>
