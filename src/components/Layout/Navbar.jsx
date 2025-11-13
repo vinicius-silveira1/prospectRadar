@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useBreakpoint, useIsMobile, useIsTablet } from '@/hooks/useResponsive.js';
 import { ResponsiveContainer, ResponsiveStack, ResponsiveText } from '@/components/Common/ResponsiveComponents.jsx';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from './NotificationBell'; // Importar o novo componente
 import LeagueToggleButton from './LeagueToggleButton';
 import BetaBadge from '../Common/BetaBadge';
 import DeleteAccountModal from './DeleteAccountModal';
@@ -247,6 +248,7 @@ const Navbar = ({ onMenuClick }) => {
             <motion.div className="scale-90 sm:scale-100" whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
               <ThemeToggle />
             </motion.div>
+            {user && <NotificationBell />}
             {user ? (
               <UserMenu user={user} onLogout={handleLogout} onDelete={() => setIsDeleteModalOpen(true)} />
             ) : (
