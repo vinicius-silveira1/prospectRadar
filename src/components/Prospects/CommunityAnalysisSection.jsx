@@ -63,11 +63,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
                   <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate">
                     {authorName}
                   </Link>
-                  {report.author?.user_badges?.slice(0, 3).map(({ badge }) => (
-                    <div key={badge.id} onMouseEnter={() => !isMobile && handleBadgeHover(badge)} onClick={() => isMobile && handleBadgeHover(badge)} className="flex-shrink-0">
-                      <BadgeIcon badge={badge} size={14} />
-                    </div>
-                  ))}
+                  
                 </div>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -76,7 +72,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
             </div>
             <div className="flex flex-wrap items-start justify-between mt-1 gap-y-2 gap-x-4">
               <h4 className="text-lg font-bold text-brand-purple dark:text-purple-400 mt-1 flex-grow min-w-0 pr-4">{report.title}</h4>
-              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <div className="flex items-center flex-wrap justify-start sm:justify-end gap-2 sm:gap-4 flex-shrink-0">
                 {isAuthor && ( 
                   <div className="flex items-center gap-3">
                     <motion.button onClick={() => onEdit(report)} whileHover={{ scale: 1.1, color: 'rgb(59 130 246)' }} whileTap={{ scale: 0.9 }} className="text-gray-400 dark:text-gray-500">
@@ -89,10 +85,10 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote }) 
                 )}
                 <motion.button
                   onClick={() => onVote(report.id, report.user_has_voted)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
+                  className={`flex items-center gap-0.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${report.user_has_voted ? 'bg-purple-100 text-brand-purple dark:bg-purple-800/50 dark:text-purple-300' : 'bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-800/50 dark:text-green-300'}`}
                 >
-                <Dribbble size={16} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
-                <span>{report.user_has_voted ? 'Cravado!' : 'Cravada'} ({report.vote_count})</span>
+                <Dribbble size={18} className={report.user_has_voted ? 'text-brand-purple dark:text-purple-300' : ''} />
+                <span></span>
                 </motion.button>
                 <motion.button
                   onClick={() => setIsCommentsVisible(!isCommentsVisible)}
