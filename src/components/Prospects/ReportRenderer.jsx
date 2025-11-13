@@ -21,9 +21,11 @@ const ReportRenderer = ({ data }) => {
             const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
             return (
               <ListTag key={block.id} className="list-disc list-inside">
-                {block.data.items.map((item, index) => (
-                  <li key={index} dangerouslySetInnerHTML={{ __html: item }} />
-                ))}
+                {block.data.items.map((item, index) => {
+                  // CORREÇÃO: Verifica se o item é um objeto com 'content' ou apenas uma string.
+                  const content = typeof item === 'object' && item.content ? item.content : item;
+                  return <li key={index} dangerouslySetInnerHTML={{ __html: content }} />;
+                })}
               </ListTag>
             );
 
