@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
@@ -14,6 +14,15 @@ import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+
+// Mapeamento de Níveis para XP necessário (deve ser o mesmo da Edge Function)
+const LEVEL_THRESHOLDS = {
+  1: 0,
+  2: 100,
+  3: 250,
+  4: 500,
+  5: 1000,
+};
 
 const fetchUserProfile = async (username) => {
   // 1. Busca o perfil pelo username
@@ -75,6 +84,17 @@ const UserProfile = () => {
     queryFn: () => fetchUserProfile(username),
   });
 
+  const levelProgress = useMemo(() => {
+    if (!data?.profile) return { progress: 0, currentXp: 0, nextLevelXp: 100 };
+    const { xp, level } = data.profile;
+    const currentLevelXp = LEVEL_THRESHOLDS[level] || 0;
+    const nextLevelXp = LEVEL_THRESHOLDS[level + 1] || xp; // Se for o nível máximo, a barra fica cheia
+    const xpInLevel = xp - currentLevelXp;
+    const xpForNextLevel = nextLevelXp - currentLevelXp;
+    const progress = xpForNextLevel > 0 ? (xpInLevel / xpForNextLevel) * 100 : 100;
+    return { progress, currentXp: xpInLevel, nextLevelXp: xpForNextLevel };
+  }, [data]);
+
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
   }
@@ -115,6 +135,21 @@ const UserProfile = () => {
         </div>
         <div className="text-center sm:text-left relative z-10">
           <h1 className="text-3xl font-gaming font-bold text-white font-mono tracking-wide">{profile.username}</h1>
+          {/* Barra de XP e Nível */}
+          <div className="mt-3 w-full">
+            <div className="flex justify-between items-center text-xs font-mono mb-1">
+              <span className="px-2 py-0.5 bg-yellow-400 text-black font-bold rounded">NÍVEL {profile.level || 1}</span>
+              <span className="text-yellow-200">{levelProgress.currentXp} / {levelProgress.nextLevelXp} XP</span>
+            </div>
+            <div className="w-full bg-black/30 rounded-full h-2.5">
+              <motion.div
+                className="bg-yellow-400 h-2.5 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${levelProgress.progress}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+            </div>
+          </div>
           <p className="text-blue-100 dark:text-gray-300 mt-1">{profile.bio || 'Este usuário ainda não adicionou uma biografia.'}</p>
           
           {/* Stats */}

@@ -53,6 +53,11 @@ export default function useWatchlist() {
     if (!error) {
       setWatchlist(prev => new Set(prev).add(prospectId));
       // Evento Google Analytics: adição à watchlist
+      // Concede XP por adicionar à watchlist
+      supabase.functions.invoke('grant-xp', {
+        body: { action: 'ADD_TO_WATCHLIST', userId: user.id },
+      }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por watchlist:', error) });
+
       if (window.gtag) {
         window.gtag('event', 'add_to_watchlist', { prospect_id: prospectId });
       }

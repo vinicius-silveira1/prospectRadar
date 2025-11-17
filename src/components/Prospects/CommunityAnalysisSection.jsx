@@ -174,6 +174,18 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
         // Adiciona o voto
         const { error } = await supabase.from('report_votes').insert({ report_id: reportId, user_id: user.id });
         if (error) throw error;
+
+        // Concede XP para quem deu o upvote e para quem recebeu
+        supabase.functions.invoke('grant-xp', {
+          body: { action: 'GIVE_ASSIST', userId: user.id },
+        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por dar assistência:', error) });
+
+        const { data: reportAuthor } = await supabase.from('community_reports').select('user_id').eq('id', reportId).single();
+        if (reportAuthor) {
+          supabase.functions.invoke('grant-xp', {
+            body: { action: 'RECEIVE_ASSIST', userId: reportAuthor.user_id },
+          }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por receber assistência:', error) });
+        }
       }
       refresh(); // Re-busca os dados para atualizar a contagem e o estado do voto
     } catch (err) {

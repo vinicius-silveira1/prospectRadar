@@ -195,6 +195,12 @@ const MockDraft = () => {
     }
     try {
       await saveMockDraft(draftNameToSave);
+      // Concede XP por completar/salvar um mock draft
+      if (user) {
+        supabase.functions.invoke('grant-xp', {
+          body: { action: 'COMPLETE_MOCK_DRAFT', userId: user.id },
+        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por mock draft:', error) });
+      }
       setNotification({ type: 'success', message: 'Draft salvo com sucesso!' });
       setIsSaveModalOpen(false);
     } catch (error) {

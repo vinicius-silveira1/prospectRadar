@@ -1010,7 +1010,7 @@ export class ProspectRankingAlgorithm {
       if (advancedStats.per >= T.highPer) {
         flags.push({ type: 'green', message: getMessage('EFFICIENT_OFFENSE') });
       }
-      if (p.position.includes('G') || p.position.includes('F')) {
+      if (p.position && (p.position.includes('G') || p.position.includes('F'))) {
         if (basicStats.rpg >= T.highRpgGuard) {
           flags.push({ type: 'green', message: getMessage('HIGH_REBOUND_GUARD') });
         }
@@ -1018,15 +1018,15 @@ export class ProspectRankingAlgorithm {
           flags.push({ type: 'green', message: getMessage('HIGH_DEFLECTION_GUARD') });
         }
       }
-      if ((p.position === 'PG' || p.position === 'SG') && basicStats.apg >= 7.0 && advancedStats.usage_rate >= 30) {
+      if (p.position && (p.position === 'PG' || p.position === 'SG') && basicStats.apg >= 7.0 && advancedStats.usage_rate >= 30) {
         flags.push({ type: 'green', message: getMessage('ELITE_CREATIVE_GUARD') });
       }
 
       // --- Red Flags ---
-      if ((p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < T.lowPpgForward && basicStats.fg_pct < T.lowFgPctForward) {
+      if (p.position && (p.position === 'SF' || p.position === 'PF') && p.age <= 19.5 && basicStats.ppg < T.lowPpgForward && basicStats.fg_pct < T.lowFgPctForward) {
         flags.push({ type: 'red', message: getMessage('RISKY_FORWARD') });
       }
-      if ((p.position === 'C' || p.position === 'PF') && basicStats.ppg < T.lowPpgBig && advancedStats.usage_rate < T.lowUsageBig) {
+      if (p.position && (p.position === 'C' || p.position === 'PF') && basicStats.ppg < T.lowPpgBig && advancedStats.usage_rate < T.lowUsageBig) {
         flags.push({ type: 'red', message: getMessage('LIMITED_OFFENSE_BIG') });
       }
       if (basicStats.ft_pct < T.lowFtPct && basicStats.ft_attempts >= T.minFtAttempts) {
@@ -1044,18 +1044,18 @@ export class ProspectRankingAlgorithm {
       if (p.tov_percent >= T.highTovPct) { 
         flags.push({ type: 'red', message: getMessage('HIGH_TOV_PERCENT') }); 
       }
-      if ((p.position.includes('G')) && basicStats.ft_pct < T.lowFtGuard && basicStats.ft_attempts >= T.minFtAttempts) {
+      if (p.position && (p.position.includes('G')) && basicStats.ft_pct < T.lowFtGuard && basicStats.ft_attempts >= T.minFtAttempts) {
         flags.push({ type: 'red', message: getMessage('QUESTIONABLE_SHOOTING_GUARD') });
-      } else if ((p.position.includes('F') || p.position.includes('C')) && basicStats.ft_pct < T.lowFtBig && basicStats.ft_attempts >= T.minFtAttempts) {
+      } else if (p.position && (p.position.includes('F') || p.position.includes('C')) && basicStats.ft_pct < T.lowFtBig && basicStats.ft_attempts >= T.minFtAttempts) {
         flags.push({ type: 'red', message: getMessage('QUESTIONABLE_SHOOTING_BIG') });
       }
-      if ((p.position === 'PF' || p.position === 'C') && basicStats.rpg < T.lowReboundBig) {
+      if (p.position && (p.position === 'PF' || p.position === 'C') && basicStats.rpg < T.lowReboundBig) {
         flags.push({ type: 'red', message: getMessage('LOW_REBOUND_BIG') });
       }
       if (p.fouls_per_game > T.highFouls) {
         flags.push({ type: 'red', message: getMessage('HIGH_FOUL_RATE') });
       }
-      if (p.position === 'PG' && basicStats.apg < T.lowApgPG) {
+      if (p.position && p.position === 'PG' && basicStats.apg < T.lowApgPG) {
         flags.push({ type: 'red', message: getMessage('LOW_ASSIST_PG') });
       }
     }

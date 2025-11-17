@@ -99,10 +99,14 @@ const Dashboard = () => {
 
   const internationalProspects = useMemo(() => {
     if (!allProspects) return [];
-    const internationalLeague = ['EuroLeague', 'AUS NBL', 'NBL Blitz', 'NBL', 'LNB', 'G-BBL', 'ACB']
+    // CORREÇÃO: Lista de ligas expandida e corrigida para incluir todas as ligas internacionais
+    const internationalLeague = [
+      'EuroLeague', 'Euroleague','AUS NBL', 'NBL Blitz', 'NBL', 'LNB', 'G-BBL', 'ACB', 
+      'Jeep Elite', 'Liga ABA', 'HEBA A1', 'LKL', 'KLS', 
+    ];
     return allProspects
       .filter(p => internationalLeague.includes(p.league))
-      .slice(0, 6);
+      .slice(0, 8);
   }, [allProspects]);
 
   // Função para tratar o toggle da watchlist com erro

@@ -107,6 +107,13 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess, initialData 
 
       if (upsertError) throw upsertError;
 
+      // Apenas concede XP para a criação de uma nova análise
+      if (!initialData && user) {
+        supabase.functions.invoke('grant-xp', {
+          body: { action: 'SUBMIT_ANALYSIS', userId: user.id },
+        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por análise:', error) });
+      }
+
       onSaveSuccess(); // Chama a função para refrescar a lista de análises
       onClose(); // Fecha o modal
 

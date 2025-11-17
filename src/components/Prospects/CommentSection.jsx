@@ -139,6 +139,11 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
       console.error('Erro ao postar comentário:', error);
       alert('Não foi possível postar seu comentário.');
     } else {
+      // Concede XP por submeter um comentário
+      supabase.functions.invoke('grant-xp', {
+        body: { action: 'SUBMIT_COMMENT', userId: user.id },
+      }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por comentário:', error) });
+
       // Adiciona o novo comentário e re-busca para garantir a ordem correta e a estrutura de thread
       // Para otimização futura, poderíamos inserir diretamente na árvore se não houver paginação ativa
       if (onCommentPosted) onCommentPosted();

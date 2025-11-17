@@ -22,7 +22,32 @@ async function scrapeRealGMPlayerStats2026(playerRealGMUrl, playerName, season, 
     await page.goto(playerRealGMUrl, { waitUntil: 'networkidle2', timeout: 60000 });
     console.log('✅ Página carregada. Extraindo dados...');
 
-    const allData = await page.evaluate((season, team, league) => {
+    // --- NOVA SEÇÃO: Extração de Dados Biográficos ---
+    const bioData = await page.evaluate(() => {
+      const getTextFromStrong = (label) => {
+        const strongElement = Array.from(document.querySelectorAll('p strong')).find(el => el.textContent.includes(label));
+        return strongElement ? strongElement.parentElement.textContent.replace(label, '').trim() : null;
+      };
+
+      const heightText = getTextFromStrong('Height:');
+      const heightMatch = heightText ? heightText.match(/(\d+-\d+)/) : null;
+
+      const featureSpans = Array.from(document.querySelectorAll('h2 span.feature'));
+      const positionElement = featureSpans.find(span => !span.textContent.trim().startsWith('#'));
+      const nationalityElement = document.querySelector('a[href*="/info/nationality/"]');
+
+      return {
+        position: positionElement ? positionElement.textContent.trim() : null,
+        height: heightMatch ? heightMatch[1] : null,
+        nationality: nationalityElement ? nationalityElement.textContent.trim() : null,
+        // Peso não está disponível no HTML fornecido, então será nulo.
+        weight: null 
+      };
+    });
+
+    console.log('🧬 Dados biográficos extraídos:', bioData);
+
+    const statsData = await page.evaluate((season, team, league) => {
       const getStatsFromRow = (row, headers) => {
         const cells = row.querySelectorAll('td');
         const stats = {};
@@ -67,7 +92,10 @@ async function scrapeRealGMPlayerStats2026(playerRealGMUrl, playerName, season, 
 
             const seasonMatch = seasonText === season || seasonText === `${season} *`;
 
-            if (seasonMatch && teamText === team && leagueText === league) {
+            // Flexibiliza a correspondência de time, útil para nomes longos ou pequenas variações
+            const teamMatch = teamText.includes(team) || team.includes(teamText);
+
+            if (seasonMatch && teamMatch && leagueText === league) {
                 if (headers.includes('PPR')) {
                   advancedStats = getStatsFromRow(row, headers);
                 } else if (headers.includes('FGM')) {
@@ -86,45 +114,46 @@ async function scrapeRealGMPlayerStats2026(playerRealGMUrl, playerName, season, 
     }, season, team, league);
 
     const tablesFound = [];
-    if (allData.perGameStats) tablesFound.push('Per Game');
-    if (allData.totalsStats) tablesFound.push('Totals');
-    if (allData.advancedStats) tablesFound.push('Advanced');
+    if (statsData.perGameStats) tablesFound.push('Per Game');
+    if (statsData.totalsStats) tablesFound.push('Totals');
+    if (statsData.advancedStats) tablesFound.push('Advanced');
 
     const playerData = {
-      ppg: parseFloat(allData.perGameStats?.pts) || 0,
-      rpg: parseFloat(allData.perGameStats?.trb) || 0,
-      apg: parseFloat(allData.perGameStats?.ast) || 0,
-      spg: parseFloat(allData.perGameStats?.stl) || 0,
-      bpg: parseFloat(allData.perGameStats?.blk) || 0,
-      fg_pct: parseFloat(allData.perGameStats?.fg_pct) || 0,
-      three_pct: parseFloat(allData.perGameStats?.three_pct) || 0,
-      ft_pct: parseFloat(allData.perGameStats?.ft_pct) || 0,
-      games_played: parseInt(allData.perGameStats?.games_played, 10) || 0,
-      total_points: parseInt(allData.totalsStats?.pts, 10) || 0,
-      total_rebounds: parseInt(allData.totalsStats?.trb, 10) || 0,
-      total_assists: parseInt(allData.totalsStats?.ast, 10) || 0,
-      total_steals: parseInt(allData.totalsStats?.stl, 10) || 0,
-      total_blocks: parseInt(allData.totalsStats?.blk, 10) || 0,
-      turnovers: parseInt(allData.totalsStats?.tov, 10) || 0,
-      minutes_played: parseFloat(allData.totalsStats?.min) || 0,
-      total_field_goal_attempts: parseInt(allData.totalsStats?.fga, 10) || 0,
-      three_pt_makes: parseInt(allData.totalsStats?.three_pm, 10) || 0,
-      three_pt_attempts: parseInt(allData.totalsStats?.three_pa, 10) || 0,
-      ft_makes: parseInt(allData.totalsStats?.ftm, 10) || 0,
-      ft_attempts: parseInt(allData.totalsStats?.fta, 10) || 0,
-      ts_percent: parseFloat(allData.advancedStats?.ts_percent) || 0,
-      efg_percent: parseFloat(allData.advancedStats?.efg_percent) || 0,
-      orb_percent: parseFloat(allData.advancedStats?.orb_percent) || 0,
-      drb_percent: parseFloat(allData.advancedStats?.drb_percent) || 0,
-      trb_percent: parseFloat(allData.advancedStats?.trb_percent) || 0,
-      ast_percent: parseFloat(allData.advancedStats?.ast_percent) || 0,
-      tov_percent: parseFloat(allData.advancedStats?.tov_percent) || 0,
-      stl_percent: parseFloat(allData.advancedStats?.stl_percent) || 0,
-      blk_percent: parseFloat(allData.advancedStats?.blk_percent) || 0,
-      usg_percent: parseFloat(allData.advancedStats?.usg_percent) || 0,
-      ortg: parseFloat(allData.advancedStats?.ortg) || 0,
-      drtg: parseFloat(allData.advancedStats?.drtg) || 0,
-      per: parseFloat(allData.advancedStats?.per) || 0,
+      ...bioData, // Adiciona os dados biográficos
+      ppg: parseFloat(statsData.perGameStats?.pts) || 0,
+      rpg: parseFloat(statsData.perGameStats?.trb) || 0,
+      apg: parseFloat(statsData.perGameStats?.ast) || 0,
+      spg: parseFloat(statsData.perGameStats?.stl) || 0,
+      bpg: parseFloat(statsData.perGameStats?.blk) || 0,
+      fg_pct: parseFloat(statsData.perGameStats?.fg_pct) || 0,
+      three_pct: parseFloat(statsData.perGameStats?.three_pct) || 0,
+      ft_pct: parseFloat(statsData.perGameStats?.ft_pct) || 0,
+      games_played: parseInt(statsData.perGameStats?.games_played, 10) || 0,
+      total_points: parseInt(statsData.totalsStats?.pts, 10) || 0,
+      total_rebounds: parseInt(statsData.totalsStats?.trb, 10) || 0,
+      total_assists: parseInt(statsData.totalsStats?.ast, 10) || 0,
+      total_steals: parseInt(statsData.totalsStats?.stl, 10) || 0,
+      total_blocks: parseInt(statsData.totalsStats?.blk, 10) || 0,
+      turnovers: parseInt(statsData.totalsStats?.tov, 10) || 0,
+      minutes_played: parseFloat(statsData.totalsStats?.min) || 0,
+      total_field_goal_attempts: parseInt(statsData.totalsStats?.fga, 10) || 0,
+      three_pt_makes: parseInt(statsData.totalsStats?.three_pm, 10) || 0,
+      three_pt_attempts: parseInt(statsData.totalsStats?.three_pa, 10) || 0,
+      ft_makes: parseInt(statsData.totalsStats?.ftm, 10) || 0,
+      ft_attempts: parseInt(statsData.totalsStats?.fta, 10) || 0,
+      ts_percent: parseFloat(statsData.advancedStats?.ts_percent) || 0,
+      efg_percent: parseFloat(statsData.advancedStats?.efg_percent) || 0,
+      orb_percent: parseFloat(statsData.advancedStats?.orb_percent) || 0,
+      drb_percent: parseFloat(statsData.advancedStats?.drb_percent) || 0,
+      trb_percent: parseFloat(statsData.advancedStats?.trb_percent) || 0,
+      ast_percent: parseFloat(statsData.advancedStats?.ast_percent) || 0,
+      tov_percent: parseFloat(statsData.advancedStats?.tov_percent) || 0,
+      stl_percent: parseFloat(statsData.advancedStats?.stl_percent) || 0,
+      blk_percent: parseFloat(statsData.advancedStats?.blk_percent) || 0,
+      usg_percent: parseFloat(statsData.advancedStats?.usg_percent) || 0,
+      ortg: parseFloat(statsData.advancedStats?.ortg) || 0,
+      drtg: parseFloat(statsData.advancedStats?.drtg) || 0,
+      per: parseFloat(statsData.advancedStats?.per) || 0,
       source: 'RealGM_2026_Scraper',
     };
     return { playerData, tablesFound };

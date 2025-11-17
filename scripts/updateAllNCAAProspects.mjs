@@ -3,6 +3,7 @@ import { supabase } from '../src/lib/supabaseClient.js';
 import { scrapeNCAAStats } from './scrapeNCAAStats.mjs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { activeProspects as internationalProspects } from './update_active_prospects.mjs';
 import { ncaaScrapingExceptions } from './ncaaScrapingExceptions.mjs';
 
 const execPromise = promisify(exec);
@@ -42,9 +43,19 @@ async function updateAllNCAAProspects(draftClass) {
       return;
     }
 
-    console.log(`✅ ${prospects.length} prospectos encontrados. Iniciando scraping...`);
+    // --- OTIMIZAÇÃO: Ignorar prospectos internacionais ---
+    // Cria um Set com os nomes dos jogadores internacionais para uma busca eficiente.
+    const internationalProspectNames = new Set(internationalProspects.map(p => p.name));
 
-    for (const prospect of prospects) {
+    // Filtra a lista de prospectos da NCAA, removendo os que já são tratados pelo script do RealGM.
+    const ncaaProspects = prospects.filter(p => !internationalProspectNames.has(p.name));
+
+    console.log(`✅ ${prospects.length} prospectos encontrados para a classe ${draftClass}.`);
+    console.log(`ℹ️ ${internationalProspectNames.size} prospectos internacionais serão ignorados.`);
+    console.log(`▶️  Iniciando scraping para ${ncaaProspects.length} prospectos da NCAA...`);
+
+
+    for (const prospect of ncaaProspects) {
       console.log(`\n----------------------------------------------------`);
       console.log(`Buscando dados para: ${prospect.name} (ID: ${prospect.id})`);
 
