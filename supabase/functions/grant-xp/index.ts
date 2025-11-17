@@ -17,7 +17,29 @@ const LEVEL_THRESHOLDS = {
   3: 250,
   4: 500,
   5: 1000,
-  // ... adicione mais níveis
+  // Expansão de Níveis
+  6: 1750,
+  7: 2750,
+  8: 4000,
+  9: 5500,
+  10: 7500, // Nível "Elite Scout"
+  11: 10000,
+  12: 13000,
+  13: 16500,
+  14: 20500,
+  15: 25000, // Nível "Lendário"
+};
+
+// Mapeamento de Níveis para Badges
+const LEVEL_BADGES = {
+  3: 'level_3',
+  4: 'level_4',
+  5: 'level_5',
+  6: 'level_6',
+  7: 'level_7',
+  8: 'level_8',
+  9: 'level_9',
+  10: 'level_10',
 };
 
 Deno.serve(async (req) => {
@@ -26,9 +48,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { action, userId } = await req.json();
+    const { action, userId, targetId } = await req.json(); // Adicionado targetId
     if (!action || !userId || !XP_MAP[action]) {
-      throw new Error('Ação ou ID de usuário inválido.');
+      throw new Error('Ação, ID de usuário ou targetId inválido.');
     }
 
     const supabaseAdmin = createClient(
@@ -36,35 +58,69 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Adicionar XP ao usuário
-    const xpToAdd = XP_MAP[action];
-    const { data: updatedProfile, error: rpcError } = await supabaseAdmin.rpc('add_xp_to_user', {
-      user_id_param: userId,
-      xp_to_add: xpToAdd
-    });
+    // Ações que devem ser concedidas apenas uma vez por alvo
+    const uniqueActions = ['ADD_TO_WATCHLIST'];
 
-    if (rpcError) throw rpcError;
+    if (uniqueActions.includes(action)) {
+      if (!targetId) {
+        throw new Error('targetId é necessário para ações únicas.');
+      }
+      // Verifica se a ação já foi registrada
+      const { error: insertError } = await supabaseAdmin
+        .from('xp_actions')
+        .insert({
+          user_id: userId,
+          action_type: action,
+          target_id: targetId,
+        });
 
-    // 2. Verificar se o usuário subiu de nível
-    const newXp = updatedProfile.xp;
-    const currentLevel = updatedProfile.level;
-    const nextLevel = currentLevel + 1;
-
-    if (LEVEL_THRESHOLDS[nextLevel] && newXp >= LEVEL_THRESHOLDS[nextLevel]) {
-      // Subiu de nível!
-      await supabaseAdmin
-        .from('profiles')
-        .update({ level: nextLevel })
-        .eq('id', userId);
-      
-      // Futuro: aqui você pode adicionar uma notificação para o usuário
-      console.log(`🎉 Usuário ${userId} subiu para o nível ${nextLevel}!`);
+      if (insertError) {
+        // Se houver um erro de violação de chave única, significa que a ação já foi feita.
+        // Retornamos sucesso, mas não concedemos XP.
+        if (insertError.code === '23505') { // Código de erro para violação de unicidade no PostgreSQL
+          console.log(`Ação '${action}' para o alvo '${targetId}' já registrada para o usuário ${userId}. Nenhum XP concedido.`);
+          return new Response(JSON.stringify({ message: 'Ação já registrada.' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          });
+        }
+        throw insertError; // Lança outros erros
+      }
     }
 
-    // 3. Futuro: aqui você pode adicionar a lógica para verificar e conceder novas badges
-    // Ex: Se o número de análises for 5, conceda a badge 'analyst_silver'
+    // 1. Adicionar XP ao usuário
+    const { data: result, error: rpcError } = await supabaseAdmin.rpc('grant_xp_and_level_up', {
+      user_id_param: userId,
+      xp_to_add: XP_MAP[action]
+    });
 
-    return new Response(JSON.stringify({ message: `+${xpToAdd} XP concedido!` }), {
+    if (rpcError || !result) {
+      throw rpcError || new Error("Erro ao processar XP e nível.");
+    }
+
+    // CORREÇÃO: Acessar o primeiro elemento do array retornado pelo RPC
+    const rpcResult = Array.isArray(result) ? result[0] : result;
+    const { xp_added, leveled_up, new_level } = rpcResult;
+
+    if (leveled_up) {
+      console.log(`🎉 Usuário ${userId} subiu para o nível ${new_level}!`);
+      // Concede a badge para o novo nível alcançado
+      const badgeToGrant = LEVEL_BADGES[new_level];
+      if (badgeToGrant) {
+        const { error: badgeError } = await supabaseAdmin
+          .from('user_badges')
+          .insert({ user_id: userId, badge_id: badgeToGrant }, { onConflict: 'user_id,badge_id' }); // Ignora se já tiver
+        
+        if (badgeError) console.error(`Erro ao conceder badge de nível ${new_level}:`, badgeError);
+        else console.log(`🏅 Badge '${badgeToGrant}' concedida para o usuário ${userId}.`);
+      }
+    }
+
+    return new Response(JSON.stringify({ 
+      message: `+${xp_added} XP!`,
+      leveledUp: leveled_up,
+      newLevel: new_level,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });

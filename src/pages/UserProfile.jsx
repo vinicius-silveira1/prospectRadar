@@ -11,6 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/context/AuthContext'; 
 import BadgeIcon from '@/components/Common/BadgeIcon';
 import AchievementUnlock from '@/components/Common/AchievementUnlock';
+import UserAchievement from '@/components/Common/UserAchievement';
 import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -179,6 +180,19 @@ const UserProfile = () => {
             </motion.div>
           )}
         </div>
+        {/* Badges de Nível e outras */}
+        {profile.user_badges && profile.user_badges.length > 0 && (
+          <div 
+            className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-2"
+            onMouseLeave={() => setHoveredUserBadge(null)}
+          >
+            {profile.user_badges.map(({ badge }) => (
+              <div key={badge.id} onMouseEnter={() => setHoveredUserBadge(badge)}>
+                <BadgeIcon badge={badge} size={20} />
+              </div>
+            ))}
+          </div>
+        )}
       </motion.div>
 
       {/* Badges Section */}
@@ -211,6 +225,7 @@ const UserProfile = () => {
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
               >
                 <AchievementUnlock badge={hoveredUserBadge} isUserBadge={true} />
+                <UserAchievement badge={hoveredUserBadge} />
               </motion.div>
             )}
           </AnimatePresence>

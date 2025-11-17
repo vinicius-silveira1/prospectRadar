@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
+import toast from 'react-hot-toast';
 import { Send, Loader2, Trash2, Link as LinkIcon } from 'lucide-react';
 import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
@@ -87,7 +88,7 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('report_comments')
-      .select(`*, author:profiles(username, avatar_url)`)
+      .select(`*, author:profiles(username, avatar_url, level)`)
       .eq('report_id', reportId)
       .order('created_at', { ascending: true });
 
@@ -132,7 +133,7 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
     const { data, error } = await supabase
       .from('report_comments')
       .insert(newCommentData)
-      .select('*, author:profiles(username, avatar_url)')
+      .select('*, author:profiles(username, avatar_url, level)')
       .single(); // Espera um único resultado
 
     if (error) {
@@ -142,7 +143,15 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
       // Concede XP por submeter um comentário
       supabase.functions.invoke('grant-xp', {
         body: { action: 'SUBMIT_COMMENT', userId: user.id },
-      }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por comentário:', error) });
+      }).then(({ data, error }) => {
+        if (error) console.error('Erro ao conceder XP por comentário:', error);
+        if (data) {
+          toast.success(data.message);
+          if (data.leveledUp) {
+            toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+          }
+        }
+      });
 
       // Adiciona o novo comentário e re-busca para garantir a ordem correta e a estrutura de thread
       // Para otimização futura, poderíamos inserir diretamente na árvore se não houver paginação ativa

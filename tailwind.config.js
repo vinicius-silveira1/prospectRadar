@@ -56,6 +56,10 @@ export default {
           transform: 'translateY(0)',
         },
       },
+      'text-gradient-animation': {
+        '0%, 100%': { 'background-position': '0% 50%' },
+        '50%': { 'background-position': '100% 50%' },
+      },
       'fade-in': {
         '0%': {
           opacity: '0',
@@ -79,6 +83,7 @@ export default {
       'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
       'fade-in': 'fade-in 0.5s ease-out forwards',
       'pulse-once': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+      'text-gradient': 'text-gradient-animation 5s ease infinite',
     },
   },
   plugins: [require('@tailwindcss/typography')],

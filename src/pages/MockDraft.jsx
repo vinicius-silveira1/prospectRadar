@@ -16,6 +16,7 @@ import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import { useResponsive } from '@/hooks/useResponsive';
 import useMockDraft from '../hooks/useMockDraft.js';
 import useProspects from '@/hooks/useProspects.js';
+import toast from 'react-hot-toast';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
@@ -199,7 +200,15 @@ const MockDraft = () => {
       if (user) {
         supabase.functions.invoke('grant-xp', {
           body: { action: 'COMPLETE_MOCK_DRAFT', userId: user.id },
-        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por mock draft:', error) });
+        }).then(({ data, error }) => {
+          if (error) console.error('Erro ao conceder XP por mock draft:', error);
+          if (data) {
+            toast.success(data.message);
+            if (data.leveledUp) {
+              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            }
+          }
+        });
       }
       setNotification({ type: 'success', message: 'Draft salvo com sucesso!' });
       setIsSaveModalOpen(false);

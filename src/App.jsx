@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import MainLayout from './components/Layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Prospects from './pages/Prospects';
@@ -91,7 +92,29 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </BrowserRouter>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          success: {
+            style: {
+              background: '#10B981', // green-500
+              color: 'white',
+            },
+            iconTheme: {
+              primary: 'white',
+              secondary: '#10B981',
+            },
+          },
+          error: {
+            style: {
+              background: '#EF4444', // red-500
+              color: 'white',
+            },
+          },
+        }}
+      />
     </>
+    
   );
 }
 

@@ -32,6 +32,7 @@ const useCommunityReports = (prospectId) => {
           author:profiles (
             username,
             avatar_url,
+            level,
             user_badges!left(badge:badges(id, name, icon, color, description))
           ),
           report_votes!left (
@@ -86,7 +87,7 @@ const useCommunityReports = (prospectId) => {
 
     const { data, error: fetchError } = await supabase
       .from('community_reports')
-      .select(`*, author:profiles(username, avatar_url, user_badges!left(badge:badges(*))), report_votes!left(user_id), report_comments(count), prospect:prospects(name, slug)`)
+      .select(`*, author:profiles(username, avatar_url, level, user_badges!left(badge:badges(*))), report_votes!left(user_id), report_comments(count), prospect:prospects(name, slug)`)
       .eq('prospect_id', prospectId)
       .eq('status', 'published')
       .order('created_at', { ascending: false })

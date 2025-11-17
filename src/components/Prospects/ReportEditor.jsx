@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2 } from 'lucide-react';
 import EditorJS from '@editorjs/editorjs';
+import toast from 'react-hot-toast';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import { supabase } from '@/lib/supabaseClient';
@@ -111,7 +112,15 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess, initialData 
       if (!initialData && user) {
         supabase.functions.invoke('grant-xp', {
           body: { action: 'SUBMIT_ANALYSIS', userId: user.id },
-        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por análise:', error) });
+        }).then(({ data, error }) => {
+          if (error) console.error('Erro ao conceder XP por análise:', error);
+          if (data) {
+            toast.success(data.message);
+            if (data.leveledUp) {
+              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            }
+          }
+        });
       }
 
       onSaveSuccess(); // Chama a função para refrescar a lista de análises

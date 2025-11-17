@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { MessageSquare, User, PlusCircle, Trash2, Edit, Dribbble, MessageCircle, Loader2, Share2 } from 'lucide-react';
 import useCommunityReports from '@/hooks/useCommunityReports';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
@@ -13,6 +14,7 @@ import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
+import { getLevelUsernameStyle } from '@/utils/userLevelUtils';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
@@ -59,8 +61,8 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
               <div className="flex items-center gap-2 min-w-0" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
-                <div className="flex items-center gap-2 truncate">
-                  <Link to={`/user/${author.username}`} className="font-semibold text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate">
+                <div className="flex items-center gap-2 truncate font-semibold">
+                  <Link to={`/user/${author.username}`} className={`text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate ${getLevelUsernameStyle(author.level)}`}>
                     {authorName}
                   </Link>
                   
@@ -178,13 +180,21 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
         // Concede XP para quem deu o upvote e para quem recebeu
         supabase.functions.invoke('grant-xp', {
           body: { action: 'GIVE_ASSIST', userId: user.id },
-        }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por dar assistência:', error) });
+        }).then(({ data, error }) => {
+          if (error) console.error('Erro ao conceder XP por dar assistência:', error);
+          if (data) {
+            toast.success(data.message);
+            if (data.leveledUp) {
+              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            }
+          }
+        });
 
         const { data: reportAuthor } = await supabase.from('community_reports').select('user_id').eq('id', reportId).single();
         if (reportAuthor) {
           supabase.functions.invoke('grant-xp', {
             body: { action: 'RECEIVE_ASSIST', userId: reportAuthor.user_id },
-          }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por receber assistência:', error) });
+          }); // Não notifica o usuário que deu o voto sobre o XP do outro
         }
       }
       refresh(); // Re-busca os dados para atualizar a contagem e o estado do voto

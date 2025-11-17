@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 const WATCHLIST_LIMIT_FREE = 5; // Limite de prospects na watchlist para usuários free
@@ -55,8 +56,16 @@ export default function useWatchlist() {
       // Evento Google Analytics: adição à watchlist
       // Concede XP por adicionar à watchlist
       supabase.functions.invoke('grant-xp', {
-        body: { action: 'ADD_TO_WATCHLIST', userId: user.id },
-      }).then(({ error }) => { if (error) console.error('Erro ao conceder XP por watchlist:', error) });
+        body: { action: 'ADD_TO_WATCHLIST', userId: user.id, targetId: prospectId },
+      }).then(({ data, error }) => {
+        if (error) console.error('Erro ao conceder XP por watchlist:', error);
+        if (data) {
+          toast.success(data.message);
+          if (data.leveledUp) {
+            toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+          }
+        }
+      });
 
       if (window.gtag) {
         window.gtag('event', 'add_to_watchlist', { prospect_id: prospectId });
