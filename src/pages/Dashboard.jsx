@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
+import LevelUpToast from '@/components/Common/LevelUpToast';
 import { Users, Star, Trophy, RefreshCw, CheckCircle, Globe, Shuffle, Heart, AlertTriangle, Lock, X, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import useProspects from '../hooks/useProspects.js';
@@ -112,7 +114,16 @@ const Dashboard = () => {
   // Função para tratar o toggle da watchlist com erro
   const handleToggleWatchlist = async (prospectId) => {
     try {
-      await toggleWatchlist(prospectId);
+      const { data, error } = await toggleWatchlist(prospectId);
+
+      if (error) throw error;
+
+      if (data) {
+        toast.success(data.message);
+        if (data.leveledUp) {
+          toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
+        }
+      }
     } catch (error) {
       if (error.message.includes('Limite de') && error.message.includes('prospects na watchlist atingido')) {
         setIsUpgradeModalOpen(true);

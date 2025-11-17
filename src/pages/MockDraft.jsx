@@ -17,6 +17,7 @@ import { useResponsive } from '@/hooks/useResponsive';
 import useMockDraft from '../hooks/useMockDraft.js';
 import useProspects from '@/hooks/useProspects.js';
 import toast from 'react-hot-toast';
+import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
@@ -204,8 +205,8 @@ const MockDraft = () => {
           if (error) console.error('Erro ao conceder XP por mock draft:', error);
           if (data) {
             toast.success(data.message);
-            if (data.leveledUp) {
-              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            if (data.leveledUp) { // Usar o toast personalizado para level-up
+              toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
             }
           }
         });

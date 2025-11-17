@@ -9,6 +9,7 @@ const XP_MAP = {
   'SUBMIT_COMMENT': 5,
   'COMPLETE_MOCK_DRAFT': 25,
   'ADD_TO_WATCHLIST': 5,
+  'TEST_XP_BURST': 1000, // Nova ação para conceder uma grande quantidade de XP de teste
 };
 
 // Mapeamento de Níveis para XP necessário

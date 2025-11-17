@@ -7,6 +7,7 @@ import { ptBR } from 'date-fns/locale';
 import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils';
 import toast from 'react-hot-toast';
 import { Send, Loader2, Trash2, Link as LinkIcon } from 'lucide-react';
+import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
 import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
 import { CornerDownRight } from 'lucide-react';
@@ -20,6 +21,28 @@ const CommentCard = ({ comment, onReply, onDelete, onBadgeClick }) => {
   const authorName = author.username || 'Usuário Anônimo';
   const { user } = useAuth();
   const isAuthor = user?.id === comment.user_id;
+
+  // Lógica de estilo movida para dentro do componente.
+  const getLevelUsernameStyle = (level) => {
+    if (!level) return '';
+    if (level >= 10) {
+      // Nível 10+: Gradiente animado
+      return 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-text-gradient bg-[200%_auto]';
+    }
+    if (level >= 9) {
+      // Nível 9: Gradiente estático
+      return 'bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent';
+    }
+    if (level >= 8) {
+      // Nível 8: Glow intenso
+      return 'text-sky-300 [text-shadow:0_0_8px_rgba(56,189,248,0.7)]';
+    }
+    if (level >= 7) {
+      // Nível 7: Glow sutil
+      return 'text-green-300 [text-shadow:0_0_5px_rgba(74,222,128,0.5)]';
+    }
+    return ''; // Sem estilo especial para níveis inferiores
+  };
 
   return (
     <div className="flex items-start space-x-3 py-2">
@@ -36,7 +59,7 @@ const CommentCard = ({ comment, onReply, onDelete, onBadgeClick }) => {
       <div className="flex-1">
         <div className="bg-gray-100 dark:bg-super-dark-border rounded-lg px-3 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 font-semibold text-sm">
               <Link to={`/user/${author.username}`} className="font-semibold text-sm text-gray-900 dark:text-white hover:underline hover:text-brand-purple">
                 {authorName}
               </Link>
@@ -88,7 +111,7 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('report_comments')
-      .select(`*, author:profiles(username, avatar_url, level)`)
+      .select(`*, author:profiles(username, avatar_url, level, user_badges(badge:badges(*)))`)
       .eq('report_id', reportId)
       .order('created_at', { ascending: true });
 
@@ -133,7 +156,7 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
     const { data, error } = await supabase
       .from('report_comments')
       .insert(newCommentData)
-      .select('*, author:profiles(username, avatar_url, level)')
+      .select('*, author:profiles(username, avatar_url, level, user_badges(badge:badges(*)))')
       .single(); // Espera um único resultado
 
     if (error) {
@@ -147,8 +170,8 @@ const CommentSection = ({ reportId, onCommentPosted }) => {
         if (error) console.error('Erro ao conceder XP por comentário:', error);
         if (data) {
           toast.success(data.message);
-          if (data.leveledUp) {
-            toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+          if (data.leveledUp) { // Usar o toast personalizado para level-up
+            toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
           }
         }
       });

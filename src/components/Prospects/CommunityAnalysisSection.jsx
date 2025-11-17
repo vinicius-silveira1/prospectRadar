@@ -10,11 +10,11 @@ import ReportEditor from '@/components/Prospects/ReportEditor';
 import { useAuth } from '@/context/AuthContext';
 import { useResponsive } from '@/hooks/useResponsive';
 import ConfirmationModal from '@/components/Prospects/ConfirmationModal';
-import AchievementUnlock from '@/components/Common/AchievementUnlock';
+import UserAchievement from '@/components/Common/UserAchievement';
+import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
 import BadgeIcon from '@/components/Common/BadgeIcon'; // Importação atualizada
 import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
-import { getLevelUsernameStyle } from '@/utils/userLevelUtils';
 import { supabase } from '@/lib/supabaseClient';
 import { ptBR } from 'date-fns/locale';
 
@@ -37,6 +37,28 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
     } else {
       setHoveredBadge(badge);
     }
+  };
+
+  // Lógica de estilo movida para dentro do componente para garantir que o Tailwind a detecte.
+  const getLevelUsernameStyle = (level) => {
+    if (!level) return '';
+    if (level >= 10) {
+      // Nível 10+: Gradiente animado
+      return 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-text-gradient bg-[200%_auto]';
+    }
+    if (level >= 9) {
+      // Nível 9: Gradiente estático
+      return 'bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent';
+    }
+    if (level >= 8) {
+      // Nível 8: Glow intenso
+      return 'text-sky-300 [text-shadow:0_0_8px_rgba(56,189,248,0.7)]';
+    }
+    if (level >= 7) {
+      // Nível 7: Glow sutil
+      return 'text-green-300 [text-shadow:0_0_5px_rgba(74,222,128,0.5)]';
+    }
+    return ''; // Sem estilo especial para níveis inferiores
   };
 
   return (
@@ -62,7 +84,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
               <div className="flex items-center gap-2 min-w-0" onMouseLeave={() => !isMobile && setHoveredBadge(null)}>
                 <div className="flex items-center gap-2 truncate font-semibold">
-                  <Link to={`/user/${author.username}`} className={`text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate ${getLevelUsernameStyle(author.level)}`}>
+                <Link to={`/user/${author.username}`} className={`text-gray-900 dark:text-white hover:underline hover:text-brand-purple truncate ${author.level ? getLevelUsernameStyle(author.level) : ''}`}>
                     {authorName}
                   </Link>
                   
@@ -121,7 +143,7 @@ const CommunityReportCard = ({ report, currentUser, onDelete, onEdit, onVote, on
         >
           {hoveredBadge ? ( 
             <div className="py-2">
-              <AchievementUnlock badge={hoveredBadge} isUserBadge={true} />
+              <UserAchievement badge={hoveredBadge} />
             </div>
           ) : (
             <ReportRenderer data={report.content} />
@@ -184,8 +206,8 @@ const CommunityAnalysisSection = ({ prospectId, onAddAnalysis }) => {
           if (error) console.error('Erro ao conceder XP por dar assistência:', error);
           if (data) {
             toast.success(data.message);
-            if (data.leveledUp) {
-              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            if (data.leveledUp) { // Usar o toast personalizado para level-up
+              toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
             }
           }
         });

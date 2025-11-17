@@ -4,6 +4,7 @@ import { X, Send, Loader2 } from 'lucide-react';
 import EditorJS from '@editorjs/editorjs';
 import toast from 'react-hot-toast';
 import Header from '@editorjs/header';
+import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
 import List from '@editorjs/list';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
@@ -116,8 +117,8 @@ const ReportEditor = ({ isOpen, onClose, prospectId, onSaveSuccess, initialData 
           if (error) console.error('Erro ao conceder XP por análise:', error);
           if (data) {
             toast.success(data.message);
-            if (data.leveledUp) {
-              toast.success(`Você subiu para o Nível ${data.newLevel}! 🎉`, { duration: 4000 });
+            if (data.leveledUp) { // Usar o toast personalizado para level-up
+              toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
             }
           }
         });

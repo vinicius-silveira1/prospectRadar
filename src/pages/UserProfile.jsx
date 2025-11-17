@@ -4,17 +4,40 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from '@/components/Layout/LoadingSpinner';
-import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils.js';
-import { BarChart3, Star, MessageSquare, Edit, Award, Info } from 'lucide-react';
+import { getInitials, getColorFromName, getAvatarPublicUrl } from '@/utils/imageUtils.js'; // Removed Zap icon from here
+import { BarChart3, Star, MessageSquare, Edit, Award, Info, Zap } from 'lucide-react'; // Added Zap icon
 import ReportRenderer from '@/components/Prospects/ReportRenderer';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/context/AuthContext'; 
+import toast from 'react-hot-toast';
+import LevelUpToast from '@/components/Common/LevelUpToast';
 import BadgeIcon from '@/components/Common/BadgeIcon';
-import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import UserAchievement from '@/components/Common/UserAchievement';
 import { ptBR } from 'date-fns/locale';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+
+// Lógica de estilo movida para dentro do componente para garantir que o Tailwind a detecte.
+const getLevelUsernameStyle = (level) => {
+  if (!level) return '';
+  if (level >= 10) {
+    // Nível 10+: Gradiente animado
+    return 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-text-gradient bg-[200%_auto]';
+  }
+  if (level >= 9) {
+    // Nível 9: Gradiente estático
+    return 'bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent';
+  }
+  if (level >= 8) {
+    // Nível 8: Glow intenso
+    return 'text-sky-300 [text-shadow:0_0_8px_rgba(56,189,248,0.7)]';
+  }
+  if (level >= 7) {
+    // Nível 7: Glow sutil
+    return 'text-green-300 [text-shadow:0_0_5px_rgba(74,222,128,0.5)]';
+  }
+  return ''; // Sem estilo especial para níveis inferiores
+};
 
 // Mapeamento de Níveis para XP necessário (deve ser o mesmo da Edge Function)
 const LEVEL_THRESHOLDS = {
@@ -106,6 +129,34 @@ const UserProfile = () => {
 
   const { profile, reports } = data;
   const isOwner = user && user.username === profile.username; // Verificar se o usuário logado é o dono do perfil
+  
+  // ID da conta oficial do ProspectRadar (para o botão de teste de XP)
+  const PROSPECTRACAR_OFFICIAL_ID = '07e135a1-7057-466c-8c49-fed2bf0dcd48';
+  const isProspectRadarOfficial = user?.id === PROSPECTRACAR_OFFICIAL_ID;
+
+  const handleGrantTestXP = async () => {
+    if (!user || user.id !== PROSPECTRACAR_OFFICIAL_ID) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('grant-xp', {
+        body: { action: 'TEST_XP_BURST', userId: user.id },
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        toast.success(data.message); // Notificação de XP ganho
+        if (data.leveledUp) {
+            toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
+        }
+        // Força a re-busca dos dados do perfil para atualizar a UI
+        // Removido: data.refetch() não é uma função da resposta da Edge Function
+      }
+    } catch (err) {
+      toast.error(`Erro ao conceder XP de teste: ${err.message}`);
+    }
+    await refreshUserProfile();
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -135,9 +186,9 @@ const UserProfile = () => {
           )}
         </div>
         <div className="text-center sm:text-left relative z-10">
-          <h1 className="text-3xl font-gaming font-bold text-white font-mono tracking-wide">{profile.username}</h1>
+          <h1 className={`text-3xl font-gaming font-bold text-white font-mono tracking-wide ${profile.level ? getLevelUsernameStyle(profile.level) : ''}`}>{profile.username}</h1>
           {/* Barra de XP e Nível */}
-          <div className="mt-3 w-full">
+          <div className="mt-4 w-full">
             <div className="flex justify-between items-center text-xs font-mono mb-1">
               <span className="px-2 py-0.5 bg-yellow-400 text-black font-bold rounded">NÍVEL {profile.level || 1}</span>
               <span className="text-yellow-200">{levelProgress.currentXp} / {levelProgress.nextLevelXp} XP</span>
@@ -151,34 +202,37 @@ const UserProfile = () => {
               />
             </div>
           </div>
-          <p className="text-blue-100 dark:text-gray-300 mt-1">{profile.bio || 'Este usuário ainda não adicionou uma biografia.'}</p>
+          <p className="text-blue-100 dark:text-gray-300 mt-4">{profile.bio || 'Este usuário ainda não adicionou uma biografia.'}</p>
           
-          {/* Stats */}
-          <div className="flex items-center justify-center sm:justify-start gap-6 mt-4 text-sm text-blue-100 dark:text-gray-300">
-            <div className="text-center">
-              <p className="font-bold text-lg">{profile.total_analyses || 0}</p>
-              <p className="text-xs text-blue-200 dark:text-gray-400">Análises</p>
+          {/* Stats e Botão de Edição */}
+          <div className="flex items-center justify-center sm:justify-start gap-6 mt-6 text-sm text-blue-100 dark:text-gray-300">
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <p className="font-bold text-lg">{profile.total_analyses || 0}</p>
+                <p className="text-xs text-blue-200 dark:text-gray-400">Análises</p>
+              </div>
+              <div className="text-center">
+                <p className="font-bold text-lg">{profile.total_assists || 0}</p>
+                <p className="text-xs text-blue-200 dark:text-gray-400">Assistências</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="font-bold text-lg">{profile.total_assists || 0}</p>
-              <p className="text-xs text-blue-200 dark:text-gray-400">Assistências</p>
-            </div>
+            {isOwner && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                <Link to="/settings/profile" className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-brand-purple/70 hover:bg-brand-purple focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                  <Edit className="w-3 h-3 mr-1.5" />
+                  Editar
+                </Link>
+              </motion.div>
+            )}
+            {isProspectRadarOfficial && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                <button onClick={handleGrantTestXP} className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600/70 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                  <Zap className="w-3 h-3 mr-1.5" />
+                  XP de Teste
+                </button>
+              </motion.div>
+            )}
           </div>
-
-          {/* Botão "Editar Perfil" - visível apenas para o dono do perfil */}
-          {isOwner && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-6"
-            >
-              <Link to="/settings/profile" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-purple hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <Edit className="w-4 h-4 mr-2" />
-                Editar Perfil
-              </Link>
-            </motion.div>
-          )}
         </div>
         {/* Badges de Nível e outras */}
         {profile.user_badges && profile.user_badges.length > 0 && (
@@ -224,7 +278,6 @@ const UserProfile = () => {
                 className="mt-6"
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
               >
-                <AchievementUnlock badge={hoveredUserBadge} isUserBadge={true} />
                 <UserAchievement badge={hoveredUserBadge} />
               </motion.div>
             )}
