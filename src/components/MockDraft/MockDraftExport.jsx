@@ -108,11 +108,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
         <h3 className="text-3xl font-extrabold tracking-wide text-gray-800 dark:text-gray-100 text-center drop-shadow-sm leading-tight -translate-y-3">
           {title}
         </h3>
-        {title === 'PRIMEIRA RODADA' && (
-          <p className="mt-0.5 text-center text-sm font-medium text-gray-600 dark:text-gray-300">
-            Destaques: Top 5 em cápsulas especiais • Loteria até pick {lotteryLimit}
-          </p>
-        )}
+        {title === 'PRIMEIRA RODADA'}
       </div>
       <div className="grid grid-cols-2 gap-7">
         {round.map((pick) => {
