@@ -102,16 +102,25 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
   // Apenas mostra a segunda rodada se houver pelo menos um prospect selecionado nela.
   const shouldRenderSecondRound = secondRound.some(pick => pick.prospect !== null);
 
-  const renderRound = (round, title) => (
+  const renderRound = (round, title) => {
+    const COLUMNS = 3;
+    const rows = Math.ceil(round.length / COLUMNS);
+    const ordered = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < COLUMNS; c++) {
+        const idx = r + c * rows;
+        if (idx < round.length) ordered.push(round[idx]);
+      }
+    }
+    return (
     <div key={title} className="relative mb-10">
       <div className="rounded-xl px-6 py-3 mb-6 shadow-inner bg-gradient-to-r from-orange-50 via-purple-50 to-indigo-50 dark:from-orange-900/20 dark:via-purple-900/20 dark:to-indigo-900/20 border border-orange-200/50 dark:border-orange-700/40">
         <h3 className="text-3xl font-extrabold tracking-wide text-gray-800 dark:text-gray-100 text-center drop-shadow-sm leading-tight -translate-y-3">
           {title}
         </h3>
-        {title === 'PRIMEIRA RODADA'}
       </div>
       <div className="grid grid-cols-3 gap-6">
-        {round.map((pick) => {
+        {ordered.map((pick) => {
           const isTop5 = top5Set.has(pick.pick);
           const isLottery = lotterySet.has(pick.pick);
           return (
@@ -152,9 +161,9 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                   }
                   data-pick-pill
                 >
-                  <div data-pill-content className="absolute inset-0" style={{ transform: 'translateY(-6px)' }}>
-                    <span className="absolute left-1/2 -translate-x-1/2 text-xl" style={{ top: '14px', lineHeight: '12px' }}>{pick.pick}</span>
-                    <span className="absolute left-1/2 -translate-x-1/2 uppercase text-[9px] opacity-80" style={{ top: '32px', lineHeight: '10px' }}>PICK</span>
+                  <div data-pill-content className="absolute inset-0" style={{ transform: 'translateY(-8px)' }}>
+                    <span className="absolute left-1/2 -translate-x-1/2 text-3xl" style={{ top: '14px', lineHeight: '12px' }}>{pick.pick}</span>
+                    
                   </div>
                 </div>
                 {/* Logo removido para simplificação do export */}
@@ -165,7 +174,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
                       <h3 className="font-black text-2xl leading-tight text-gray-900 dark:text-gray-50 tracking-tight">
                         {pick.prospect.name}
                       </h3>
-                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1.5">
+                      <p className="text-md font-semibold text-gray-600 dark:text-gray-300 mt-1.5">
                         {teamFullNames[pick.team] || pick.team}
                       </p>
                       {/* Badges removidas para simplificação do export */}
@@ -181,6 +190,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       </div>
     </div>
   );
+  };
   // Ajuste dinâmico removido para evitar deslocamentos artificiais
 
   return (
