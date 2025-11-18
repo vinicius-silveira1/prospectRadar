@@ -21,10 +21,10 @@ import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo 
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { toPng } from 'html-to-image';
+import { supabase } from '@/lib/supabaseClient';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 
 
@@ -38,14 +38,14 @@ const MockDraft = () => {
   const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters);
 
   const {
-    draftBoard, availableProspects, currentPick, draftSettings, filters, isLoading,
+    draftBoard, availableProspects, currentPick, draftSettings, filters,
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
-    customDraftOrder, isOrderCustomized,
+    isOrderCustomized,
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
-    setCustomTeamOrder, resetToDefaultOrder, shuffleTeamOrder, getCurrentDraftOrder,
-    generateReportCardData,
+    setCustomTeamOrder, getCurrentDraftOrder,
+    // generateReportCardData removido
     autocompleteDraft
   } = useMockDraft(allProspects);
 
@@ -53,24 +53,47 @@ const MockDraft = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const exportRef = useRef(null);
-  const [selectedBadgeData, setSelectedBadgeData] = useState(null);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  // Removidos estados não utilizados para limpar lint
 
-  const handleBadgeClick = (badge) => {
-    setSelectedBadgeData(badge);
-    setIsBottomSheetOpen(true);
-  };
-
-  const handleCloseBottomSheet = () => {
-    setIsBottomSheetOpen(false);
-  };
+  // Funções de badge removidas (não usadas na página atual)
 
   const exportAsImage = async () => {
     setIsExporting(true);
     try {
       const html2canvas = (await import('html2canvas')).default;
       if (exportRef.current) {
-        const canvas = await html2canvas(exportRef.current, {
+        const node = exportRef.current;
+        // Debug: log bounding boxes para investigar desalinhamento
+        try {
+          const firstCard = node.querySelector('[data-export-card]');
+          const pill = firstCard?.querySelector('[data-pick-pill]');
+          const pillInner = firstCard?.querySelector('[data-pill-content]');
+          const firstBadge = firstCard?.querySelector('[data-badge]');
+          const firstBadgeText = firstCard?.querySelector('[data-badge-text]');
+          if (firstCard && pill) {
+            const cardRect = firstCard.getBoundingClientRect();
+            const pillRect = pill.getBoundingClientRect();
+            const pillInnerRect = pillInner?.getBoundingClientRect();
+            console.log('EXPORT DEBUG cardRect', cardRect);
+            console.log('EXPORT DEBUG pillRect', pillRect);
+            console.log('EXPORT DEBUG pill->card center delta', (pillRect.top - cardRect.top + pillRect.height / 2) - cardRect.height / 2);
+            if (pillInnerRect) {
+              console.log('EXPORT DEBUG pillInnerRect', pillInnerRect);
+              console.log('EXPORT DEBUG pillInner->pill center delta', (pillInnerRect.top - pillRect.top + pillInnerRect.height / 2) - pillRect.height / 2);
+            }
+          }
+          if (firstBadge && firstBadgeText) {
+            const bRect = firstBadge.getBoundingClientRect();
+            const tRect = firstBadgeText.getBoundingClientRect();
+            console.log('EXPORT DEBUG badgeRect', bRect);
+            console.log('EXPORT DEBUG badgeTextRect', tRect);
+            console.log('EXPORT DEBUG badgeText->badge center delta', (tRect.top - bRect.top + tRect.height / 2) - bRect.height / 2);
+          }
+        } catch { /* silencioso */ }
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready.catch(() => {});
+        }
+        const canvas = await html2canvas(node, {
           backgroundColor: imageExportBackgroundColor,
           scale: 2,
           useCORS: true,
@@ -97,53 +120,11 @@ const MockDraft = () => {
   const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
-  const [reportCardImage, setReportCardImage] = useState(null);
-  const [isReportCardModalOpen, setIsReportCardModalOpen] = useState(false);
-  const reportCardRef = useRef(null);
+  // Relatório desativado nesta versão
 
-  const generateReportImage = async (asDataUrl = true) => {
-    const reportData = generateReportCardData();
-    if (!reportData || !reportCardRef.current) {
-      setNotification({ type: 'error', message: 'Não foi possível gerar o relatório. O draft está vazio?' });
-      return null;
-    }
+  // Função de relatório removida
 
-    try {
-      const dataUrl = await toPng(reportCardRef.current, { quality: 0.95, pixelRatio: 2 });
-      if (asDataUrl) {
-        return dataUrl;
-      } else {
-        const link = document.createElement('a');
-        link.download = `prospectradar-report-card-${draftNameToSave.replace(/ /g, '-')}.png`;
-        link.href = dataUrl;
-        link.click();
-      }
-    } catch (error) {
-      console.error('Erro ao gerar imagem do relatório:', error);
-      setNotification({ type: 'error', message: 'Ocorreu um erro ao gerar a imagem do relatório.' });
-      return null;
-    }
-  };
-
-  const handleOpenReportModal = async () => {
-    const dataUrl = await generateReportImage(true);
-    if (dataUrl) {
-      setReportCardImage(dataUrl);
-      setIsReportCardModalOpen(true);
-    }
-  };
-
-  const handleDownloadReport = () => {
-    generateReportImage(false);
-  };
-
-  const shareOnTwitter = () => {
-    const reportData = generateReportCardData();
-    const grade = reportData?.grade || 'N/A';
-    const text = `Eu consegui a nota ${grade} no Mock Draft ${draftSettings.draftClass} do @prospectradar! 🏀\n\nCrie o seu próprio mock draft e veja a sua nota em prospectradar.com.br/mock-draft\n\n#NBADraft #ProspectRadar`;
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(twitterUrl, '_blank');
-  };
+  // Funções de compartilhamento/relatório removidas para limpar lint
 
   const handleTradeClick = (pick) => {
     setSelectedPickForTrade(pick);
@@ -236,31 +217,7 @@ const MockDraft = () => {
     setNotification({ type: 'success', message: 'Draft excluído.' });
   };
 
-  const handleExportPDF = async () => {
-    setIsExporting(true);
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF('landscape', 'pt', 'a4');
-    const element = exportRef.current;
-
-    if (!element) return;
-
-    // Adicionando rastreamento de evento para exportação de mock draft
-    if (window.gtag) {
-      window.gtag('event', 'export_mock_draft', { draft_class: draftSettings.draftClass });
-    }
-
-    // Obter o nome da escola do prospect para o cabeçalho
-    const schoolName = element.querySelector('.school-name')?.innerText || 'Mock Draft';
-
-    doc.setFontSize(20);
-    doc.text(schoolName, 40, 40);
-
-    const imgData = element.toDataURL('image/png', 1.0);
-    doc.addImage(imgData, 'PNG', 40, 60, 522, 0);
-
-    doc.save(`mock-draft-${new Date().toISOString().slice(0, 10)}.pdf`);
-    setIsExporting(false);
-  };
+  // Export PDF removido para limpeza
 
   if (prospectsLoading) {
     return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
@@ -722,8 +679,8 @@ const MockDraft = () => {
                 transition={{ duration: 0.3 }}
               >
                 {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
-                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
-                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} onBadgeClick={handleBadgeClick} />}
+                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
+                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -768,7 +725,7 @@ const MockDraft = () => {
                   currentDraftOrder={getCurrentDraftOrder()}
                   league={league}
                 />
-        <div className="absolute left-[-9999px] top-0 z-[-10">
+        <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} />
           {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
         </div>
@@ -1045,7 +1002,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
   )
 };
 
-const MockDraftProspectCard = ({ prospect, action, onBadgeClick }) => {
+const MockDraftProspectCard = ({ prospect, action }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { league: currentLeague } = useContext(LeagueContext);
   const badges = assignBadges(prospect, currentLeague);

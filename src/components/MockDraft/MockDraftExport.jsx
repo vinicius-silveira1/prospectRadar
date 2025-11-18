@@ -1,38 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useProspectImage } from '@/hooks/useProspectImage';
-
-const teamLogos = {
-  'ATL': 'https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg',
-  'BOS': 'https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg',
-  'BKN': 'https://cdn.nba.com/logos/nba/1610612751/primary/L/logo.svg',
-  'CHA': 'https://cdn.nba.com/logos/nba/1610612766/primary/L/logo.svg',
-  'CHI': 'https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg',
-  'CLE': 'https://cdn.nba.com/logos/nba/1610612739/primary/L/logo.svg',
-  'DAL': 'https://cdn.nba.com/logos/nba/1610612742/primary/L/logo.svg',
-  'DEN': 'https://cdn.nba.com/logos/nba/1610612743/primary/L/logo.svg',
-  'DET': 'https://cdn.nba.com/logos/nba/1610612765/primary/L/logo.svg',
-  'GSW': 'https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg',
-  'HOU': 'https://cdn.nba.com/logos/nba/1610612745/primary/L/logo.svg',
-  'IND': 'https://cdn.nba.com/logos/nba/1610612754/primary/L/logo.svg',
-  'LAC': 'https://cdn.nba.com/logos/nba/1610612746/primary/L/logo.svg',
-  'LAL': 'https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg',
-  'MEM': 'https://cdn.nba.com/logos/nba/1610612763/primary/L/logo.svg',
-  'MIA': 'https://cdn.nba.com/logos/nba/1610612748/primary/L/logo.svg',
-  'MIL': 'https://cdn.nba.com/logos/nba/1610612749/primary/L/logo.svg',
-  'MIN': 'https://cdn.nba.com/logos/nba/1610612750/primary/L/logo.svg',
-  'NOP': 'https://cdn.nba.com/logos/nba/1610612740/primary/L/logo.svg',
-  'NYK': 'https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg',
-  'OKC': 'https://cdn.nba.com/logos/nba/1610612760/primary/L/logo.svg',
-  'ORL': 'https://cdn.nba.com/logos/nba/1610612753/primary/L/logo.svg',
-  'PHI': 'https://cdn.nba.com/logos/nba/1610612755/primary/L/logo.svg',
-  'PHX': 'https://cdn.nba.com/logos/nba/1610612756/primary/L/logo.svg',
-  'POR': 'https://cdn.nba.com/logos/nba/1610612757/primary/L/logo.svg',
-  'SAC': 'https://cdn.nba.com/logos/nba/1610612758/primary/L/logo.svg',
-  'SAS': 'https://cdn.nba.com/logos/nba/1610612759/primary/L/logo.svg',
-  'TOR': 'https://cdn.nba.com/logos/nba/1610612761/primary/L/logo.svg',
-  'UTA': 'https://cdn.nba.com/logos/nba/1610612762/primary/L/logo.svg',
-  'WAS': 'https://cdn.nba.com/logos/nba/1610612764/primary/L/logo.svg',
-};
 
 const teamFullNames = {
   'ATL': 'Atlanta Hawks',
@@ -67,7 +34,7 @@ const teamFullNames = {
   'WAS': 'Washington Wizards',
 };
 
-const getTeamLogo = (teamName) => teamLogos[teamName] || '/logo.svg';
+// Removido: mapeamento de logos de times para simplificação do export
 
 // Funções auxiliares para as imagens dos prospects
 const getColorFromName = (name) => {
@@ -110,118 +77,172 @@ const ProspectImage = ({ prospect }) => {
   );
 };
 
-const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
-  if (!draftData || !draftData.board) {
-    return null;
-  }
 
-  const { board, settings } = draftData;
+const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
+  // Hooks devem ser chamados sempre; usar fallbacks quando dados ausentes
+  const rootInnerRef = useRef(null);
+  // Removido gating de fontes (não necessário após simplificação)
+  // const [fontsReady, setFontsReady] = useState(false);
+
+  // Gating de fontes removido
+
+  const board = draftData?.board || [];
+  const settings = draftData?.settings || {};
   const firstRound = board.filter(p => p.round === 1);
   const secondRound = board.filter(p => p.round === 2);
+
+  // Estatísticas básicas para header
+  const filledPicks = board.filter(p => p.prospect);
+
+  const totalFilled = filledPicks.length;
+  const top5Set = new Set(firstRound.filter(p => p.pick <= 5).map(p => p.pick));
+  const lotteryLimit = firstRound.length >= 14 ? 14 : (firstRound.length >= 4 ? 4 : 0);
+  const lotterySet = new Set(firstRound.filter(p => p.pick <= lotteryLimit).map(p => p.pick));
 
   // Apenas mostra a segunda rodada se houver pelo menos um prospect selecionado nela.
   const shouldRenderSecondRound = secondRound.some(pick => pick.prospect !== null);
 
   const renderRound = (round, title) => (
-    <div key={title} className="relative mb-6">
-      {/* Section Header Limpo */}
-      <div className="bg-gray-50 border-l-4 border-orange-500 p-3 mb-4 rounded">
-        <h3 className="text-3xl font-bold text-gray-800 text-center">
+    <div key={title} className="relative mb-10">
+      <div className="rounded-xl px-6 py-3 mb-6 shadow-inner bg-gradient-to-r from-orange-50 via-purple-50 to-indigo-50 dark:from-orange-900/20 dark:via-purple-900/20 dark:to-indigo-900/20 border border-orange-200/50 dark:border-orange-700/40">
+        <h3 className="text-3xl font-extrabold tracking-wide text-gray-800 dark:text-gray-100 text-center drop-shadow-sm leading-tight -translate-y-3">
           {title}
         </h3>
+        {title === 'PRIMEIRA RODADA' && (
+          <p className="mt-0.5 text-center text-sm font-medium text-gray-600 dark:text-gray-300">
+            Destaques: Top 5 em cápsulas especiais • Loteria até pick {lotteryLimit}
+          </p>
+        )}
       </div>
-      
-      {/* Grid Layout de Duas Colunas com Mais Espaço */}
-      <div className="grid grid-cols-2 gap-6">
-        {round.map((pick) => (
-          <div key={pick.pick} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center space-x-4">
-              {/* Pick Number - Solto, Sem Container */}
-              <div className="flex-shrink-0">
-                <span className="font-bold text-orange-600 text-3xl">
-                  {pick.pick}
-                </span>
-              </div>
-              
-              {/* Team Logo */}
-              <div className="w-10 flex-shrink-0 flex items-center justify-center">
-                <img src={getTeamLogo(pick.team)} alt={pick.team} className="w-10 h-10 object-contain" />
-              </div>
-              
-              {/* Prospect Info */}
-              <div className="flex-1 min-w-0">
-                {pick.prospect ? (
-                  <div>
-                    <h3 className="font-bold text-3xl text-gray-900 leading-tight">
-                      {pick.prospect.name}
-                    </h3>
-                    <p className="text-lg text-gray-600 font-semibold">{teamFullNames[pick.team] || pick.team}</p>
+      <div className="grid grid-cols-2 gap-7">
+        {round.map((pick) => {
+          const isTop5 = top5Set.has(pick.pick);
+          const isLottery = lotterySet.has(pick.pick);
+          return (
+            <div
+              key={pick.pick}
+              data-export-card
+              className={
+                `relative group rounded-2xl px-5 pt-2 pb-3 flex items-center transition-all duration-300 border backdrop-blur-sm ` +
+                (pick.prospect
+                  ? 'bg-white/90 dark:bg-gray-900/70 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl'
+                  : 'bg-white/60 dark:bg-gray-800/50 border-dashed border-gray-300 dark:border-gray-600 hover:bg-white/80 dark:hover:bg-gray-800/70')
+              }
+              style={{
+                boxShadow: isTop5
+                  ? '0 0 0 2px rgba(249,115,22,0.15), 0 8px 24px -4px rgba(168,85,247,0.25)'
+                  : isLottery
+                  ? '0 0 0 2px rgba(99,102,241,0.12), 0 4px 16px -2px rgba(99,102,241,0.25)'
+                  : '0 2px 8px rgba(0,0,0,0.06)'
+              }}
+            >
+              {/* Background Accent for Top5 / Lottery */}
+              {isTop5 && (
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-100/60 to-yellow-50/40 dark:from-orange-500/10 dark:to-yellow-500/5 pointer-events-none" />
+              )}
+              {!isTop5 && isLottery && (
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-100/40 to-purple-100/30 dark:from-indigo-500/10 dark:to-purple-500/5 pointer-events-none" />
+              )}
+              <div className="relative flex items-center gap-5 w-full">
+                {/* Pick Pill */}
+                <div
+                  className={
+                    `relative w-14 h-14 rounded-xl shadow-md border text-sm font-bold tracking-wide ` +
+                    (isTop5
+                      ? 'bg-gradient-to-b from-orange-500 to-orange-600 text-white border-orange-600'
+                      : isLottery
+                      ? 'bg-gradient-to-b from-indigo-600 to-purple-600 text-white border-indigo-600'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600')
+                  }
+                  data-pick-pill
+                >
+                  <div data-pill-content className="absolute inset-0" style={{ transform: 'translateY(-6px)' }}>
+                    <span className="absolute left-1/2 -translate-x-1/2 text-xl" style={{ top: '14px', lineHeight: '12px' }}>{pick.pick}</span>
+                    <span className="absolute left-1/2 -translate-x-1/2 uppercase text-[9px] opacity-80" style={{ top: '32px', lineHeight: '10px' }}>PICK</span>
                   </div>
-                ) : (
-                  <div className="flex items-center">
-                    <p className="text-gray-400 italic text-xl font-medium">Seleção em aberto</p>
-                  </div>
-                )}
+                </div>
+                {/* Logo removido para simplificação do export */}
+                {/* Content */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  {pick.prospect ? (
+                    <div className="-translate-y-2">
+                      <h3 className="font-black text-2xl leading-tight text-gray-900 dark:text-gray-50 tracking-tight">
+                        {pick.prospect.name}
+                      </h3>
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1.5">
+                        {teamFullNames[pick.team] || pick.team}
+                      </p>
+                      {/* Badges removidas para simplificação do export */}
+                    </div>
+                  ) : (
+                    <div className="italic text-gray-400 dark:text-gray-500 font-medium">Seleção em aberto</div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
+  // Ajuste dinâmico removido para evitar deslocamentos artificiais
 
   return (
-    <div ref={ref} className="w-[1200px] bg-white p-8 font-sans relative overflow-hidden">
+    <div
+      ref={ref}
+      className="w-[1200px] bg-white dark:bg-[#0A0B12] pt-4 pb-8 px-8 font-sans relative rounded-2xl shadow-2xl"
+      style={{ boxSizing: 'border-box' }}
+    >
       {/* Grid Background Sutil */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)',
-        backgroundSize: '40px 40px'
-      }}></div>
+      <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08]" style={{
+        backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.35) 1px, transparent 0)',
+        backgroundSize: '22px 22px'
+      }} />
       
       {/* Corner Accents Simples */}
-      <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-gray-300"></div>
-      <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-gray-300"></div>
+      <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-orange-300 dark:border-orange-600/60 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-purple-300 dark:border-purple-600/60 pointer-events-none"></div>
 
       {/* Header Limpo */}
-      <header className="relative z-10 bg-white border-b-2 border-gray-200 p-6 mb-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 mr-6" />
-            <div>
-              <h1 className="text-3xl font-bold mb-1">
-                <span className="text-orange-500">prospect</span>
-                <span className="text-brand-purple">Radar</span>
-              </h1>
-              <p className="text-gray-600 text-lg">Mock Draft Profissional</p>
+      <div ref={rootInnerRef} className="relative transition-none">
+      <header className="relative z-10 mb-8">
+        <div className="rounded-2xl p-6 bg-gradient-to-r from-orange-500 via-purple-600 to-indigo-600 text-white shadow-xl border border-white/10 dark:border-white/5">
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <div className="flex items-center gap-6">
+              <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 drop-shadow-lg" />
+              <div>
+                <h1 className="text-4xl font-black tracking-tight leading-none flex items-center gap-2">
+                  <span className="bg-white/10 backdrop-blur px-3 py-1 rounded-lg">Mock Draft</span>
+                  <span className="text-yellow-300">{settings.draftClass}</span>
+                </h1>
+                <p className="mt-2 text-sm font-medium opacity-90">Compartilhe seu board • Atualizado {new Date().toLocaleDateString('pt-BR')}</p>
+              </div>
             </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-gray-800 mb-1">
-              DRAFT {settings.draftClass}
-            </div>
-            <div className="bg-gray-100 px-3 py-1 rounded">
-              <p className="text-sm text-gray-600">GERADO EM: {new Date().toLocaleDateString('pt-BR')}</p>
+            <div className="text-right flex-1 min-w-[250px]">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur border border-white/20 text-sm font-semibold tracking-wide">
+                <span className="text-yellow-200">{totalFilled}</span> / {board.length} PICKS DEFINIDOS
+              </div>
             </div>
           </div>
         </div>
+        {/* Bloco de estatísticas removido para simplificar o export */}
       </header>
-
-      <section className="relative z-10 py-6">
+      <section className="relative z-10 py-2">
         {renderRound(firstRound, "PRIMEIRA RODADA")}
         {shouldRenderSecondRound && renderRound(secondRound, "SEGUNDA RODADA")}
       </section>
 
       {/* Footer Limpo */}
-      <footer className="relative z-10 bg-white border-t-2 border-gray-200 text-center p-4">
-        <div className="mb-2">
-          <span className="text-xl font-bold text-orange-500">prospect</span>
-          <span className="text-xl font-bold text-brand-purple">Radar</span>
-          <span className="text-gray-600 ml-2">• Análise Profissional de Prospects</span>
-        </div>
-        <div className="text-sm text-gray-500">
-          prospectradar.com.br • {new Date().toLocaleDateString('pt-BR')}
+      <footer className="relative z-10 mt-2 text-center p-6 rounded-2xl bg-gradient-to-r from-gray-100 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-inner">
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-lg font-extrabold tracking-tight">
+            <span className="text-orange-600">prospect</span><span className="text-purple-700 dark:text-purple-400">Radar</span>
+          </div>
+          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Crie seu próprio mock em prospectradar.com.br • #{settings.draftClass} #NBADraft #ProspectRadar</div>
+          <div className="text-[10px] text-gray-400 dark:text-gray-500">{new Date().toLocaleDateString('pt-BR')} • Visual Premium Export</div>
         </div>
       </footer>
+      </div>
     </div>
   );
 });
