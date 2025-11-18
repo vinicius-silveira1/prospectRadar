@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { LeagueContext } from '@/context/LeagueContext';
+import { buildFirstRoundOrderFromStandings } from '@/utils/lottery';
 
 // Ordem do draft padrão da NBA
 const defaultDraftOrder = [
@@ -86,9 +87,10 @@ const useMockDraft = (allProspects) => {
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
     const orderToUse = customDraftOrder || activeDraftOrder;
-    const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo) => ({
+    const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo, idx) => ({
       ...pickInfo,
-      round: league === 'WNBA' ? Math.floor((pickInfo.pick - 1) / 12) + 1 : (pickInfo.pick <= 30 ? 1 : 2),
+      pick: idx + 1, // garantir que o número do pick corresponda à posição no board
+      round: league === 'WNBA' ? Math.floor(idx / 12) + 1 : (idx + 1 <= 30 ? 1 : 2),
       prospect: null,
     }));
     setDraftBoard(initialBoard);
@@ -178,7 +180,7 @@ const useMockDraft = (allProspects) => {
 
       if (error) throw error;
 
-      const { draftBoard, currentPick, draftHistory, draftSettings, league: savedLeague } = data.draft_data;
+      const { draftBoard, currentPick, draftHistory, draftSettings } = data.draft_data;
       // ATENÇÃO: A mudança de liga aqui pode causar efeitos colaterais se não for gerenciada no componente pai.
       // Por enquanto, apenas carregamos os dados. O ideal seria o componente pai reagir a `savedLeague`.
       setDraftBoard(draftBoard);
@@ -356,6 +358,39 @@ const useMockDraft = (allProspects) => {
     setIsOrderCustomized(true);
   }, [league]);
 
+  // Generate draft order from current NBA standings
+  const generateOrderFromStandings = useCallback((standings, options = {}) => {
+    const { simulateLottery = true } = options;
+    if (!standings || league === 'WNBA') {
+      return activeDraftOrder;
+    }
+
+    try {
+      const firstRound = buildFirstRoundOrderFromStandings(standings, simulateLottery);
+      // Build second round: strict inverse record order across all 30 teams (no lottery)
+      const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
+      const allTeamsInverse = [
+        ...(standings?.lottery || []),
+        ...(standings?.playoff || []),
+      ].sort(byWinPctAsc).map(t => t.team);
+
+      const secondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, team }));
+      const full = [...firstRound, ...secondRound];
+      const capped = full.slice(0, draftSettings.totalPicks).map((p, i) => ({ pick: i + 1, team: p.team }));
+      return capped;
+    } catch (e) {
+      console.error('Falha ao gerar ordem a partir das standings:', e);
+      return activeDraftOrder;
+    }
+  }, [activeDraftOrder, draftSettings.totalPicks, league]);
+
+  // Apply standings-based order into current draft
+  const applyStandingsOrder = useCallback((standings, options = {}) => {
+    const newOrder = generateOrderFromStandings(standings, options);
+    setCustomDraftOrder(newOrder);
+    setIsOrderCustomized(true);
+  }, [generateOrderFromStandings]);
+
   const getCurrentDraftOrder = useCallback(() => {
     return customDraftOrder || (league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder);
   }, [customDraftOrder, league]);
@@ -387,7 +422,7 @@ const useMockDraft = (allProspects) => {
 
   const generateReportCardData = useCallback(() => {
     return null;
-  }, [draftHistory, allProspects]);
+  }, []);
 
   return {
     draftBoard,
@@ -412,6 +447,8 @@ const useMockDraft = (allProspects) => {
     resetToDefaultOrder,
     shuffleTeamOrder,
     getCurrentDraftOrder,
+    generateOrderFromStandings,
+    applyStandingsOrder,
     draftProspect,
     undraftProspect,
     simulateLottery,

@@ -498,6 +498,8 @@ const MockDraft = () => {
                   <RotateCcw className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
                   <span className="relative z-10">Reset</span>
                 </motion.button>
+
+                {/* Botões de standings/loteria removidos temporariamente */}
                 
                 <motion.button 
                   whileHover={{
