@@ -110,7 +110,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
         </h3>
         {title === 'PRIMEIRA RODADA'}
       </div>
-      <div className="grid grid-cols-2 gap-7">
+      <div className="grid grid-cols-3 gap-6">
         {round.map((pick) => {
           const isTop5 = top5Set.has(pick.pick);
           const isLottery = lotterySet.has(pick.pick);
