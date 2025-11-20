@@ -66,33 +66,7 @@ const MockDraft = () => {
       const html2canvas = (await import('html2canvas')).default;
       if (exportRef.current) {
         const node = exportRef.current;
-        // Debug: log bounding boxes para investigar desalinhamento
-        try {
-          const firstCard = node.querySelector('[data-export-card]');
-          const pill = firstCard?.querySelector('[data-pick-pill]');
-          const pillInner = firstCard?.querySelector('[data-pill-content]');
-          const firstBadge = firstCard?.querySelector('[data-badge]');
-          const firstBadgeText = firstCard?.querySelector('[data-badge-text]');
-          if (firstCard && pill) {
-            const cardRect = firstCard.getBoundingClientRect();
-            const pillRect = pill.getBoundingClientRect();
-            const pillInnerRect = pillInner?.getBoundingClientRect();
-            console.log('EXPORT DEBUG cardRect', cardRect);
-            console.log('EXPORT DEBUG pillRect', pillRect);
-            console.log('EXPORT DEBUG pill->card center delta', (pillRect.top - cardRect.top + pillRect.height / 2) - cardRect.height / 2);
-            if (pillInnerRect) {
-              console.log('EXPORT DEBUG pillInnerRect', pillInnerRect);
-              console.log('EXPORT DEBUG pillInner->pill center delta', (pillInnerRect.top - pillRect.top + pillInnerRect.height / 2) - pillRect.height / 2);
-            }
-          }
-          if (firstBadge && firstBadgeText) {
-            const bRect = firstBadge.getBoundingClientRect();
-            const tRect = firstBadgeText.getBoundingClientRect();
-            console.log('EXPORT DEBUG badgeRect', bRect);
-            console.log('EXPORT DEBUG badgeTextRect', tRect);
-            console.log('EXPORT DEBUG badgeText->badge center delta', (tRect.top - bRect.top + tRect.height / 2) - bRect.height / 2);
-          }
-        } catch { /* silencioso */ }
+        // Debug removido (higienização)
         if (document.fonts && document.fonts.ready) {
           await document.fonts.ready.catch(() => {});
         }
@@ -125,6 +99,69 @@ const MockDraft = () => {
   const [notification, setNotification] = useState({ type: '', message: '' });
   const [lotterySeed, setLotterySeed] = useState('');
   const [lastLotteryResult, setLastLotteryResult] = useState(null);
+  const [showLotteryRanges, setShowLotteryRanges] = useState(false);
+  // Estados de feedback e acessibilidade
+  const [isOddsApplying, setIsOddsApplying] = useState(false);
+  const [isLotterySimulating, setIsLotterySimulating] = useState(false); // reutilizado para rerodar
+  const [oddsInlineFeedback, setOddsInlineFeedback] = useState('');
+
+  useEffect(() => {
+    if (oddsInlineFeedback) {
+      const t = setTimeout(()=> setOddsInlineFeedback(''), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [oddsInlineFeedback]);
+
+  // Atalho de teclado: R para rerodar odds
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (!standingsLoading && standings && !isLotterySimulating) {
+          const newSeed = Math.floor(Math.random()*1e9);
+          setLotterySeed(String(newSeed));
+          try {
+            applyStandingsOrder(standings, { simulateLottery: true, seed: newSeed });
+            const ranked = [...(standings?.lottery || [])]
+              .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
+              .map((t,i)=>({ team: t.team, rank: i+1 }));
+            const detailed = simulateLotteryDetailed(ranked, { seed: newSeed });
+            setLastLotteryResult(detailed);
+            setOddsInlineFeedback('Rerodado (atalho R)');
+          } catch {
+            setOddsInlineFeedback('Falha ao rerodar odds.');
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [standings, standingsLoading, isLotterySimulating, applyStandingsOrder]);
+    // Restore persisted seed and last result
+    useEffect(() => {
+      try {
+        const savedSeed = localStorage.getItem('mockDraftLotterySeed');
+        if (savedSeed) setLotterySeed(savedSeed);
+        const savedResult = localStorage.getItem('mockDraftLastLotteryResult');
+        if (savedResult) {
+          const parsed = JSON.parse(savedResult);
+          if (parsed?.winners && parsed?.ranges) setLastLotteryResult(parsed);
+        }
+      } catch { /* ignore */ }
+    }, []);
+
+    // Persist changes
+    useEffect(() => {
+      try {
+        if (lotterySeed) localStorage.setItem('mockDraftLotterySeed', lotterySeed);
+      } catch {}
+    }, [lotterySeed]);
+    useEffect(() => {
+      try {
+        if (lastLotteryResult) {
+          localStorage.setItem('mockDraftLastLotteryResult', JSON.stringify(lastLotteryResult));
+        }
+      } catch {}
+    }, [lastLotteryResult]);
   // Relatório desativado nesta versão
 
   // Função de relatório removida
@@ -277,6 +314,9 @@ const MockDraft = () => {
                 </motion.div>
                 <span className="text-yellow-300">Mock Draft</span>
                 <span className="ml-3">{draftSettings.draftClass}</span>
+                {lotterySeed && (
+                  <span className="ml-3 px-2 py-1 rounded-md bg-yellow-300/20 text-yellow-900 dark:text-yellow-200 text-xs font-mono border border-yellow-300/40">seed {lotterySeed}</span>
+                )}
               </motion.h1>
               
               <motion.p 
@@ -342,7 +382,12 @@ const MockDraft = () => {
         {/* Indicador de frescor das standings */}
         {standings && freshness && (
           <div className={`text-xs font-mono mt-1 ml-1 ${freshness.isStale ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
-            Standings: atualizadas há {Math.floor(freshness.ageMs / (1000*60*60))}h · fonte {standings.source || 'desconhecida'} {freshness.isStale && '⚠️'}
+            {(() => {
+              const minutes = Math.floor(freshness.ageMs / (1000*60));
+              if (minutes < 60) return `Standings: há ${minutes}m` + (freshness.isStale ? ' ⚠️' : '');
+              const hours = Math.floor(minutes / 60);
+              return `Standings: há ${hours}h` + (freshness.isStale ? ' ⚠️' : '');
+            })()}
           </div>
         )}
 
@@ -474,30 +519,44 @@ const MockDraft = () => {
                   }} 
                   whileTap={{ scale: 0.95 }} 
                   onClick={() => {
-                    if (standings && !standingsLoading) {
+                    if (standings && !standingsLoading && !isOddsApplying) {
+                      setIsOddsApplying(true);
                       const seedVal = lotterySeed.trim() !== '' ? Number(lotterySeed) : undefined;
-                      applyStandingsOrder(standings, { simulateLottery: true, seed: seedVal });
-                      // Gerar detalhamento
                       try {
+                        applyStandingsOrder(standings, { simulateLottery: true, seed: seedVal });
                         const ranked = [...(standings?.lottery || [])]
                           .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
                           .map((t,i)=>({ team: t.team, rank: i+1 }));
                         const detailed = simulateLotteryDetailed(ranked, { seed: seedVal });
                         setLastLotteryResult(detailed);
+                        setOddsInlineFeedback('Odds reais da loteria aplicadas!');
                       } catch(e) {
                         console.error('Falha simulando detalhamento da loteria:', e);
+                        setOddsInlineFeedback('Falha ao aplicar odds.');
+                      } finally {
+                        setIsOddsApplying(false);
                       }
-                      setNotification({ type: 'success', message: 'Odds reais da loteria aplicadas!' });
-                    } else {
+                    } else if (!standings || standingsLoading) {
                       setNotification({ type: 'error', message: 'Aguardando dados de standings...' });
                     }
                   }} 
                   disabled={league === 'WNBA' || standingsLoading}
-                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                  aria-label="Aplicar odds reais da loteria"
+                  title="Aplica a simulação oficial da loteria usando as standings atuais"
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-green-400"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Trophy className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
-                  <span className="relative z-10">Odds Reais</span>
+                  {isOddsApplying ? (
+                    <div className="flex items-center gap-2 relative z-10">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      <span>Aplicando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Trophy className="h-4 w-4 mr-1 sm:mr-2 relative z-10" aria-hidden="true" /> 
+                      <span className="relative z-10">Odds Reais</span>
+                    </>
+                  )}
                 </motion.button>
                 
                 <motion.button 
@@ -506,12 +565,42 @@ const MockDraft = () => {
                     boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
                   }} 
                   whileTap={{ scale: 0.95 }} 
-                  onClick={simulateLottery} 
-                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group"
+                  onClick={() => {
+                    if (isLotterySimulating || standingsLoading || !standings) return;
+                    setIsLotterySimulating(true);
+                    const newSeed = Math.floor(Math.random()*1e9);
+                    setLotterySeed(String(newSeed));
+                    try {
+                      applyStandingsOrder(standings, { simulateLottery: true, seed: newSeed });
+                      const ranked = [...(standings?.lottery || [])]
+                        .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
+                        .map((t,i)=>({ team: t.team, rank: i+1 }));
+                      const detailed = simulateLotteryDetailed(ranked, { seed: newSeed });
+                      setLastLotteryResult(detailed);
+                      setOddsInlineFeedback('Rerodado com nova seed!');
+                    } catch(e) {
+                      console.error(e);
+                      setOddsInlineFeedback('Falha ao rerodar odds.');
+                    } finally {
+                      setTimeout(()=> setIsLotterySimulating(false), 600);
+                    }
+                  }} 
+                  aria-label="Rerodar odds" title="Gera nova seed e reaplica a loteria oficial" 
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-40"
+                  disabled={standingsLoading || !standings}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <Shuffle className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
-                  <span className="relative z-10">Simular</span>
+                  {isLotterySimulating ? (
+                    <div className="flex items-center gap-2 relative z-10">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                      <span>Rerodando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Shuffle className="h-4 w-4 mr-1 sm:mr-2 relative z-10" aria-hidden="true" /> 
+                      <span className="relative z-10">Rerodar Odds</span>
+                    </>
+                  )}
                 </motion.button>
                 
                 {/* NOVO BOTÃO PARA CUSTOMIZAR ORDEM DOS TIMES */}
@@ -615,7 +704,102 @@ const MockDraft = () => {
                   <span className="relative z-10">Gerar Relatório do Draft</span>
                 </motion.button>
                 */}
+                {/* Seed input + odds panel controls */}
+                <div className="col-span-2 flex flex-col gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      type="number"
+                      value={lotterySeed}
+                      onChange={(e)=> setLotterySeed(e.target.value)}
+                      placeholder="Seed opcional"
+                      aria-label="Seed da loteria" title="Defina uma seed numérica para reproduzir o sorteio"
+                      className="flex-1 min-w-[120px] px-2 py-1 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-super-dark-secondary text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 invalid:border-red-500"
+                    />
+                    <button
+                      onClick={() => setLotterySeed(String(Math.floor(Math.random()*1e9)))}
+                      aria-label="Gerar seed aleatória" title="Gera uma seed aleatória" 
+                      className="px-2 py-1 text-xs rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600 transition focus:outline-none focus:ring-2 focus:ring-slate-400 flex-1 sm:flex-none"
+                    >Random</button>
+                    <button
+                      onClick={() => {
+                        if (!lotterySeed) return;
+                        try {
+                          navigator.clipboard.writeText(lotterySeed);
+                          setNotification({ type: 'success', message: 'Seed copiada!' });
+                        } catch {
+                          setNotification({ type: 'error', message: 'Falha ao copiar seed.' });
+                        }
+                      }}
+                      disabled={!lotterySeed}
+                      aria-label="Copiar seed" title="Copia a seed atual para a área de transferência"
+                      className="px-2 py-1 text-xs rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-100 hover:bg-slate-300 dark:hover:bg-slate-600 transition disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-slate-400 flex-1 sm:flex-none"
+                    >Copiar</button>
+                    {lastLotteryResult && (
+                      <button
+                        onClick={() => setShowLotteryRanges(v=>!v)}
+                        aria-label="Alternar exibição das odds" title="Mostra ou esconde a tabela completa de odds"
+                        className="px-2 py-1 text-xs rounded-md bg-green-200 dark:bg-green-700 text-green-900 dark:text-green-100 hover:bg-green-300 dark:hover:bg-green-600 transition focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto"
+                      >{showLotteryRanges ? 'Esconder Odds' : 'Ver Odds'}</button>
+                    )}
+                  </div>
+                  {!lotterySeed && (
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1" role="note">Nenhuma seed definida – sorteio não é reproduzível.</div>
+                  )}
+                  {lastLotteryResult && showLotteryRanges && (
+                    <div className="rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 max-h-56 overflow-auto">
+                      <div className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 mb-1 flex justify-between">
+                        <span>Lottery Odds (Combos)</span>
+                        <span className="font-normal text-[9px] opacity-70">Total {lastLotteryResult.ranges[lastLotteryResult.ranges.length-1].end}</span>
+                      </div>
+                      <table className="w-full text-[10px]">
+                        <thead className="sticky top-0 bg-white dark:bg-slate-800 shadow">
+                          <tr className="text-slate-600 dark:text-slate-300">
+                            <th className="text-left font-medium">Rank</th>
+                            <th className="text-left font-medium">Team</th>
+                            <th className="text-right font-medium">Combos</th>
+                            <th className="text-right font-medium">% Pick 1</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lastLotteryResult.ranges.map(r => (
+                            <tr key={r.team} className={`border-t border-slate-200 dark:border-slate-700 ${lastLotteryResult.winners.some(w=>w.team===r.team) ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}> 
+                              <td className="py-1 pr-2 text-slate-700 dark:text-slate-200">{r.rank}</td>
+                              <td className="py-1 pr-2 text-slate-700 dark:text-slate-200 font-mono">{r.team}</td>
+                              <td className="py-1 pr-2 text-right text-slate-600 dark:text-slate-300">{r.start}-{r.end}</td>
+                              <td className="py-1 pr-2 text-right text-slate-600 dark:text-slate-300">{r.oddsPct.toFixed(1)}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {lastLotteryResult && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {lastLotteryResult.winners.map(w => (
+                        <div key={w.pick} className="text-[10px] sm:text-xs flex flex-col rounded-md border border-slate-300 dark:border-slate-700 p-2 bg-white dark:bg-slate-800">
+                          <div className="font-bold text-slate-800 dark:text-slate-100">Pick {w.pick}: {w.team}</div>
+                          <div className="text-slate-600 dark:text-slate-300">Rank {w.rank} • {w.oddsPct?.toFixed(1)}%</div>
+                          <div className="text-slate-500 dark:text-slate-400">Combos {w.start}-{w.end}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+              {oddsInlineFeedback && (
+                <div className="mt-3 col-span-2 animate-fade-in">
+                  <div className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-md border shadow-sm w-full 
+                    ${oddsInlineFeedback.startsWith('Falha') 
+                      ? 'bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-200' 
+                      : 'bg-green-100 border-green-300 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-200'}`}
+                    role="status" aria-live="polite">
+                    <span>{oddsInlineFeedback}</span>
+                    {lotterySeed && !oddsInlineFeedback.startsWith('Falha') && (
+                      <span className="ml-auto text-[10px] opacity-70 font-mono">seed {lotterySeed}</span>
+                    )}
+                  </div>
+                </div>
+              )}
               {!user && <p className="text-xs text-center text-gray-500 mt-2">Faça login para salvar e carregar seus drafts.</p>}
             </div>
           </div>
