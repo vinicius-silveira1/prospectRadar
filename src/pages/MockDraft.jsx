@@ -16,6 +16,7 @@ import AchievementUnlock from '@/components/Common/AchievementUnlock';
 import { useResponsive } from '@/hooks/useResponsive';
 import useMockDraft from '../hooks/useMockDraft.js';
 import useProspects from '@/hooks/useProspects.js';
+import useNBAStandings from '@/hooks/useNBAStandings.js';
 import toast from 'react-hot-toast';
 import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
@@ -23,6 +24,7 @@ import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import { simulateLotteryDetailed } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/lib/supabaseClient';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
@@ -32,6 +34,7 @@ import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 const MockDraft = () => {
   const { user } = useAuth();
   const { league } = useContext(LeagueContext);
+  const { standings, loading: standingsLoading, freshness } = useNBAStandings();
   
     const allProspectsFilters = useMemo(() => ({ draftClass: '2026', league }), [league]);
 
@@ -44,7 +47,7 @@ const MockDraft = () => {
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
     initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
-    setCustomTeamOrder, getCurrentDraftOrder,
+    setCustomTeamOrder, getCurrentDraftOrder, applyStandingsOrder,
     // generateReportCardData removido
     autocompleteDraft
   } = useMockDraft(allProspects);
@@ -120,6 +123,8 @@ const MockDraft = () => {
   const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
+  const [lotterySeed, setLotterySeed] = useState('');
+  const [lastLotteryResult, setLastLotteryResult] = useState(null);
   // Relatório desativado nesta versão
 
   // Função de relatório removida
@@ -334,6 +339,12 @@ const MockDraft = () => {
           onModeChange={(newSize) => setDraftSettings(prev => ({ ...prev, totalPicks: newSize }))}
           league={league}
         />
+        {/* Indicador de frescor das standings */}
+        {standings && freshness && (
+          <div className={`text-xs font-mono mt-1 ml-1 ${freshness.isStale ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'}`}>
+            Standings: atualizadas há {Math.floor(freshness.ageMs / (1000*60*60))}h · fonte {standings.source || 'desconhecida'} {freshness.isStale && '⚠️'}
+          </div>
+        )}
 
         {/* Barra de Progresso - Separada do banner */}
         <motion.div 
@@ -456,7 +467,38 @@ const MockDraft = () => {
                   <span className="relative z-10">Reset</span>
                 </motion.button>
 
-                {/* Botões de standings/loteria removidos temporariamente */}
+                <motion.button 
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: "0 4px 12px rgba(34, 197, 94, 0.3)"
+                  }} 
+                  whileTap={{ scale: 0.95 }} 
+                  onClick={() => {
+                    if (standings && !standingsLoading) {
+                      const seedVal = lotterySeed.trim() !== '' ? Number(lotterySeed) : undefined;
+                      applyStandingsOrder(standings, { simulateLottery: true, seed: seedVal });
+                      // Gerar detalhamento
+                      try {
+                        const ranked = [...(standings?.lottery || [])]
+                          .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
+                          .map((t,i)=>({ team: t.team, rank: i+1 }));
+                        const detailed = simulateLotteryDetailed(ranked, { seed: seedVal });
+                        setLastLotteryResult(detailed);
+                      } catch(e) {
+                        console.error('Falha simulando detalhamento da loteria:', e);
+                      }
+                      setNotification({ type: 'success', message: 'Odds reais da loteria aplicadas!' });
+                    } else {
+                      setNotification({ type: 'error', message: 'Aguardando dados de standings...' });
+                    }
+                  }} 
+                  disabled={league === 'WNBA' || standingsLoading}
+                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Trophy className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
+                  <span className="relative z-10">Odds Reais</span>
+                </motion.button>
                 
                 <motion.button 
                   whileHover={{

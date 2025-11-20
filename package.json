@@ -12,6 +12,19 @@
     "db:migrate": "node scripts/seed.mjs",
     "test": "vitest"
   },
+  "standings": {
+    "seasonFormat": "YYYY-YY"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "invoke:stats": "supabase functions invoke update-prospect-stats --body-file .\\empty-body.json",
+    "db:migrate": "node scripts/seed.mjs",
+    "test": "vitest",
+    "update:standings": "node scripts/updateNbaStandings.mjs --seasonStart=2025"
+  },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/ios": "^7.4.3",

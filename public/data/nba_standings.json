@@ -1,5 +1,159 @@
 {
-  "updatedAt": "",
-  "lottery": [],
-  "playoff": []
+  "updatedAt": "2025-11-20T00:12:26.183Z",
+  "lottery": [
+    {
+      "team": "IND",
+      "wins": 1,
+      "losses": 13
+    },
+    {
+      "team": "WAS",
+      "wins": 1,
+      "losses": 12
+    },
+    {
+      "team": "BKN",
+      "wins": 2,
+      "losses": 12
+    },
+    {
+      "team": "NOP",
+      "wins": 2,
+      "losses": 12
+    },
+    {
+      "team": "SAC",
+      "wins": 3,
+      "losses": 11
+    },
+    {
+      "team": "MEM",
+      "wins": 4,
+      "losses": 11
+    },
+    {
+      "team": "DAL",
+      "wins": 4,
+      "losses": 11
+    },
+    {
+      "team": "CHA",
+      "wins": 4,
+      "losses": 10
+    },
+    {
+      "team": "LAC",
+      "wins": 4,
+      "losses": 10
+    },
+    {
+      "team": "UTA",
+      "wins": 5,
+      "losses": 9
+    },
+    {
+      "team": "POR",
+      "wins": 6,
+      "losses": 8
+    },
+    {
+      "team": "ORL",
+      "wins": 8,
+      "losses": 7
+    },
+    {
+      "team": "BOS",
+      "wins": 8,
+      "losses": 7
+    },
+    {
+      "team": "MIL",
+      "wins": 8,
+      "losses": 7
+    }
+  ],
+  "playoff": [
+    {
+      "team": "CHI",
+      "wins": 7,
+      "losses": 6
+    },
+    {
+      "team": "GSW",
+      "wins": 9,
+      "losses": 7
+    },
+    {
+      "team": "MIA",
+      "wins": 8,
+      "losses": 6
+    },
+    {
+      "team": "ATL",
+      "wins": 9,
+      "losses": 6
+    },
+    {
+      "team": "PHX",
+      "wins": 9,
+      "losses": 6
+    },
+    {
+      "team": "NYK",
+      "wins": 8,
+      "losses": 5
+    },
+    {
+      "team": "PHI",
+      "wins": 8,
+      "losses": 5
+    },
+    {
+      "team": "TOR",
+      "wins": 9,
+      "losses": 5
+    },
+    {
+      "team": "MIN",
+      "wins": 9,
+      "losses": 5
+    },
+    {
+      "team": "CLE",
+      "wins": 10,
+      "losses": 5
+    },
+    {
+      "team": "SAS",
+      "wins": 10,
+      "losses": 4
+    },
+    {
+      "team": "LAL",
+      "wins": 11,
+      "losses": 4
+    },
+    {
+      "team": "HOU",
+      "wins": 9,
+      "losses": 3
+    },
+    {
+      "team": "DEN",
+      "wins": 10,
+      "losses": 3
+    },
+    {
+      "team": "DET",
+      "wins": 13,
+      "losses": 2
+    },
+    {
+      "team": "OKC",
+      "wins": 14,
+      "losses": 1
+    }
+  ],
+  "source": "basketball-reference-puppeteer",
+  "season": "2025-26"
 }

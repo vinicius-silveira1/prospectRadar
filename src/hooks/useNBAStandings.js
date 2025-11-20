@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 // Lightweight client hook to fetch current NBA standings from a static endpoint.
 // Expected shape:
@@ -33,5 +33,13 @@ export default function useNBAStandings() {
     return () => { cancelled = true; };
   }, []);
 
-  return { standings, loading, error };
+  const freshness = useMemo(() => {
+    if (!standings?.updatedAt) return null;
+    const updatedAtDate = new Date(standings.updatedAt);
+    const ageMs = Date.now() - updatedAtDate.getTime();
+    const isStale = ageMs > 1000 * 60 * 60 * 24; // >24h
+    return { ageMs, isStale, updatedAtDate };
+  }, [standings]);
+
+  return { standings, loading, error, freshness };
 }
