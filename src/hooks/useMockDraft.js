@@ -56,33 +56,90 @@ const useMockDraft = (allProspects) => {
   const [currentPick, setCurrentPick] = useState(1);
   const [draftHistory, setDraftHistory] = useState([]);
   const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL' });
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [customDraftOrder, setCustomDraftOrder] = useState(null);
   const [isOrderCustomized, setIsOrderCustomized] = useState(false);
   const [savedDrafts, setSavedDrafts] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
+  const [trendingMap, setTrendingMap] = useState({});
+  const TREND_THRESHOLD = 0.02; // ~2 pontos percentuais de mudança no radar_score (se radar_score ~0-1) ou ajustar conforme escala real
+
+  // Fetch trending data (simplified overlay) - timeframe fixo 7_days
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const trendColumn = 'trending_7_days';
+        const { data, error } = await supabase
+          .from('prospects')
+          .select(`id, ${trendColumn}`)
+          .eq('category', league);
+        if (error) throw error;
+        const map = {};
+        (data || []).forEach(p => {
+          const change = p?.[trendColumn]?.radar_score_change || 0;
+            if (Math.abs(change) < TREND_THRESHOLD) return; // ignora neutros para reduzir ruído
+            map[p.id] = {
+              change,
+              direction: change > 0 ? 'up' : 'down'
+            };
+        });
+        setTrendingMap(map);
+      } catch (e) {
+        console.error('Falha ao buscar trending overlay:', e);
+      }
+    };
+    fetchTrending();
+  }, [league]);
 
   const activeDraftOrder = useMemo(() => {
     return league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
   }, [league]);
 
+  // Debounce search term to reduce filter recomputations
+  useEffect(() => {
+    const h = setTimeout(() => setDebouncedSearchTerm(filters.searchTerm), 200);
+    return () => clearTimeout(h);
+  }, [filters.searchTerm]);
+
+  // Augment prospects once with trending info
+  const augmentedProspects = useMemo(() => {
+    if (!allProspects || allProspects.length === 0) return [];
+    return allProspects.map(p => {
+      const trend = trendingMap[p.id];
+      return trend ? { ...p, trend_direction: trend.direction, trend_change: trend.change } : p;
+    });
+  }, [allProspects, trendingMap]);
+
+  // Single sorted list reused by BigBoard and availableProspects
+  const sortedAugmentedProspects = useMemo(() => {
+    return [...augmentedProspects].sort((a, b) => {
+      const aScore = a.radar_score != null ? a.radar_score : -Infinity;
+      const bScore = b.radar_score != null ? b.radar_score : -Infinity;
+      if (aScore !== bScore) return bScore - aScore;
+      const aRank = a.ranking != null ? a.ranking : Infinity;
+      const bRank = b.ranking != null ? b.ranking : Infinity;
+      return aRank - bRank;
+    });
+  }, [augmentedProspects]);
+
   const availableProspects = useMemo(() => {
     const draftedProspectIds = new Set(draftBoard.filter(pick => pick.prospect).map(pick => pick.prospect.id));
-    let filtered = allProspects.filter(prospect => !draftedProspectIds.has(prospect.id));
-    if (filters.searchTerm) {
-      const lowerCaseSearchTerm = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(prospect => 
-        (prospect.name && prospect.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (prospect.position && prospect.position.toLowerCase().includes(lowerCaseSearchTerm)) ||
-        (prospect.high_school_team && prospect.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
+    let filtered = sortedAugmentedProspects.filter(p => !draftedProspectIds.has(p.id));
+    if (debouncedSearchTerm) {
+      const lowerCaseSearchTerm = debouncedSearchTerm.toLowerCase();
+      filtered = filtered.filter(p =>
+        (p.name && p.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (p.position && p.position.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (p.high_school_team && p.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
       );
     }
     if (filters.position !== 'ALL') {
-      filtered = filtered.filter(prospect => prospect.position && prospect.position === filters.position);
+      filtered = filtered.filter(p => p.position && p.position === filters.position);
     }
-    return filtered.sort((a, b) => a.ranking - b.ranking);
-  }, [allProspects, draftBoard, filters.searchTerm, filters.position]);
+    return filtered; // already sorted
+  }, [sortedAugmentedProspects, draftBoard, debouncedSearchTerm, filters.position]);
 
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
@@ -230,30 +287,38 @@ const useMockDraft = (allProspects) => {
     setDraftHistory([]);
   }, [league]);
   
-  const getBigBoard = useCallback(() => {
-    return [...allProspects].sort((a, b) => a.ranking - b.ranking);
-  }, [allProspects]);
+  const getBigBoard = useCallback(() => sortedAugmentedProspects, [sortedAugmentedProspects]);
   
   const getProspectRecommendations = useCallback((pick) => {
     if (!pick || !availableProspects) return [];
 
     const internationalLeagues = new Set(['EuroLeague', 'AUS NBL', 'NBL Blitz', 'NBL', 'LNB', 'G-BBL', 'ACB']);
 
-    const rankedProspects = availableProspects.filter(p => p.ranking != null);
-    const internationalProspects = availableProspects.filter(p => internationalLeagues.has(p.league) && p.ranking == null);
+    // Já estão ordenados por radar_score desc com ranking como desempate
+    const scoredProspects = availableProspects.filter(p => p.radar_score != null);
+    const internationalProspects = availableProspects.filter(p => internationalLeagues.has(p.league));
 
     const recommendations = [];
 
-    recommendations.push(...rankedProspects.slice(0, 2));
-    if (internationalProspects.length > 0) {
-      recommendations.push(internationalProspects[0]);
+    // Top 2 por radar_score
+    recommendations.push(...scoredProspects.slice(0, 2));
+
+    // Adiciona 1 internacional (o de maior radar_score) se ainda não incluso
+    const topInternational = internationalProspects.find(intP => !recommendations.some(r => r.id === intP.id));
+    if (topInternational) {
+      recommendations.push(topInternational);
     }
 
-    const needed = 3 - recommendations.length;
-    if (needed > 0) {
-      recommendations.push(...rankedProspects.slice(2, 2 + needed));
+    // Completa até 3 usando próximos melhores por radar_score
+    let i = 2; // já consideramos primeiros dois
+    while (recommendations.length < 3 && i < scoredProspects.length) {
+      const candidate = scoredProspects[i];
+      if (!recommendations.some(r => r.id === candidate.id)) {
+        recommendations.push(candidate);
+      }
+      i++;
     }
-    
+
     return recommendations.slice(0, 3);
   }, [availableProspects]);
   

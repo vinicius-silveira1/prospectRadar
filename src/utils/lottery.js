@@ -101,6 +101,71 @@ export function simulateLotteryDetailed(teamsRankedWorstToBest, { seed } = {}) {
   return { seed: rngSeed, winners: winnersDetailed, ranges };
 }
 
+// Resolve ranking with tie-handling (seeded random shuffle within equal winPct groups).
+// Expects input objects shape: { team, wins, losses } or { team, rank } (if rank given, returns as-is).
+export function resolveLotteryRankingWithTies(lotteryTeams, seed) {
+  // If already ranked (contains rank), just map through.
+  if (lotteryTeams.length && lotteryTeams[0].rank != null) {
+    return lotteryTeams.map(t => ({ team: t.team, rank: t.rank }));
+  }
+  const rng = seed != null ? createSeededRng(seed) : Math.random;
+  const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
+  const sorted = [...lotteryTeams].sort(byWinPctAsc);
+  // Group by winPct string with limited precision to catch ties.
+  const groups = [];
+  sorted.forEach(t => {
+    const key = (t.wins / Math.max(1, t.wins + t.losses)).toFixed(6);
+    let g = groups.find(gr => gr.key === key);
+    if (!g) { g = { key, teams: [] }; groups.push(g); }
+    g.teams.push(t);
+  });
+  // Shuffle inside tie groups (Fisher-Yates seeded) if size > 1.
+  groups.forEach(g => {
+    if (g.teams.length > 1) {
+      for (let i = g.teams.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [g.teams[i], g.teams[j]] = [g.teams[j], g.teams[i]];
+      }
+    }
+  });
+  // Flatten preserving group ordering.
+  const flattened = groups.flatMap(g => g.teams);
+  return flattened.map((t, idx) => ({ team: t.team, rank: idx + 1 }));
+}
+
+// Monte Carlo probability matrix for picks 1..14 (lottery portion).
+// Returns: { seedUsed, iterations, probabilities: [{ team, rank, pickProbs: {1:%,...,14:%}, expectedPick }] }
+export function simulateLotteryProbabilityMatrix(teamsRankedWorstToBest, { iterations = 5000, seed } = {}) {
+  const baseSeed = seed != null ? seed : Math.floor(Math.random() * 1e9);
+  const teamCodes = teamsRankedWorstToBest.map(t => t.team);
+  const pickCounts = {};
+  teamCodes.forEach(tc => { pickCounts[tc] = Array(14).fill(0); });
+  for (let iter = 0; iter < iterations; iter++) {
+    // Derive iteration seed for determinism if seed supplied.
+    const iterSeed = baseSeed + iter;
+    const winners = simulateLotteryWinners(teamsRankedWorstToBest, { seed: iterSeed });
+    // Build final order (first 14 picks) replicating buildFirstRound logic.
+    const remaining = teamsRankedWorstToBest.filter(t => !winners.includes(t.team));
+    const order = [
+      ...winners.map((team, i) => ({ pick: i + 1, team })),
+      ...remaining.map((t, idx) => ({ pick: winners.length + idx + 1, team: t.team }))
+    ].slice(0, 14);
+    order.forEach(p => { pickCounts[p.team][p.pick - 1]++; });
+  }
+  const probabilities = teamCodes.map((team, idx) => {
+    const counts = pickCounts[team];
+    const pickProbs = {};
+    let expected = 0;
+    for (let p = 1; p <= 14; p++) {
+      const prob = counts[p - 1] / iterations;
+      pickProbs[p] = prob * 100;
+      expected += p * prob;
+    }
+    return { team, rank: idx + 1, pickProbs, expectedPick: expected };
+  });
+  return { seedUsed: baseSeed, iterations, probabilities };
+}
+
 // Build first-round order using standings and simulated lottery
 // standings: { lottery: [{team, wins, losses}, ... 14], playoff: [{team, wins, losses}, ...] }
 export function buildFirstRoundOrderFromStandings(standings, simulateLottery = true, options = {}) {
@@ -110,7 +175,7 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
   const playoffTeams = [...(standings?.playoff || [])].sort(byWinPctAsc);  // worse playoff -> best playoff
 
   // Map to worst->best ranking structure for lottery
-  const ranked = lotteryTeams.map((t, i) => ({ team: t.team, rank: i + 1 }));
+  const ranked = resolveLotteryRankingWithTies(lotteryTeams, options?.seed);
   let picks = [];
 
   if (simulateLottery && ranked.length >= 14) {

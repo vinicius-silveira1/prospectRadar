@@ -5,7 +5,8 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
-  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter
+  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter,
+  ArrowUp, ArrowDown
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useProspectImage } from '@/hooks/useProspectImage';
@@ -24,7 +25,7 @@ import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { simulateLotteryDetailed } from '@/utils/lottery.js';
+import { simulateLotteryDetailed, resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/lib/supabaseClient';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
@@ -102,8 +103,10 @@ const MockDraft = () => {
   const [showLotteryRanges, setShowLotteryRanges] = useState(false);
   // Estados de feedback e acessibilidade
   const [isOddsApplying, setIsOddsApplying] = useState(false);
-  const [isLotterySimulating, setIsLotterySimulating] = useState(false); // reutilizado para rerodar
   const [oddsInlineFeedback, setOddsInlineFeedback] = useState('');
+  const [showProbabilityMatrix, setShowProbabilityMatrix] = useState(false);
+  const [probabilityMatrix, setProbabilityMatrix] = useState(null);
+  const [isCalculatingMatrix, setIsCalculatingMatrix] = useState(false);
 
   useEffect(() => {
     if (oddsInlineFeedback) {
@@ -112,11 +115,11 @@ const MockDraft = () => {
     }
   }, [oddsInlineFeedback]);
 
-  // Atalho de teclado: R para rerodar odds
+  // Atalho de teclado: R para rerodar odds (usa ação principal)
   useEffect(() => {
     const handler = (e) => {
       if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        if (!standingsLoading && standings && !isLotterySimulating) {
+        if (!standingsLoading && standings && !isOddsApplying) {
           const newSeed = Math.floor(Math.random()*1e9);
           setLotterySeed(String(newSeed));
           try {
@@ -135,7 +138,7 @@ const MockDraft = () => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [standings, standingsLoading, isLotterySimulating, applyStandingsOrder]);
+  }, [standings, standingsLoading, isOddsApplying, applyStandingsOrder]);
     // Restore persisted seed and last result
     useEffect(() => {
       try {
@@ -559,50 +562,6 @@ const MockDraft = () => {
                   )}
                 </motion.button>
                 
-                <motion.button 
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: "0 4px 12px rgba(147, 51, 234, 0.3)"
-                  }} 
-                  whileTap={{ scale: 0.95 }} 
-                  onClick={() => {
-                    if (isLotterySimulating || standingsLoading || !standings) return;
-                    setIsLotterySimulating(true);
-                    const newSeed = Math.floor(Math.random()*1e9);
-                    setLotterySeed(String(newSeed));
-                    try {
-                      applyStandingsOrder(standings, { simulateLottery: true, seed: newSeed });
-                      const ranked = [...(standings?.lottery || [])]
-                        .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
-                        .map((t,i)=>({ team: t.team, rank: i+1 }));
-                      const detailed = simulateLotteryDetailed(ranked, { seed: newSeed });
-                      setLastLotteryResult(detailed);
-                      setOddsInlineFeedback('Rerodado com nova seed!');
-                    } catch(e) {
-                      console.error(e);
-                      setOddsInlineFeedback('Falha ao rerodar odds.');
-                    } finally {
-                      setTimeout(()=> setIsLotterySimulating(false), 600);
-                    }
-                  }} 
-                  aria-label="Rerodar odds" title="Gera nova seed e reaplica a loteria oficial" 
-                  className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-40"
-                  disabled={standingsLoading || !standings}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  {isLotterySimulating ? (
-                    <div className="flex items-center gap-2 relative z-10">
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      <span>Rerodando...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Shuffle className="h-4 w-4 mr-1 sm:mr-2 relative z-10" aria-hidden="true" /> 
-                      <span className="relative z-10">Rerodar Odds</span>
-                    </>
-                  )}
-                </motion.button>
-                
                 {/* NOVO BOTÃO PARA CUSTOMIZAR ORDEM DOS TIMES */}
                 <motion.button 
                   whileHover={{
@@ -782,6 +741,64 @@ const MockDraft = () => {
                           <div className="text-slate-500 dark:text-slate-400">Combos {w.start}-{w.end}</div>
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {lastLotteryResult && (
+                    <div className="mt-2">
+                      <button
+                        onClick={async () => {
+                          if (!standings || isCalculatingMatrix) return;
+                          if (!showProbabilityMatrix && !probabilityMatrix) {
+                            setIsCalculatingMatrix(true);
+                            try {
+                              const rankedRaw = resolveLotteryRankingWithTies(standings.lottery || [], Number(lotterySeed) || undefined);
+                              const matrix = simulateLotteryProbabilityMatrix(rankedRaw, { iterations: 3000, seed: Number(lotterySeed) || undefined });
+                              setProbabilityMatrix(matrix);
+                            } catch (e) {
+                              console.error('Falha calculando matriz de probabilidades', e);
+                              setOddsInlineFeedback('Falha ao calcular probabilidades.');
+                            } finally {
+                              setIsCalculatingMatrix(false);
+                              setShowProbabilityMatrix(true);
+                            }
+                          } else {
+                            setShowProbabilityMatrix(v => !v);
+                          }
+                        }}
+                        className="w-full px-2 py-1 text-[10px] rounded-md bg-purple-200 dark:bg-purple-700 text-purple-900 dark:text-purple-100 hover:bg-purple-300 dark:hover:bg-purple-600 transition focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      >{isCalculatingMatrix ? 'Calculando...' : showProbabilityMatrix ? 'Esconder Probabilidades' : 'Ver Probabilidades'}</button>
+                      {showProbabilityMatrix && probabilityMatrix && (
+                        <div className="mt-2 border border-slate-300 dark:border-slate-700 rounded-md p-2 bg-white dark:bg-slate-800 max-h-56 overflow-auto">
+                          <div className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 mb-1 flex justify-between">
+                            <span>Pick Probabilities</span>
+                            <span className="font-normal text-[9px] opacity-70">Iterações {probabilityMatrix.iterations}</span>
+                          </div>
+                          <table className="w-full text-[10px]">
+                            <thead className="sticky top-0 bg-white dark:bg-slate-800 shadow">
+                              <tr className="text-slate-600 dark:text-slate-300">
+                                <th className="text-left font-medium">Rank</th>
+                                <th className="text-left font-medium">Team</th>
+                                {[...Array(14)].map((_,i)=>(
+                                  <th key={i} className="text-right font-medium">{i+1}</th>
+                                ))}
+                                <th className="text-right font-medium">Exp</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {probabilityMatrix.probabilities.map(row => (
+                                <tr key={row.team} className="border-t border-slate-200 dark:border-slate-700">
+                                  <td className="py-1 pr-2 text-slate-700 dark:text-slate-200">{row.rank}</td>
+                                  <td className="py-1 pr-2 text-slate-700 dark:text-slate-200 font-mono">{row.team}</td>
+                                  {[...Array(14)].map((_,i)=>(
+                                    <td key={i} className="py-1 pr-2 text-right text-slate-600 dark:text-slate-300">{row.pickProbs[i+1].toFixed(1)}%</td>
+                                  ))}
+                                  <td className="py-1 pr-2 text-right text-slate-700 dark:text-slate-200">{row.expectedPick.toFixed(2)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1156,16 +1173,20 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
       {prospects.map((prospect, index) => (
         <motion.div 
           key={prospect.id} 
-          layoutId={`prospect-card-${prospect.id}`}
           className="relative"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ delay: index * 0.05 }}
+          whileHover={{ scale: 1.015 }}
         >
           <div className="absolute -top-2 -left-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-lg border-2 border-white dark:border-super-dark-secondary">
             #{index + 1}
           </div>
+          {prospect.trend_direction && (
+            <div className={`absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold z-10 shadow-lg border-2 border-white dark:border-super-dark-secondary backdrop-blur-sm ${prospect.trend_direction === 'up' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'}`}> 
+              {prospect.trend_direction === 'up' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+              <span>{prospect.trend_change > 0 ? '+' : ''}{prospect.trend_change?.toFixed(2)}</span>
+            </div>
+          )}
           <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
         </motion.div>
       ))}
