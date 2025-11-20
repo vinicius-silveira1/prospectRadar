@@ -71,22 +71,22 @@ const ExportBoardView = ({ board = [], tiers = [], boardName = 'Big Board', draf
       {/* Background grid sutil como mock draft */}
       <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.25) 1px, transparent 0)',backgroundSize:'22px 22px'}} />
       {/* Header estilo mock draft com logo */}
-      <div className="relative z-10 mb-4 sm:mb-5 rounded-xl p-3 sm:p-4 bg-gradient-to-r from-orange-500 via-purple-600 to-indigo-600 shadow-lg border border-white/10">
+      <div className="relative z-10 mb-5 sm:mb-6 rounded-xl p-4 sm:p-5 bg-gradient-to-r from-orange-500 via-purple-600 to-indigo-600 shadow-lg border border-white/10">
         {/* Badge TOTAL posicionado absoluto para evitar quebra de linha no mobile */}
         <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
           <div className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-2.5 rounded-lg bg-white/10 backdrop-blur border border-white/20 text-[9px] sm:text-[10px] font-semibold tracking-wide">
             <span className="text-yellow-200">{limitedBoard.length}</span> TOTAL
           </div>
         </div>
-        <div className="flex items-center gap-3 pr-16 min-w-0">
-          <img src="/logo.png" alt="prospectRadar Logo" className="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-lg" />
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight leading-none flex items-center gap-2">
-              <span className="bg-white/10 backdrop-blur px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg truncate max-w-[60vw] sm:max-w-none">{boardName}</span>
+        <div className="flex items-center gap-3 pr-12 min-w-0">
+          <img src="/logo.png" alt="prospectRadar Logo" className="w-11 h-11 sm:w-14 sm:h-14 drop-shadow-lg" />
+          <div className="flex flex-col min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2 mb-1" style={{lineHeight: '1.35', minHeight: '2.2em', paddingBottom: '4px'}}>
+              <span className="bg-white/10 backdrop-blur px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg truncate max-w-[60vw] sm:max-w-none">{boardName}</span>
               <span className="text-yellow-300">{draftClass}</span>
             </h1>
-            <p className="mt-1 text-[10px] sm:text-[11px] font-medium opacity-90">Gerado {new Date().toLocaleDateString('pt-BR')} • {limitedBoard.length} prospectos</p>
-            {positionSummary && <p className="mt-0.5 text-[9px] sm:text-[10px] opacity-75">Posições: {positionSummary}</p>}
+            <p className="text-[11px] sm:text-[12px] font-medium opacity-90">Gerado {new Date().toLocaleDateString('pt-BR')} • {limitedBoard.length} prospectos</p>
+            {positionSummary && <p className="mt-1 text-[10px] sm:text-[11px] opacity-75">Posições: {positionSummary}</p>}
           </div>
         </div>
       </div>
@@ -122,8 +122,7 @@ const ExportBoardView = ({ board = [], tiers = [], boardName = 'Big Board', draf
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span
-                          className={[
-                            // Aumenta a legibilidade: +1px em cada faixa e eleva para sm:text-[13px] no modo normal
+                          className={[ 
                             density==='compact' ? 'text-[11px] sm:text-[12px]' : 'text-[12px] sm:text-[13px]',
                             'font-semibold',
                             'leading-[1.3]',
