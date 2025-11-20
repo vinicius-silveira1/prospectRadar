@@ -532,7 +532,7 @@ const MockDraft = () => {
                           .map((t,i)=>({ team: t.team, rank: i+1 }));
                         const detailed = simulateLotteryDetailed(ranked, { seed: seedVal });
                         setLastLotteryResult(detailed);
-                        setOddsInlineFeedback('Odds reais da loteria aplicadas!');
+                        setOddsInlineFeedback('Loteria oficial simulada (odds reais aplicadas)!');
                       } catch(e) {
                         console.error('Falha simulando detalhamento da loteria:', e);
                         setOddsInlineFeedback('Falha ao aplicar odds.');
@@ -544,8 +544,8 @@ const MockDraft = () => {
                     }
                   }} 
                   disabled={league === 'WNBA' || standingsLoading}
-                  aria-label="Aplicar odds reais da loteria"
-                  title="Aplica a simulação oficial da loteria usando as standings atuais"
+                  aria-label="Simular Loteria (Odds Oficiais)"
+                  title="Simula a loteria oficial da NBA aplicando odds reais às standings atuais (seed reproduzível)"
                   className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group focus:outline-none focus:ring-2 focus:ring-green-400"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -557,7 +557,7 @@ const MockDraft = () => {
                   ) : (
                     <>
                       <Trophy className="h-4 w-4 mr-1 sm:mr-2 relative z-10" aria-hidden="true" /> 
-                      <span className="relative z-10">Odds Reais</span>
+                      <span className="relative z-10">Simular Loteria (Odds Oficiais)</span>
                     </>
                   )}
                 </motion.button>
