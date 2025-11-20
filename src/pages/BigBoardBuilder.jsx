@@ -65,6 +65,7 @@ const BigBoardBuilder = () => {
   const [prospectTierSelections, setProspectTierSelections] = useState({});
   const defaultTierId = useMemo(() => (tiers?.[0]?.id || 'tier1'), [tiers]);
   const exportRef = useRef(null);
+  const exportHiddenRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
   const [showScore, setShowScore] = useState(true);
   const [showPosition, setShowPosition] = useState(true);
@@ -138,7 +139,9 @@ const BigBoardBuilder = () => {
   };
 
   const exportImage = async () => {
-    if (!exportRef.current) return;
+    // Prefer the off-screen desktop export node for consistent layout
+    const node = exportHiddenRef.current || exportRef.current;
+    if (!node) return;
     try {
       setIsExporting(true);
       // Aguarda fontes carregarem para evitar clipping vertical
@@ -147,7 +150,7 @@ const BigBoardBuilder = () => {
       }
       // Força pequeno delay para layout estabilizar
       await new Promise(r => requestAnimationFrame(r));
-      const canvas = await html2canvas(exportRef.current, { useCORS: true, scale: 2, backgroundColor: null });
+      const canvas = await html2canvas(node, { useCORS: true, scale: 2, backgroundColor: null, scrollX: 0, scrollY: 0, windowWidth: 1400 });
       const link = document.createElement('a');
       const safeName = (boardName || 'big-board').replace(/\s+/g, '-').toLowerCase();
       link.download = `${safeName}.png`;
@@ -235,10 +238,10 @@ const BigBoardBuilder = () => {
   };
 
   return (
-    <div className="space-y-6 font-sans text-gray-900 dark:text-gray-100">
+    <div className="space-y-6 font-sans text-gray-900 dark:text-gray-100 w-full overflow-x-hidden px-3 sm:px-0">
       {/* Banner (consistente com Mock Draft) */}
       <div 
-        className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-2xl border border-blue-200/20 dark:border-gray-700 transition-all duration-300 hover:shadow-3xl hover:scale-[1.02] hover:border-blue-300/30 dark:hover:border-gray-600 group"
+        className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-2xl border border-blue-200/20 dark:border-gray-700 transition-all duration-300 md:hover:shadow-3xl md:hover:scale-[1.02] md:hover:border-blue-300/30 dark:hover:border-gray-600 group"
       >
         {/* Partículas de fundo */}
         <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300">
@@ -383,7 +386,7 @@ const BigBoardBuilder = () => {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Lista de Prospectos */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <div className="flex flex-col gap-2">
             <h2 className="text-lg font-bold flex items-center gap-2"><Layers className="h-5 w-5 text-purple-600" /> Prospectos (Classe 2026)</h2>
             <div className="flex flex-wrap gap-2">
@@ -405,7 +408,7 @@ const BigBoardBuilder = () => {
               </select>
             </div>
           </div>
-          <div className="space-y-2 max-h-[60vh] overflow-auto pr-1">
+          <div className="space-y-2 max-h-[60vh] overflow-auto pr-0 sm:pr-1 box-border">
             {loading && <div className="p-3 text-sm text-gray-500">Carregando...</div>}
             {!loading && filteredProspects.map(p => {
               const already = boardIds.has(p.id || p.slug);
@@ -445,7 +448,7 @@ const BigBoardBuilder = () => {
           </div>
         </div>
         {/* Seu Big Board */}
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <h2 className="text-lg font-bold flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-500" /> Seu Big Board</h2>
           {isEmpty && !loading && (
             <div className="p-4 rounded bg-gray-100 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-300">
@@ -472,7 +475,7 @@ const BigBoardBuilder = () => {
             </div>
           )}
           {!isEmpty && (
-            <div className="space-y-2 max-h-[40vh] overflow-auto pr-1">
+            <div className="space-y-2 max-h-[40vh] overflow-auto pr-0 sm:pr-1 box-border">
               {board.map((p, idx) => (
                 <div key={p.id || p.slug} className="flex items-center gap-4 bg-white dark:bg-super-dark-secondary rounded-xl p-4 shadow border dark:border-super-dark-border">
                   <div className="text-xs font-bold w-8 text-center bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded">#{idx+1}</div>
@@ -499,16 +502,34 @@ const BigBoardBuilder = () => {
           {savedBoards.length > 0 && (
             <div className="space-y-2 mt-2">
               <h3 className="text-sm font-semibold flex items-center gap-2"><Layers className="h-4 w-4" /> Boards Salvos</h3>
-              <div className="space-y-1 max-h-[20vh] overflow-auto pr-1">
+              <div className="space-y-2 max-h-[22vh] overflow-auto pr-0 sm:pr-1 box-border">
                 {savedBoards.map(entry => (
-                  <div key={entry.id} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 text-xs">
-                    <div className="flex flex-col">
-                      <span className="font-medium truncate max-w-[160px]" title={entry.name}>{entry.name}</span>
-                      <span className="opacity-60">{new Date(entry.createdAt).toLocaleDateString()}</span>
+                  <div
+                    key={entry.id}
+                    className="group flex items-center justify-between rounded-lg px-3 py-2 text-xs bg-gradient-to-r from-white to-white dark:from-super-dark-secondary dark:to-super-dark-secondary border border-gray-200 dark:border-super-dark-border shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="shrink-0 inline-flex items-center justify-center h-6 px-2 rounded-md bg-indigo-600 text-white text-[10px] font-bold">
+                        {entry.board?.length || 0}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-semibold truncate max-w-[180px]" title={entry.name}>{entry.name}</span>
+                        <span className="opacity-60">{new Date(entry.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => loadBoard(entry)} className="px-2 py-1 rounded bg-indigo-600 text-white" aria-label={`Carregar board ${entry.name}`}>Carregar</button>
-                      <button onClick={() => deleteBoard(entry.id)} className="p-1 rounded bg-red-600 text-white" aria-label={`Excluir board ${entry.name}`}><Trash className="h-3 w-3" /></button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => loadBoard(entry)}
+                        className="px-2.5 py-1 rounded-md bg-indigo-600 text-white hover:brightness-110"
+                        aria-label={`Carregar board ${entry.name}`}
+                      >Carregar</button>
+                      <button
+                        onClick={() => deleteBoard(entry.id)}
+                        className="p-1.5 rounded-md bg-red-600/90 hover:bg-red-600 text-white"
+                        aria-label={`Excluir board ${entry.name}`}
+                      >
+                        <Trash className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -517,7 +538,7 @@ const BigBoardBuilder = () => {
           )}
           {/* Preview Export (dedicated component) */}
           <h2 className="text-sm font-semibold mt-4">Pré-visualização da Exportação</h2>
-          <div ref={exportRef}>
+          <div ref={exportRef} className="min-w-0">
             <ExportBoardView
               board={board.map((p, idx) => ({ ...p, boardIndex: idx }))}
               tiers={tiers}
@@ -527,6 +548,21 @@ const BigBoardBuilder = () => {
               maxItems={exportSize}
               density={exportSize === 60 ? 'compact' : 'normal'}
               trendingMap={trendingMap}
+              forceDesktop={false}
+            />
+          </div>
+          {/* Off-screen desktop export node for consistent capture on mobile */}
+          <div ref={exportHiddenRef} style={{ position: 'absolute', left: '-10000px', top: 0 }}>
+            <ExportBoardView
+              board={board.map((p, idx) => ({ ...p, boardIndex: idx }))}
+              tiers={tiers}
+              boardName={boardName}
+              draftClass={"2026"}
+              options={{ showScore, showPosition, showTrending }}
+              maxItems={exportSize}
+              density={exportSize === 60 ? 'compact' : 'normal'}
+              trendingMap={trendingMap}
+              forceDesktop={true}
             />
           </div>
         </div>
