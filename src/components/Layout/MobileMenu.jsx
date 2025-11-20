@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookText, Calendar, CreditCard, GitCompare, Home, Info, Lightbulb, Star, TrendingUp, Trophy, Users, X, BarChart2 } from 'lucide-react';
+import { BookText, Calendar, CreditCard, GitCompare, Home, Info, Lightbulb, Star, TrendingUp, Trophy, Users, X, BarChart2, Layers } from 'lucide-react';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const location = useLocation();
@@ -9,6 +9,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const navItems = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/prospects', icon: Users, label: 'Prospects', isBrand: true },
+    { path: '/big-board-builder', icon: Layers, label: 'Big Board' },
     { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },

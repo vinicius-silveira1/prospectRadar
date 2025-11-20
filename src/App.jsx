@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Prospects from './pages/Prospects';
 import Compare from './pages/Compare';
 import MockDraft from './pages/MockDraft';
+import BigBoardBuilder from '@/pages/BigBoardBuilder';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Watchlist from './pages/Watchlist';
@@ -70,6 +71,7 @@ function App() {
             <Route path="prospects/:id" element={<ProspectDetail />} />
             <Route path="compare" element={<Compare />} />
             <Route path="mock-draft" element={<MockDraft />} />
+            <Route path="big-board-builder" element={<BigBoardBuilder />} />
             <Route path="watchlist" element={<Watchlist />} />
             <Route path="trending" element={<Trending />} />
             <Route path="draft-history" element={<DraftHistory />} />

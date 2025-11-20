@@ -11,7 +11,8 @@ import {
   Info,
   Lightbulb,
   CreditCard,
-  Award
+  Award,
+  Layers
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -21,7 +22,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/', icon: Home, label: 'Início' },
     { path: '/prospects', icon: Users, label: 'Prospects', isBrand: true },
     { path: '/nba-players', icon: Award, label: 'NBA Players', isNBA: true },
-    { path: '/draft', icon: Trophy, label: 'Mock Draft' },
+    { path: '/big-board-builder', icon: Layers, label: 'Big Board' },
+    { path: '/mock-draft', icon: Trophy, label: 'Mock Draft' },
     { path: '/compare', icon: GitCompare, label: 'Comparar' },
     { path: '/watchlist', icon: Star, label: 'Favoritos' },
     { path: '/trending', icon: TrendingUp, label: 'Em Alta' },

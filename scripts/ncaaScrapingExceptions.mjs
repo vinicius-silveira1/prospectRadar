@@ -28,7 +28,8 @@ export const ncaaScrapingExceptions = {
   "jasper-johnson-espn-2025": "https://www.sports-reference.com/cbb/players/jasper-johnson-2.html",
   "anthony-robinson": "https://www.sports-reference.com/cbb/players/anthony-robinson-6.html",
   "anthony-robinson-ii": "https://www.sports-reference.com/cbb/players/anthony-robinson-ii-1.html",
-  "mikel-brown-espn-2025": "https://www.sports-reference.com/cbb/players/mikel-brown-jr-1.html"
+  "mikel-brown-espn-2025": "https://www.sports-reference.com/cbb/players/mikel-brown-jr-1.html",
+  "mackenzie-mgbako": "https://www.sports-reference.com/cbb/players/mackenzie-mgbako-2.html"
 
 
   // Adicione outros prospectos que falham aqui
