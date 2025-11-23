@@ -1,4 +1,4 @@
-import { assignBadges } from '../lib/badges.js';
+// Note: badges assignment is handled elsewhere; avoid importing here to prevent unused var lint
 
 /**
  * ALGORITMO INTELIGENTE DE RANKING DE PROSPECTS
@@ -894,18 +894,18 @@ export class ProspectRankingAlgorithm {
       ELITE_3PT_SHOOTER: { NBA: 'Arremessador de 3pt de elite', WNBA: 'Arremessadora de 3pt de elite' },
       EFFICIENT_PLAYMAKER: { NBA: 'Playmaker de poucos erros e muito impacto', WNBA: 'Playmaker de poucos erros e muito impacto' },
       EFFICIENT_OFFENSE: { NBA: 'Produção ofensiva extremamente eficiente (PER)', WNBA: 'Produção ofensiva extremamente eficiente (PER)' },
-      HIGH_REBOUND_GUARD: { NBA: 'Alto volume de rebotes para guard/ala', WNBA: 'Alto volume de rebotes para guard/ala' },
-      HIGH_DEFLECTION_GUARD: { NBA: 'Alto volume de roubos/tocos para guard/ala', WNBA: 'Alto volume de roubos/tocos para guard/ala' },
-      ELITE_CREATIVE_GUARD: { NBA: 'Guard criativo elite (alta assistência + uso)', WNBA: 'Guard criativa elite (alta assistência + uso)' },
-      RISKY_FORWARD: { NBA: 'Padrão de risco: Forward jovem com baixa produção', WNBA: 'Padrão de risco: Forward jovem com baixa produção' },
+      HIGH_REBOUND_GUARD: { NBA: 'Alto volume de rebotes para guard/ala', WNBA: 'Alto volume de rebotes para armadora/ala' },
+      HIGH_DEFLECTION_GUARD: { NBA: 'Alto volume de roubos/tocos para guard/ala', WNBA: 'Alto volume de roubos/tocos para armadora/ala' },
+      ELITE_CREATIVE_GUARD: { NBA: 'Guard criativo elite (alta assistência + uso)', WNBA: 'Armadora criativa elite (alta assistência + uso)' },
+      RISKY_FORWARD: { NBA: 'Padrão de risco: Forward jovem com baixa produção', WNBA: 'Padrão de risco: Ala jovem com baixa produção' },
       LIMITED_OFFENSE_BIG: { NBA: 'Grande com limitações ofensivas', WNBA: 'Grande com limitações ofensivas' },
       QUESTIONABLE_MECHANICS: { NBA: 'Mecânica de arremesso questionável (Baixo FT%)', WNBA: 'Mecânica de arremesso questionável (Baixo FT%)' },
       HIGH_VOLUME_LOW_EFFICIENCY: { NBA: 'Alto volume com baixa eficiência ofensiva', WNBA: 'Alto volume com baixa eficiência ofensiva' },
       HIGH_TURNOVER_RATE: { NBA: 'Alto volume de erros (mais turnovers que assistências)', WNBA: 'Alto volume de erros (mais turnovers que assistências)' },
       INEFFICIENT_SCORER: { NBA: 'Pontuador ineficiente (alto volume, baixa eficiência)', WNBA: 'Pontuadora ineficiente (alto volume, baixa eficiência)' },
       HIGH_TOV_PERCENT: { NBA: 'Muitos turnovers (alta taxa de erros)', WNBA: 'Muitos turnovers (alta taxa de erros)' },
-      QUESTIONABLE_SHOOTING_GUARD: { NBA: 'Arremesso questionável (baixo FT% para guard)', WNBA: 'Arremesso questionável (baixo FT% para guard)' },
-      QUESTIONABLE_SHOOTING_BIG: { NBA: 'Arremesso questionável (baixo FT% para big)', WNBA: 'Arremesso questionável (baixo FT% para big)' },
+      QUESTIONABLE_SHOOTING_GUARD: { NBA: 'Arremesso questionável (baixo FT% para guard)', WNBA: 'Arremesso questionável (baixo FT% para armadora)' },
+      QUESTIONABLE_SHOOTING_BIG: { NBA: 'Arremesso questionável (baixo FT% para big)', WNBA: 'Arremesso questionável (baixo FT% para pivô/ala-pivô)' },
       LOW_REBOUND_BIG: { NBA: 'Baixa taxa de rebotes para pivô/ala-pivô', WNBA: 'Baixa taxa de rebotes para pivô/ala-pivô' },
       HIGH_FOUL_RATE: { NBA: 'Alta taxa de faltas', WNBA: 'Alta taxa de faltas' },
       LOW_ASSIST_PG: { NBA: 'Baixa taxa de assistências para armador principal', WNBA: 'Baixa taxa de assistências para armadora principal' },

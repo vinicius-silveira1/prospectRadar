@@ -86,6 +86,9 @@ const Dashboard = () => {
     isLoaded
   } = useProspects(allProspectsFilters); // Passar o objeto memoizado
 
+  // If the current league view is WNBA, prefer feminine forms in labels
+  const useFeminine = league === 'WNBA';
+
   const { watchlist, toggleWatchlist } = useWatchlist();
 
   const featuredProspect = useMemo(() => {
@@ -286,7 +289,7 @@ const Dashboard = () => {
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                {brazilianProspects.length} <span className="font-semibold">prospects</span>
+                {brazilianProspects.length} <span className="font-semibold">{useFeminine ? 'prospectas' : 'prospectos'}</span>
               </motion.span>
             </div>
           </div>
@@ -444,7 +447,7 @@ const Dashboard = () => {
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                {internationalProspects.length} <span className="font-semibold">prospects</span>
+                {internationalProspects.length} <span className="font-semibold">{useFeminine ? 'prospectas' : 'prospectos'}</span>
               </motion.span>
             </div>
           </div>
@@ -528,7 +531,7 @@ const Dashboard = () => {
               <div className="hidden md:flex items-center space-x-6 text-sm leading-normal text-blue-200 dark:text-blue-300 mb-4">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="h-4 w-4" />
-                  <span>{allProspects.length} <span className="font-semibold">prospects</span> disponíveis</span>
+                  <span>{allProspects.length} <span className="font-semibold">{useFeminine ? 'prospectas' : 'prospectos'}</span> disponíveis</span>
                 </div>
               </div>
               <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-3 lg:space-y-0 lg:space-x-4">

@@ -11,7 +11,8 @@
     "invoke:stats": "supabase functions invoke update-prospect-stats --body-file .\\empty-body.json",
     "db:migrate": "node scripts/seed.mjs",
     "test": "vitest",
-    "update:standings": "node scripts/updateNbaStandings.mjs --seasonStart=2025"
+    "update:standings": "node scripts/updateNbaStandings.mjs --seasonStart=2025",
+    "update:picks": "node scripts/updateDraftPickOwnership.mjs"
   },
   "standings": {
     "seasonFormat": "YYYY-YY"

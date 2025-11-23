@@ -314,6 +314,10 @@ const Prospects = () => {
     });
     return Array.from(nationalities).sort();
   }, [allProspects]);
+  
+  // Detect if current list is predominantly WNBA (to use feminine wording)
+  const allWnbaCount = Array.isArray(allProspects) ? allProspects.filter(p => (p.league === 'WNBA' || p.category === 'WNBA' || p.competition === 'WNBA' || p.gender === 'F' || p.gender === 'f')).length : 0;
+  const useFeminineProspect = allProspects.length > 0 && allWnbaCount >= Math.ceil(allProspects.length / 2);
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><LoadingSpinner /></div>;
@@ -384,7 +388,7 @@ const Prospects = () => {
                   <Users className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
                 </motion.div>
                 <span>Todos os</span>
-                <span className="text-yellow-300 ml-3">prospects</span>
+                <span className="text-yellow-300 ml-3">{useFeminineProspect ? 'prospectas' : 'prospectos'}</span>
               </motion.h1>
               
               <motion.p 
@@ -393,7 +397,7 @@ const Prospects = () => {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wide"
               >
-                ➤ Explore e analise {allProspects.length} prospects do Draft 2026
+                ➤ Explore e analise {allProspects.length} {useFeminineProspect ? 'prospectas' : 'prospectos'} do Draft 2026
               </motion.p>
               
 
@@ -553,7 +557,7 @@ const Prospects = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 dark:text-purple-500 z-10" size={18} />
               <input 
                 type="text" 
-                placeholder={isMobile ? "Buscar prospects..." : "Buscar por nome ou universidade..."} 
+                placeholder={isMobile ? (useFeminineProspect ? "Buscar prospectas..." : "Buscar prospectos...") : "Buscar por nome ou universidade..."} 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
                 className={`${inputBaseClasses} pl-10 relative z-0`} 
@@ -616,7 +620,7 @@ const Prospects = () => {
           </AnimatePresence>
 
           <div className="mt-4 flex items-center gap-6 text-sm text-slate-600 dark:text-super-dark-text-secondary">
-            <span className="flex items-center gap-1.5"><Users size={16} /><strong>{filteredProspects.length}</strong> <span className="font-semibold text-brand-orange">prospects</span> encontrados</span>
+            <span className="flex items-center gap-1.5"><Users size={16} /><strong>{filteredProspects.length}</strong> <span className="font-semibold text-brand-orange">{useFeminineProspect ? 'prospectas' : 'prospectos'}</span> {useFeminineProspect ? 'encontradas' : 'encontrados'}</span>
             {watchlist.size > 0 && (<span className="flex items-center gap-1.5"><Heart size={16} className="text-brand-orange" /><strong>{watchlist.size}</strong> na sua watchlist</span>)}
           </div>
         </motion.div>
@@ -625,7 +629,7 @@ const Prospects = () => {
           <AlertBox 
             type="info"
             title="Temporada NCAA 2025-26 em Breve!"
-            message="Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"
+            message={useFeminineProspect ? "As prospectas que serão calouras no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!" : "Os prospectos que serão calouros no college estão mostrando suas estatísticas de high school, e terão dados de NCAA atualizados em tempo real assim que a temporada começar. Marque-nos como favorito e prepare-se para a cobertura mais completa!"}
           />
         </div>
 
@@ -1108,7 +1112,7 @@ const Prospects = () => {
           <div className="text-center py-12">
             <div className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border dark:border-super-dark-border p-8">
               <Search className="mx-auto text-slate-400 dark:text-super-dark-text-secondary mb-4" size={48} />
-              <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">Nenhum prospect encontrado</h3>
+              <h3 className="text-lg font-medium text-slate-900 dark:text-super-dark-text-primary mb-2">{useFeminineProspect ? 'Nenhuma prospecta encontrada' : 'Nenhum prospecto encontrado'}</h3>
               <p className="text-slate-600 dark:text-super-dark-text-secondary mb-4">Tente ajustar os filtros ou termos de busca</p>
               <button 
                 onClick={clearAllFilters}

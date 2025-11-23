@@ -19,8 +19,12 @@ function Compare() {
   const navigate = useNavigate();
   const prospects = useMemo(() => allProspects, [allProspects]);
 
-  // Estado para notas abertas
-  const [openNotesId, setOpenNotesId] = useState(null);
+  // Determine whether we should use feminine wording based on WNBA-majority
+  const allWnbaCount = Array.isArray(allProspects) ? allProspects.filter(p => (p.league === 'WNBA' || p.category === 'WNBA' || p.competition === 'WNBA' || p.gender === 'F' || p.gender === 'f')).length : 0;
+  const useFeminineProspect = allProspects?.length > 0 && allWnbaCount >= Math.ceil(allProspects.length / 2);
+
+  // Estado para notas abertas (nome inicial com _ para evitar warning se não usado)
+  const [_openNotesId, _setOpenNotesId] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedProspects, setSelectedProspects] = useState([]);
@@ -78,7 +82,7 @@ function Compare() {
         setSearchParams(searchParams, { replace: true });
       }
     }
-  }, [prospects, searchParams, addProspect, setSearchParams, selectedProspects.length]);
+  }, [prospects, searchParams, addProspect, setSearchParams, selectedProspects.length, allProspects]);
 
   const filteredProspects = useMemo(() => {
     if (!prospects || prospects.length === 0) return [];
@@ -112,7 +116,7 @@ function Compare() {
           window.gtag('event', 'export_comparison', { prospect_ids: selectedProspects.map(p => p.id) });
         }
         const link = document.createElement('a');
-        link.download = `prospects-comparison.png`;
+        link.download = `${useFeminineProspect ? 'prospectas' : 'prospectos'}-comparacao.png`;
         link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
       }
@@ -167,10 +171,10 @@ function Compare() {
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
+                        <GitCompare className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300 mr-2 sm:mr-3 flex-shrink-0 drop-shadow-lg" />
               </motion.div>
-              <span>Comparar</span>
-              <span className="text-yellow-300 ml-3">prospects</span>
+                      <span>Comparar</span>
+                      <span className="text-yellow-300 ml-3">{useFeminineProspect ? 'prospectas' : 'prospectos'}</span>
             </motion.h1>
             
             <motion.p 
@@ -179,7 +183,7 @@ function Compare() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-sm sm:text-base text-blue-100 dark:text-gray-300 font-mono tracking-wider"
             >
-              ➤ Sistema de comparação avançada: até {maxComparisons} prospects
+              ➤ Sistema de comparação avançada: até {maxComparisons} {useFeminineProspect ? 'prospectas' : 'prospectos'}
               {user?.subscription_tier?.toLowerCase() !== 'scout' && (
                 <motion.span 
                   initial={{ opacity: 0 }}
@@ -208,7 +212,7 @@ function Compare() {
             className="bg-white dark:bg-super-dark-secondary rounded-lg border border-slate-200 dark:border-super-dark-border p-3 sm:p-4 mb-4 shadow-xl"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-mono font-bold text-slate-600 dark:text-slate-200 tracking-wide">BUSCAR PROSPECTS</h2>
+              <h2 className="font-mono font-bold text-slate-600 dark:text-slate-200 tracking-wide">{useFeminineProspect ? 'BUSCAR PROSPECTAS' : 'BUSCAR PROSPECTOS'}</h2>
               <motion.button 
                 whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(59, 130, 246, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
@@ -231,7 +235,7 @@ function Compare() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 h-4 w-4" />
                     <input 
                       type="text" 
-                      placeholder="Digite o nome do prospect ou time..." 
+                      placeholder={useFeminineProspect ? "Digite o nome da prospecta ou time..." : "Digite o nome do prospecto ou time..."} 
                       value={searchTerm} 
                       onChange={(e) => setSearchTerm(e.target.value)} 
                       className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-super-dark-primary border border-slate-200 dark:border-super-dark-border rounded-lg text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all font-mono" 
@@ -259,7 +263,7 @@ function Compare() {
                         </motion.div>
                       ))
                     ) : (
-                      <p className="p-4 text-center text-slate-500 dark:text-slate-400 font-mono">NENHUM_PROSPECT_ENCONTRADO.exe</p>
+                      <p className="p-4 text-center text-slate-500 dark:text-slate-400 font-mono">{useFeminineProspect ? 'Nenhuma prospecta encontrada' : 'Nenhum prospecto encontrado'}</p>
                     )}
                   </div>
                 </motion.div>
@@ -357,7 +361,7 @@ function Compare() {
                     >
                       <Plus size={24} className="text-slate-500 dark:text-slate-400" />
                     </motion.div>
-                    <span className="text-sm mt-2 text-slate-600 dark:text-slate-400 font-mono font-bold tracking-wide">ADICIONAR PROSPECT</span>
+                    <span className="text-sm mt-2 text-slate-600 dark:text-slate-400 font-mono font-bold tracking-wide">{useFeminineProspect ? 'ADICIONAR PROSPECTA' : 'ADICIONAR PROSPECTO'}</span>
                   </motion.div>
                 );
               })}

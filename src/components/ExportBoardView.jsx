@@ -40,6 +40,12 @@ const ExportBoardView = ({ board = [], tiers = [], boardName = 'Big Board', draf
   const today = new Date();
   const dateStr = today.toISOString().slice(0,10);
 
+  // Detect if board is predominantly WNBA to use feminine wording
+  const wnbaCount = Array.isArray(limitedBoard) ? limitedBoard.filter(p => {
+    return (p.league === 'WNBA' || p.category === 'WNBA' || p.competition === 'WNBA' || p.gender === 'F' || p.gender === 'f');
+  }).length : 0;
+  const useFeminineProspect = limitedBoard.length > 0 && wnbaCount >= Math.ceil(limitedBoard.length / 2);
+
   // getColumns removido no layout em colunas por tier
 
   const scoreFmt = (s) => {
@@ -85,7 +91,7 @@ const ExportBoardView = ({ board = [], tiers = [], boardName = 'Big Board', draf
               <span className="bg-white/10 backdrop-blur px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg truncate max-w-[60vw] sm:max-w-none">{boardName}</span>
               <span className="text-yellow-300">{draftClass}</span>
             </h1>
-            <p className="text-[11px] sm:text-[12px] font-medium opacity-90">Gerado {new Date().toLocaleDateString('pt-BR')} • {limitedBoard.length} prospectos</p>
+            <p className="text-[11px] sm:text-[12px] font-medium opacity-90">Gerado {new Date().toLocaleDateString('pt-BR')} • {limitedBoard.length} {useFeminineProspect ? 'prospectas' : 'prospectos'}</p>
             {positionSummary && <p className="mt-1 text-[10px] sm:text-[11px] opacity-75">Posições: {positionSummary}</p>}
           </div>
         </div>
@@ -166,7 +172,7 @@ const ExportBoardView = ({ board = [], tiers = [], boardName = 'Big Board', draf
       {/* Footer Summary */}
       <div className="mt-6 sm:mt-8 pt-3 sm:pt-4 border-t border-white/10 text-[9px] sm:text-[10px] flex flex-wrap gap-3 sm:gap-4 opacity-70">
         <span>prospectRadar • {dateStr}</span>
-        <span>Board Size: {limitedBoard.length}</span>
+        <span>{limitedBoard.length} {useFeminineProspect ? 'prospectas' : 'prospectos'}</span>
         {positionSummary && <span>Positions: {positionSummary}</span>}
         <span>Radar v2</span>
       </div>

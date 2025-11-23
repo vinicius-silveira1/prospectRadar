@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { LeagueContext } from '@/context/LeagueContext';
+import { resolve2026DraftOrder, resolveSecondRound } from '@/logic/tradeResolver';
 import { buildFirstRoundOrderFromStandings } from '@/utils/lottery';
 
 // Ordem do draft padrão da NBA
@@ -144,12 +145,19 @@ const useMockDraft = (allProspects) => {
   const initializeDraft = useCallback(() => {
     setIsLoading(true);
     const orderToUse = customDraftOrder || activeDraftOrder;
-    const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo, idx) => ({
-      ...pickInfo,
-      pick: idx + 1, // garantir que o número do pick corresponda à posição no board
+    const initialBoard = orderToUse.slice(0, draftSettings.totalPicks).map((pickInfo, idx) => {
+      // A ordem agora pode ter 'newOwner' e 'originalTeam'
+      const team = pickInfo.newOwner || pickInfo.team;
+      const originalTeam = pickInfo.originalTeam || pickInfo.team;
+      return {
+      ...pickInfo, // Mantém todas as propriedades como isTraded, description, etc.
+      team: team, // Garante compatibilidade com o resto do hook que usa 'team'
+      newOwner: team, // Garante que newOwner sempre exista para a UI
+      originalTeam: originalTeam, // Garante que originalTeam sempre exista para a UI
+      pick: idx + 1,
       round: league === 'WNBA' ? Math.floor(idx / 12) + 1 : (idx + 1 <= 30 ? 1 : 2),
       prospect: null,
-    }));
+    }});
     setDraftBoard(initialBoard);
     setCurrentPick(1);
     setDraftHistory([]);
@@ -237,13 +245,22 @@ const useMockDraft = (allProspects) => {
 
       if (error) throw error;
 
-      const { draftBoard, currentPick, draftHistory, draftSettings } = data.draft_data;
+      const { draftBoard: loadedBoard, currentPick, draftHistory, draftSettings } = data.draft_data;
       // ATENÇÃO: A mudança de liga aqui pode causar efeitos colaterais se não for gerenciada no componente pai.
       // Por enquanto, apenas carregamos os dados. O ideal seria o componente pai reagir a `savedLeague`.
-      setDraftBoard(draftBoard);
+
+      // "Reidrata" o board carregado para garantir que ele tenha as propriedades visuais necessárias.
+      const rehydratedBoard = loadedBoard.map(pickInfo => ({
+        ...pickInfo,
+        newOwner: pickInfo.newOwner || pickInfo.team, // Fallback para 'team' se 'newOwner' não existir
+        originalTeam: pickInfo.originalTeam || pickInfo.team, // Fallback para 'team'
+      }));
+
+      setDraftBoard(rehydratedBoard);
       setCurrentPick(currentPick);
       setDraftHistory(draftHistory);
       setDraftSettings(draftSettings);
+      setIsOrderCustomized(true); // Um draft salvo sempre tem uma ordem customizada.
 
     } catch (error) {
       console.error("Erro ao carregar o mock draft:", error);
@@ -385,22 +402,29 @@ const useMockDraft = (allProspects) => {
         return prevBoard;
       }
 
-      const pick1 = prevBoard[pick1Index];
-      const pick2 = prevBoard[pick2Index];
+      const pick1 = { ...prevBoard[pick1Index] };
+      const pick2 = { ...prevBoard[pick2Index] };
 
-      let newPick1;
-      let newPick2;
+      // A troca manual de picks na UI deve refletir uma troca de posse dos slots.
+      // O que realmente acontece é que o dono da pick 1 passa a ser o dono da pick 2, e vice-versa.
+      // As informações de "origem" da pick também são trocadas.
+      newBoard[pick1Index] = {
+        ...pick1, // Mantém o número da pick e o round
+        newOwner: pick2.newOwner,
+        originalTeam: pick2.originalTeam,
+        isTraded: pick2.isTraded,
+        description: pick2.description,
+        prospect: pick2.prospect, // O prospecto também se move com a posse
+      };
 
-      if (pick1.prospect === null && pick2.prospect === null) {
-        newPick1 = { ...pick1, prospect: pick2.prospect, team: pick2.team };
-        newPick2 = { ...pick2, prospect: pick1.prospect, team: pick1.team };
-      } else {
-        newPick1 = { ...pick1, prospect: pick2.prospect };
-        newPick2 = { ...pick2, prospect: pick1.prospect };
-      }
-
-      newBoard[pick1Index] = newPick1;
-      newBoard[pick2Index] = newPick2;
+      newBoard[pick2Index] = {
+        ...pick2,
+        newOwner: pick1.newOwner,
+        originalTeam: pick1.originalTeam,
+        isTraded: pick1.isTraded,
+        description: pick1.description,
+        prospect: pick1.prospect,
+      };
 
       return newBoard;
     });
@@ -431,17 +455,28 @@ const useMockDraft = (allProspects) => {
     }
 
     try {
-      const firstRound = buildFirstRoundOrderFromStandings(standings, simulateLottery);
+      // PASSO 1: Gerar a ordem inicial (pré-trocas)
+      const initialFirstRound = buildFirstRoundOrderFromStandings(standings, simulateLottery);
+
+      // PASSO 2: Aplicar nosso resolvedor de trocas
+      // Mapeia para o formato esperado pelo resolvedor: { pick, originalTeam }
+      const resolverInput = initialFirstRound.map(p => ({ pick: p.pick, originalTeam: p.team }));
+      const finalFirstRound = resolve2026DraftOrder(resolverInput);
+
       // Build second round: strict inverse record order across all 30 teams (no lottery)
       const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
       const allTeamsInverse = [
         ...(standings?.lottery || []),
         ...(standings?.playoff || []),
       ].sort(byWinPctAsc).map(t => t.team);
-
-      const secondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, team }));
-      const full = [...firstRound, ...secondRound];
-      const capped = full.slice(0, draftSettings.totalPicks).map((p, i) => ({ pick: i + 1, team: p.team }));
+      
+      // PASSO 3: Gerar e resolver a segunda rodada
+      const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));
+      const finalSecondRound = resolveSecondRound(initialSecondRound);
+      
+      // PASSO 4: Combinar as rodadas
+      const fullOrder = [...finalFirstRound, ...finalSecondRound];
+      const capped = fullOrder.slice(0, draftSettings.totalPicks);
       return capped;
     } catch (e) {
       console.error('Falha ao gerar ordem a partir das standings:', e);
@@ -453,6 +488,7 @@ const useMockDraft = (allProspects) => {
   const applyStandingsOrder = useCallback((standings, options = {}) => {
     const newOrder = generateOrderFromStandings(standings, options);
     setCustomDraftOrder(newOrder);
+    // A initializeDraft será chamada automaticamente pelo useEffect que observa customDraftOrder
     setIsOrderCustomized(true);
   }, [generateOrderFromStandings]);
 

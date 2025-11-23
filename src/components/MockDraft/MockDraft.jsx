@@ -59,20 +59,20 @@ const MockDraft = () => {
   const exportRef = useRef(null);
   // Removidos estados não utilizados para limpar lint
 
-  // Funções de badge removidas (não usadas na página atual)
-
   const exportAsImage = async () => {
     setIsExporting(true);
+    // Detecta o tema atual para passar ao componente de exportação
+    const isDark = document.documentElement.classList.contains('dark');
+
     try {
       const html2canvas = (await import('html2canvas')).default;
       if (exportRef.current) {
         const node = exportRef.current;
-        // Debug removido (higienização)
         if (document.fonts && document.fonts.ready) {
           await document.fonts.ready.catch(() => {});
         }
         const canvas = await html2canvas(node, {
-          backgroundColor: imageExportBackgroundColor,
+          backgroundColor: isDark ? '#0A0B12' : '#f8fafc',
           scale: 2,
           useCORS: true,
         });
@@ -969,7 +969,7 @@ const MockDraft = () => {
                   league={league}
                 />
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
-          <MockDraftExport ref={exportRef} draftData={exportDraft()} />
+          <MockDraftExport ref={exportRef} draftData={exportDraft()} isDark={document.documentElement.classList.contains('dark')} />
           {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
         </div>
 

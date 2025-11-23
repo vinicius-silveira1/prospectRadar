@@ -34,6 +34,8 @@ const teamFullNames = {
   'WAS': 'Washington Wizards',
 };
 
+
+
 // Removido: mapeamento de logos de times para simplificação do export
 
 // Funções auxiliares para as imagens dos prospects
@@ -77,8 +79,24 @@ const ProspectImage = ({ prospect }) => {
   );
 };
 
+const getHeightDisplay = (height) => {
+  if (!height) return 'N/A';
+  let parsedHeight = height;
+  if (typeof height === 'string') {
+    try {
+      parsedHeight = JSON.parse(height);
+    } catch (e) {
+      return height; // Retorna como está se não for um JSON válido
+    }
+  }
+  if (typeof parsedHeight === 'object' && parsedHeight !== null) {
+    return parsedHeight.us || 'N/A';
+  }
+  return height;
+};
 
-const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
+
+const MockDraftExport = React.forwardRef(({ draftData, isDark }, ref) => {
   // Hooks devem ser chamados sempre; usar fallbacks quando dados ausentes
   const rootInnerRef = useRef(null);
   // Removido gating de fontes (não necessário após simplificação)
@@ -105,7 +123,7 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
   const renderRound = (round, title) => {
     const COLUMNS = 3;
     const rows = Math.ceil(round.length / COLUMNS);
-    const ordered = [];
+    const ordered = []; // Ordenação em colunas para preenchimento vertical
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < COLUMNS; c++) {
         const idx = r + c * rows;
@@ -114,8 +132,8 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
     }
     return (
     <div key={title} className="relative mb-10">
-      <div className="rounded-xl px-6 py-3 mb-6 shadow-inner bg-gradient-to-r from-orange-50 via-purple-50 to-indigo-50 dark:from-orange-900/20 dark:via-purple-900/20 dark:to-indigo-900/20 border border-orange-200/50 dark:border-orange-700/40">
-        <h3 className="text-3xl font-extrabold tracking-wide text-gray-800 dark:text-gray-100 text-center drop-shadow-sm leading-tight -translate-y-3">
+      <div className={`rounded-xl px-6 py-3 mb-6 shadow-inner border ${isDark ? 'bg-gradient-to-r from-orange-900/20 via-purple-900/20 to-indigo-900/20 border-orange-700/40' : 'bg-gradient-to-r from-orange-50 via-purple-50 to-indigo-50 border-orange-200/50'}`}>
+        <h3 className={`text-3xl font-extrabold tracking-wide text-center drop-shadow-sm leading-normal ${isDark ? 'text-gray-100' : 'text-gray-800'}`} style={{ transform: 'translateY(-14px)' }}>
           {title}
         </h3>
       </div>
@@ -128,11 +146,11 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
               key={pick.pick}
               data-export-card
               className={
-                `relative group rounded-2xl px-5 pt-2 pb-3 flex items-center transition-all duration-300 border backdrop-blur-sm ` +
+                `relative group rounded-2xl px-5 pt-2 pb-3 flex items-center transition-all duration-300 border backdrop-blur-sm ${
                 (pick.prospect
-                  ? 'bg-white/90 dark:bg-gray-900/70 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl'
-                  : 'bg-white/60 dark:bg-gray-800/50 border-dashed border-gray-300 dark:border-gray-600 hover:bg-white/80 dark:hover:bg-gray-800/70')
-              }
+                  ? (isDark ? 'bg-gray-900/70 border-gray-700' : 'bg-white/90 border-gray-200') + ' shadow-lg hover:shadow-xl'
+                  : (isDark ? 'bg-gray-800/50 border-dashed border-gray-600 hover:bg-gray-800/70' : 'bg-white/60 border-dashed border-gray-300 hover:bg-white/80'))
+              }`}
               style={{
                 boxShadow: isTop5
                   ? '0 0 0 2px rgba(249,115,22,0.15), 0 8px 24px -4px rgba(168,85,247,0.25)'
@@ -143,47 +161,54 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
             >
               {/* Background Accent for Top5 / Lottery */}
               {isTop5 && (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-100/60 to-yellow-50/40 dark:from-orange-500/10 dark:to-yellow-500/5 pointer-events-none" />
+                <div className={`absolute inset-0 rounded-2xl pointer-events-none ${isDark ? 'bg-gradient-to-br from-orange-500/10 to-yellow-500/5' : 'bg-gradient-to-br from-orange-100/60 to-yellow-50/40'}`} />
               )}
               {!isTop5 && isLottery && (
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-100/40 to-purple-100/30 dark:from-indigo-500/10 dark:to-purple-500/5 pointer-events-none" />
+                <div className={`absolute inset-0 rounded-2xl pointer-events-none ${isDark ? 'bg-gradient-to-br from-indigo-500/10 to-purple-500/5' : 'bg-gradient-to-br from-indigo-100/40 to-purple-100/30'}`} />
               )}
               <div className="relative flex items-center gap-5 w-full">
                 {/* Pick Pill */}
                 <div
                   className={
-                    `relative w-14 h-14 rounded-xl shadow-md border text-sm font-bold tracking-wide ` +
+                    `relative w-14 h-14 rounded-xl shadow-md border text-sm font-bold tracking-wide ${
                     (isTop5
                       ? 'bg-gradient-to-b from-orange-500 to-orange-600 text-white border-orange-600'
                       : isLottery
                       ? 'bg-gradient-to-b from-indigo-600 to-purple-600 text-white border-indigo-600'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600')
-                  }
+                      : (isDark ? 'bg-gray-700 text-gray-100 border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-300'))
+                  }`}
                   data-pick-pill
                 >
-                  <div data-pill-content className="absolute inset-0" style={{ transform: 'translateY(-8px)' }}>
-                    <span className="absolute left-1/2 -translate-x-1/2 text-3xl" style={{ top: '14px', lineHeight: '12px' }}>{pick.pick}</span>
-                    
+                  <div data-pill-content className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translateY(-14px)' }}>
+                    <span className="text-3xl leading-none">{pick.pick}</span>
                   </div>
                 </div>
-                {/* Logo removido para simplificação do export */}
                 {/* Content */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   {pick.prospect ? (
                     <div className="-translate-y-2">
-                      <h3 className="font-black text-2xl leading-tight text-gray-900 dark:text-gray-50 tracking-tight">
-                        {pick.prospect.name}
+                      <h3 className={`font-black text-2xl leading-tight tracking-tight ${isDark ? 'text-gray-50' : 'text-gray-900'}`}>
+                        {pick.prospect.name || 'Nome Indisponível'}
                       </h3>
-                      <p className="text-md font-semibold text-gray-600 dark:text-gray-300 mt-1.5">
-                        {teamFullNames[pick.team] || pick.team}
+                      <p className={`text-md font-semibold mt-1.5 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        {pick.prospect.position} • {getHeightDisplay(pick.prospect.height)} • {pick.prospect.team || pick.prospect.high_school_team || 'N/A'}
                       </p>
                       {/* Badges removidas para simplificação do export */}
                     </div>
                   ) : (
-                    <div className="italic text-gray-400 dark:text-gray-500 font-medium">Seleção em aberto</div>
+                    <div className={`italic font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Seleção em aberto</div>
                   )}
                 </div>
               </div>
+              {/* LOGO DE FUNDO (WATERMARK) */}
+              {pick.prospect && (
+                <img
+                  src={`/images/teams/${pick.newOwner}.svg`}
+                  alt=""
+                  className={`absolute right-0 top-0 h-full w-auto object-contain pointer-events-none ${isDark ? 'opacity-30' : 'opacity-40'}`}
+                  style={{ transform: 'translateX(10%)' }}
+                />
+              )}
             </div>
           );
         })}
@@ -196,18 +221,18 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
   return (
     <div
       ref={ref}
-      className="w-[1200px] bg-white dark:bg-[#0A0B12] pt-4 pb-8 px-8 font-sans relative rounded-2xl shadow-2xl"
+      className={`w-[1200px] pt-4 pb-8 px-8 font-sans relative rounded-2xl shadow-2xl ${isDark ? 'bg-[#0A0B12]' : 'bg-white'}`}
       style={{ boxSizing: 'border-box' }}
     >
       {/* Grid Background Sutil */}
-      <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08]" style={{
+      <div className={`absolute inset-0 ${isDark ? 'opacity-[0.08]' : 'opacity-[0.04]'}`} style={{
         backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.35) 1px, transparent 0)',
         backgroundSize: '22px 22px'
       }} />
       
       {/* Corner Accents Simples */}
-      <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-orange-300 dark:border-orange-600/60 pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-purple-300 dark:border-purple-600/60 pointer-events-none"></div>
+      <div className={`absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 pointer-events-none ${isDark ? 'border-orange-600/60' : 'border-orange-300'}`}></div>
+      <div className={`absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 pointer-events-none ${isDark ? 'border-purple-600/60' : 'border-purple-300'}`}></div>
 
       {/* Header Limpo */}
       <div ref={rootInnerRef} className="relative transition-none">
@@ -216,8 +241,8 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
           <div className="flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 drop-shadow-lg" />
-              <div>
-                <h1 className="text-4xl font-black tracking-tight leading-none flex items-center gap-2">
+                <div className={isDark ? 'text-white' : 'text-black'}>
+                  <h1 className="text-4xl font-black tracking-tight leading-normal flex items-center gap-2">
                   <span className="bg-white/10 backdrop-blur px-3 py-1 rounded-lg">Mock Draft</span>
                   <span className="text-yellow-300">{settings.draftClass}</span>
                 </h1>
@@ -239,13 +264,13 @@ const MockDraftExport = React.forwardRef(({ draftData }, ref) => {
       </section>
 
       {/* Footer Limpo */}
-      <footer className="relative z-10 mt-2 text-center p-6 rounded-2xl bg-gradient-to-r from-gray-100 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-inner">
+      <footer className={`relative z-10 mt-2 text-center p-6 rounded-2xl border shadow-inner ${isDark ? 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-r from-gray-100 via-white to-gray-100 border-gray-200'}`}>
         <div className="flex flex-col items-center gap-2">
           <div className="text-lg font-extrabold tracking-tight">
-            <span className="text-orange-600">prospect</span><span className="text-purple-700 dark:text-purple-400">Radar</span>
+            <span className="text-orange-600">prospect</span><span className={isDark ? 'text-purple-400' : 'text-purple-700'}>Radar</span>
           </div>
-          <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Crie seu próprio mock em prospectradar.com.br • #{settings.draftClass} #NBADraft #ProspectRadar</div>
-          <div className="text-[10px] text-gray-400 dark:text-gray-500">{new Date().toLocaleDateString('pt-BR')} • Visual Premium Export</div>
+          <div className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Crie seu próprio mock em prospectradar.com.br • #{settings.draftClass} #NBADraft #ProspectRadar</div>
+          <div className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{new Date().toLocaleDateString('pt-BR')} • Visual Premium Export</div>
         </div>
       </footer>
       </div>
