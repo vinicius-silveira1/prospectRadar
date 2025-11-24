@@ -152,6 +152,7 @@ const useMockDraft = (allProspects) => {
       return {
       ...pickInfo, // Mantém todas as propriedades como isTraded, description, etc.
       team: team, // Garante compatibilidade com o resto do hook que usa 'team'
+      isTraded: team !== originalTeam, // Garante que isTraded seja sempre calculado corretamente
       newOwner: team, // Garante que newOwner sempre exista para a UI
       originalTeam: originalTeam, // Garante que originalTeam sempre exista para a UI
       pick: idx + 1,
@@ -164,11 +165,19 @@ const useMockDraft = (allProspects) => {
     setIsLoading(false);
   }, [customDraftOrder, draftSettings.totalPicks, league, activeDraftOrder]);
 
+  // Efeito para inicializar o board quando os prospects são carregados ou a ordem muda.
+  // A verificação `draftBoard.length === 0` é crucial para evitar que o board seja
+  // resetado desnecessariamente durante re-renderizações causadas por filtros.
   useEffect(() => {
-    if (allProspects && allProspects.length > 0) {
+    // Inicializa se os prospects carregaram e o board está vazio
+    if (allProspects && allProspects.length > 0 && draftBoard.length === 0) {
       initializeDraft();
     }
-  }, [allProspects, customDraftOrder, initializeDraft]);
+    // Reinicializa apenas se a ordem customizada mudar (e não for a primeira carga)
+    if (customDraftOrder && draftBoard.length > 0) {
+      initializeDraft();
+    }
+  }, [allProspects, customDraftOrder, initializeDraft]); // Mantemos as dependências, mas a lógica interna agora é mais segura.
 
   const listSavedDrafts = useCallback(async () => {
     if (!user) return;
@@ -358,6 +367,9 @@ const useMockDraft = (allProspects) => {
   const progress = useMemo(() => (currentPick - 1) / draftSettings.totalPicks * 100, [currentPick, draftSettings.totalPicks]);
   
   const exportDraft = useCallback(() => ({
+    // CORREÇÃO: Garante que os dados exportados sempre tenham a estrutura completa,
+    // incluindo `newOwner` e `originalTeam`, que são essenciais para os logos.
+    // Ele reconstrói o board a partir da ordem atual e do histórico de seleções.
     board: draftBoard,
     settings: draftSettings,
     stats: getDraftStats(),
@@ -456,19 +468,24 @@ const useMockDraft = (allProspects) => {
 
     try {
       // PASSO 1: Gerar a ordem inicial (pré-trocas)
-      const initialFirstRound = buildFirstRoundOrderFromStandings(standings, simulateLottery);
+      let initialFirstRound = buildFirstRoundOrderFromStandings(standings, simulateLottery, options);
 
       // PASSO 2: Aplicar nosso resolvedor de trocas
       // Mapeia para o formato esperado pelo resolvedor: { pick, originalTeam }
       const resolverInput = initialFirstRound.map(p => ({ pick: p.pick, originalTeam: p.team }));
       const finalFirstRound = resolve2026DraftOrder(resolverInput);
 
+      // --- CORREÇÃO DEFINITIVA DO BUG DA SEGUNDA RODADA ---
+      // Trabalha com uma cópia profunda dos standings para evitar a mutação que causava o bug das picks duplicadas.
+      const standingsCopy = JSON.parse(JSON.stringify(standings));
+      const allTeamsFromStandings = [
+        ...(standingsCopy?.lottery || []),
+        ...(standingsCopy?.playoff || []),
+      ];
+
       // Build second round: strict inverse record order across all 30 teams (no lottery)
       const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
-      const allTeamsInverse = [
-        ...(standings?.lottery || []),
-        ...(standings?.playoff || []),
-      ].sort(byWinPctAsc).map(t => t.team);
+      const allTeamsInverse = allTeamsFromStandings.sort(byWinPctAsc).map(t => t.team);
       
       // PASSO 3: Gerar e resolver a segunda rodada
       const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));

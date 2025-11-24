@@ -115,30 +115,7 @@ const MockDraft = () => {
     }
   }, [oddsInlineFeedback]);
 
-  // Atalho de teclado: R para rerodar odds (usa ação principal)
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        if (!standingsLoading && standings && !isOddsApplying) {
-          const newSeed = Math.floor(Math.random()*1e9);
-          setLotterySeed(String(newSeed));
-          try {
-            applyStandingsOrder(standings, { simulateLottery: true, seed: newSeed });
-            const ranked = [...(standings?.lottery || [])]
-              .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
-              .map((t,i)=>({ team: t.team, rank: i+1 }));
-            const detailed = simulateLotteryDetailed(ranked, { seed: newSeed });
-            setLastLotteryResult(detailed);
-            setOddsInlineFeedback('Rerodado (atalho R)');
-          } catch {
-            setOddsInlineFeedback('Falha ao rerodar odds.');
-          }
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [standings, standingsLoading, isOddsApplying, applyStandingsOrder]);
+  // Atalho de teclado 'R' removido — rerun de odds agora deve ser acionado apenas por controles explícitos
     // Restore persisted seed and last result
     useEffect(() => {
       try {
@@ -200,9 +177,13 @@ const MockDraft = () => {
 
   useEffect(() => {
     if (!prospectsLoading && allProspects.length > 0) {
-      initializeDraft();
+      // Do not auto-initialize if user already made picks — prevents
+      // accidental clearing of the draft when the page re-renders (e.g. typing in search).
+      if (!draftHistory || draftHistory.length === 0) {
+        initializeDraft();
+      }
     }
-  }, [prospectsLoading, allProspects, initializeDraft]);
+  }, [prospectsLoading, allProspects, initializeDraft, draftHistory]);
 
   useEffect(() => {
     if (notification.message) {

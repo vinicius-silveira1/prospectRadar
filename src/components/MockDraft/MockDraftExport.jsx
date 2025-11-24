@@ -166,7 +166,7 @@ const MockDraftExport = React.forwardRef(({ draftData, isDark }, ref) => {
               {!isTop5 && isLottery && (
                 <div className={`absolute inset-0 rounded-2xl pointer-events-none ${isDark ? 'bg-gradient-to-br from-indigo-500/10 to-purple-500/5' : 'bg-gradient-to-br from-indigo-100/40 to-purple-100/30'}`} />
               )}
-              <div className="relative flex items-center gap-5 w-full">
+              <div className="relative z-10 flex items-center gap-5 w-full">
                 {/* Pick Pill */}
                 <div
                   className={
@@ -205,7 +205,7 @@ const MockDraftExport = React.forwardRef(({ draftData, isDark }, ref) => {
                 <img
                   src={`/images/teams/${pick.newOwner}.svg`}
                   alt=""
-                  className={`absolute right-0 top-0 h-full w-auto object-contain pointer-events-none ${isDark ? 'opacity-30' : 'opacity-40'}`}
+                  className={`absolute right-0 top-0 h-full w-auto object-contain pointer-events-none z-0 ${isDark ? 'opacity-40' : 'opacity-40'}`}
                   style={{ transform: 'translateX(10%)' }}
                 />
               )}
@@ -241,7 +241,7 @@ const MockDraftExport = React.forwardRef(({ draftData, isDark }, ref) => {
           <div className="flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6">
               <img src="/logo.png" alt="prospectRadar Logo" className="w-24 h-24 drop-shadow-lg" />
-                <div className={isDark ? 'text-white' : 'text-black'}>
+                <div className="text-white">
                   <h1 className="text-4xl font-black tracking-tight leading-normal flex items-center gap-2">
                   <span className="bg-white/10 backdrop-blur px-3 py-1 rounded-lg">Mock Draft</span>
                   <span className="text-yellow-300">{settings.draftClass}</span>

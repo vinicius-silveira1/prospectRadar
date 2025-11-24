@@ -62,9 +62,15 @@ export function resolve2026DraftOrder(initialOrder) {
       // A menos favorável vai para WAS
       const pick3 = finalPicks.find(p => p.pick === leastFavorable.position);
 
-      if (pick1) { pick1.newOwner = 'OKC'; pick1.isTraded = true; pick1.description = [okcTradeRule]; }
-      if (pick2) { pick2.newOwner = 'OKC'; pick2.isTraded = true; pick2.description = [okcTradeRule]; }
-      if (pick3) { pick3.newOwner = 'WAS'; pick3.isTraded = true; pick3.description = [okcTradeRule]; }
+      if (pick1) { 
+        pick1.newOwner = 'OKC'; pick1.isTraded = true; pick1.description = [okcTradeRule]; 
+      }
+      if (pick2) { 
+        pick2.newOwner = 'OKC'; pick2.isTraded = true; pick2.description = [okcTradeRule]; 
+      }
+      if (pick3) { 
+        pick3.newOwner = 'WAS'; pick3.isTraded = true; pick3.description = [okcTradeRule]; 
+      }
     }
     // Cenário onde a pick de HOU é 1-4: HOU a mantém. A regra de OKC/LAC/WAS não se aplica como esperado.
     // A lógica para esse caso de falha precisaria ser detalhada com base nas regras exatas do contrato da troca.

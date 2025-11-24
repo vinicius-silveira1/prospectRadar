@@ -96,6 +96,7 @@ const MockDraft = () => {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false); // New state for trade modal
   const [isTeamOrderModalOpen, setIsTeamOrderModalOpen] = useState(false); // New state for team order modal
   const [selectedPickForTrade, setSelectedPickForTrade] = useState(null); // New state for selected pick
+  const [isPublicDraft, setIsPublicDraft] = useState(false); // Novo estado para o checkbox
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
   const [lotterySeed, setLotterySeed] = useState('');
@@ -115,30 +116,7 @@ const MockDraft = () => {
     }
   }, [oddsInlineFeedback]);
 
-  // Atalho de teclado: R para rerodar odds (usa ação principal)
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        if (!standingsLoading && standings && !isOddsApplying) {
-          const newSeed = Math.floor(Math.random()*1e9);
-          setLotterySeed(String(newSeed));
-          try {
-            applyStandingsOrder(standings, { simulateLottery: true, seed: newSeed });
-            const ranked = [...(standings?.lottery || [])]
-              .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
-              .map((t,i)=>({ team: t.team, rank: i+1 }));
-            const detailed = simulateLotteryDetailed(ranked, { seed: newSeed });
-            setLastLotteryResult(detailed);
-            setOddsInlineFeedback('Rerodado (atalho R)');
-          } catch {
-            setOddsInlineFeedback('Falha ao rerodar odds.');
-          }
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [standings, standingsLoading, isOddsApplying, applyStandingsOrder]);
+  
     // Restore persisted seed and last result
     useEffect(() => {
       try {
@@ -198,6 +176,10 @@ const MockDraft = () => {
   }, [bigBoard, draftHistory]);
   const recommendations = getProspectRecommendations(currentPick);
 
+  const currentPickData = useMemo(() => {
+    return draftBoard.find(p => p.pick === currentPick);
+  }, [draftBoard, currentPick]);
+
   useEffect(() => {
     if (!prospectsLoading && allProspects.length > 0) {
       initializeDraft();
@@ -216,13 +198,13 @@ const MockDraft = () => {
     setIsSaveModalOpen(true);
   };
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = async (isPublic) => {
     if (!draftNameToSave.trim()) {
       setNotification({ type: 'error', message: 'Por favor, dê um nome ao seu draft.' });
       return;
     }
     try {
-      await saveMockDraft(draftNameToSave);
+      await saveMockDraft(draftNameToSave, isPublic);
       // Concede XP por completar/salvar um mock draft
       if (user) {
         supabase.functions.invoke('grant-xp', {
@@ -526,6 +508,8 @@ const MockDraft = () => {
                       setIsOddsApplying(true);
                       const seedVal = lotterySeed.trim() !== '' ? Number(lotterySeed) : undefined;
                       try {
+                        // A lógica de simulação agora é mais simples aqui,
+                        // pois o processamento complexo será feito no hook.
                         applyStandingsOrder(standings, { simulateLottery: true, seed: seedVal });
                         const ranked = [...(standings?.lottery || [])]
                           .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
@@ -922,8 +906,8 @@ const MockDraft = () => {
                 transition={{ duration: 0.3 }}
               >
                 {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
-                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} />}
-                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} />}
+                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -934,6 +918,8 @@ const MockDraft = () => {
           isOpen={isSaveModalOpen} 
           onClose={() => setIsSaveModalOpen(false)} 
           onSave={handleSaveDraft} 
+          isPublic={isPublicDraft}
+          setIsPublic={setIsPublicDraft}
           draftName={draftNameToSave} 
           setDraftName={setDraftNameToSave} 
           isSaving={isSaving} 
@@ -969,7 +955,7 @@ const MockDraft = () => {
                   league={league}
                 />
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
-          <MockDraftExport ref={exportRef} draftData={exportDraft()} />
+          <MockDraftExport ref={exportRef} draftData={exportDraft()} isDark={document.documentElement.classList.contains('dark')} />
           {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
         </div>
 
@@ -1175,13 +1161,21 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
 };
 
 
-const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick }) => (
+const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData }) => (
   <div className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm">
     <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
       <span className="flex items-center flex-wrap gap-2">
         <Trophy className="h-5 w-5 text-purple-600" />
         Big Board - Principais Prospects
       </span>
+      {currentPickData && !isDraftComplete && (
+        <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
+          <span className="font-semibold">Escolhendo para:</span>
+          <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
+          <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
+          <span className="text-slate-400">(Pick #{currentPickData.pick})</span>
+        </div>
+      )}
     </h3>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
       {prospects.map((prospect, index) => (
@@ -1208,7 +1202,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
   </div>
 );
 
-const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick }) => {
+const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick, currentPickData }) => {
   const recommendationIds = new Set(recommendations.map(p => p.id));
   const nonRecommendedProspects = prospects.filter(p => !recommendationIds.has(p.id));
 
@@ -1216,12 +1210,19 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
   <div className="space-y-4 sm:space-y-6">
     {recommendations.length > 0 && !isDraftComplete && (
       <div className="bg-gradient-to-br from-yellow-50/80 to-orange-50/80 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl shadow-xl border border-yellow-200/50 dark:border-yellow-700/30 p-4 sm:p-6 backdrop-blur-sm">
-        <h3 className="text-lg font-bold mb-4 flex items-center">
-          <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
-          <span className="text-black dark:text-white font-mono tracking-wide truncate">
+        <div className="mb-4">
+          <h3 className="text-lg font-bold flex items-center text-black dark:text-white font-mono tracking-wide truncate">
+            <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
             🎯 Recomendações para Pick #{currentPick}
-          </span>
-        </h3>
+          </h3>
+          {currentPickData && (
+            <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
+              <span className="font-semibold">Escolhendo para:</span>
+              <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
+              <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
+            </div>
+          )}
+        </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
           {recommendations.map((prospect, index) => 
             <motion.div
@@ -1464,7 +1465,7 @@ import TradeModal from '@/components/MockDraft/TradeModal.jsx';
 import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
 
 // NOVOS COMPONENTES DE MODAL
-const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving }) => {
+const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving, isPublic, setIsPublic }) => {
   if (!isOpen) return null;
   return (
     <AnimatePresence>
@@ -1489,11 +1490,23 @@ const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSa
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
               placeholder="Ex: Minha versão com trocas"
-              className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg mb-4 text-slate-900 dark:text-white dark:bg-gray-700"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-super-dark-border rounded-lg text-slate-900 dark:text-white dark:bg-gray-700"
             />
+            <div className="flex items-center my-4">
+              <input
+                id="is-public-checkbox"
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-brand-purple focus:ring-brand-purple"
+              />
+              <label htmlFor="is-public-checkbox" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                Tornar este Mock Draft público para a comunidade
+              </label>
+            </div>
             <div className="flex justify-end gap-3">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="px-4 py-2 rounded-lg text-slate-700 dark:text-super-dark-text-secondary bg-slate-100 dark:bg-super-dark-border hover:bg-slate-200">Cancelar</motion.button>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={onSave} disabled={isSaving} className="px-4 py-2 rounded-lg bg-brand-purple text-white hover:brightness-90 transition-all disabled:opacity-50">
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onSave(isPublic)} disabled={isSaving} className="px-4 py-2 rounded-lg bg-brand-purple text-white hover:brightness-90 transition-all disabled:opacity-50">
                 {isSaving ? 'Salvando...' : 'Salvar'}
               </motion.button>
             </div>

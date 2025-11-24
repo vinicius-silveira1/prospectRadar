@@ -179,11 +179,26 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
   let picks = [];
 
   if (simulateLottery && ranked.length >= 14) {
-    const winners = simulateLotteryWinners(ranked, options);
-    picks = winners.map((team, i) => ({ pick: i + 1, team }));
-    // Remaining lottery teams in inverse record order (skip winners)
+    let lotteryWinners;
+    let originalWinnerTeams;
+
+    // **LÓGICA CORRIGIDA**
+    // Se uma ordem de loteria corrigida for passada, use-a.
+    // Isso acontece quando a simulação precisa ser ciente das trocas (ex: pick do Wizards).
+    if (options.correctedLotteryOrder) {
+      lotteryWinners = options.correctedLotteryOrder.map(w => w.team);
+      originalWinnerTeams = new Set(options.correctedLotteryOrder.map(w => w.originalTeam));
+      picks = options.correctedLotteryOrder.map(w => ({ pick: w.pick, team: w.team }));
+    } else {
+      // Comportamento antigo: simulação "cega"
+      lotteryWinners = simulateLotteryWinners(ranked, options);
+      originalWinnerTeams = new Set(lotteryWinners);
+      picks = lotteryWinners.map((team, i) => ({ pick: i + 1, team }));
+    }
+
+    // Preenche o resto da loteria com os times que não "ganharam"
     const remainingLottery = lotteryTeams
-      .filter(t => !winners.includes(t.team))
+      .filter(t => !originalWinnerTeams.has(t.team))
       .map((t, idx) => ({ pick: picks.length + idx + 1, team: t.team }))
       .slice(0, Math.max(0, 14 - picks.length));
     picks = [...picks, ...remainingLottery];
