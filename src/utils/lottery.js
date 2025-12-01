@@ -190,28 +190,24 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
   const standingsCopy = JSON.parse(JSON.stringify(standings || { lottery: [], playoff: [] }));
   const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
 
-  // CORREÇÃO: Filtra os times da loteria para incluir apenas aqueles que possuem uma pick de 1ª rodada.
-  // Isso remove times como o NOP, que já negociaram suas picks.
-  const allLotteryTeams = standingsCopy.lottery;
+  // CORREÇÃO DEFINITIVA: A lista de times da loteria deve ser composta apenas por times que
+  // possuem uma pick de 1ª rodada. Isso impede que times como NOP entrem com sua própria campanha.
+  const allLotteryTeams = [...standingsCopy.lottery];
   const teamsWithFirstRoundPicks = allLotteryTeams.filter(t => {
-    const picks = nbaDraftPicks['2026']?.[t.team];
-    return picks && picks.firstRoundPicks > 0;
+    const teamData = nbaDraftPicks['2026']?.[t.team];
+    // A condição é: o time tem dados no arquivo E o número de picks de 1ª rodada é maior que zero.
+    return teamData && teamData.firstRoundPicks > 0;
   });
 
-  // CORREÇÃO: Cria uma nova cópia do array antes de ordenar para evitar mutação do array original
-  // e garantir que a entrada para o ranking seja sempre "fresca".
-  const lotteryTeams = [...teamsWithFirstRoundPicks].sort(byWinPctAsc); // worst -> best
+  // A simulação da loteria usará apenas os times elegíveis.
+  const lotteryTeams = teamsWithFirstRoundPicks.sort(byWinPctAsc);
   const playoffTeams = [...standingsCopy.playoff].sort(byWinPctAsc);  // worse playoff -> best playoff
 
   // Map to worst->best ranking structure for lottery
-  console.log('lottery.js: buildFirstRoundOrderFromStandings - lotteryTeams (antes do ranking):', lotteryTeams); // DEBUG
   const ranked = resolveLotteryRankingWithTies(lotteryTeams, options?.seed);
-  console.log('lottery.js: buildFirstRoundOrderFromStandings - ranked (após desempate):', ranked); // DEBUG
   let picks = [];
 
   let lotteryResult = null; // Variável para armazenar o resultado da loteria
-  // CORREÇÃO: A condição `ranked.length >= 14` estava incorreta. A loteria deve ser simulada
-  // se a simulação for solicitada e houver times elegíveis, mesmo que sejam menos de 14.
   if (simulateLottery && ranked.length > 0) {
     let lotteryWinners;
     lotteryResult = simulateLotteryDetailed(ranked, options);
@@ -223,7 +219,6 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
       .map((t, idx) => ({ pick: picks.length + idx + 1, team: t.team }))
       .slice(0, Math.max(0, 14 - picks.length));
     picks = [...picks, ...remainingLottery];
-    console.log('lottery.js: buildFirstRoundOrderFromStandings - lotteryResult (antes do retorno):', lotteryResult); // DEBUG
   } else {
     // No lottery simulation: straight inverse order for picks 1-14
     picks = lotteryTeams.map((t, idx) => ({ pick: idx + 1, team: t.team }));

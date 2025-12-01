@@ -132,9 +132,9 @@ export const nbaDraftPicks = {
     },
     "IND": {
         "firstRound": [
-            "Own (via TOR to NOP)"
+            "Own"
         ],
-        "firstRoundPicks": 1,
+        "firstRoundPicks": 1, // Indiana mantém sua própria pick de 1ª rodada.
         "secondRound": [
             "More favorable of (i) SAN and (ii) less favorable of IND and MIA to SAN then least favorable of all to MIN",
             "less favorable of (i) BOS and (ii) more favorable of IND and MIA to ATL then most favorable of all to MEM or to BRK [MEM can swap this pick for LAC; LAC then conveyed to HOU which then conveyed to BRK] (via MIA to IND; via SAN swap for IND or MIA; via MIL to MEM; via MEM swap of IND or MIA for BOS; via BOS to ATL)",
