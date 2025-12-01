@@ -1,156 +1,156 @@
 {
-  "updatedAt": "2025-11-24T12:08:47.088Z",
+  "updatedAt": "2025-11-30T23:30:54.075Z",
   "lottery": [
     {
       "team": "WAS",
-      "wins": 1,
-      "losses": 15
+      "wins": 2,
+      "losses": 16
     },
     {
       "team": "NOP",
-      "wins": 2,
-      "losses": 15
-    },
-    {
-      "team": "IND",
-      "wins": 2,
-      "losses": 14
+      "wins": 3,
+      "losses": 17
     },
     {
       "team": "BKN",
       "wins": 3,
-      "losses": 13
+      "losses": 16
     },
     {
-      "team": "CHA",
+      "team": "IND",
       "wins": 4,
-      "losses": 13
+      "losses": 16
     },
     {
       "team": "SAC",
-      "wins": 4,
-      "losses": 13
-    },
-    {
-      "team": "DAL",
       "wins": 5,
-      "losses": 13
+      "losses": 15
     },
     {
       "team": "LAC",
       "wins": 5,
-      "losses": 12
+      "losses": 15
+    },
+    {
+      "team": "DAL",
+      "wins": 6,
+      "losses": 15
+    },
+    {
+      "team": "CHA",
+      "wins": 6,
+      "losses": 14
     },
     {
       "team": "UTA",
-      "wins": 5,
-      "losses": 11
+      "wins": 6,
+      "losses": 12
     },
     {
       "team": "MEM",
-      "wins": 6,
-      "losses": 11
+      "wins": 8,
+      "losses": 12
     },
     {
       "team": "POR",
-      "wins": 7,
-      "losses": 10
+      "wins": 8,
+      "losses": 11
     },
     {
       "team": "MIL",
-      "wins": 8,
-      "losses": 9
-    },
-    {
-      "team": "GSW",
       "wins": 9,
-      "losses": 9
-    },
-    {
-      "team": "BOS",
-      "wins": 9,
-      "losses": 8
-    }
-  ],
-  "playoff": [
-    {
-      "team": "ORL",
-      "wins": 10,
-      "losses": 8
+      "losses": 12
     },
     {
       "team": "CHI",
       "wins": 9,
-      "losses": 7
+      "losses": 10
+    },
+    {
+      "team": "GSW",
+      "wins": 11,
+      "losses": 10
+    }
+  ],
+  "playoff": [
+    {
+      "team": "BOS",
+      "wins": 10,
+      "losses": 9
     },
     {
       "team": "PHI",
-      "wins": 9,
-      "losses": 7
-    },
-    {
-      "team": "NYK",
-      "wins": 9,
-      "losses": 6
-    },
-    {
-      "team": "ATL",
-      "wins": 11,
-      "losses": 7
-    },
-    {
-      "team": "MIN",
       "wins": 10,
-      "losses": 6
-    },
-    {
-      "team": "MIA",
-      "wins": 11,
-      "losses": 6
+      "losses": 8
     },
     {
       "team": "PHX",
+      "wins": 12,
+      "losses": 9
+    },
+    {
+      "team": "MIN",
       "wins": 11,
-      "losses": 6
+      "losses": 8
+    },
+    {
+      "team": "ATL",
+      "wins": 12,
+      "losses": 8
     },
     {
       "team": "CLE",
       "wins": 12,
+      "losses": 8
+    },
+    {
+      "team": "ORL",
+      "wins": 12,
+      "losses": 8
+    },
+    {
+      "team": "MIA",
+      "wins": 13,
+      "losses": 7
+    },
+    {
+      "team": "NYK",
+      "wins": 12,
+      "losses": 6
+    },
+    {
+      "team": "TOR",
+      "wins": 14,
       "losses": 6
     },
     {
       "team": "SAS",
-      "wins": 11,
+      "wins": 13,
       "losses": 5
     },
     {
-      "team": "TOR",
-      "wins": 12,
+      "team": "DEN",
+      "wins": 14,
       "losses": 5
     },
     {
       "team": "HOU",
-      "wins": 10,
+      "wins": 12,
       "losses": 4
     },
     {
       "team": "LAL",
-      "wins": 12,
-      "losses": 4
-    },
-    {
-      "team": "DEN",
-      "wins": 12,
+      "wins": 14,
       "losses": 4
     },
     {
       "team": "DET",
-      "wins": 14,
-      "losses": 2
+      "wins": 16,
+      "losses": 4
     },
     {
       "team": "OKC",
-      "wins": 17,
+      "wins": 19,
       "losses": 1
     }
   ],

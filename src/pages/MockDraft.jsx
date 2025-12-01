@@ -27,7 +27,6 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { simulateLotteryDetailed, resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
-import { supabase } from '@/lib/supabaseClient';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 
 
@@ -116,82 +115,32 @@ const MockDraft = () => {
     }
   }, [oddsInlineFeedback]);
 
-  
-    // Restore persisted seed and last result
-    useEffect(() => {
-      try {
-        const savedSeed = localStorage.getItem('mockDraftLotterySeed');
-        if (savedSeed) setLotterySeed(savedSeed);
-        const savedResult = localStorage.getItem('mockDraftLastLotteryResult');
-        if (savedResult) {
-          const parsed = JSON.parse(savedResult);
-          if (parsed?.winners && parsed?.ranges) setLastLotteryResult(parsed);
-        }
-      } catch { /* ignore */ }
-    }, []);
+  // Restaura o resultado da última loteria salva para ser exibido ao carregar a página.
+  // A seed não é mais persistida para garantir que o campo de input comece vazio.
+  useEffect(() => {
+    console.log('MockDraft.jsx: useEffect de carregamento. lotterySeed inicial:', lotterySeed); // DEBUG
+    try {
+      const savedResult = localStorage.getItem('mockDraftLastLotteryResult');
+      if (savedResult) {
+        const parsed = JSON.parse(savedResult);
+        if (parsed?.winners && parsed?.ranges) setLastLotteryResult(parsed);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
-    // Persist changes
-    useEffect(() => {
-      try {
-        if (lotterySeed) localStorage.setItem('mockDraftLotterySeed', lotterySeed);
-      } catch {}
-    }, [lotterySeed]);
-    useEffect(() => {
-      try {
-        if (lastLotteryResult) {
-          localStorage.setItem('mockDraftLastLotteryResult', JSON.stringify(lastLotteryResult));
-        }
-      } catch {}
-    }, [lastLotteryResult]);
-  // Relatório desativado nesta versão
+  // Persiste o resultado da última loteria para ser exibido ao recarregar a página.
+  useEffect(() => {
+    console.log('MockDraft.jsx: useEffect de persistência de lastLotteryResult. lotterySeed atual:', lotterySeed); // DEBUG
+    try {
+      if (lastLotteryResult) {
+        localStorage.setItem('mockDraftLastLotteryResult', JSON.stringify(lastLotteryResult));
+      }
+    } catch {}
+  }, [lastLotteryResult]);
 
-  // Função de relatório removida
-
-  // Funções de compartilhamento/relatório removidas para limpar lint
-
-  const handleTradeClick = (pick) => {
-    setSelectedPickForTrade(pick);
-    setIsTradeModalOpen(true);
-  };
-
-  const handleConfirmTrade = (pick1, pick2) => {
-    tradePicks(pick1.pick, pick2.pick);
-    setIsTradeModalOpen(false);
-    setNotification({ type: 'success', message: `Troca realizada: Pick #${pick1.pick} e Pick #${pick2.pick} trocados!` });
-  };
-
-  const handleTeamOrderConfirm = (newOrder) => {
-    setCustomTeamOrder(newOrder);
-    setIsTeamOrderModalOpen(false);
-    setNotification({ type: 'success', message: 'Ordem dos times atualizada com sucesso!' });
-  };
-
-  const imageExportBackgroundColor = document.documentElement.classList.contains('dark') ? '#0A0A0A' : '#f8fafc';
-
-  const draftStats = getDraftStats() || { totalPicked: 0, remaining: 0, byPosition: {} };
-  const bigBoard = getBigBoard();
-  const availableBigBoard = useMemo(() => {
-    const draftedProspectIds = new Set(draftHistory.map(pick => pick.prospect.id));
-    return bigBoard.filter(prospect => !draftedProspectIds.has(prospect.id));
-  }, [bigBoard, draftHistory]);
+  // Variáveis computadas para a UI
+  const draftStats = getDraftStats();
   const recommendations = getProspectRecommendations(currentPick);
-
-  const currentPickData = useMemo(() => {
-    return draftBoard.find(p => p.pick === currentPick);
-  }, [draftBoard, currentPick]);
-
-  useEffect(() => {
-    if (!prospectsLoading && allProspects.length > 0) {
-      initializeDraft();
-    }
-  }, [prospectsLoading, allProspects, initializeDraft]);
-
-  useEffect(() => {
-    if (notification.message) {
-      const timer = setTimeout(() => setNotification({ type: '', message: '' }), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
 
   const handleSaveClick = () => {
     setDraftNameToSave(`Meu Mock Draft - ${new Date().toLocaleDateString('pt-BR')}`);
@@ -208,16 +157,15 @@ const MockDraft = () => {
       // Concede XP por completar/salvar um mock draft
       if (user) {
         supabase.functions.invoke('grant-xp', {
-          body: { action: 'COMPLETE_MOCK_DRAFT', userId: user.id },
-        }).then(({ data, error }) => {
-          if (error) console.error('Erro ao conceder XP por mock draft:', error);
-          if (data) {
-            toast.success(data.message);
-            if (data.leveledUp) { // Usar o toast personalizado para level-up
-              toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
+            body: { action: 'COMPLETE_MOCK_DRAFT', userId: user.id },
+          }).then(({ data, error }) => {
+            if (error) console.error('Erro ao conceder XP por mock draft:', error);
+            if (data?.leveledUp) {
+                toast.custom((t) => <LevelUpToast t={t} newLevel={data.newLevel} message={data.message} />, { duration: 4000 });
+            } else if (data) {
+                toast.success(data.message);
             }
-          }
-        });
+          });
       }
       setNotification({ type: 'success', message: 'Draft salvo com sucesso!' });
       setIsSaveModalOpen(false);
@@ -242,6 +190,26 @@ const MockDraft = () => {
   const handleDeleteDraft = async (draftId) => {
     await deleteMockDraft(draftId);
     setNotification({ type: 'success', message: 'Draft excluído.' });
+  };
+
+  const handleTradeClick = (pick) => {
+    setSelectedPickForTrade(pick);
+    setIsTradeModalOpen(true);
+  };
+
+  const handleConfirmTrade = (pickToTradeWith) => {
+    if (selectedPickForTrade && pickToTradeWith) {
+      tradePicks(selectedPickForTrade.pick, pickToTradeWith.pick);
+      setNotification({ type: 'success', message: `Troca entre as picks #${selectedPickForTrade.pick} e #${pickToTradeWith.pick} realizada!` });
+    }
+    setIsTradeModalOpen(false);
+    setSelectedPickForTrade(null);
+  };
+
+  const handleTeamOrderConfirm = (newOrder) => {
+    setCustomTeamOrder(newOrder);
+    setIsTeamOrderModalOpen(false);
+    setNotification({ type: 'success', message: 'Ordem dos times atualizada com sucesso!' });
   };
 
   // Export PDF removido para limpeza
@@ -506,16 +474,17 @@ const MockDraft = () => {
                   onClick={() => {
                     if (standings && !standingsLoading && !isOddsApplying) {
                       setIsOddsApplying(true);
-                      const seedVal = lotterySeed.trim() !== '' ? Number(lotterySeed) : undefined;
+                      console.log('MockDraft.jsx: Botão Simular Loteria clicado. Valor atual de lotterySeed:', lotterySeed); // DEBUG
+                      // CORREÇÃO: Gera uma nova seed aleatória se nenhuma for fornecida.
+                      // Isso garante que cada clique produza um resultado diferente.
+                      const seedForSimulation = lotterySeed.trim() !== '' ? Number(lotterySeed) : Math.floor(Math.random() * 1e9);
+                      console.log('MockDraft.jsx: seedForSimulation gerada:', seedForSimulation); // DEBUG
+
                       try {
-                        // A lógica de simulação agora é mais simples aqui,
-                        // pois o processamento complexo será feito no hook.
-                        applyStandingsOrder(standings, { simulateLottery: true, seed: seedVal });
-                        const ranked = [...(standings?.lottery || [])]
-                          .sort((a,b) => (a.wins/(a.wins+a.losses)) - (b.wins/(b.wins+b.losses)))
-                          .map((t,i)=>({ team: t.team, rank: i+1 }));
-                        const detailed = simulateLotteryDetailed(ranked, { seed: seedVal });
-                        setLastLotteryResult(detailed);
+                        // A função do hook agora retorna o resultado detalhado da loteria
+                        const lotteryDetails = applyStandingsOrder(standings, { simulateLottery: true, seed: seedForSimulation });
+                        // Usamos o resultado retornado para atualizar o painel de controle
+                        if (lotteryDetails) setLastLotteryResult(lotteryDetails);
                         setOddsInlineFeedback('Loteria oficial simulada (odds reais aplicadas)!');
                       } catch(e) {
                         console.error('Falha simulando detalhamento da loteria:', e);
@@ -1569,6 +1538,7 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
   );
 };
 
+
 const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
   const modes = league === 'WNBA' 
     ? [
@@ -1583,6 +1553,7 @@ const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
         { name: 'Completo', picks: 60 },
       ];
 
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: -10 }}

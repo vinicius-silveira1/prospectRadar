@@ -1,45 +1,47 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 
-// Lightweight client hook to fetch current NBA standings from a static endpoint.
-// Expected shape:
-// {
-//   updatedAt: string,
-//   lottery: [{ team: 'DET', wins: 14, losses: 68 }, ... 14],
-//   playoff: [{ team: 'MIA', wins: 46, losses: 36 }, ... 16]
-// }
-export default function useNBAStandings() {
+const useNBAStandings = () => {
   const [standings, setStandings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [freshness, setFreshness] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetch('/data/nba_standings.json', { cache: 'no-store' })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => {
-        if (!cancelled) setStandings(json);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const fetchStandings = async () => {
+      try {
+        setLoading(true);
+        // CORREÇÃO DEFINITIVA: Usar fetch para obter uma cópia limpa do JSON,
+        // em vez de importar diretamente, o que o tornava vulnerável a mutações
+        // no cache do HMR (Hot Module Replacement) do Vite.
+        const response = await fetch('/data/nba_standings.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setStandings(data);
 
-    return () => { cancelled = true; };
+        // Lógica de frescor (opcional, mas mantida)
+        const lastModified = response.headers.get('last-modified');
+        if (lastModified) {
+            const ageMs = Date.now() - new Date(lastModified).getTime();
+            setFreshness({
+                ageMs,
+                isStale: ageMs > 1000 * 60 * 60 * 4, // 4 horas
+            });
+        }
+
+      } catch (e) {
+        console.error("Failed to fetch NBA standings:", e);
+        setError(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStandings();
   }, []);
 
-  const freshness = useMemo(() => {
-    if (!standings?.updatedAt) return null;
-    const updatedAtDate = new Date(standings.updatedAt);
-    const ageMs = Date.now() - updatedAtDate.getTime();
-    const isStale = ageMs > 1000 * 60 * 60 * 24; // >24h
-    return { ageMs, isStale, updatedAtDate };
-  }, [standings]);
-
   return { standings, loading, error, freshness };
-}
+};
+
+export default useNBAStandings;

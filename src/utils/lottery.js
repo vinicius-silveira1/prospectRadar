@@ -1,7 +1,9 @@
 // NBA Lottery utilities (post-2019 odds)
 // Oficial (#1 pick combinations) distribui 1000 combinações entre as 14 piores equipes.
-// Fonte: distribuição de probabilidades pós-reforma (top 3 empatados).
+// Fonte: distribuição de probabilidades pós-reforma (top 3 empatado).
 // Tabela oficial (combinations): 140,140,140,125,105,90,75,60,45,30,25,20,15,10 => soma 1000.
+import { nbaDraftPicks } from '../data/draftPicksOwnership.js';
+
 export const TOP_PICK_WEIGHTS = [
   140, // rank 1 (worst record)
   140, // rank 2
@@ -44,10 +46,20 @@ function weightedPick(items, rng = Math.random) {
 }
 // Build a flat list of "combination slots" (1..1000) mapped to teams based on official weights.
 function buildCombinationSlots(teamsRankedWorstToBest) {
+  // CORREÇÃO ESTRUTURAL: A simulação precisa saber o dono real da pick.
+  // Ex: A pick do WAS (rank 1-8) pertence a MEM. As combinações do WAS devem ser atribuídas a MEM.
   let cursor = 1;
   const slots = [];
   teamsRankedWorstToBest.forEach((t, idx) => {
     const weight = TOP_PICK_WEIGHTS[idx];
+    // Lógica de troca crítica: Se a pick do Wizards está protegida (1-8), suas combinações vão para Memphis.
+    // Esta é uma simplificação da regra complexa, mas captura o cenário mais importante da loteria.
+    if (t.team === 'WAS' && t.rank <= 8) {
+      for (let i = 0; i < weight; i++) {
+        slots.push({ team: 'MEM', combo: cursor++ }); // Atribui a combinação para MEM
+      }
+      return; // Pula a atribuição normal para WAS
+    }
     for (let i = 0; i < weight; i++) {
       slots.push({ team: t.team, combo: cursor++ });
     }
@@ -83,8 +95,10 @@ export function simulateLotteryDetailed(teamsRankedWorstToBest, { seed } = {}) {
     cursor = end + 1;
     return { team: t.team, rank: idx + 1, start, end, weight, oddsPct: (weight / 1000) * 100 };
   });
-  const rngSeed = seed != null ? seed : Math.floor(Math.random() * 1e9);
-  const winners = simulateLotteryWinners(teamsRankedWorstToBest, { seed: rngSeed });
+  // CORREÇÃO: Usa a seed recebida. Se nenhuma for passada, gera uma nova.
+  // Isso garante que a seed usada na simulação seja a mesma que a UI conhece.
+  const seedForSimulation = seed != null ? seed : Math.floor(Math.random() * 1e9);
+  const winners = simulateLotteryWinners(teamsRankedWorstToBest, { seed: seedForSimulation });
   // Map winners to detailed objects
   const winnersDetailed = winners.map((team, i) => {
     const range = ranges.find(r => r.team === team);
@@ -98,7 +112,9 @@ export function simulateLotteryDetailed(teamsRankedWorstToBest, { seed } = {}) {
       oddsPct: range?.oddsPct,
     };
   });
-  return { seed: rngSeed, winners: winnersDetailed, ranges };
+  // CORREÇÃO: Retorna uma nova referência de objeto para garantir que o React detecte a mudança de estado.
+  // A propriedade 'timestamp' força a criação de um novo objeto a cada chamada.
+  return { seed: seedForSimulation, winners: winnersDetailed, ranges, timestamp: Date.now() };
 }
 
 // Resolve ranking with tie-handling (seeded random shuffle within equal winPct groups).
@@ -110,8 +126,8 @@ export function resolveLotteryRankingWithTies(lotteryTeams, seed) {
   }
   const rng = seed != null ? createSeededRng(seed) : Math.random;
   const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
-  const sorted = [...lotteryTeams].sort(byWinPctAsc);
   // Group by winPct string with limited precision to catch ties.
+  const sorted = [...lotteryTeams].sort(byWinPctAsc);
   const groups = [];
   sorted.forEach(t => {
     const key = (t.wins / Math.max(1, t.wins + t.losses)).toFixed(6);
@@ -169,39 +185,45 @@ export function simulateLotteryProbabilityMatrix(teamsRankedWorstToBest, { itera
 // Build first-round order using standings and simulated lottery
 // standings: { lottery: [{team, wins, losses}, ... 14], playoff: [{team, wins, losses}, ...] }
 export function buildFirstRoundOrderFromStandings(standings, simulateLottery = true, options = {}) {
+  // CORREÇÃO DEFINITIVA: Clona profundamente o objeto standings para evitar mutação do estado original no hook.
+  // Esta é a causa raiz do bug de "só funciona uma vez".
+  const standingsCopy = JSON.parse(JSON.stringify(standings || { lottery: [], playoff: [] }));
   const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
 
-  const lotteryTeams = [...(standings?.lottery || [])].sort(byWinPctAsc); // worst -> best
-  const playoffTeams = [...(standings?.playoff || [])].sort(byWinPctAsc);  // worse playoff -> best playoff
+  // CORREÇÃO: Filtra os times da loteria para incluir apenas aqueles que possuem uma pick de 1ª rodada.
+  // Isso remove times como o NOP, que já negociaram suas picks.
+  const allLotteryTeams = standingsCopy.lottery;
+  const teamsWithFirstRoundPicks = allLotteryTeams.filter(t => {
+    const picks = nbaDraftPicks['2026']?.[t.team];
+    return picks && picks.firstRoundPicks > 0;
+  });
+
+  // CORREÇÃO: Cria uma nova cópia do array antes de ordenar para evitar mutação do array original
+  // e garantir que a entrada para o ranking seja sempre "fresca".
+  const lotteryTeams = [...teamsWithFirstRoundPicks].sort(byWinPctAsc); // worst -> best
+  const playoffTeams = [...standingsCopy.playoff].sort(byWinPctAsc);  // worse playoff -> best playoff
 
   // Map to worst->best ranking structure for lottery
+  console.log('lottery.js: buildFirstRoundOrderFromStandings - lotteryTeams (antes do ranking):', lotteryTeams); // DEBUG
   const ranked = resolveLotteryRankingWithTies(lotteryTeams, options?.seed);
+  console.log('lottery.js: buildFirstRoundOrderFromStandings - ranked (após desempate):', ranked); // DEBUG
   let picks = [];
 
-  if (simulateLottery && ranked.length >= 14) {
+  let lotteryResult = null; // Variável para armazenar o resultado da loteria
+  // CORREÇÃO: A condição `ranked.length >= 14` estava incorreta. A loteria deve ser simulada
+  // se a simulação for solicitada e houver times elegíveis, mesmo que sejam menos de 14.
+  if (simulateLottery && ranked.length > 0) {
     let lotteryWinners;
-    let originalWinnerTeams;
-
-    // **LÓGICA CORRIGIDA**
-    // Se uma ordem de loteria corrigida for passada, use-a.
-    // Isso acontece quando a simulação precisa ser ciente das trocas (ex: pick do Wizards).
-    if (options.correctedLotteryOrder) {
-      lotteryWinners = options.correctedLotteryOrder.map(w => w.team);
-      originalWinnerTeams = new Set(options.correctedLotteryOrder.map(w => w.originalTeam));
-      picks = options.correctedLotteryOrder.map(w => ({ pick: w.pick, team: w.team }));
-    } else {
-      // Comportamento antigo: simulação "cega"
-      lotteryWinners = simulateLotteryWinners(ranked, options);
-      originalWinnerTeams = new Set(lotteryWinners);
-      picks = lotteryWinners.map((team, i) => ({ pick: i + 1, team }));
-    }
+    lotteryResult = simulateLotteryDetailed(ranked, options);
+    lotteryWinners = lotteryResult.winners.map(w => w.team);
+    picks = lotteryWinners.map((team, i) => ({ pick: i + 1, team }));
 
     // Preenche o resto da loteria com os times que não "ganharam"
-    const remainingLottery = lotteryTeams
-      .filter(t => !originalWinnerTeams.has(t.team))
+    const remainingLottery = ranked.filter(t => !lotteryWinners.includes(t.team))
       .map((t, idx) => ({ pick: picks.length + idx + 1, team: t.team }))
       .slice(0, Math.max(0, 14 - picks.length));
     picks = [...picks, ...remainingLottery];
+    console.log('lottery.js: buildFirstRoundOrderFromStandings - lotteryResult (antes do retorno):', lotteryResult); // DEBUG
   } else {
     // No lottery simulation: straight inverse order for picks 1-14
     picks = lotteryTeams.map((t, idx) => ({ pick: idx + 1, team: t.team }));
@@ -210,5 +232,5 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
   // Fill picks 15-30 with playoff teams in inverse record order
   const restFirstRound = playoffTeams.slice(0, Math.max(0, 30 - picks.length))
     .map((t, idx) => ({ pick: picks.length + idx + 1, team: t.team }));
-  return [...picks, ...restFirstRound];
+  return { picks: [...picks, ...restFirstRound], lotteryResult };
 }
