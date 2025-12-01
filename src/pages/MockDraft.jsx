@@ -20,6 +20,7 @@ import useProspects from '@/hooks/useProspects.js';
 import useNBAStandings from '@/hooks/useNBAStandings.js';
 import toast from 'react-hot-toast';
 import LevelUpToast from '@/components/Common/LevelUpToast'; // Importar o novo toast
+import { supabase } from '@/lib/supabaseClient'; // Importar supabase
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
@@ -143,7 +144,6 @@ const MockDraft = () => {
 
   // Variáveis computadas para a UI
   const draftStats = getDraftStats();
-  const availableBigBoard = getBigBoard();
   const currentPickData = draftBoard.find(p => p.pick === currentPick);
   const recommendations = getProspectRecommendations(currentPick);
 
@@ -884,7 +884,7 @@ const MockDraft = () => {
                 transition={{ duration: 0.3 }}
               >
                 {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
-                {view === 'bigboard' && <BigBoardView prospects={availableBigBoard} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
                 {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
               </motion.div>
             </AnimatePresence>
@@ -1075,14 +1075,14 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                     Desfazer
                   </motion.button>
                 )}
-                <motion.button
+                {/* <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onTradeClick(pick)}
                   className="px-2 py-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium"
                 >
                   <RefreshCw className="h-3 w-3 mr-1" /> Trocar
-                </motion.button>
+                </motion.button> */}
               </div>
             </div>
             
