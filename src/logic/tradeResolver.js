@@ -261,17 +261,6 @@ export function resolve2026DraftOrder(initialOrder) {
     // A lógica para isso já está implementada no bloco de código para a primeira rodada.
   }
 
-  // Lógica para a pick condicional de HOU -> OKC
-  const houFirstRoundPick = finalPicks.find(p => p.originalTeam === 'HOU');
-  if (houFirstRoundPick && houFirstRoundPick.newOwner === 'HOU' && houFirstRoundPick.pick <= 4) {
-    // Se HOU manteve sua pick 1-4, sua pick de 2ª rodada vai para OKC.
-    const houSecondRoundPick = finalPicks.find(p => p.originalTeam === 'HOU' && p.pick > 30);
-    if (houSecondRoundPick && !houSecondRoundPick.isTraded) {
-      houSecondRoundPick.newOwner = 'OKC';
-      houSecondRoundPick.isTraded = true;
-      houSecondRoundPick.description = ['To OKC (conveyed as HOU 1st was 1-4)'];
-    }
-  }
 
   // PASSO 4: RESOLVER TROCAS DIRETAS E CONDICIONAIS RESTANTES
   for (const pickToResolve of finalPicks) {
@@ -346,9 +335,10 @@ export function resolve2026DraftOrder(initialOrder) {
 /**
  * Resolve a ordem da segunda rodada do draft da NBA de 2026.
  * @param {Array<{pick: number, originalTeam: string}>} initialSecondRoundOrder - Ordem inicial da segunda rodada.
+ * @param {Array<DraftPick>} resolvedFirstRound - A ordem final da primeira rodada, já resolvida.
  * @returns {Array<DraftPick>} A ordem final da segunda rodada, resolvida.
  */
-export function resolveSecondRound(initialSecondRoundOrder) {
+export function resolveSecondRound(initialSecondRoundOrder, resolvedFirstRound = []) {
   const finalPicks = initialSecondRoundOrder.map(p => ({
     pick: p.pick,
     originalTeam: p.originalTeam,
@@ -359,6 +349,20 @@ export function resolveSecondRound(initialSecondRoundOrder) {
   const initialPickMap = new Map(initialSecondRoundOrder.map(p => [p.originalTeam, p.pick]));
 
   // --- LÓGICA DE RESOLUÇÃO DA SEGUNDA RODADA ---
+
+  // PASSO 0: RESOLVER CONDIÇÕES DEPENDENTES DA 1ª RODADA
+  // Ex: HOU envia sua pick de 2ª rodada para OKC se manteve sua pick de 1ª (1-4)
+  const houFirstRoundPick = resolvedFirstRound.find(p => p.originalTeam === 'HOU');
+  if (houFirstRoundPick && houFirstRoundPick.newOwner === 'HOU' && houFirstRoundPick.pick <= 4) {
+    const houSecondRoundPick = finalPicks.find(p => p.originalTeam === 'HOU');
+    const rule = nbaDraftPicks['2026'].HOU.secondRound.find(r => r.includes('To OKC if HOU 1-4'));
+    if (houSecondRoundPick && !houSecondRoundPick.isTraded && rule) {
+      houSecondRoundPick.newOwner = 'OKC';
+      houSecondRoundPick.isTraded = true;
+      houSecondRoundPick.description = [rule];
+    }
+  }
+
 
   // PASSO 1: RESOLVER POOLS DE MÚLTIPLAS PICKS
 

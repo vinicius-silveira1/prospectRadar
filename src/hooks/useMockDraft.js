@@ -115,14 +115,14 @@ const useMockDraft = (allProspects) => {
 
     // PASSO 1: Obter a ordem da primeira rodada. Se for customizada (pós-loteria), ela não tem trocas resolvidas.
     // Se não for customizada, usamos a ordem padrão. A ordem agora é passada como argumento.
-    const firstRoundOrderInput = orderToUse 
+    const firstRoundOrderInput = (orderToUse && orderToUse.length > 0)
       ? orderToUse.map(p => ({ pick: p.pick, originalTeam: p.team })) 
       : activeDraftOrder.filter(p => p.pick <= 30).map(p => ({ pick: p.pick, originalTeam: p.team }));
 
-    // PASSO 2: Aplicar o resolvedor de trocas na primeira rodada.
+    // PASSO 2: Resolve a primeira rodada.
     const finalFirstRound = resolve2026DraftOrder(firstRoundOrderInput);
 
-    // PASSO 3: Reconstruir e resolver a segunda rodada.
+    // PASSO 3: Reconstrói e resolve a segunda rodada, passando o resultado da primeira.
     let finalSecondRound = [];
     if (league === 'NBA' && standings) {
       const standingsCopy = JSON.parse(JSON.stringify(standings));
@@ -133,7 +133,7 @@ const useMockDraft = (allProspects) => {
       const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
       const allTeamsInverse = [...allTeamsFromStandings].sort(byWinPctAsc).map(t => t.team);
       const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));
-      finalSecondRound = resolveSecondRound(initialSecondRound);
+      finalSecondRound = resolveSecondRound(initialSecondRound, finalFirstRound);
     } else {
       // Fallback para a ordem padrão se as standings não estiverem disponíveis ou for WNBA
       finalSecondRound = activeDraftOrder.filter(p => p.pick > 30);

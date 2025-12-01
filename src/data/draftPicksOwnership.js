@@ -9,7 +9,7 @@ export const nbaDraftPicks = {
       "firstRound": [
         "More favorable of (i) less favorable of ATL and SAN and (ii) less favorable of (a) CLE and (b) more favorable of UTH 1-8 and MIN [or (ii) CLE if UTH not conveyable] then less favorable of (i) and (ii) to CLE",
         "more favorable of ATL and SAN to SAN",
-        "Own (via MIL in NOP swap; NOP no longer has a 1st round pick to convey)"
+        "More favorable of NOP and MIL (via NOP swap for MIL)"
       ],
       "firstRoundPicks": 2,
       "secondRound": [

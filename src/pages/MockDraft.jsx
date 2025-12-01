@@ -59,6 +59,9 @@ const MockDraft = () => {
   // Removidos estados não utilizados para limpar lint
 
   // Funções de badge removidas (não usadas na página atual)
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const imageExportBackgroundColor = isDarkMode ? '#111827' : '#FFFFFF';
+
 
   const exportAsImage = async () => {
     setIsExporting(true);
@@ -458,8 +461,11 @@ const MockDraft = () => {
                     scale: 1.05,
                     boxShadow: "0 4px 12px rgba(249, 115, 22, 0.3)"
                   }} 
-                  whileTap={{ scale: 0.95 }} 
-                  onClick={initializeDraft} 
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    const currentOrder = getCurrentDraftOrder();
+                    initializeDraft(currentOrder);
+                  }}
                   className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
