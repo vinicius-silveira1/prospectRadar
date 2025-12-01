@@ -514,8 +514,8 @@ const MockDraft = () => {
                     </>
                   )}
                 </motion.button>
+                {/*
                 
-                {/* NOVO BOTÃO PARA CUSTOMIZAR ORDEM DOS TIMES */}
                 <motion.button 
                   whileHover={{
                     scale: 1.05,
@@ -533,6 +533,7 @@ const MockDraft = () => {
                   <Users className="h-4 w-4 mr-1 sm:mr-2 relative z-10" /> 
                   <span className="relative z-10">{isOrderCustomized ? 'Ordenar' : 'Ordenar'}</span>
                 </motion.button>
+                */}
                 
                 {/* NOVOS BOTÕES DE SALVAR E CARREGAR */}
                 <motion.button 

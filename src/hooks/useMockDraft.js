@@ -178,9 +178,10 @@ const useMockDraft = (allProspects) => {
       const aScore = a.radar_score != null ? a.radar_score : -Infinity;
       const bScore = b.radar_score != null ? b.radar_score : -Infinity;
       if (aScore !== bScore) return bScore - aScore;
-      const aRank = a.ranking != null ? a.ranking : Infinity;
-      const bRank = b.ranking != null ? b.ranking : Infinity;
-      return aRank - bRank;
+
+      // CORREÇÃO: Usa o nome em ordem alfabética como critério de desempate,
+      // que é mais justo e universal que o ranking de recrutamento.
+      return a.name.localeCompare(b.name);
     });
   }, [augmentedProspects]);
 
@@ -414,6 +415,13 @@ const useMockDraft = (allProspects) => {
       const pickIndex = newBoard.findIndex(pick => pick.pick === currentPick);
       if (pickIndex !== -1) {
         newBoard[pickIndex] = { ...newBoard[pickIndex], prospect: prospect };
+
+        // Calculate Steal/Reach
+        const bigBoardRank = sortedAugmentedProspects.findIndex(p => p.id === prospect.id) + 1;
+        if (bigBoardRank > 0) { // Ensure prospect is found in Big Board
+          newBoard[pickIndex].prospect.bigBoardRank = bigBoardRank;
+          newBoard[pickIndex].prospect.stealReachValue = bigBoardRank - currentPick;
+        }
       }
       return newBoard;
     });
@@ -602,6 +610,7 @@ const useMockDraft = (allProspects) => {
     setFilters,
     initializeDraft,
     getBigBoard,
+    sortedAugmentedProspects, // Expose sortedAugmentedProspects for steal/reach calculation
     getProspectRecommendations,
     exportDraft,
     getDraftStats,
