@@ -140,6 +140,8 @@ const MockDraft = () => {
 
   // Variáveis computadas para a UI
   const draftStats = getDraftStats();
+  const availableBigBoard = getBigBoard();
+  const currentPickData = draftBoard.find(p => p.pick === currentPick);
   const recommendations = getProspectRecommendations(currentPick);
 
   const handleSaveClick = () => {

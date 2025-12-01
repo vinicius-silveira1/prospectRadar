@@ -32,9 +32,9 @@ export const nbaDraftPicks = {
     },
     "BKN": {
       "firstRound": [
-        "Own (via HOU)"
+        "Own"
       ],
-      "firstRoundPicks": 1,
+      "firstRoundPicks": 1, // Brooklyn mantém sua própria pick de 1ª rodada.
       "secondRound": [
         "31-55 Own",
         "56-60 to MIA",
