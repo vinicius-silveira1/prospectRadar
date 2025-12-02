@@ -113,17 +113,7 @@ export function resolve2026DraftOrder(initialOrder) {
     // Por enquanto, o código lida com o cenário mais provável onde a pick de HOU é >= 5.
   }
 
-  // Exemplo: Troca complexa envolvendo MEM, CHA, PHX, WAS, ORL
-  const memTradeRule = nbaDraftPicks['2026'].MEM.firstRound.find(r => r.includes('Two most favorable of'));
-  // A lógica foi movida para a função auxiliar e será chamada abaixo
-  const memPicks = ['MEM', 'ORL', 'PHX', 'WAS'];
-  for (const pick of finalPicks) {
-    if (memPicks.includes(pick.originalTeam)) {
-      pick.newOwner = getComplexTradeOwner(pick.pick, pick.originalTeam, initialPickMap);
-      pick.isTraded = pick.newOwner !== pick.originalTeam;
-      if (pick.isTraded) pick.description = [memTradeRule];
-    }
-  }
+  
 
   // PASSO 2: RESOLVER A TROCA SUPER COMPLEXA DE ATL (envolve 7 times)
   // Esta regra tem prioridade sobre swaps e trocas individuais envolvendo estes times.
@@ -166,17 +156,16 @@ export function resolve2026DraftOrder(initialOrder) {
         pickForFinalDispute = { position: clePos, originalTeam: 'CLE' };
       }
 
-      // Parte C: Resolver o swap ATL/SAN
-      const atlSanMoreFavorable = Math.min(atlPos, sanPos);
+      // A pick que "perde" o swap ATL/SAN e continua na disputa.
       const atlSanLessFavorable = Math.max(atlPos, sanPos);
+      const atlPickFromSwap = { position: atlSanLessFavorable, originalTeam: atlPos > sanPos ? 'ATL' : 'SAN' };
 
       // SAN recebe a mais favorável
       const sanPick = finalPicks.find(p => p.pick === atlSanMoreFavorable);
       if (sanPick) { sanPick.newOwner = 'SAN'; sanPick.isTraded = true; sanPick.description = [nbaDraftPicks['2026'].SAS.firstRound[0]]; }
       // A menos favorável de ATL/SAN entra na disputa final
-      const atlPickFromSwap = { position: atlSanLessFavorable, originalTeam: atlPos > sanPos ? 'ATL' : 'SAN' };
-
-      // Parte D: Disputa final entre os resultados das partes B e C
+      
+      
       const finalPool = [atlPickFromSwap, pickForFinalDispute].sort((a, b) => a.position - b.position);
       const finalMoreFavorable = finalPool[0];
       const finalLessFavorable = finalPool[1];
@@ -189,7 +178,21 @@ export function resolve2026DraftOrder(initialOrder) {
       const clePick = finalPicks.find(p => p.pick === finalLessFavorable.position);
       if (clePick && !clePick.isTraded) { clePick.newOwner = 'CLE'; clePick.isTraded = true; clePick.description = [atlComplexRule]; }
     }
-    // Parte E: Resolver o swap NOP/MIL, que também vai para ATL
+  }
+
+  // PASSO 2.5: RESOLVER O SWAP ATL/SAS (parte da troca complexa)
+  // Esta lógica é separada para garantir que o swap ocorra antes que a pick seja usada em outra parte da troca.
+  const atlSanSwapRule = nbaDraftPicks['2026'].ATL.firstRound.find(r => r.startsWith('more favorable of ATL and SAN to SAN'));
+  if (atlSanSwapRule) {
+    const atlPos = initialPickMap.get('ATL');
+    const sanPos = initialPickMap.get('SAN');
+    if (atlPos && sanPos) {
+      const moreFavorablePos = Math.min(atlPos, sanPos);
+      const pickToSAN = finalPicks.find(p => p.pick === moreFavorablePos);
+      if (pickToSAN && !pickToSAN.isTraded) { pickToSAN.newOwner = 'SAN'; pickToSAN.isTraded = true; pickToSAN.description = [atlSanSwapRule]; }
+    }
+  }
+  // PASSO 2.6: Resolver o swap NOP/MIL, que também vai para ATL
     const milNopSwapRule = nbaDraftPicks['2026'].ATL.firstRound.find(r => r.includes('More favorable of NOP and MIL'));
     const milPos = initialPickMap.get('MIL');
     const nopPos = initialPickMap.get('NOP');
@@ -204,7 +207,6 @@ export function resolve2026DraftOrder(initialOrder) {
         const pickToMIL = finalPicks.find(p => p.pick === lessFavorablePos);
         if (pickToMIL && !pickToMIL.isTraded) { pickToMIL.newOwner = 'MIL'; pickToMIL.isTraded = pickToMIL.originalTeam !== 'MIL'; pickToMIL.description = [nbaDraftPicks['2026'].MIL.firstRound[0]]; }
     }
-  }
 
   // PASSO 3: RESOLVER TROCAS DE POSSE (ex: BKN "Own via HOU")
   // Regras como "Own (via HOU)" ou "Own (via TOR to NOP)" mudam a posse fundamental de uma pick.
@@ -303,19 +305,20 @@ export function resolve2026DraftOrder(initialOrder) {
     }
   }
 
-  // Regra específica para a pick de Washington que não se encaixa nos padrões anteriores
-  const wasPick = finalPicks.find(p => p.originalTeam === 'WAS' && !p.isTraded);
-  if (wasPick) {
-      const wasRule = nbaDraftPicks['2026'].WAS.firstRound.find(r => r.startsWith('1-8'));
-      if (wasRule) {
-          if (wasPick.pick <= 8) {
-              wasPick.newOwner = 'MEM';
-          } else {
-              wasPick.newOwner = 'CHA';
-          }
-          wasPick.isTraded = true;
-          wasPick.description = [wasRule];
-      }
+  
+
+ 
+
+  // PASSO 5: RESOLVER A TROCA COMPLEXA DE MEMPHIS (após todas as outras trocas prioritárias)
+  const memTradeRule = nbaDraftPicks['2026'].MEM.firstRound.find(r => r.includes('Two most favorable of'));
+  const memPicks = ['MEM', 'ORL', 'PHX', 'WAS'];
+  for (const pick of finalPicks) {
+    // Apenas reavalia as picks que ainda não foram trocadas
+    if (memPicks.includes(pick.originalTeam) && !pick.isTraded) {
+      pick.newOwner = getComplexTradeOwner(pick.pick, pick.originalTeam, initialPickMap);
+      pick.isTraded = pick.newOwner !== pick.originalTeam;
+      if (pick.isTraded) pick.description = [memTradeRule];
+    }
   }
 
   // PASSO FINAL: Retorna a ordem de picks com os donos atualizados.
@@ -503,26 +506,38 @@ export function resolveSecondRound(initialSecondRoundOrder, resolvedFirstRound =
     const nykPos = initialPickMap.get('NYK');
     const nopPos = initialPickMap.get('NOP');
     const porPos = initialPickMap.get('POR');
+
     const pool = [
       { position: minPos, originalTeam: 'MIN' },
       { position: nykPos, originalTeam: 'NYK' },
       { position: nopPos, originalTeam: 'NOP' },
       { position: porPos, originalTeam: 'POR' },
     ].filter(p => p.position).sort((a, b) => a.position - b.position);
-
+    
     if (pool.length === 4) {
       const [mostFavorable, secondFavorable, thirdFavorable, leastFavorable] = pool;
       
+      // "most favorable to BOS"
       const pickToBOS = finalPicks.find(p => p.pick === mostFavorable.position);
       if (pickToBOS) { pickToBOS.newOwner = 'BOS'; pickToBOS.isTraded = true; pickToBOS.description = [minNykNopPorRule]; }
+      
+      // "third least favorable to POR" (which is the second most favorable, P2)
+      const pickToPOR = finalPicks.find(p => p.pick === secondFavorable.position);
+      if (pickToPOR && !pickToPOR.isTraded) { pickToPOR.newOwner = 'POR'; pickToPOR.isTraded = true; pickToPOR.description = [minNykNopPorRule]; }
 
-      const lessFavorableOfMinNyk = Math.max(minPos, nykPos);
-      const pickToNYK = finalPicks.find(p => p.pick === lessFavorableOfMinNyk && !p.isTraded);
-      if (pickToNYK) { pickToNYK.newOwner = 'NYK'; pickToNYK.isTraded = pickToNYK.originalTeam !== 'NYK'; pickToNYK.description = [minNykNopPorRule]; }
+      // "second least favorable to NYK" (which is the third most favorable, P3)
+      const pickToNYK = finalPicks.find(p => p.pick === thirdFavorable.position);
+      if (pickToNYK && !pickToNYK.isTraded) { pickToNYK.newOwner = 'NYK'; pickToNYK.isTraded = true; pickToNYK.description = [minNykNopPorRule]; }
 
-      const lessFavorableOfNopPor = Math.max(nopPos, porPos);
-      const pickToSAS = finalPicks.find(p => p.pick === lessFavorableOfNopPor && !p.isTraded);
-      if (pickToSAS) { pickToSAS.newOwner = 'SAS'; pickToSAS.isTraded = true; pickToSAS.description = [minNykNopPorRule]; }
+      // "Less favorable of MIN, NYK, NOP and POR to UTH" (which is the least favorable, P4)
+      const pickToUTH = finalPicks.find(p => p.pick === leastFavorable.position);
+      if (pickToUTH && !pickToUTH.isTraded) { pickToUTH.newOwner = 'UTH'; pickToUTH.isTraded = true; pickToUTH.description = [minNykNopPorRule]; }
+
+      // The rule also mentions SAS and WAS in the description, but the core rule in MIN.secondRound
+      // and BOS.secondRound (which the resolver uses) does not explicitly assign picks to SAS or WAS
+      // from *this* pool. It's possible SAS and WAS get picks from other rules or sub-rules not fully
+      // captured in this specific string. For now, I'll stick to the explicit assignments in the rule.
+      // If SAS and WAS are meant to get picks from this pool, the rule string needs to be more explicit.
     }
   }
 

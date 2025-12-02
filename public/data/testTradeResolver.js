@@ -1,65 +1,42 @@
-import { resolve2026DraftOrder } from '../public/data/tradeResolver.js';
+import { resolve2026DraftOrder, resolveSecondRound } from '../../src/logic/tradeResolver.js';
+import { buildFirstRoundOrderFromStandings } from '../../src/utils/lottery.js';
+import standings from './nba_standings.json'; // Importa as standings reais
 
 /**
- * Simula uma ordem de draft inicial estática para fins de teste.
- * Esta ordem é baseada nas classificações de nba_standings.json,
- * com uma ordem de loteria fixa para garantir a repetibilidade do teste.
- * @returns {Array<{pick: number, originalTeam: string}>}
+ * Executa um teste completo do resolvedor de trocas para o Draft 2026.
+ * @param {number} seed - Uma seed numérica para garantir a repetibilidade da simulação da loteria.
  */
-function getMockInitialOrder() {
-  // Ordem da loteria (picks 1-14) - um resultado fixo para o teste
-  const lotteryOrder = [
-    { pick: 1, originalTeam: 'WAS' },
-    { pick: 2, originalTeam: 'IND' },
-    { pick: 3, originalTeam: 'NOP' },
-    { pick: 4, originalTeam: 'BKN' },
-    { pick: 5, originalTeam: 'SAC' },
-    { pick: 6, originalTeam: 'DAL' },
-    { pick: 7, originalTeam: 'CHA' },
-    { pick: 8, originalTeam: 'LAC' },
-    { pick: 9, originalTeam: 'MEM' },
-    { pick: 10, originalTeam: 'UTA' },
-    { pick: 11, originalTeam: 'POR' },
-    { pick: 12, originalTeam: 'MIL' },
-    { pick: 13, originalTeam: 'GSW' },
-    { pick: 14, originalTeam: 'BOS' },
-  ];
+function runTest(seed) {
+  console.log(`--- Iniciando teste do resolvedor de trocas do Draft 2026 (Seed: ${seed}) ---`);
 
-  // Ordem dos playoffs (picks 15-30) - em ordem inversa da classificação
-  const playoffOrder = [
-    { pick: 15, originalTeam: 'ATL' },
-    { pick: 16, originalTeam: 'ORL' },
-    { pick: 17, originalTeam: 'CHI' },
-    { pick: 18, originalTeam: 'MIA' },
-    { pick: 19, originalTeam: 'PHI' },
-    { pick: 20, originalTeam: 'PHX' },
-    { pick: 21, originalTeam: 'CLE' },
-    { pick: 22, originalTeam: 'NYK' },
-    { pick: 23, originalTeam: 'TOR' },
-    { pick: 24, originalTeam: 'MIN' },
-    { pick: 25, originalTeam: 'LAL' },
-    { pick: 26, originalTeam: 'SAS' },
-    { pick: 27, originalTeam: 'HOU' },
-    { pick: 28, originalTeam: 'DEN' },
-    { pick: 29, originalTeam: 'DET' },
-    { pick: 30, originalTeam: 'OKC' },
-  ];
+  // 1. Gera a ordem da primeira rodada simulando a loteria com a seed fornecida.
+  const { picks: initialFirstRound, lotteryResult } = buildFirstRoundOrderFromStandings(standings, true, { seed });
+  console.log('\nResultado da Loteria Simulada:');
+  console.table(lotteryResult.winners);
+  console.log('\nOrdem Inicial da 1ª Rodada (Pós-Loteria):');
+  console.table(initialFirstRound);
 
-  return [...lotteryOrder, ...playoffOrder];
-}
+  // 2. Resolve as trocas da primeira rodada.
+  const finalFirstRound = resolve2026DraftOrder(initialFirstRound);
+  console.log('\nOrdem Final da 1ª Rodada (Após Trocas):');
+  console.table(finalFirstRound, ['pick', 'originalTeam', 'newOwner', 'isTraded', 'description']);
 
-function runTest() {
-  console.log('--- Iniciando teste do resolvedor de trocas do Draft 2026 ---');
+  // 3. Gera a ordem inicial da segunda rodada com base nas standings.
+  const allTeamsFromStandings = [...(standings?.lottery || []), ...(standings?.playoff || [])];
+  const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
+  const allTeamsInverse = [...allTeamsFromStandings].sort(byWinPctAsc).map(t => t.team);
+  const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));
+  console.log('\nOrdem Inicial da 2ª Rodada (Baseada nas Standings):');
+  console.table(initialSecondRound);
 
-  const initialOrder = getMockInitialOrder();
-  console.log('\nOrdem Inicial (Pós-Loteria Simulada):');
-  console.table(initialOrder);
-
-  const finalOrder = resolve2026DraftOrder(initialOrder);
-  console.log('\nOrdem Final (Após Resolução de Trocas):');
-  console.table(finalOrder, ['pick', 'originalTeam', 'newOwner', 'isTraded', 'description']);
+  // 4. Resolve as trocas da segunda rodada, passando o resultado da primeira para as trocas condicionais.
+  const finalSecondRound = resolveSecondRound(initialSecondRound, finalFirstRound);
+  console.log('\nOrdem Final da 2ª Rodada (Após Trocas):');
+  console.table(finalSecondRound, ['pick', 'originalTeam', 'newOwner', 'isTraded', 'description']);
 
   console.log('\n--- Teste concluído ---');
 }
 
-runTest();
+// Execute o teste com uma seed específica para garantir resultados consistentes.
+// Mude a seed para testar diferentes cenários de loteria.
+runTest(12345);

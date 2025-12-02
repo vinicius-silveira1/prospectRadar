@@ -203,7 +203,7 @@ export const nbaDraftPicks = {
         ],
         "firstRoundPicks": 0,
         "secondRound": [
-            "Less favorable of MIN, NYK, NOP and POR to UTH then second least favorable to NYK and third least favorable to POR; most favorable to BOS (via MIN to NYK; via NOP to POR to NOP; via POR to DET to BOS; via NYK to OKC to UTH; via NOP to SAS to UTH; via NOP to POR)",
+            "Most favorable of MIN, NYK, NOP and POR to BOS; less favorable of MIN and NYK to NYK; less favorable of NOP and POR to SAS; less favorable of (more favorable of MIN and NYK) and (more favorable of NOP and POR) to WAS",
             "Less favorable of DEN and GOS (via CHA to PHX)"
         ],
         "secondRoundPicks": 2
@@ -213,17 +213,18 @@ export const nbaDraftPicks = {
         "firstRoundPicks": 0,
         "secondRound": [
             "To IND (via TOR)",
-            "Less favorable of MIN, NYK, NOP and POR to UTH then second least favorable to NYK and third least favorable to POR; most favorable to BOS (via MIN to NYK; via NOP to POR to NOP; via POR to DET to BOS; via NOP to SAS to UTH; via NOP to POR)"
+            "Most favorable of MIN, NYK, NOP and POR to BOS; less favorable of MIN and NYK to NYK; less favorable of NOP and POR to SAS; less favorable of (more favorable of MIN and NYK) and (more favorable of NOP and POR) to WAS"
         ],
         "secondRoundPicks": 0
     },
     "NYK": {
         "firstRound": [
-            "Own"
+            "Own",
+            "WAS 9-30"
         ],
-        "firstRoundPicks": 1,
+        "firstRoundPicks": "1 + 1",
         "secondRound": [
-            "Less favorable of MIN, NYK, NOP and POR to UTH then second least favorable to NYK and third least favorable to POR; most favorable to BOS (via MIN to NYK; via NOP to POR to NOP; via POR to DET to BOS; via NYK to OKC to UTH; via NOP to POR)",
+            "Most favorable of MIN, NYK, NOP and POR to BOS; less favorable of MIN and NYK to NYK; less favorable of NOP and POR to SAS; less favorable of (more favorable of MIN and NYK) and (more favorable of NOP and POR) to WAS",
             "Least favorable of DET, MIL and ORL (via ORL to PHX to BRK)",
             "WAS (via PHX)"
         ],
@@ -277,7 +278,7 @@ export const nbaDraftPicks = {
         ],
         "firstRoundPicks": 1,
         "secondRound": [
-            "Less favorable of MIN, NYK, NOP and POR to UTH then second least favorable to NYK and third least favorable to POR; most favorable to BOS (via NOP to POR; via MIN to NYK; via NOP to POR to NOP; via POR to DET to BOS; via NOP to POR)",
+            "Most favorable of MIN, NYK, NOP and POR to BOS; less favorable of MIN and NYK to NYK; less favorable of NOP and POR to SAS; less favorable of (more favorable of MIN and NYK) and (more favorable of NOP and POR) to WAS",
             "MEM 43-60 (via UTH to GOS)"
         ],
         "secondRoundPicks": 2
@@ -298,7 +299,8 @@ export const nbaDraftPicks = {
         ],
         "firstRoundPicks": 1,
         "secondRound": [
-            "More favorable of (i) SAN and (ii) less favorable of IND and MIA then least favorable of all to MIN (via MIA to IND; via SAN swap for IND or MIA)"
+            "More favorable of (i) SAN and (ii) less favorable of IND and MIA then least favorable of all to MIN (via MIA to IND; via SAN swap for IND or MIA)",
+            "Less favorable of NOP and POR (part of MIN/NYK/NOP/POR deal)"
         ],
         "secondRoundPicks": 1
     },
@@ -328,7 +330,8 @@ export const nbaDraftPicks = {
     "WAS": {
         "firstRound": [
             "More favorable of WAS 9-30 and PHX then other to MEM or CHA (via WAS swap for PHX; via MEM swap of ORL for PHX or WAS)",
-            "Less favorable of HOU 5-30, LAC and OKC (via OKC to PHL)"
+            "Less favorable of HOU 5-30, LAC and OKC (via OKC to PHL)",
+            "1-8 Own; 9-30 to NYK (via HOU to OKC)"
         ],
         "firstRoundPicks": 1,
         "secondRound": [
