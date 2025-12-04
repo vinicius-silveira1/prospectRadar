@@ -1,6 +1,6 @@
-import { resolve2026DraftOrder, resolveSecondRound } from '../../src/logic/tradeResolver.js';
-import { buildFirstRoundOrderFromStandings } from '../../src/utils/lottery.js';
-import standings from './nba_standings.json'; // Importa as standings reais
+import { resolve2026DraftOrder, resolveSecondRound } from '../src/logic/tradeResolver.js';
+import { buildFirstRoundOrderFromStandings } from '../src/utils/lottery.js';
+import standings from '../public/data/nba_standings.json'; // Importa as standings reais
 
 /**
  * Executa um teste completo do resolvedor de trocas para o Draft 2026.
@@ -30,13 +30,13 @@ function runTest(seed) {
   console.table(initialSecondRound);
 
   // 4. Resolve as trocas da segunda rodada, passando o resultado da primeira para as trocas condicionais.
-  const finalSecondRound = resolveSecondRound(initialSecondRound, finalFirstRound);
+  const finalSecondRoundOrder = resolveSecondRound(initialSecondRound, finalFirstRound);
   console.log('\nOrdem Final da 2ª Rodada (Após Trocas):');
-  console.table(finalSecondRound, ['pick', 'originalTeam', 'newOwner', 'isTraded', 'description']);
+  console.table(finalSecondRoundOrder, ['pick', 'originalTeam', 'newOwner', 'isTraded', 'description']);
 
   console.log('\n--- Teste concluído ---');
 }
 
-// Execute o teste com uma seed específica para garantir resultados consistentes.
-// Mude a seed para testar diferentes cenários de loteria.
-runTest(12345);
+// Pega a seed da linha de comando ou usa uma padrão
+const seed = process.argv[2] ? parseInt(process.argv[2], 10) : 12345;
+runTest(seed);

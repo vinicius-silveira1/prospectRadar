@@ -5,7 +5,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { 
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
-  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter,
+  Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter, LayoutDashboard,
   ArrowUp, ArrowDown
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -29,6 +29,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { simulateLotteryDetailed, resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
+import TradeModal from '@/components/MockDraft/TradeModal.jsx';
+import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
 
 
 
@@ -52,6 +54,7 @@ const MockDraft = () => {
     // generateReportCardData removido
     autocompleteDraft
   } = useMockDraft(allProspects);
+  const [warRoomRightView, setWarRoomRightView] = useState('bigboard'); // Estado para controlar a visualização da coluna direita do War Room
 
   const [view, setView] = useState('draft');
   const [showFilters, setShowFilters] = useState(false);
@@ -353,6 +356,7 @@ const MockDraft = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }} 
           transition={{ delay: 0.2 }}
           className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-super-dark-secondary dark:to-indigo-900/10 rounded-xl shadow-lg border border-indigo-200/50 dark:border-indigo-700/30 p-4 backdrop-blur-sm"
         >
@@ -404,7 +408,7 @@ const MockDraft = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6">
           <div className="xl:col-span-1 order-1 xl:order-1 space-y-4 lg:space-y-6">
             {/* ... (Card de Estatísticas) ... */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -847,32 +851,50 @@ const MockDraft = () => {
                     />
                   )}
                 </motion.button>
+                {/* Botão War Room - Movido para dentro do flex container e com destaque */}
+                <motion.button 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setView('war_room')} 
+                  className={`ml-auto mr-2 px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden rounded-lg ${ 
+                    view === 'war_room' 
+                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 shadow-lg border border-yellow-300' // More prominent active state
+                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-900/20'
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4 inline mr-1 sm:mr-2" /> 
+                  <span className="relative z-10">War Room</span>
+                </motion.button>
               </div>
-              <div className="p-3 sm:p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
-                <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <button onClick={() => setShowFilters(!showFilters)} className="px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 active:scale-95 flex items-center flex-shrink-0 shadow-lg hover:shadow-xl text-sm">
-                      <Filter className="h-4 w-4 mr-2" /> Filtros
-                    </button>
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                      <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95 w-full text-sm" />
+              {view !== 'war_room' && (
+                <div className="p-3 sm:p-4 border-b dark:border-super-dark-border bg-slate-50 dark:bg-super-dark-secondary">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <button onClick={() => setShowFilters(!showFilters)} className="px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition-all duration-200 active:scale-95 flex items-center flex-shrink-0 shadow-lg hover:shadow-xl text-sm">
+                        <Filter className="h-4 w-4 mr-2" /> Filtros
+                      </button>
+                      <div className="flex items-center space-x-2 flex-1 min-w-0">
+                        <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                        <input type="text" placeholder="Buscar prospects..." value={filters.searchTerm} onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))} className="select-filter active:scale-95 w-full text-sm" />
+                      </div>
                     </div>
+                    {showFilters && (
+                      <div className="flex flex-wrap gap-2 sm:gap-3 animate-fade-in">
+                        <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter active:scale-95 text-sm">
+                          <option value="ALL">Todas Posições</option>
+                          <option value="PG">Point Guard</option> 
+                          <option value="SG">Shooting Guard</option> 
+                          <option value="SF">Small Forward</option> 
+                          <option value="PF">Power Forward</option> 
+                          <option value="C">Center</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
-                  {showFilters && (
-                    <div className="flex flex-wrap gap-2 sm:gap-3 animate-fade-in">
-                      <select value={filters.position} onChange={(e) => setFilters(prev => ({ ...prev, position: e.target.value }))} className="select-filter active:scale-95 text-sm">
-                        <option value="ALL">Todas Posições</option>
-                        <option value="PG">Point Guard</option> 
-                        <option value="SG">Shooting Guard</option> 
-                        <option value="SF">Small Forward</option> 
-                        <option value="PF">Power Forward</option> 
-                        <option value="C">Center</option>
-                      </select>
-                    </div>
-                  )}
+                  {/* Filtros foram movidos para dentro de cada view que os utiliza */}
                 </div>
-              </div>
+              )}
+              
             </div>
 
             <AnimatePresence mode="wait">
@@ -883,9 +905,67 @@ const MockDraft = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
-                {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
-                {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                {view === 'war_room' ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 p-4">
+                    {/* Left Column: Draft Board */}
+                    <div className="h-[80vh] overflow-y-auto rounded-xl bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 border border-purple-200/50 dark:border-purple-700/30 p-2 sm:p-4 shadow-lg">
+                      <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} isWarRoom={true} />
+                    </div>
+
+                    {/* Right Column: Search, Toggle, Big Board/Recommendations */}
+                    <div className="flex flex-col h-[80vh] rounded-xl bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 border border-purple-200/50 dark:border-purple-700/30 p-2 sm:p-4 shadow-lg">
+                      {/* Search Bar */}
+                      <div className="mb-3 flex items-center gap-2">
+                        <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Buscar prospects..."
+                          value={filters.searchTerm}
+                          onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                          className="select-filter active:scale-95 w-full text-sm"
+                        />
+                      </div>
+
+                      {/* Toggle Buttons for Right Column View */}
+                      <div className="flex justify-center mb-3 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-inner">
+                        <motion.button
+                          onClick={() => setWarRoomRightView('bigboard')}
+                          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                            warRoomRightView === 'bigboard' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          }`}
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                        >
+                          Big Board
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setWarRoomRightView('recommendations')}
+                          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                            warRoomRightView === 'recommendations' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          }`}
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                        >
+                          Recomendações
+                        </motion.button>
+                      </div>
+
+                      {/* Conditionally render BigBoardView or ProspectsView */}
+                      <div className="flex-1 overflow-y-auto">
+                        {warRoomRightView === 'bigboard' && (
+                          <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
+                        )}
+                        {warRoomRightView === 'recommendations' && (
+                          <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
+                    {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                    {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                  </>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -1007,7 +1087,7 @@ const MockDraft = () => {
 };
 
 
-const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, league }) => {
+const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, league, isWarRoom = false }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -1033,12 +1113,12 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm"
+      className={!isWarRoom ? "bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm" : ""}
     >
-      <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
+      <h3 className={`text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6 ${isWarRoom ? 'text-center text-base sm:text-lg' : ''}`}>
         Draft Board
       </h3>
-      <motion.div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+      <motion.div className={`grid gap-3 sm:gap-4 ${isWarRoom ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}`}>
         {draftBoard.map((pick) => (
           <motion.div
             key={pick.pick} // A key permanece o número do pick original do slot
@@ -1092,21 +1172,24 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                 key={pick.pick + "-" + (pick.prospect ? pick.prospect.id : "empty")} // Key única usando o número do pick
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                  exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.5 }}
               >
                 <div className="flex items-center gap-2 mb-2" title={pick.description?.join('; ')}>
                   {/* Logo e Nome do Time Dono da Pick */}
                   <div className="flex items-center gap-2 min-w-0">
-                    <img src={`/images/teams/${pick.newOwner}.svg`} alt={pick.newOwner} className="h-10 w-10 object-contain" />
-                    <span className="text-xs font-semibold text-slate-700 dark:text-super-dark-text-secondary truncate">
-                      {teamNames[pick.newOwner] || pick.newOwner}
-                    </span>
+                    <img src={`/images/teams/${pick.newOwner}.svg`} alt={pick.newOwner} className={`${isWarRoom ? 'h-8 w-8' : 'h-10 w-10'} object-contain`} />
+                    {!isWarRoom && (
+                      // Only show team name if not in War Room
+                      <span className="text-xs font-semibold text-slate-700 dark:text-super-dark-text-secondary truncate">
+                        {teamNames[pick.newOwner] || pick.newOwner}
+                      </span>
+                    )}
                   </div>
 
                   {/* Indicador Visual de Troca */}
                   {pick.isTraded && (
-                    <span className="flex items-center gap-1.5 bg-slate-200 dark:bg-super-dark-border px-2 py-0.5 rounded-full flex-shrink-0" title={`Originalmente de ${teamNames[pick.originalTeam]}`}>
+                    <span className={`flex items-center gap-1.5 bg-slate-200 dark:bg-super-dark-border px-2 py-0.5 rounded-full flex-shrink-0 ${isWarRoom ? 'hidden sm:flex' : ''}`} title={`Originalmente de ${teamNames[pick.originalTeam]}`}>
                       <RefreshCw className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                       <img src={`/images/teams/${pick.originalTeam}.svg`} alt={pick.originalTeam} className="h-6 w-6 object-contain" />
                     </span>
@@ -1138,15 +1221,14 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
   );
 };
 
-
-const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData }) => (
-  <div className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm">
-    <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
-      <span className="flex items-center flex-wrap gap-2">
+const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false, teamNames }) => (
+  <div className={!isWarRoom ? "bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm" : ""}>
+    <h3 className={`text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6 ${isWarRoom ? 'text-center text-base sm:text-lg' : ''}`}>
+      <span className={`flex items-center flex-wrap gap-2 ${isWarRoom ? 'justify-center' : ''}`}>
         <Trophy className="h-5 w-5 text-purple-600" />
         Big Board - Principais Prospects
       </span>
-      {currentPickData && !isDraftComplete && (
+      {currentPickData && !isDraftComplete && !isWarRoom && (
         <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
           <span className="font-semibold">Escolhendo para:</span>
           <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
@@ -1155,7 +1237,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
         </div>
       )}
     </h3>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
+  <div className={`grid gap-4 sm:gap-6 ${isWarRoom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'}`}>
       {prospects.map((prospect, index) => (
         <motion.div 
           key={prospect.id} 
@@ -1173,17 +1255,17 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
               <span>{prospect.trend_change > 0 ? '+' : ''}{prospect.trend_change?.toFixed(2)}</span>
             </div>
           )}
-          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
+          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} isWarRoom={isWarRoom} />
         </motion.div>
       ))}
     </div>
   </div>
 );
 
-const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick, currentPickData }) => {
+const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false, teamNames }) => {
   const recommendationIds = new Set(recommendations.map(p => p.id));
   const nonRecommendedProspects = prospects.filter(p => !recommendationIds.has(p.id));
-
+  
   return (
   <div className="space-y-4 sm:space-y-6">
     {recommendations.length > 0 && !isDraftComplete && (
@@ -1191,7 +1273,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
         <div className="mb-4">
           <h3 className="text-lg font-bold flex items-center text-black dark:text-white font-mono tracking-wide truncate">
             <TrendingUp className="h-5 w-5 text-yellow-500 mr-2" /> 
-            🎯 Recomendações para Pick #{currentPick}
+            🎯 Recomendações
           </h3>
           {currentPickData && (
             <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
@@ -1201,7 +1283,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
             </div>
           )}
         </div>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4">
+  <div className={`grid gap-3 sm:gap-4 ${isWarRoom ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'}`}>
           {recommendations.map((prospect, index) => 
             <motion.div
               key={prospect.id}
@@ -1210,7 +1292,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.02 }}
               transition={{ delay: index * 0.05 }}
-            >
+            > 
               <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
             </motion.div>
           )}
@@ -1219,11 +1301,11 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
     )}
     <div className="bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm">
       <h3 className="text-base md:text-lg font-bold mb-4 sm:mb-6 flex items-center flex-wrap gap-2">
-        <Users className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0" /> 
+        <Users className="h-5 w-5 text-purple-600 mr-2 flex-shrink-0" />
         <span className="text-black dark:text-white font-mono tracking-wide">Prospects</span> 
         <span className="text-black dark:text-white font-mono tracking-wide">Disponíveis ({nonRecommendedProspects.length})</span>
       </h3>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6">
+  <div className={`grid gap-4 sm:gap-6 ${isWarRoom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'}`}>
         {nonRecommendedProspects.map((prospect, index) => 
           <motion.div
             key={prospect.id}
@@ -1232,7 +1314,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
             transition={{ delay: index * 0.05 }}
-          >
+          > 
             <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} />
           </motion.div>
         )}
@@ -1242,7 +1324,7 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
   )
 };
 
-const MockDraftProspectCard = ({ prospect, action }) => {
+const MockDraftProspectCard = ({ prospect, action, isWarRoom = false }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { league: currentLeague } = useContext(LeagueContext);
   const badges = assignBadges(prospect, currentLeague);
@@ -1288,20 +1370,20 @@ const MockDraftProspectCard = ({ prospect, action }) => {
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-3">
           {/* Image or Skeleton */}
-          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white text-lg sm:text-xl font-bold mr-3 ring-2 ring-purple-200/50 dark:ring-purple-700/50 group-hover:ring-purple-400/70 transition-all" style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+          <div className={`rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white font-bold mr-3 ring-2 ring-purple-200/50 dark:ring-purple-700/50 group-hover:ring-purple-400/70 transition-all ${isWarRoom ? 'w-10 h-10 text-base' : 'w-12 h-12 sm:w-16 sm:h-16 text-lg sm:text-xl'}`} style={{ backgroundColor: getColorFromName(prospect?.name) }}>
             {isLoading ? (
               <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
             ) : imageUrl ? (
               <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-lg sm:text-xl">{getInitials(prospect?.name)}</span>
+              <span className={isWarRoom ? 'text-base' : 'text-lg sm:text-xl'}>{getInitials(prospect?.name)}</span>
             )}
           </div>
           <div className="flex-grow min-w-0 flex flex-col">
-            <p className="font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary text-base sm:text-lg truncate max-w-[160px]">
+            <p className={`font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary truncate ${isWarRoom ? 'text-sm max-w-[120px]' : 'text-base sm:text-lg max-w-[160px]'}`}>
               {prospect.name}
             </p>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-super-dark-text-secondary truncate max-w-[160px]">{prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}</p>
+            <p className={`text-xs text-slate-500 dark:text-super-dark-text-secondary truncate ${isWarRoom ? 'max-w-[120px]' : 'sm:text-sm max-w-[160px]'}`}>{prospect.position} • {prospect.team || prospect.high_school_team || 'N/A'}</p>
             {/* Badges */}
             <div className="mt-1 flex flex-wrap gap-1 badge-container">
               {badges.slice(0, 4).map((badge, index) => (
@@ -1327,12 +1409,12 @@ const MockDraftProspectCard = ({ prospect, action }) => {
           <div className="flex justify-start mb-3">
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="inline-block text-center bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-400/20 dark:to-indigo-400/20 border border-purple-300/50 dark:border-purple-600/50 px-2 sm:px-3 py-1 rounded-full shadow-lg backdrop-blur-sm group"
+              className={`inline-block text-center bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-400/20 dark:to-indigo-400/20 border border-purple-300/50 dark:border-purple-600/50 rounded-full shadow-lg backdrop-blur-sm group ${isWarRoom ? 'px-2 py-0.5' : 'px-2 sm:px-3 py-1'}`}
             >
-              <span className="font-mono font-bold text-sm sm:text-lg mr-1 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className={`font-mono font-bold mr-1 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent ${isWarRoom ? 'text-sm' : 'text-sm sm:text-lg'}`}>
                 {prospect.radar_score.toFixed(2)}
               </span>
-              <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">Radar Score</span>
+              <span className={`text-xs text-purple-600 dark:text-purple-400 font-medium ${isWarRoom ? 'hidden sm:inline' : ''}`}>Radar Score</span>
             </motion.div>
           </div>
         )}
@@ -1389,18 +1471,18 @@ const MockDraftProspectCard = ({ prospect, action }) => {
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center mb-4 flex-1">
+                <div className={`grid grid-cols-3 text-center mb-4 flex-1 ${isWarRoom ? 'gap-1' : 'gap-2 sm:gap-4'}`}>
                   <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-purple-50 to-purple-100/80 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg border border-purple-200/50 dark:border-purple-700/50">
-                    <p className="font-mono font-bold text-purple-600 dark:text-purple-400 text-sm sm:text-base">{prospect.ppg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-purple-500 dark:text-purple-400 font-medium">PPG</p>
+                    <p className={`font-mono font-bold text-purple-600 dark:text-purple-400 ${isWarRoom ? 'text-xs' : 'text-sm sm:text-base'}`}>{prospect.ppg?.toFixed(1) || '-'}</p>
+                    <p className={`font-medium ${isWarRoom ? 'text-[10px]' : 'text-xs'} text-purple-500 dark:text-purple-400`}>PPG</p>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-green-50 to-emerald-100/80 dark:from-green-900/30 dark:to-emerald-800/30 rounded-lg border border-green-200/50 dark:border-green-700/50">
-                    <p className="font-mono font-bold text-green-600 dark:text-green-400 text-sm sm:text-base">{prospect.rpg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-green-500 dark:text-green-400 font-medium">RPG</p>
+                    <p className={`font-mono font-bold text-green-600 dark:text-green-400 ${isWarRoom ? 'text-xs' : 'text-sm sm:text-base'}`}>{prospect.rpg?.toFixed(1) || '-'}</p>
+                    <p className={`font-medium ${isWarRoom ? 'text-[10px]' : 'text-xs'} text-green-500 dark:text-green-400`}>RPG</p>
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.05 }} className="p-2 bg-gradient-to-br from-orange-50 to-amber-100/80 dark:from-orange-900/30 dark:to-amber-800/30 rounded-lg border border-orange-200/50 dark:border-orange-700/50">
-                    <p className="font-mono font-bold text-orange-600 dark:text-orange-400 text-sm sm:text-base">{prospect.apg?.toFixed(1) || '-'}</p>
-                    <p className="text-xs text-orange-500 dark:text-orange-400 font-medium">APG</p>
+                    <p className={`font-mono font-bold text-orange-600 dark:text-orange-400 ${isWarRoom ? 'text-xs' : 'text-sm sm:text-base'}`}>{prospect.apg?.toFixed(1) || '-'}</p>
+                    <p className={`font-medium ${isWarRoom ? 'text-[10px]' : 'text-xs'} text-orange-500 dark:text-orange-400`}>APG</p>
                   </motion.div>
                 </div>
               </motion.div>
@@ -1416,7 +1498,7 @@ const MockDraftProspectCard = ({ prospect, action }) => {
                 scale: 1.05,
                 boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
               }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.95 }} 
               onClick={action.onClick} 
               disabled={action.disabled} 
               className="w-full flex items-center justify-center px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-super-dark-border dark:disabled:to-super-dark-border disabled:cursor-not-allowed relative overflow-hidden group"
@@ -1439,16 +1521,60 @@ const MockDraftProspectCard = ({ prospect, action }) => {
   );
 };
 
-import TradeModal from '@/components/MockDraft/TradeModal.jsx';
-import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
+const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
+  const modes = league === 'WNBA'
+    ? [
+        { name: 'Top 4 (Loteria)', picks: 4 },
+        { name: '1ª Rodada', picks: 12 },
+        { name: 'Completo', picks: 36 },
+      ]
+    : [
+        { name: 'Top 5', picks: 5 },
+        { name: 'Loteria', picks: 14 },
+        { name: '1ª Rodada', picks: 30 },
+        { name: 'Completo', picks: 60 },
+      ];
 
-// NOVOS COMPONENTES DE MODAL
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="bg-gradient-to-br from-white to-slate-50/30 dark:from-super-dark-secondary dark:to-slate-900/10 rounded-xl shadow-lg border border-slate-200/50 dark:border-slate-700/30 p-3 sm:p-4 backdrop-blur-sm"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <h3 className="text-sm font-semibold text-black dark:text-white font-mono tracking-wide flex-shrink-0">
+          Modo do Draft:
+        </h3>
+        <div className="flex flex-wrap items-center gap-2">
+          {modes.map(mode => (
+            <motion.button
+              key={mode.name}
+              onClick={() => onModeChange(mode.picks)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md ${
+                currentTotalPicks === mode.picks
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'
+              }`}
+            >
+              {mode.name}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving, isPublic, setIsPublic }) => {
   if (!isOpen) return null;
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1463,7 +1589,7 @@ const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSa
           >
             <h3 className="text-lg font-bold text-black dark:text-white mb-4 font-mono tracking-wide">Salvar Mock Draft</h3>
             <p className="text-sm text-slate-600 dark:text-super-dark-text-secondary mb-4">Dê um nome para o seu mock draft para poder carregá-lo mais tarde.</p>
-            <input 
+            <input
               type="text"
               value={draftName}
               onChange={(e) => setDraftName(e.target.value)}
@@ -1500,7 +1626,7 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -1518,11 +1644,11 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
               <button onClick={onClose}><X className="h-5 w-5 text-slate-500" /></button>
             </div>
             <div className="max-h-96 overflow-y-auto space-y-3">
-              {isLoading ? <LoadingSpinner /> : 
-              savedDrafts.length === 0 ? <p className="text-center text-slate-500 py-8">Você ainda não tem nenhum draft salvo.</p> : 
+              {isLoading ? <LoadingSpinner /> :
+              savedDrafts.length === 0 ? <p className="text-center text-slate-500 py-8">Você ainda não tem nenhum draft salvo.</p> :
               savedDrafts.map(draft => (
-                <motion.div 
-                  key={draft.id} 
+                <motion.div
+                  key={draft.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
@@ -1548,56 +1674,6 @@ const LoadDraftModal = ({ isOpen, onClose, savedDrafts, onLoad, onDelete, isLoad
 };
 
 
-const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
-  const modes = league === 'WNBA' 
-    ? [
-        { name: 'Top 4 (Loteria)', picks: 4 },
-        { name: '1ª Rodada', picks: 12 },
-        { name: 'Completo', picks: 36 },
-      ]
-    : [
-        { name: 'Top 5', picks: 5 },
-        { name: 'Loteria', picks: 14 },
-        { name: '1ª Rodada', picks: 30 },
-        { name: 'Completo', picks: 60 },
-      ];
-
-  
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="bg-gradient-to-br from-white to-slate-50/30 dark:from-super-dark-secondary dark:to-slate-900/10 rounded-xl shadow-lg border border-slate-200/50 dark:border-slate-700/30 p-3 sm:p-4 backdrop-blur-sm"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <h3 className="text-sm font-semibold text-black dark:text-white font-mono tracking-wide flex-shrink-0">
-          Modo do Draft:
-        </h3>
-        <div className="flex flex-wrap items-center gap-2">
-          {modes.map(mode => (
-            <motion.button
-              key={mode.name}
-              onClick={() => onModeChange(mode.picks)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md ${ 
-                currentTotalPicks === mode.picks
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600'
-              }`}
-            >
-              {mode.name}
-            </motion.button>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Modal de Upgrade para Mock Draft
-export default MockDraft;
 
 const nbaTeamFullNames = {
   'ATL': 'Atlanta Hawks',
@@ -1646,3 +1722,5 @@ const wnbaTeamFullNames = {
   'SEA': 'Seattle Storm',
   'WAS': 'Washington Mystics',
 };
+
+export default MockDraft;

@@ -46,20 +46,10 @@ function weightedPick(items, rng = Math.random) {
 }
 // Build a flat list of "combination slots" (1..1000) mapped to teams based on official weights.
 function buildCombinationSlots(teamsRankedWorstToBest) {
-  // CORREÇÃO ESTRUTURAL: A simulação precisa saber o dono real da pick.
-  // Ex: A pick do WAS (rank 1-8) pertence a MEM. As combinações do WAS devem ser atribuídas a MEM.
   let cursor = 1;
   const slots = [];
   teamsRankedWorstToBest.forEach((t, idx) => {
     const weight = TOP_PICK_WEIGHTS[idx];
-    // Lógica de troca crítica: Se a pick do Wizards está protegida (1-8), suas combinações vão para Memphis.
-    // Esta é uma simplificação da regra complexa, mas captura o cenário mais importante da loteria.
-    if (t.team === 'WAS' && t.rank <= 8) {
-      for (let i = 0; i < weight; i++) {
-        slots.push({ team: 'MEM', combo: cursor++ }); // Atribui a combinação para MEM
-      }
-      return; // Pula a atribuição normal para WAS
-    }
     for (let i = 0; i < weight; i++) {
       slots.push({ team: t.team, combo: cursor++ });
     }
@@ -185,13 +175,10 @@ export function simulateLotteryProbabilityMatrix(teamsRankedWorstToBest, { itera
 // Build first-round order using standings and simulated lottery
 // standings: { lottery: [{team, wins, losses}, ... 14], playoff: [{team, wins, losses}, ...] }
 export function buildFirstRoundOrderFromStandings(standings, simulateLottery = true, options = {}) {
-  // CORREÇÃO DEFINITIVA: Clona profundamente o objeto standings para evitar mutação do estado original no hook.
-  // Esta é a causa raiz do bug de "só funciona uma vez".
+  // Clona profundamente o objeto standings para evitar a mutação do estado original no hook.
   const standingsCopy = JSON.parse(JSON.stringify(standings || { lottery: [], playoff: [] }));
   const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
 
-  // CORREÇÃO DEFINITIVA: A lista de times da loteria deve ser composta apenas por times que
-  // possuem uma pick de 1ª rodada. Isso impede que times como NOP entrem com sua própria campanha.
   const allLotteryTeams = [...standingsCopy.lottery];
   const teamsWithFirstRoundPicks = allLotteryTeams.filter(t => {
     const teamData = nbaDraftPicks['2026']?.[t.team];
@@ -204,7 +191,8 @@ export function buildFirstRoundOrderFromStandings(standings, simulateLottery = t
   const playoffTeams = [...standingsCopy.playoff].sort(byWinPctAsc);  // worse playoff -> best playoff
 
   // Map to worst->best ranking structure for lottery
-  const ranked = resolveLotteryRankingWithTies(lotteryTeams, options?.seed);
+  // CORREÇÃO: Passa a seed explicitamente para a função de desempate.
+  const ranked = resolveLotteryRankingWithTies(lotteryTeams, options.seed);
   let picks = [];
 
   let lotteryResult = null; // Variável para armazenar o resultado da loteria

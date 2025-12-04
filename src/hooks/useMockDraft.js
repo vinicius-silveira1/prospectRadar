@@ -101,18 +101,18 @@ const useMockDraft = (allProspects) => {
     return league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
   }, [league]);
 
-  // Debounce search term to reduce filter recomputations
+  // Debounce do termo de busca para reduzir re-cálculos de filtro
   useEffect(() => {
     const h = setTimeout(() => setDebouncedSearchTerm(filters.searchTerm), 200);
     return () => clearTimeout(h);
   }, [filters.searchTerm]);
 
-  const initializeDraft = useCallback((orderToUse) => {
+  const initializeDraft = (orderToUse) => {
     setIsLoading(true);
-
+  
     // --- LÓGICA DE RECONSTRUÇÃO COMPLETA DO DRAFT ---
     // Esta é a correção definitiva. A cada mudança de ordem, reconstruímos tudo.
-
+  
     // PASSO 1: Obter a ordem da primeira rodada. Se for customizada (pós-loteria), ela não tem trocas resolvidas.
     // Se não for customizada, usamos a ordem padrão. A ordem agora é passada como argumento.
     const firstRoundOrderInput = (orderToUse && orderToUse.length > 0)
@@ -123,7 +123,7 @@ const useMockDraft = (allProspects) => {
     const finalFirstRound = resolve2026DraftOrder(firstRoundOrderInput);
 
     // PASSO 3: Reconstrói e resolve a segunda rodada, passando o resultado da primeira.
-    let finalSecondRound = [];
+    let finalSecondRound;
     if (league === 'NBA' && standings) {
       const standingsCopy = JSON.parse(JSON.stringify(standings));
       const allTeamsFromStandings = [
@@ -134,11 +134,11 @@ const useMockDraft = (allProspects) => {
       const allTeamsInverse = [...allTeamsFromStandings].sort(byWinPctAsc).map(t => t.team);
       const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));
       finalSecondRound = resolveSecondRound(initialSecondRound, finalFirstRound);
-    } else {
-      // Fallback para a ordem padrão se as standings não estiverem disponíveis ou for WNBA
-      finalSecondRound = activeDraftOrder.filter(p => p.pick > 30);
     }
-
+    else {
+      finalSecondRound = activeDraftOrder.filter(p => p.pick > 30).map(p => ({ ...p, newOwner: p.team, originalTeam: p.team, isTraded: false, description: ['Own'] }));
+    }
+    
     // PASSO 4: Combinar as rodadas e construir o board.
     const fullOrder = [...finalFirstRound, ...finalSecondRound];
     const cappedOrder = fullOrder.slice(0, draftSettings.totalPicks);
@@ -161,7 +161,7 @@ const useMockDraft = (allProspects) => {
     setCurrentPick(1);
     setDraftHistory([]);
     setIsLoading(false);
-  }, [draftSettings.totalPicks, league, activeDraftOrder, standings]); // Removido customDraftOrder das dependências
+  };
 
   // Augment prospects once with trending info
   const augmentedProspects = useMemo(() => {
@@ -206,11 +206,15 @@ const useMockDraft = (allProspects) => {
   // A verificação `draftBoard.length === 0` é crucial para evitar que o board seja
   // resetado desnecessariamente durante re-renderizações causadas por filtros.
   useEffect(() => {
-    // Reinicializa o draft sempre que os prospects carregam pela primeira vez ou a versão da ordem muda.
-    if (allProspects && allProspects.length > 0 && draftBoard.length === 0) {
-      initializeDraft(customDraftOrder || activeDraftOrder);
+    if (!allProspects || allProspects.length === 0) return; // Aguarda os prospects
+
+    if (customDraftOrder) { // Uma ordem customizada (pós-loteria) sempre tem prioridade
+      initializeDraft(customDraftOrder);
+    } else if (standings) { // Na carga inicial, usa as standings para gerar a ordem base
+      const { picks: initialOrder } = buildFirstRoundOrderFromStandings(standings, false); // false = não simula loteria na carga
+      initializeDraft(initialOrder);
     }
-  }, [allProspects, initializeDraft]); // Simplificado para rodar apenas uma vez na carga inicial
+  }, [allProspects, standings, customDraftOrder, orderVersion]); // Re-executa quando a versão da ordem muda
 
   const listSavedDrafts = useCallback(async () => {
     if (!user) return;
@@ -503,47 +507,27 @@ const useMockDraft = (allProspects) => {
     setIsOrderCustomized(true);
   }, [league]);
 
-  // Generate draft order from current NBA standings - REMOVIDO do useCallback
-  const generateOrderFromStandings = (standings, options = {}) => {
-    const { simulateLottery = true } = options;
-    if (!standings || league === 'WNBA') {
-      return { finalOrder: activeDraftOrder, lotteryResult: null };
-    }
-
-    try {
-      // A função agora retorna a ordem pós-loteria, mas ANTES da resolução de trocas.
-      const { picks: initialFirstRound, lotteryResult } = buildFirstRoundOrderFromStandings(standings, simulateLottery, options);
-
-      // O resolvedor de trocas será aplicado no `initializeDraft` para garantir consistência.
-      // Aqui, apenas retornamos a ordem inicial pós-loteria e o resultado da loteria.
-      // A segunda rodada também será construída e resolvida em `initializeDraft`.
-      return { initialOrder: initialFirstRound, lotteryResult };
-    } catch (e) {
-      console.error('Falha ao gerar ordem a partir das standings:', e);
-      return { initialOrder: null, lotteryResult: null };
-    }
-  };
-
   // Apply standings-based order into current draft
-  const applyStandingsOrder = useCallback((standings, options = {}) => { // DEBUG: Adicionado log para ver o que é passado
+  const applyStandingsOrder = useCallback((standings, options = {}) => {
     console.log('useMockDraft.js: applyStandingsOrder chamado. Seed recebida:', options.seed);
-    const simulationOptions = {
-      ...options,
-      rerunTrigger: Date.now(), // Um valor que é sempre novo a cada chamada
-    };
-
-    console.log('useMockDraft.js: applyStandingsOrder chamando generateOrderFromStandings com seed:', simulationOptions.seed); // DEBUG
-    const { initialOrder, lotteryResult } = generateOrderFromStandings(standings, simulationOptions);
+    if (!standings || league === 'WNBA') {
+      return null;
+    }
+  
+    // Chama buildFirstRoundOrderFromStandings diretamente, passando a seed.
+    const { picks: initialOrder, lotteryResult } = buildFirstRoundOrderFromStandings(
+      standings, 
+      options.simulateLottery, 
+      { seed: options.seed }
+    );
+  
     if (initialOrder) {
-      // A ordem customizada agora é a ordem PÓS-LOTERIA, mas PRÉ-TROCAS.
       setCustomDraftOrder(initialOrder);
-      console.log('useMockDraft.js: setCustomDraftOrder chamado com:', initialOrder); // DEBUG
       setIsOrderCustomized(true);
-      // CORREÇÃO: Chama initializeDraft diretamente com a nova ordem, em vez de depender de um useEffect.
-      initializeDraft(initialOrder);
+      setOrderVersion(v => v + 1); // Força a reconstrução do board
     }
     return lotteryResult; // Retorna o resultado para a UI
-  }, [league, standings, initializeDraft]); // Dependências simplificadas
+  }, [league, standings]); // Removido initializeDraft
 
   const getCurrentDraftOrder = useCallback(() => {
     return customDraftOrder || (league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder);
@@ -601,7 +585,6 @@ const useMockDraft = (allProspects) => {
     resetToDefaultOrder,
     shuffleTeamOrder,
     getCurrentDraftOrder,
-    generateOrderFromStandings,
     applyStandingsOrder,
     draftProspect,
     undraftProspect,

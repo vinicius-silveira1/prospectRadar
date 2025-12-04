@@ -10,9 +10,11 @@ const useNBAStandings = () => {
     const fetchStandings = async () => {
       try {
         setLoading(true);
-        // CORREÇÃO DEFINITIVA: Usar fetch para obter uma cópia limpa do JSON,
-        // em vez de importar diretamente, o que o tornava vulnerável a mutações
-        // no cache do HMR (Hot Module Replacement) do Vite.
+        // CORREÇÃO DEFINITIVA: Usar fetch para obter uma cópia limpa do JSON.
+        // A importação direta (import standings from '...') pode ser cacheada pelo Vite/Webpack
+        // e, se o objeto for mutado em algum lugar (como na nossa simulação de loteria anterior),
+        // a mutação persiste entre re-renderizações durante o desenvolvimento (HMR).
+        // O fetch garante que sempre obtemos uma cópia "limpa" e imutável do arquivo original.
         const response = await fetch('/data/nba_standings.json');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
