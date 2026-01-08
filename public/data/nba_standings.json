@@ -1,157 +1,157 @@
 {
-  "updatedAt": "2025-12-04T12:25:13.565Z",
+  "updatedAt": "2026-01-08T06:07:16.552Z",
   "lottery": [
     {
-      "team": "NOP",
-      "wins": 3,
-      "losses": 19
-    },
-    {
-      "team": "WAS",
-      "wins": 3,
-      "losses": 17
-    },
-    {
       "team": "IND",
-      "wins": 4,
-      "losses": 18
+      "wins": 6,
+      "losses": 31
+    },
+    {
+      "team": "NOP",
+      "wins": 8,
+      "losses": 30
     },
     {
       "team": "SAC",
-      "wins": 5,
-      "losses": 17
+      "wins": 8,
+      "losses": 29
+    },
+    {
+      "team": "WAS",
+      "wins": 10,
+      "losses": 25
     },
     {
       "team": "BKN",
-      "wins": 5,
-      "losses": 16
-    },
-    {
-      "team": "CHA",
-      "wins": 6,
-      "losses": 16
-    },
-    {
-      "team": "LAC",
-      "wins": 6,
-      "losses": 16
-    },
-    {
-      "team": "DAL",
-      "wins": 8,
-      "losses": 15
+      "wins": 11,
+      "losses": 22
     },
     {
       "team": "UTA",
-      "wins": 7,
-      "losses": 13
+      "wins": 12,
+      "losses": 23
     },
     {
-      "team": "MEM",
-      "wins": 9,
-      "losses": 13
+      "team": "CHA",
+      "wins": 13,
+      "losses": 23
     },
     {
-      "team": "POR",
-      "wins": 9,
-      "losses": 13
+      "team": "LAC",
+      "wins": 13,
+      "losses": 22
     },
     {
-      "team": "CHI",
-      "wins": 9,
-      "losses": 12
+      "team": "DAL",
+      "wins": 14,
+      "losses": 23
     },
     {
       "team": "MIL",
-      "wins": 10,
-      "losses": 13
+      "wins": 16,
+      "losses": 20
     },
     {
-      "team": "GSW",
-      "wins": 11,
-      "losses": 11
+      "team": "MEM",
+      "wins": 16,
+      "losses": 20
+    },
+    {
+      "team": "ATL",
+      "wins": 17,
+      "losses": 21
+    },
+    {
+      "team": "POR",
+      "wins": 17,
+      "losses": 20
+    },
+    {
+      "team": "CHI",
+      "wins": 17,
+      "losses": 19
     }
   ],
   "playoff": [
     {
-      "team": "PHI",
-      "wins": 11,
-      "losses": 9
-    },
-    {
-      "team": "CLE",
-      "wins": 13,
-      "losses": 10
-    },
-    {
-      "team": "ATL",
-      "wins": 13,
-      "losses": 10
-    },
-    {
-      "team": "BOS",
-      "wins": 12,
-      "losses": 9
+      "team": "GSW",
+      "wins": 19,
+      "losses": 18
     },
     {
       "team": "ORL",
-      "wins": 13,
-      "losses": 9
-    },
-    {
-      "team": "PHX",
-      "wins": 13,
-      "losses": 9
-    },
-    {
-      "team": "MIN",
-      "wins": 13,
-      "losses": 8
+      "wins": 20,
+      "losses": 17
     },
     {
       "team": "MIA",
-      "wins": 14,
-      "losses": 8
+      "wins": 20,
+      "losses": 17
     },
     {
-      "team": "NYK",
-      "wins": 14,
-      "losses": 7
+      "team": "CLE",
+      "wins": 21,
+      "losses": 17
+    },
+    {
+      "team": "PHI",
+      "wins": 19,
+      "losses": 15
+    },
+    {
+      "team": "PHX",
+      "wins": 21,
+      "losses": 15
     },
     {
       "team": "TOR",
-      "wins": 15,
-      "losses": 7
+      "wins": 22,
+      "losses": 15
     },
     {
-      "team": "SAS",
-      "wins": 15,
-      "losses": 6
+      "team": "NYK",
+      "wins": 23,
+      "losses": 13
     },
     {
-      "team": "DEN",
-      "wins": 15,
-      "losses": 6
+      "team": "MIN",
+      "wins": 24,
+      "losses": 13
+    },
+    {
+      "team": "BOS",
+      "wins": 23,
+      "losses": 12
     },
     {
       "team": "HOU",
-      "wins": 14,
-      "losses": 5
+      "wins": 22,
+      "losses": 11
+    },
+    {
+      "team": "DEN",
+      "wins": 24,
+      "losses": 12
     },
     {
       "team": "LAL",
-      "wins": 15,
-      "losses": 5
+      "wins": 23,
+      "losses": 11
+    },
+    {
+      "team": "SAS",
+      "wins": 25,
+      "losses": 11
     },
     {
       "team": "DET",
-      "wins": 17,
-      "losses": 5
+      "wins": 27,
+      "losses": 9
     },
     {
       "team": "OKC",
-      "wins": 21,
-      "losses": 1
+      "wins": 30,
+      "losses": 7
     }
   ],
   "source": "basketball-reference-puppeteer",

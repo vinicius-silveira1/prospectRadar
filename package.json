@@ -17,7 +17,6 @@
   "standings": {
     "seasonFormat": "YYYY-YY"
   },
-  
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
@@ -46,6 +45,9 @@
     "postcss-nesting": "^13.0.2",
     "puppeteer": "^24.17.0",
     "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-anonymize-ua": "^2.4.6",
+    "puppeteer-extra-plugin-block-resources": "^2.4.3",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

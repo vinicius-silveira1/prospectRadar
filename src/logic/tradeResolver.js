@@ -16,6 +16,11 @@ import { nbaDraftPicks } from '../data/draftPicksOwnership.js';
  * @returns {Array<DraftPick>} A ordem final do draft, resolvida.
  */
 export function resolve2026DraftOrder(initialOrder) {
+  if (!initialOrder || initialOrder.length === 0 || (!initialOrder[0].originalTeam && !initialOrder[0].team)) {
+    console.warn('⚠️ resolve2026DraftOrder recebeu dados inválidos ou incompletos. Retornando array vazio.');
+    return [];
+  }
+
   // --- LÓGICA DE RESOLUÇÃO DE TROCAS COMPLEXAS ---
   // Esta função auxiliar determina o dono de uma pick dentro da troca MEM/WAS/PHX/ORL/CHA.
   // Ela será usada tanto na simulação da loteria quanto na resolução final.
@@ -54,71 +59,143 @@ export function resolve2026DraftOrder(initialOrder) {
   // 1. Inicializa o array de picks. Cada time começa como dono de sua própria pick.
   let finalPicks = initialOrder.map(p => ({
     pick: p.pick,
-    originalTeam: p.originalTeam,
-    newOwner: p.originalTeam,
+    originalTeam: p.originalTeam || p.team || 'UNKNOWN',
+    newOwner: p.originalTeam || p.team || 'UNKNOWN',
     description: ['Own'],
     isTraded: false,
   }));
 
   // Mapa para consulta rápida da posição original da pick de um time.
-  const initialPickMap = new Map(initialOrder.map(p => [p.originalTeam, p.pick]));
-
+  const initialPickMap = new Map(initialOrder.map(p => [p.originalTeam || p.team || 'UNKNOWN', p.pick]));
+  
   // --- ORDEM DE RESOLUÇÃO DE TROCAS DA 1ª RODADA ---
   // A prioridade é crucial. Swaps e trocas complexas são resolvidos antes de trocas condicionais simples.
 
   // PASSO 1: TROCA OKC/LAC/HOU -> OKC/WAS
+  // Regra: HOU protege 1-4. Se 5-30, entra no pool.
+  // Pool: OKC, LAC, HOU (se 5-30).
+  // Resultado: OKC fica com as 2 melhores do pool. WAS fica com a pior do pool.
   const okcTradeRule = nbaDraftPicks['2026'].OKC.firstRound.find(r => r.includes('Two most / more favorable'));
-  if (okcTradeRule) {
-    const okcPos = initialPickMap.get('OKC');
-    const lacPos = initialPickMap.get('LAC');
-    const houPos = initialPickMap.get('HOU');
-    let involvedPicks = [];
-    if (okcPos) involvedPicks.push({ position: okcPos, originalTeam: 'OKC' });
-    if (lacPos) involvedPicks.push({ position: lacPos, originalTeam: 'LAC' });
+  const okcPos = initialPickMap.get('OKC');
+  const lacPos = initialPickMap.get('LAC');
+  const houPos = initialPickMap.get('HOU');
+
+  if (okcPos && lacPos) { // OKC e LAC sempre existem no draft
+    let pool = [];
+    pool.push({ position: okcPos, originalTeam: 'OKC' });
+    pool.push({ position: lacPos, originalTeam: 'LAC' });
+
+    // Verifica se HOU entra no pool (fora do Top 4)
     if (houPos && houPos >= 5) {
-      involvedPicks.push({ position: houPos, originalTeam: 'HOU' });
+      pool.push({ position: houPos, originalTeam: 'HOU' });
     }
-    involvedPicks.sort((a, b) => a.position - b.position);
 
-    if (involvedPicks.length === 3) {
-      const [mostFavorable, secondFavorable, leastFavorable] = involvedPicks;
-      const pick1 = finalPicks.find(p => p.pick === mostFavorable.position);
-      const pick2 = finalPicks.find(p => p.pick === secondFavorable.position);
-      const pick3 = finalPicks.find(p => p.pick === leastFavorable.position);
+    // Ordena o pool: menor número = melhor pick
+    pool.sort((a, b) => a.position - b.position);
 
-      if (pick1) { pick1.newOwner = 'OKC'; pick1.isTraded = true; pick1.description = [okcTradeRule]; }
-      if (pick2) { pick2.newOwner = 'OKC'; pick2.isTraded = true; pick2.description = [okcTradeRule]; }
-      if (pick3) { pick3.newOwner = 'WAS'; pick3.isTraded = true; pick3.description = [okcTradeRule]; }
+    const ruleDesc = okcTradeRule || "Two most favorable of OKC, LAC and HOU to OKC, other to WAS";
+
+    if (pool.length === 3) {
+      // Cenário Completo: OKC pega as 2 melhores, WAS a pior
+      const [best, second, worst] = pool;
+      
+      const p1 = finalPicks.find(p => p.pick === best.position);
+      if (p1) { p1.newOwner = 'OKC'; p1.isTraded = p1.originalTeam !== 'OKC'; p1.description = [ruleDesc]; }
+      
+      const p2 = finalPicks.find(p => p.pick === second.position);
+      if (p2) { p2.newOwner = 'OKC'; p2.isTraded = p2.originalTeam !== 'OKC'; p2.description = [ruleDesc]; }
+      
+      const p3 = finalPicks.find(p => p.pick === worst.position);
+      if (p3) { p3.newOwner = 'WAS'; p3.isTraded = true; p3.description = [ruleDesc]; }
+
+    } else if (pool.length === 2) {
+      // Cenário HOU Protegido: OKC pega a melhor, WAS a pior
+      const [best, worst] = pool;
+      
+      const p1 = finalPicks.find(p => p.pick === best.position);
+      if (p1) { p1.newOwner = 'OKC'; p1.isTraded = p1.originalTeam !== 'OKC'; p1.description = [ruleDesc]; }
+      
+      const p2 = finalPicks.find(p => p.pick === worst.position);
+      if (p2) { p2.newOwner = 'WAS'; p2.isTraded = true; p2.description = [ruleDesc]; }
     }
   }
 
-  // PASSO 2: SWAPS DE MAIOR PRIORIDADE
-  // Swap ATL/SAS
-  const atlSanSwapRule = nbaDraftPicks['2026'].ATL.firstRound.find(r => r.startsWith('more favorable of ATL and SAN to SAN'));
-  if (atlSanSwapRule) {
+  // PASSO 2: SWAPS COMPLEXOS E EM CASCATA (MIN/UTA/CLE e ATL/SAS)
+  
+  // 2.1: MIN/UTA/CLE (Se UTA for Top 8)
+  // Regra: UTA pega a melhor de (UTA, MIN, CLE). MIN fica com a pior de (UTA, MIN). CLE fica com a sobra.
+  const utaPos = initialPickMap.get('UTA');
+  const minPos = initialPickMap.get('MIN');
+  const clePos = initialPickMap.get('CLE');
+  
+  // Variável para rastrear onde a pick de CLE foi parar antes da troca com ATL
+  let currentClePickPos = clePos; 
+
+  if (utaPos && minPos && clePos && utaPos <= 8) {
+    const minUtaCleRule = "Most favorable of UTH 1-8, CLE and MIN to UTH";
+    
+    // Determina quem fica com qual pick original
+    const bestOf3 = Math.min(utaPos, minPos, clePos);
+    const worstOfMinUta = Math.max(utaPos, minPos);
+    // A pick que sobra para o CLE é a que não foi para UTA (bestOf3) nem para MIN (worstOfMinUta)
+    // Matematicamente para 3 números A,B,C: Middle = (A+B+C) - Min - Max. 
+    // Mas aqui a lógica é específica: CLE = Max(CLE, Min(UTA, MIN))
+    const middlePick = Math.max(clePos, Math.min(utaPos, minPos));
+
+    const pickToUTA = finalPicks.find(p => p.pick === bestOf3);
+    const pickToMIN = finalPicks.find(p => p.pick === worstOfMinUta);
+    const pickToCLE = finalPicks.find(p => p.pick === middlePick);
+
+    if (pickToUTA) { pickToUTA.newOwner = 'UTA'; pickToUTA.isTraded = pickToUTA.originalTeam !== 'UTA'; pickToUTA.description = [minUtaCleRule]; }
+    if (pickToMIN) { pickToMIN.newOwner = 'MIN'; pickToMIN.isTraded = pickToMIN.originalTeam !== 'MIN'; pickToMIN.description = [minUtaCleRule]; }
+    if (pickToCLE) { 
+      // Não marcamos como final ainda, pois ela vai para a troca com ATL/SAS
+      pickToCLE.newOwner = 'CLE'; 
+      currentClePickPos = middlePick; // Atualiza a posição da pick que o CLE detém
+    }
+  }
+
+  // 2.2: ATL/SAS/CLE
+  // Regra: SAS pega melhor de (ATL, SAS). 
+  // ATL pega a melhor entre (Pior de ATL/SAS) e (Pick de CLE).
+  // CLE pega a pior entre (Pior de ATL/SAS) e (Pick de CLE).
+  const atlSanSwapRule = nbaDraftPicks['2026'].ATL.firstRound.find(r => r.includes('more favorable of ATL and SAN to SAN'));
+  if (atlSanSwapRule && currentClePickPos) {
     const atlPos = initialPickMap.get('ATL');
-    const sanPos = initialPickMap.get('SAN');
+    const sanPos = initialPickMap.get('SAS');
+    
     if (atlPos && sanPos) {
-      const moreFavorablePos = Math.min(atlPos, sanPos);
-      const lessFavorablePos = Math.max(atlPos, sanPos);
-      const pickToSAN = finalPicks.find(p => p.pick === moreFavorablePos);
-      const pickToATL = finalPicks.find(p => p.pick === lessFavorablePos);
-      if (pickToSAN) { pickToSAN.newOwner = 'SAS'; pickToSAN.isTraded = true; pickToSAN.description = [atlSanSwapRule]; }
-      if (pickToATL) { pickToATL.newOwner = 'ATL'; pickToATL.isTraded = true; pickToATL.description = [atlSanSwapRule]; }
+      const bestAtlSas = Math.min(atlPos, sanPos);
+      const worstAtlSas = Math.max(atlPos, sanPos);
+
+      const pickToSAS = finalPicks.find(p => p.pick === bestAtlSas);
+      if (pickToSAS) { pickToSAS.newOwner = 'SAS'; pickToSAS.isTraded = pickToSAS.originalTeam !== 'SAS'; pickToSAS.description = [atlSanSwapRule]; }
+
+      const pickToATL = finalPicks.find(p => p.pick === Math.min(worstAtlSas, currentClePickPos));
+      if (pickToATL) { pickToATL.newOwner = 'ATL'; pickToATL.isTraded = pickToATL.originalTeam !== 'ATL'; pickToATL.description = [atlSanSwapRule]; }
+
+      const pickToCLE = finalPicks.find(p => p.pick === Math.max(worstAtlSas, currentClePickPos));
+      if (pickToCLE) { pickToCLE.newOwner = 'CLE'; pickToCLE.isTraded = pickToCLE.originalTeam !== 'CLE'; pickToCLE.description = [atlSanSwapRule]; }
     }
   }
 
   // Swap NOP/MIL -> ATL/MIL
-  const milNopSwapRule = nbaDraftPicks['2026'].ATL.firstRound.find(r => r.includes('More favorable of NOP and MIL'));
+  // Regra: ATL recebe a mais favorável entre NOP e MIL.
+  // A menos favorável permanece com o dono original (swap simples).
+  const milNopSwapRule = "More favorable of NOP and MIL to ATL";
   const milPos = initialPickMap.get('MIL');
   const nopPos = initialPickMap.get('NOP');
-  if (milNopSwapRule && milPos && nopPos) {
+  
+  if (milPos && nopPos) {
       const moreFavorablePos = Math.min(milPos, nopPos);
-      const lessFavorablePos = Math.max(nopPos, milPos);
+      // const lessFavorablePos = Math.max(nopPos, milPos); // A pior fica com quem tinha a pior
+
       const pickToATL = finalPicks.find(p => p.pick === moreFavorablePos);
-      const pickToMIL = finalPicks.find(p => p.pick === lessFavorablePos);
-      if (pickToATL) { pickToATL.newOwner = 'ATL'; pickToATL.isTraded = true; pickToATL.description = [milNopSwapRule]; }
-      if (pickToMIL) { pickToMIL.newOwner = 'MIL'; pickToMIL.isTraded = true; pickToMIL.description = [milNopSwapRule]; }
+      if (pickToATL) { 
+        pickToATL.newOwner = 'ATL'; 
+        pickToATL.isTraded = pickToATL.originalTeam !== 'ATL'; 
+        pickToATL.description = [milNopSwapRule]; 
+      }
   }
 
   // PASSO 3: TROCAS CONDICIONAIS DIRETAS (Protegidas)
@@ -193,12 +270,12 @@ export function resolve2026DraftOrder(initialOrder) {
 export function resolveSecondRound(initialSecondRoundOrder, resolvedFirstRound = []) {
   const finalPicks = initialSecondRoundOrder.map(p => ({
     pick: p.pick,
-    originalTeam: p.originalTeam,
-    newOwner: p.originalTeam,
+    originalTeam: p.originalTeam || p.team || 'UNKNOWN',
+    newOwner: p.originalTeam || p.team || 'UNKNOWN',
     description: ['Own'],
     isTraded: false,
   }));
-  const initialPickMap = new Map(initialSecondRoundOrder.map(p => [p.originalTeam, p.pick]));
+  const initialPickMap = new Map(initialSecondRoundOrder.map(p => [p.originalTeam || p.team || 'UNKNOWN', p.pick]));
 
   // --- LÓGICA DE RESOLUÇÃO DA SEGUNDA RODADA ---
 
@@ -422,7 +499,7 @@ export function resolveSecondRound(initialSecondRoundOrder, resolvedFirstRound =
     const tradeRules = nbaDraftPicks['2026'][originalTeam]?.secondRound || [];
 
     // Regra: Troca direta (ex: "To HOU (via WAS)")
-    const directTradeRule = tradeRules.find(r => r.startsWith('To '));
+    const directTradeRule = tradeRules.find(r => r.startsWith('To ') && !r.toLowerCase().includes('if '));
     if (directTradeRule) {
       const newOwner = directTradeRule.substring(3, 6).trim();
       pickToResolve.newOwner = newOwner;
@@ -450,5 +527,115 @@ export function resolveSecondRound(initialSecondRoundOrder, resolvedFirstRound =
     }
   }
 
+  // PASSO 3: PATCHES MANUAIS PARA ALINHAMENTO COM TANKATHON (2026)
+  // Corrige discrepâncias de dados da 2ª rodada onde a fonte automática difere da realidade projetada.
+  for (const pick of finalPicks) {
+    // REMOVIDO: if (pick.isTraded) continue; 
+    // Os patches devem ter prioridade absoluta para corrigir atribuições automáticas incorretas.
+    
+    // 1. WAS -> NYK
+    if (pick.originalTeam === 'WAS') {
+      pick.newOwner = 'NYK';
+      pick.isTraded = true;
+      pick.description = ['To NYK (Manual Patch)'];
+    }
+
+    // 2. UTA -> SAS
+    if (pick.originalTeam === 'UTA') {
+      pick.newOwner = 'SAS';
+      pick.isTraded = true;
+      pick.description = ['To SAS (Manual Patch)'];
+    }
+
+    // 3. CHA -> SAC
+    if (pick.originalTeam === 'CHA') {
+      pick.newOwner = 'SAC';
+      pick.isTraded = true;
+      pick.description = ['To SAC (Manual Patch)'];
+    }
+
+    // 4. CHI -> WAS
+    if (pick.originalTeam === 'CHI') {
+      pick.newOwner = 'WAS';
+      pick.isTraded = true;
+      pick.description = ['To WAS (Manual Patch)'];
+    }
+  }
+
   return finalPicks.sort((a, b) => a.pick - b.pick);
+}
+
+/**
+ * Gera a ordem inicial do draft (1-30) com base nas standings, antes da loteria.
+ * Garante que o frontend use a mesma lógica de ordenação (Win %) que os testes.
+ * @param {object} standings - O objeto JSON contendo { lottery: [], playoff: [] }
+ * @returns {Array<{pick: number, team: string, originalTeam: string, wins: number, losses: number}>}
+ */
+export function generateInitialOrderFromStandings(standings) {
+  if (!standings || !standings.lottery || !standings.playoff) return [];
+
+  const getWinPct = (t) => {
+    if (typeof t !== 'object') return 0;
+    return (t.wins || 0) / ((t.wins || 0) + (t.losses || 0) || 1);
+  };
+
+  // Ordena times da loteria por % de vitórias (pior -> melhor)
+  const lotteryTeams = [...standings.lottery].sort((a, b) => getWinPct(a) - getWinPct(b));
+  
+  // Ordena times de playoff por % de vitórias (pior -> melhor)
+  const playoffTeams = [...standings.playoff].sort((a, b) => getWinPct(a) - getWinPct(b));
+
+  const order = [];
+
+  // 1-14 (Loteria)
+  lotteryTeams.forEach((t, i) => {
+    const teamCode = typeof t === 'string' ? t : (t.team || t.code || t.name || 'UNKNOWN');
+    order.push({ 
+      pick: i + 1, 
+      team: teamCode, 
+      originalTeam: teamCode,
+      wins: typeof t === 'object' ? (t.wins || 0) : 0, 
+      losses: typeof t === 'object' ? (t.losses || 0) : 0
+    });
+  });
+
+  // 15-30 (Playoffs)
+  playoffTeams.forEach((t, i) => {
+    const teamCode = typeof t === 'string' ? t : (t.team || t.code || t.name || 'UNKNOWN');
+    order.push({ 
+      pick: 14 + i + 1, 
+      team: teamCode, 
+      originalTeam: teamCode,
+      wins: typeof t === 'object' ? (t.wins || 0) : 0, 
+      losses: typeof t === 'object' ? (t.losses || 0) : 0
+    });
+  });
+
+  return order;
+}
+
+/**
+ * Gera a ordem inicial da segunda rodada (31-60) com base nas standings.
+ * @param {object} standings - O objeto JSON contendo { lottery: [], playoff: [] }
+ * @returns {Array<{pick: number, team: string, originalTeam: string}>}
+ */
+export function generateSecondRoundOrderFromStandings(standings) {
+    if (!standings || !standings.lottery || !standings.playoff) return [];
+    
+    const allTeams = [...standings.lottery, ...standings.playoff];
+    const getWinPct = (t) => {
+        if (typeof t !== 'object') return 0;
+        return (t.wins || 0) / ((t.wins || 0) + (t.losses || 0) || 1);
+    };
+    
+    // Ordena por % de vitórias (pior -> melhor) para definir a ordem 31-60
+    allTeams.sort((a, b) => getWinPct(a) - getWinPct(b));
+    
+    return allTeams.map((t, i) => {
+        const teamCode = typeof t === 'string' ? t : (t.team || t.code || t.name || 'UNKNOWN');
+        return {
+        pick: 31 + i,
+        team: teamCode,
+        originalTeam: teamCode
+    }});
 }

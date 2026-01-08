@@ -31,6 +31,12 @@ import { ptBR } from 'date-fns/locale';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 import TradeModal from '@/components/MockDraft/TradeModal.jsx';
 import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
+import { 
+  generateInitialOrderFromStandings, 
+  generateSecondRoundOrderFromStandings, 
+  resolve2026DraftOrder, 
+  resolveSecondRound 
+} from '@/logic/tradeResolver';
 
 
 
@@ -48,7 +54,7 @@ const MockDraft = () => {
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
     isOrderCustomized,
     draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
-    initializeDraft, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
+    initializeDraft, resetToDefaultOrder, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
     setCustomTeamOrder, getCurrentDraftOrder, applyStandingsOrder,
     // generateReportCardData removido
@@ -125,7 +131,6 @@ const MockDraft = () => {
   // Restaura o resultado da última loteria salva para ser exibido ao carregar a página.
   // A seed não é mais persistida para garantir que o campo de input comece vazio.
   useEffect(() => {
-    console.log('MockDraft.jsx: useEffect de carregamento. lotterySeed inicial:', lotterySeed); // DEBUG
     try {
       const savedResult = localStorage.getItem('mockDraftLastLotteryResult');
       if (savedResult) {
@@ -137,7 +142,6 @@ const MockDraft = () => {
 
   // Persiste o resultado da última loteria para ser exibido ao recarregar a página.
   useEffect(() => {
-    console.log('MockDraft.jsx: useEffect de persistência de lastLotteryResult. lotterySeed atual:', lotterySeed); // DEBUG
     try {
       if (lastLotteryResult) {
         localStorage.setItem('mockDraftLastLotteryResult', JSON.stringify(lastLotteryResult));
@@ -467,8 +471,18 @@ const MockDraft = () => {
                   }} 
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
-                    const currentOrder = getCurrentDraftOrder();
-                    initializeDraft(currentOrder);
+                    if (standings && !standingsLoading && standings.lottery && standings.playoff) {
+                      // Usa a função do hook para limpar ordem customizada e forçar reconstrução via useEffect
+                      resetToDefaultOrder();
+                      setLastLotteryResult(null);
+                      setLotterySeed('');
+                      localStorage.removeItem('mockDraftState'); // Limpa dados persistidos
+                      setNotification({ type: 'success', message: 'Draft resetado para a ordem das standings!' });
+                    } else {
+                      console.warn('⚠️ Standings incompletas ou carregando. Usando ordem atual.');
+                      const currentOrder = getCurrentDraftOrder();
+                      initializeDraft(currentOrder);
+                    }
                   }}
                   className="w-full px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-300 flex items-center justify-center text-xs sm:text-sm font-medium shadow-lg relative overflow-hidden group"
                 >
@@ -486,13 +500,12 @@ const MockDraft = () => {
                   onClick={() => {
                     if (standings && !standingsLoading && !isOddsApplying) {
                       setIsOddsApplying(true);
-                      console.log('MockDraft.jsx: Botão Simular Loteria clicado. Valor atual de lotterySeed:', lotterySeed); // DEBUG
                       // CORREÇÃO: Gera uma nova seed aleatória se nenhuma for fornecida.
                       // Isso garante que cada clique produza um resultado diferente.
                       const seedForSimulation = lotterySeed.trim() !== '' ? Number(lotterySeed) : Math.floor(Math.random() * 1e9);
-                      console.log('MockDraft.jsx: seedForSimulation gerada:', seedForSimulation); // DEBUG
 
                       try {
+                        setOddsInlineFeedback(''); // Limpa feedback anterior
                         // A função do hook agora retorna o resultado detalhado da loteria
                         const lotteryDetails = applyStandingsOrder(standings, { simulateLottery: true, seed: seedForSimulation });
                         // Usamos o resultado retornado para atualizar o painel de controle
@@ -777,8 +790,10 @@ const MockDraft = () => {
                       : 'bg-green-100 border-green-300 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-200'}`}
                     role="status" aria-live="polite">
                     <span>{oddsInlineFeedback}</span>
-                    {lotterySeed && !oddsInlineFeedback.startsWith('Falha') && (
-                      <span className="ml-auto text-[10px] opacity-70 font-mono">seed {lotterySeed}</span>
+                    {(lotterySeed || lastLotteryResult?.seed) && !oddsInlineFeedback.startsWith('Falha') && (
+                      <span className="ml-auto text-[10px] opacity-70 font-mono">
+                        seed {lotterySeed || lastLotteryResult?.seed}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1229,11 +1244,26 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
         Big Board - Principais Prospects
       </span>
       {currentPickData && !isDraftComplete && !isWarRoom && (
-        <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
-          <span className="font-semibold">Escolhendo para:</span>
-          <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
-          <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
-          <span className="text-slate-400">(Pick #{currentPickData.pick})</span>
+        <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+          <div className="text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2 mb-2">
+            <span className="font-semibold">Escolhendo para:</span>
+            <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
+            <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
+            <span className="text-slate-400">(Pick #{currentPickData.pick})</span>
+          </div>
+          {/* Team Needs Indicator */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+             <span className="font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+               <Target className="h-3 w-3" /> Necessidades:
+             </span>
+             <div className="flex flex-wrap gap-1">
+                {TEAM_NEEDS[currentPickData.newOwner]?.map(need => (
+                   <span key={need} className="px-2 py-0.5 bg-white dark:bg-slate-700 rounded text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 font-medium">
+                      {need}
+                   </span>
+                )) || <span className="text-slate-400 italic">Análise não disponível</span>}
+             </div>
+          </div>
         </div>
       )}
     </h3>
@@ -1276,10 +1306,24 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPic
             🎯 Recomendações
           </h3>
           {currentPickData && (
-            <div className="mt-2 text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2">
-              <span className="font-semibold">Escolhendo para:</span>
-              <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
-              <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
+            <div className="mt-3 p-3 bg-white/50 dark:bg-black/20 rounded-lg border border-yellow-200/50 dark:border-yellow-700/30">
+              <div className="text-sm font-normal text-slate-700 dark:text-slate-200 flex items-center gap-2 mb-2">
+                <span className="font-semibold">Escolhendo para:</span>
+                <img src={`/images/teams/${currentPickData.newOwner}.svg`} alt={currentPickData.newOwner} className="h-5 w-5 object-contain" />
+                <span className="font-bold">{nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <Target className="h-3 w-3" /> Necessidades:
+                </span>
+                <div className="flex flex-wrap gap-1">
+                    {TEAM_NEEDS[currentPickData.newOwner]?.map(need => (
+                      <span key={need} className="px-2 py-0.5 bg-white/80 dark:bg-black/40 rounded text-slate-700 dark:text-slate-300 border border-yellow-200/50 dark:border-yellow-800/30 font-medium">
+                          {need}
+                      </span>
+                    )) || <span className="text-slate-500 italic">Análise não disponível</span>}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -1721,6 +1765,41 @@ const wnbaTeamFullNames = {
   'PHX': 'Phoenix Mercury',
   'SEA': 'Seattle Storm',
   'WAS': 'Washington Mystics',
+};
+
+// Fonte das Necessidades: Consenso de analistas (Tankathon, Bleacher Report) e análise de elenco para a temporada 2025-26.
+// Atualizado em: Janeiro 2026
+const TEAM_NEEDS = {
+  'ATL': ['Criador de elite', 'Pontuador de volume', 'Proteção de aro'],
+  'BKN': ['Melhor disponível', 'Franchise Player', 'Criação secundária'],
+  'BOS': ['Proteção de aro', 'Criação secundária', 'Ala versátil'],
+  'CHA': ['Proteção de aro', 'Ala versátil', 'Criação de arremesso'],
+  'CHI': ['Melhor disponível', 'Proteção de aro', 'Ala versátil'],
+  'CLE': ['Ala moderno', 'Criação de arremesso', 'Proteção de aro'],
+  'DAL': ['Criação de arremesso', 'Ala versátil', 'Criação secundária'],
+  'DEN': ['Proteção de aro', 'Ameaça de perímetro', 'Ala de conexão'],
+  'DET': ['Ameaça de perímetro', 'Pontuador de volume', 'Ala de conexão'],
+  'GSW': ['Pontuador de volume', 'Proteção de aro', 'Ameaça de perímetro  '],
+  'HOU': ['Melhor disponível', 'Criação secundária', 'Ameaça de perímetro'],
+  'IND': ['Melhor disponível', 'Franchise Player', 'Proteção de aro'],
+  'LAC': ['Pontuador de volume', 'Ala de conexão', 'Ameaça de perímetro'],
+  'LAL': ['Ala defensivo', 'Proteção de aro', 'Ameaça de perímetro'],
+  'MEM': ['Ala defensivo', 'Criador secundário', 'Ameaça de perímetro'],
+  'MIA': ['Franchise Player', 'Melhor disponível', 'Criador secundário'],
+  'MIL': ['Criador primário', 'Ala 3&D', 'Melhor disponível'],
+  'MIN': ['Criador primário', 'Melhor disponível', 'Ala versátil'],
+  'NOP': ['Melhor disponível', 'Franchise Player', 'Criação'],
+  'NYK': ['Profundidade', 'Criador secundário', 'Ameaça de perímetro'],
+  'OKC': ['Pontuador de volume', 'Ameaça de perímetro', 'Melhor disponível'],
+  'ORL': ['Criador primário', 'Ameaça de perímetro', 'Melhor disponível'],
+  'PHI': ['Ala defensivo', 'Proteção de aro', 'Melhor disponível'],
+  'PHX': ['Criador primário', 'Ameaça de perímetro', 'Melhor disponível'],
+  'POR': ['Franchise Player', 'Ameaça de perímetro', 'Ala defensivo'],
+  'SAC': ['Franchise Player', 'Melhor disponível', 'Proteção de aro'],
+  'SAS': ['Ala versátil', 'Ameaça do perímetro', 'Criação secundária'],
+  'TOR': ['Ameaça de perímetro', 'Criador primário', 'Proteção de aro'],
+  'UTA': ['Franchise Player', 'Criador primário', 'Proteção de aro'],
+  'WAS': ['Melhor Disponível', 'Ala moderno', 'Criação secundária'],
 };
 
 export default MockDraft;

@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock, Crown, Zap } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Ruler, Weight, Star, TrendingUp, Award, BarChart3, Globe, Heart, Share2, GitCompare, Lightbulb, Clock, CheckCircle2, AlertTriangle, Users, Lock, Crown, Zap, Info } from 'lucide-react';
 import useProspect from '@/hooks/useProspect.js';
 import useProspects from '@/hooks/useProspects.js'; // Adicionado para buscar todos os prospects
 import useWatchlist from '@/hooks/useWatchlist.js';
@@ -22,6 +22,8 @@ import BadgeBottomSheet from '@/components/Common/BadgeBottomSheet';
 import CompleteProfileModal from '@/components/Common/CompleteProfileModal';
 import CommunityAnalysisSection from '@/components/Prospects/CommunityAnalysisSection'; // Importar a nova seção
 import { useResponsive } from '@/hooks/useResponsive';
+import StatsTable from './StatsTable';
+import NewFeatureAlert from './NewFeatureAlert';
 
 
 const AwaitingStats = ({ prospectName }) => (
@@ -95,6 +97,23 @@ const ProspectDetail = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [actionToPerform, setActionToPerform] = useState(null);
 
+  // Estado para o Tooltip Global (para evitar clipping em containers com overflow)
+  const [tooltipState, setTooltipState] = useState({ visible: false, x: 0, y: 0, text: '' });
+
+  const showTooltip = (e, text) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipState({
+      visible: true,
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      text
+    });
+  };
+
+  const hideTooltip = () => {
+    setTooltipState(prev => ({ ...prev, visible: false }));
+  };
+
   // Detectar se é mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -128,6 +147,117 @@ const ProspectDetail = () => {
   const { watchlist, toggleWatchlist } = useWatchlist();
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
   const [isCommunitySectionVisible, setIsCommunitySectionVisible] = useState(false);
+
+  const [activeTab, setActiveTab] = useState(null);
+
+  const TABS_DATA = useMemo(() => {
+    if (!prospect) return [];
+    
+    // Inicializa s com prospect.stats ou um objeto vazio
+    let s = prospect.stats || {};
+    
+    // Fallback para ncaa_raw_stats se stats estiver vazio
+    if (Object.keys(s).length === 0 && prospect.ncaa_raw_stats) {
+      s = {
+        per_game: prospect.ncaa_raw_stats.perGame,
+        totals: prospect.ncaa_raw_stats.totals,
+        advanced: prospect.ncaa_raw_stats.advanced,
+      };
+    }
+
+    // Helper para extrair dados Per 40 Min do objeto prospect se não existirem em stats
+    const getPer40 = () => {
+      if (s.per_min && Object.keys(s.per_min).length > 0) return s.per_min;
+      const data = {};
+      const fields = ['pts', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'fga', 'fg3a', 'fta', 'fg', 'fg3', 'ft'];
+      let found = false;
+      fields.forEach(f => {
+        const key = `${f}_per_40_min`;
+        if (prospect[key] !== undefined && prospect[key] !== null) {
+          data[key] = prospect[key];
+          found = true;
+        }
+      });
+      return found ? data : null;
+    };
+
+    // Helper para extrair dados Per 100 Poss do objeto prospect se não existirem em stats
+    const getPer100 = () => {
+      if (s.per_poss && Object.keys(s.per_poss).length > 0) return s.per_poss;
+      const data = {};
+      const fields = ['pts', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'fga', 'fg3a', 'fta', 'fg', 'fg3', 'ft', 'ortg', 'drtg'];
+      let found = false;
+      fields.forEach(f => {
+        const key = `${f}_per_100_poss`;
+        if (prospect[key] !== undefined && prospect[key] !== null) {
+          data[key] = prospect[key];
+          found = true;
+        }
+      });
+      return found ? data : null;
+    };
+
+    // Helper para extrair/complementar dados Avançados
+    const getAdvanced = () => {
+      const data = { ...(s.advanced || {}) };
+      const map = { 'ts_percent': 'ts_pct', 'efg_percent': 'efg_pct', 'usg_percent': 'usg_pct', 'per': 'per', 'win_shares': 'win_shares', 'bpm': 'bpm', 'vorp': 'vorp', 'ortg': 'ortg', 'drtg': 'drtg', 'trb_percent': 'trb_percent', 'ast_percent': 'ast_percent', 'stl_percent': 'stl_percent', 'blk_percent': 'blk_percent', 'tov_percent': 'tov_percent' };
+      let found = Object.keys(data).length > 0;
+      Object.entries(map).forEach(([propKey, tableKey]) => {
+        if (prospect[propKey] !== undefined && prospect[propKey] !== null) {
+          data[tableKey] = prospect[propKey];
+          found = true;
+        }
+      });
+      return found ? data : null;
+    };
+
+    // Helper para extrair dados Totais (priorizando colunas do prospect)
+    const getTotals = () => {
+      const data = { ...(s.totals || {}) };
+      const map = {
+        'games_played': 'games',
+        'minutes_played': 'mp',
+        'total_points': 'pts',
+        'total_rebounds': 'trb',
+        'total_assists': 'ast',
+        'total_steals': 'stl',
+        'total_blocks': 'blk',
+        'total_field_goal_attempts': 'fga',
+        'three_pt_attempts': 'fg3a',
+        'ft_attempts': 'fta',
+        'fg_pct': 'fg_pct',
+        'three_pct': 'fg3_pct',
+        'ft_pct': 'ft_pct'
+      };
+
+      let found = Object.keys(data).length > 0;
+      Object.entries(map).forEach(([propKey, tableKey]) => {
+        if (prospect[propKey] !== undefined && prospect[propKey] !== null) {
+          data[tableKey] = prospect[propKey];
+          found = true;
+        }
+      });
+      return found ? data : null;
+    };
+
+    const perMinData = getPer40();
+    const perPossData = getPer100();
+    const advancedData = getAdvanced();
+    const totalsData = getTotals();
+
+    const tabs = [];
+    if (totalsData) tabs.push({ id: 'totals', label: 'Totais', data: totalsData });
+    if (advancedData) tabs.push({ id: 'advanced', label: 'Avançado', data: advancedData });
+    if (perMinData) tabs.push({ id: 'per_min', label: 'Por 40 Min', data: perMinData });
+    if (perPossData) tabs.push({ id: 'per_poss', label: 'Por 100 Poss', data: perPossData });
+    return tabs;
+  }, [prospect]);
+
+  useEffect(() => {
+    if (TABS_DATA.length > 0 && !activeTab) {
+      setActiveTab(TABS_DATA[0].id);
+    }
+  }, [TABS_DATA, activeTab]);
 
   const handleCommunityAction = (action) => {
     console.log('handleCommunityAction foi chamada!');
@@ -796,65 +926,81 @@ const ProspectDetail = () => {
 
             {displayStats.hasStats ? (
               <>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-                  className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
-                >
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-black dark:text-white flex items-center font-mono tracking-wide"><BarChart3 className="w-5 h-5 mr-2 text-brand-gold" />Estatísticas Avançadas</h2>
-                    {(displayStats.league || displayStats['stats-season']) && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                        {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {(() => {
-                      const renderStat = (label, value, colorClass, bgClass, borderClass, shadowColor, isPercentage = true) => (
-                        <motion.div
-                          className={`relative p-3 rounded-lg ${bgClass} border ${borderClass} overflow-hidden group cursor-pointer`}
-                          whileHover={{ 
-                            scale: 1.05,
-                            boxShadow: `0 0 20px ${shadowColor}`
-                          }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        >
-                          <div className={`absolute inset-0 bg-gradient-to-r ${colorClass.replace('text-', 'from-').replace('dark:text-', '')}/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                          <motion.p 
-                            className={`text-lg font-mono font-bold ${colorClass} relative z-10 tracking-wide text-center`}
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          >
-                            {value != null ? `${value}${isPercentage ? '%' : ''}` : '—'}
-                          </motion.p>
-                          <p className="text-xs text-slate-500 dark:text-super-dark-text-secondary relative z-10 text-center mt-1">{label}</p>
-                        </motion.div>
-                      );
+                {/* SEÇÃO DE ESTATÍSTICAS DETALHADAS (ABAS) */}
+                {TABS_DATA.length > 0 && (
+                  <>
+                    <NewFeatureAlert />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }} 
+                      className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-4 sm:p-6 mb-6"
+                    >
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-bold text-black dark:text-white flex items-center font-mono tracking-wide">
+                        <BarChart3 className="w-5 h-5 mr-2 text-brand-purple" />
+                        Estatísticas Detalhadas
+                      </h2>
+                      {(displayStats.league || displayStats['stats-season']) && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                          {displayStats.league || ''}{displayStats.league && displayStats['stats-season'] ? ' ' : ''}{(displayStats['stats-season'] || '').replace(/"/g, '')}
+                        </span>
+                      )}
+                    </div>
 
-                      return (
-                        <>
-                          {renderStat('TS%', (displayStats.ts_percent * 100)?.toFixed(1), 'text-purple-600 dark:text-purple-400', 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10', 'border-purple-200/50 dark:border-purple-700/30', 'rgba(168, 85, 247, 0.3)')}
-                          {renderStat('eFG%', (displayStats.efg_percent * 100)?.toFixed(1), 'text-teal-600 dark:text-teal-400', 'bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10', 'border-teal-200/50 dark:border-teal-700/30', 'rgba(20, 184, 166, 0.3)')}
-                          {renderStat('PER', displayStats.per?.toFixed(2), 'text-indigo-600 dark:text-indigo-400', 'bg-gradient-to-br from-indigo-50 to-indigo-100/50 dark:from-indigo-900/20 dark:to-indigo-800/10', 'border-indigo-200/50 dark:border-indigo-700/30', 'rgba(99, 102, 241, 0.3)', false)}
-                          {renderStat('USG%', displayStats.usg_percent?.toFixed(1), 'text-pink-600 dark:text-pink-400', 'bg-gradient-to-br from-pink-50 to-pink-100/50 dark:from-pink-900/20 dark:to-pink-800/10', 'border-pink-200/50 dark:border-pink-700/30', 'rgba(236, 72, 153, 0.3)')}
-                          {renderStat('ORtg', displayStats.ortg?.toFixed(1), 'text-lime-600 dark:text-lime-400', 'bg-gradient-to-br from-lime-50 to-lime-100/50 dark:from-lime-900/20 dark:to-lime-800/10', 'border-lime-200/50 dark:border-lime-700/30', 'rgba(132, 204, 22, 0.3)', false)}
-                          {renderStat('DRtg', displayStats.drtg?.toFixed(1), 'text-red-600 dark:text-red-400', 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10', 'border-red-200/50 dark:border-red-700/30', 'rgba(239, 68, 68, 0.3)', false)}
-                          {renderStat('TOV%', displayStats.tov_percent?.toFixed(1), 'text-orange-600 dark:text-orange-400', 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10', 'border-orange-200/50 dark:border-orange-700/30', 'rgba(249, 115, 22, 0.3)')}
-                          {renderStat('AST%', displayStats.ast_percent?.toFixed(1), 'text-green-600 dark:text-green-400', 'bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', 'border-green-200/50 dark:border-green-700/30', 'rgba(34, 197, 94, 0.3)')}
-                          {renderStat('TRB%', displayStats.trb_percent?.toFixed(1), 'text-blue-600 dark:text-blue-400', 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10', 'border-blue-200/50 dark:border-blue-700/30', 'rgba(59, 130, 246, 0.3)')}
-                          {renderStat('STL%', displayStats.stl_percent?.toFixed(1), 'text-violet-600 dark:text-violet-400', 'bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-900/20 dark:to-violet-800/10', 'border-violet-200/50 dark:border-violet-700/30', 'rgba(139, 92, 246, 0.3)')}
-                          {renderStat('BLK%', displayStats.blk_percent?.toFixed(1), 'text-yellow-600 dark:text-yellow-400', 'bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/10', 'border-yellow-200/50 dark:border-yellow-700/30', 'rgba(234, 179, 8, 0.3)')}
-                        </>
-                      );
-                    })()}
-                  </div>
-                </motion.div>
+                    <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                      {TABS_DATA.map((tab) => {
+                        const description = tab.id === 'per_min' 
+                          ? 'Projeção para 40 minutos. Ideal para comparar jogadores com minutagens diferentes.' 
+                          : tab.id === 'per_poss' 
+                            ? 'Ajustado para 100 posses. Neutraliza o ritmo de jogo para comparar eficiência real.' 
+                            : '';
+
+                        return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          onMouseEnter={(e) => description && showTooltip(e, description)}
+                          onMouseLeave={hideTooltip}
+                          className={`group relative px-4 py-2 rounded-lg text-sm font-bold font-mono whitespace-nowrap transition-all flex items-center gap-2 ${
+                            activeTab === tab.id
+                              ? 'bg-brand-purple text-white shadow-md'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {tab.label}
+                          {description && (
+                            <Info className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`} />
+                          )}
+                        </button>
+                      )})}
+                    </div>
+                    
+                    <AnimatePresence mode="wait">
+                      {activeTab && (
+                        <motion.div
+                          key={activeTab}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <StatsTable 
+                            title={TABS_DATA.find(t => t.id === activeTab)?.label} 
+                            data={TABS_DATA.find(t => t.id === activeTab)?.data} 
+                            type={activeTab} 
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    </motion.div>
+                  </>
+                )}
+                
                 <AdvancedStatsExplanation />
 
                 {/* ANÁLISE DO RADAR SCORE */}
-                {evaluation.categoryScores && (
+                {(evaluation.categoryScores || prospect.radar_score) && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -863,7 +1009,7 @@ const ProspectDetail = () => {
                   >
                     <h2 className="text-xl font-bold text-black dark:text-white mb-4 flex items-center font-mono tracking-wide"><Link to="/radar-score-explained" className="flex items-center hover:text-brand-orange transition-colors"><Lightbulb className="w-5 h-5 mr-2 text-brand-orange" />Análise do Radar Score</Link></h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                      <div><RadarScoreChart data={evaluation.categoryScores} /></div>
+                      <div><RadarScoreChart data={evaluation.categoryScores || {}} /></div>
                       <div className="space-y-4">
                         {/* Projeção de Draft */}
                         <motion.div 
@@ -1156,7 +1302,7 @@ const ProspectDetail = () => {
             )}
 
             {/* ANÁLISE DO JOGADOR (SCOUT) */}
-            {displayStats.hasStats && (
+            {(displayStats.hasStats || (evaluation.strengths && evaluation.strengths.length > 0)) && (
               isScout ? (
                 (displayStats.strengths?.length > 0 || displayStats.weaknesses?.length > 0) && (
                   <motion.div
@@ -1166,7 +1312,7 @@ const ProspectDetail = () => {
                     className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-sm border border-slate-200 dark:border-super-dark-border p-6"
                   >
                     <h2 className="text-xl font-bold text-black dark:text-white mb-6 flex items-center font-mono tracking-wide"><TrendingUp className="w-5 h-5 mr-2 text-brand-orange" />Análise Detalhada do Jogador</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                       {displayStats.strengths?.length > 0 && (
                         <motion.div
                           initial={{ opacity: 0, x: -20 }}
@@ -1191,7 +1337,7 @@ const ProspectDetail = () => {
                               variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
                               initial="hidden"
                               animate="visible"
-                              className="space-y-3"
+                              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                             >
                               {displayStats.strengths.map((strength, index) => (
                                 <motion.li 
@@ -1237,7 +1383,7 @@ const ProspectDetail = () => {
                               }}
                               initial="hidden"
                               animate="visible"
-                              className="space-y-3"
+                              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                             >
                             {displayStats.weaknesses.map((weakness, index) => (
                               <motion.li
@@ -1477,6 +1623,30 @@ const ProspectDetail = () => {
           setActionToPerform(null); // Limpa a ação
         }}
       />
+
+      {/* GLOBAL TOOLTIP (Renderizado aqui para evitar clipping por overflow) */}
+      <AnimatePresence>
+        {tooltipState.visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: 'fixed',
+              left: tooltipState.x,
+              top: tooltipState.y,
+              transform: 'translate(-50%, -100%)',
+              marginTop: '-10px',
+              zIndex: 9999
+            }}
+            className="w-64 p-3 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 text-xs rounded-xl shadow-xl text-center font-sans font-medium backdrop-blur-sm border border-white/10 dark:border-slate-200/20 pointer-events-none"
+          >
+            {tooltipState.text}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900/95 dark:border-t-white/95"></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
     </div>
   );

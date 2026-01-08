@@ -59,13 +59,13 @@ const parseNumericStat = (value) => {
   return isNaN(parsedValue) ? 0 : parsedValue;
 };
 
-async function processScrapedStats(prospectId) {
+export async function processScrapedData(prospectId) {
   if (!prospectId) {
     console.error('❌ Erro: Forneça o ID do prospecto como argumento.');
     return;
   }
 
-  console.log(`🚀 Processando estatísticas para o prospecto ID: ${prospectId}...`);
+  console.log(`[${prospectId}] 🚀 Processando estatísticas...`);
 
   try {
     const { data: prospect, error: fetchError } = await supabase
@@ -86,7 +86,9 @@ async function processScrapedStats(prospectId) {
 
     const perGame = rawStats.perGame || {};
     const advanced = rawStats.advanced || {};
-    const totals = rawStats.totals || {}; // Access the totals object
+    const totals = rawStats.totals || {};
+    const per40min = rawStats.per40min || {};
+    const per100poss = rawStats.per100poss || {};
 
     // Determine category and league based on collegeSchools text (most reliable for women's teams)
     const collegeSchoolsText = rawStats.collegeSchools || '';
@@ -112,12 +114,12 @@ async function processScrapedStats(prospectId) {
       three_pct: parseNumericStat(perGame.fg3_pct),
       ft_pct: parseNumericStat(perGame.ft_pct),
       team: perGame.team_name_abbr,
-      ts_percent: parseNumericStat(advanced.ts_pct), // Ensure ts_percent is parsed
+      ts_percent: parseNumericStat(advanced.ts_pct),
       usg_percent: parseNumericStat(advanced.usg_pct),
       per: parseNumericStat(advanced.per),
       win_shares: parseNumericStat(advanced.ws),
       bpm: parseNumericStat(advanced.bpm),
-      efg_percent: parseNumericStat(perGame.efg_pct), // Corrected from advanced.efg_pct
+      efg_percent: parseNumericStat(perGame.efg_pct),
       orb_percent: parseNumericStat(advanced.orb_pct),
       drb_percent: parseNumericStat(advanced.drb_pct),
       trb_percent: parseNumericStat(advanced.trb_pct),
@@ -125,8 +127,8 @@ async function processScrapedStats(prospectId) {
       tov_percent: parseNumericStat(advanced.tov_pct),
       stl_percent: parseNumericStat(advanced.stl_pct),
       blk_percent: parseNumericStat(advanced.blk_pct),
-      source: 'NCAA', // Atualiza a fonte das estatísticas
-      league: league, // Use the determined league
+      source: 'NCAA',
+      league: league,
       conference: perGame.conf_abbr,
       "stats-season": perGame.year_id,
       games_played: parseNumericStat(totals.games),
@@ -148,7 +150,43 @@ async function processScrapedStats(prospectId) {
       height: parseHeight(rawStats.height) || prospect.height || null,
       weight: parseWeight(rawStats.weight) || prospect.weight || null,
       school: rawStats.highSchool || prospect.school || null,
-      nationality: rawStats.nationality || prospect.nationality || null, // NEW: Add nationality
+      nationality: rawStats.nationality || prospect.nationality || null,
+
+      // Novas colunas 'Per 40 Min'
+      fg_per_40_min: parseNumericStat(per40min.fg_per_min),
+      fga_per_40_min: parseNumericStat(per40min.fga_per_min),
+      fg3_per_40_min: parseNumericStat(per40min.fg3_per_min),
+      fg3a_per_40_min: parseNumericStat(per40min.fg3a_per_min),
+      ft_per_40_min: parseNumericStat(per40min.ft_per_min),
+      fta_per_40_min: parseNumericStat(per40min.fta_per_min),
+      orb_per_40_min: parseNumericStat(per40min.orb_per_min),
+      drb_per_40_min: parseNumericStat(per40min.drb_per_min),
+      trb_per_40_min: parseNumericStat(per40min.trb_per_min),
+      ast_per_40_min: parseNumericStat(per40min.ast_per_min),
+      stl_per_40_min: parseNumericStat(per40min.stl_per_min),
+      blk_per_40_min: parseNumericStat(per40min.blk_per_min),
+      tov_per_40_min: parseNumericStat(per40min.tov_per_min),
+      pf_per_40_min: parseNumericStat(per40min.pf_per_min),
+      pts_per_40_min: parseNumericStat(per40min.pts_per_min),
+
+      // Novas colunas 'Per 100 Poss'
+      fg_per_100_poss: parseNumericStat(per100poss.fg_per_poss),
+      fga_per_100_poss: parseNumericStat(per100poss.fga_per_poss),
+      fg3_per_100_poss: parseNumericStat(per100poss.fg3_per_poss),
+      fg3a_per_100_poss: parseNumericStat(per100poss.fg3a_per_poss),
+      ft_per_100_poss: parseNumericStat(per100poss.ft_per_poss),
+      fta_per_100_poss: parseNumericStat(per100poss.fta_per_poss),
+      orb_per_100_poss: parseNumericStat(per100poss.orb_per_poss),
+      drb_per_100_poss: parseNumericStat(per100poss.drb_per_poss),
+      trb_per_100_poss: parseNumericStat(per100poss.trb_per_poss),
+      ast_per_100_poss: parseNumericStat(per100poss.ast_per_poss),
+      stl_per_100_poss: parseNumericStat(per100poss.stl_per_poss),
+      blk_per_100_poss: parseNumericStat(per100poss.blk_per_poss),
+      tov_per_100_poss: parseNumericStat(per100poss.tov_per_poss),
+      pf_per_100_poss: parseNumericStat(per100poss.pf_per_poss),
+      pts_per_100_poss: parseNumericStat(per100poss.pts_per_poss),
+      ortg_per_100_poss: parseNumericStat(per100poss.off_rtg),
+      drtg_per_100_poss: parseNumericStat(per100poss.def_rtg),
     };
 
     // Instantiate ProspectRankingAlgorithm
@@ -157,28 +195,35 @@ async function processScrapedStats(prospectId) {
     // Call evaluateProspect
     const evaluationResult = await algorithm.evaluateProspect(prospect, prospect.league);
     const radarScore = evaluationResult.totalScore;
-    const tier = evaluationResult.tier;
-    const draftProjection = evaluationResult.draftProjection;
-    const nbaReadiness = evaluationResult.nbaReadiness;
-    const flags = evaluationResult.flags;
-    const comparablePlayers = evaluationResult.comparablePlayers;
-    const qualitativeArchetypes = evaluationResult.qualitativeArchetypes;
 
-    // Ensure comparablePlayers and qualitativeArchetypes are not in statsUpdate for the 'prospects' table
+    try {
+      const { error: updateError } = await supabase
+        .from('prospects')
+        .update({
+          ...statsUpdate, // Atualiza ppg, rpg, etc. e os novos campos
+          evaluation: evaluationResult // Salva o objeto de avaliação completo na coluna JSONB
+        })
+        .eq('id', prospectId);
 
-    const { error: updateError } = await supabase
-      .from('prospects')
-      .update({
-        ...statsUpdate, // Atualiza ppg, rpg, etc.
-        evaluation: evaluationResult // Salva o objeto de avaliação completo na coluna JSONB
-      })
-      .eq('id', prospectId);
+      if (updateError) {
+        throw updateError; // Lança o erro para ser pego pelo bloco catch externo
+      }
+    
+      console.log(`[${prospectId}] ✅ Estatísticas do prospecto atualizadas com sucesso!`);
 
-    if (updateError) {
-      throw new Error(`Erro ao atualizar prospecto: ${updateError.message}`);
+    } catch (updateError) {
+        // Verifica se o erro é de coluna inexistente
+        if (updateError.message.includes("column") && updateError.message.includes("does not exist")) {
+            console.error(`[${prospectId}] ❌ ERRO DE BANCO DE DADOS: Coluna não encontrada.`);
+            console.error(`👉 Parece que você ainda não adicionou as novas colunas para 'Per 40 Min' e 'Per 100 Poss' na tabela 'prospects'.`);
+            console.error(`👉 Por favor, execute o script SQL para adicionar as colunas antes de rodar este processamento.`);
+            // Interrompe a execução para este prospecto, mas não quebra o loop principal se estivesse em um
+            return; // Retorna para indicar falha
+        } else {
+            // Lança outros erros de banco de dados
+            throw new Error(`Erro ao atualizar prospecto: ${updateError.message}`);
+        }
     }
-
-    console.log(`✅ Estatísticas do prospecto ID: ${prospectId} atualizadas com sucesso!`);
 
 
 
@@ -222,15 +267,16 @@ async function processScrapedStats(prospectId) {
       );
 
     if (historyUpsertError) {
-      console.error(`❌ Erro ao fazer upsert do histórico de estatísticas: ${historyUpsertError.message}`);
+      console.error(`[${prospectId}] ❌ Erro ao fazer upsert do histórico de estatísticas: ${historyUpsertError.message}`);
     } else {
-      console.log(`✅ Histórico de estatísticas para ${prospectId} atualizado (upsert) com sucesso!`);
+      console.log(`[${prospectId}] ✅ Histórico de estatísticas atualizado (upsert) com sucesso!`);
     }
 
   } catch (error) {
-    console.error(`❌ Ocorreu um erro ao processar as estatísticas: ${error.message}`);
+    console.error(`[${prospectId}] ❌ Ocorreu um erro ao processar as estatísticas: ${error.message}`);
   }
 }
 
-const prospectId = process.argv[2];
-processScrapedStats(prospectId);
+// Remove a execução direta para que a função possa ser importada
+// const prospectId = process.argv[2];
+// processScrapedStats(prospectId);

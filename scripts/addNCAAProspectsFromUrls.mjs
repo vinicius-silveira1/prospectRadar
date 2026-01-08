@@ -17,8 +17,11 @@ const execPromise = promisify(exec);
  */
 async function addNCAAProspectsFromUrls() {
   const args = process.argv.slice(2);
-  const draftClass = args[0];
-  const urls = args.slice(1);
+  const noProxyFlag = args.includes('--no-proxy');
+  const filteredArgs = args.filter(arg => arg !== '--no-proxy');
+
+  const draftClass = filteredArgs[0];
+  const urls = filteredArgs.slice(1);
 
   if (!draftClass) {
     console.error('❌ Erro: Forneça a classe do draft como primeiro argumento. Ex: 2026');
@@ -31,6 +34,9 @@ async function addNCAAProspectsFromUrls() {
   }
 
   console.log(`🚀 Iniciando adição e atualização de ${urls.length} novos prospectos para a classe ${draftClass}...`);
+  if (noProxyFlag) {
+    console.log("🚫 Executando sem proxy.");
+  }
 
   const successfulAdditions = [];
   const failedAdditions = [];
@@ -89,7 +95,13 @@ async function addNCAAProspectsFromUrls() {
 
       // 3. Chamar o script de atualização individual para raspar e processar as estatísticas
       console.log(`Chamando updateIndividualNCAAProspect.mjs para ${playerName} (ID: ${prospectId})...`);
-      const { stdout, stderr } = await execPromise(`node scripts/updateIndividualNCAAProspect.mjs ${prospectId} "${url}"`);
+      
+      let command = `node scripts/updateIndividualNCAAProspect.mjs ${prospectId} "${url}"`;
+      if (noProxyFlag) {
+        command += ' --no-proxy';
+      }
+
+      const { stdout, stderr } = await execPromise(command);
       console.log('Saída do updateIndividualNCAAProspect:', stdout);
       if (stderr) {
         console.error('Erro no updateIndividualNCAAProspect:', stderr);

@@ -1,291 +1,172 @@
-
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
 
+
+// --- ESTRATÉGIA DE SCRAPING COM PROXY RESIDENCIAL ---
+
+
+// Plugins do Puppeteer
 puppeteer.use(StealthPlugin());
+puppeteer.use(AdblockerPlugin({ blockTrackers: true })); // Adiciona o plugin de adblocker
 
-// Helper function to map country/state to flag emoji
+
+
+// Funções de ajuda (Helpers)
 const countryToEmojiMap = {
-  "USA": "🇺🇸",
-  "Germany": "🇩🇪",
-  "Canada": "🇨🇦",
-  "France": "🇫🇷",
-  "Spain": "🇪🇸",
-  "Australia": "🇦🇺",
-  "Brazil": "🇧🇷",
-  "Serbia": "🇷🇸",
-  "Croatia": "🇭🇷",
-  "Lithuania": "🇱🇹",
-  "Slovenia": "🇸🇮",
-  "Greece": "🇬🇷",
-  "Turkey": "🇹🇷",
-  "Argentina": "🇦🇷",
-  "Nigeria": "🇳🇬",
-  "Mali": "🇲🇱",
-  "Congo": "🇨🇩", // Democratic Republic of the Congo
-  "DR Congo": "🇨🇩",
-  "Latvia": "🇱🇻",
-  "Estonia": "🇪🇪",
-  "Finland": "🇫🇮",
-  "Sweden": "🇸🇪",
-  "Denmark": "🇩🇰",
-  "UK": "🇬🇧",
-  "England": "🇬🇧",
-  "Scotland": "🇬🇧",
-  "Ireland": "🇮🇪",
-  "Italy": "🇮🇹",
-  "Mexico": "🇲🇽",
-  "Dominican Republic": "🇩🇴",
-  "Puerto Rico": "🇵🇷",
-  "Bahamas": "🇧🇸",
-  "New Zealand": "🇳🇿",
-  "China": "🇨🇳",
-  "Japan": "🇯🇵",
-  "South Korea": "🇰🇷",
-  "Philippines": "🇵🇭",
-  // Add more countries as needed
+  "USA": "🇺🇸", "Germany": "🇩🇪", "Canada": "🇨🇦", "France": "🇫🇷", "Spain": "🇪🇸", "Australia": "🇦🇺", "Brazil": "🇧🇷", "Serbia": "🇷🇸", "Croatia": "🇭🇷", "Lithuania": "🇱🇹", "Slovenia": "🇸🇮", "Greece": "🇬🇷", "Turkey": "🇹🇷", "Argentina": "🇦🇷", "Nigeria": "🇳🇬", "Mali": "🇲🇱", "Congo": "🇨🇩", "DR Congo": "🇨🇩", "Latvia": "🇱🇻", "Estonia": "🇪🇪", "Finland": "🇫🇮", "Sweden": "🇸🇪", "Denmark": "🇩🇰", "UK": "🇬🇧", "England": "🇬🇧", "Scotland": "🇬🇧", "Ireland": "🇮🇪", "Italy": "🇮🇹", "Mexico": "🇲🇽", "Dominican Republic": "🇩🇴", "Puerto Rico": "🇵🇷", "Bahamas": "🇧🇸", "New Zealand": "🇳🇿", "China": "🇨🇳", "Japan": "🇯🇵", "South Korea": "🇰🇷", "Philippines": "🇵🇭",
 };
-
-// List of US state abbreviations for implicit USA nationality
 const usStateAbbreviations = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
-
 function getNationalityFromHometown(hometownText) {
   if (!hometownText) return null;
-
   const parts = hometownText.split(',').map(p => p.trim());
   const lastPart = parts[parts.length - 1];
-
-  // 1. Check if the last part is a US state abbreviation
-  if (usStateAbbreviations.includes(lastPart.toUpperCase())) {
-    return countryToEmojiMap["USA"];
-  }
-
-  // 2. Check if the last part is a known country name
+  if (usStateAbbreviations.includes(lastPart.toUpperCase())) return countryToEmojiMap["USA"];
   for (const country in countryToEmojiMap) {
-    if (lastPart.toLowerCase() === country.toLowerCase()) {
-      return countryToEmojiMap[country];
-    }
+    if (lastPart.toLowerCase() === country.toLowerCase()) return countryToEmojiMap[country];
   }
-
-  // 3. If the hometown has multiple parts, try the second to last part for countries like "Würzburg, Germany"
   if (parts.length > 1) {
-    const potentialCountry = parts[parts.length - 1]; // e.g., "Germany"
-    if (countryToEmojiMap[potentialCountry]) {
-      return countryToEmojiMap[potentialCountry];
-    }
+    const potentialCountry = parts[parts.length - 1];
+    if (countryToEmojiMap[potentialCountry]) return countryToEmojiMap[potentialCountry];
   }
-
-  return null; // If no match found
+  return null;
 }
 
-export async function scrapeNCAAStats(playerName, directUrl = null) {
-  if (!playerName) {
-    console.error('❌ Erro: Por favor, forneça o nome do jogador como um argumento entre aspas.');
-    return;
+export async function scrapeNCAAStats(browser, playerName, directUrl) {
+  // A URL direta é agora essencial para a operação.
+  if (!browser || !playerName || !directUrl) {
+    console.error('❌ Erro: Instância do navegador, nome do jogador e uma URL direta são necessários.');
+    return null;
   }
 
-  console.log(`🚀 Iniciando busca por "${playerName}"...`);
-  let browser = null;
+  let page = null;
 
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
+    page = await browser.newPage();
+    
     await page.setViewport({ width: 1280, height: 800 });
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    // Define um User-Agent real para evitar detecção básica
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-    let playerUrl = directUrl; // Use directUrl if provided
+    // Acessa a URL direta e espera o seletor #info aparecer para garantir que a página do jogador foi carregada.
+    try {
+        console.log(`[${playerName}] Navegando para ${directUrl} e aguardando a página do jogador...`);
+        // Aumenta o timeout do goto e espera o DOM carregar. A verificação do seletor '#info' é a etapa principal.
+        // Usar networkidle2 ajuda a esperar o Cloudflare resolver redirecionamentos
+        await page.goto(directUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-    if (!playerUrl) { // Only run existing logic if directUrl is not provided
-      const createSlug = (name) => {
-        const normalizedName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return normalizedName.toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-          .replace(/--+/g, '-');
-      };
+        // Verificação de título para Cloudflare
+        const title = await page.title();
+        if (title.includes('Just a moment') || title.includes('Cloudflare')) {
+            console.log(`[${playerName}] ⚠️ Tela de verificação Cloudflare detectada. Aguardando resolução...`);
+            await new Promise(resolve => setTimeout(resolve, 10000));
+        }
 
-      const slug = createSlug(playerName);
+        console.log(`[${playerName}] Página base carregada, aguardando seletor '#info' para passar por possíveis desafios (Cloudflare)...`);
+        await page.waitForSelector('#info', { timeout: 40000 }); // Total de espera pode chegar a 2 minutos
+        
+        console.log(`[${playerName}] Seletor '#info' encontrado. A página do jogador é válida, prosseguindo com o scraping.`);
 
-      for (let i = 1; i <= 3; i++) {
-        const url = `https://www.sports-reference.com/cbb/players/${slug}-${i}.html`;
-        console.log(`Tentando URL direta: ${url}`);
+    } catch (error) {
+        const screenshotPath = `debug_screenshot_error_${playerName.replace(/ /g, '_')}.png`;
+        let pageTitle = 'N/A';
         try {
-          const response = await page.goto(url, { waitUntil: 'networkidle2' });
-          console.log(`Status da resposta: ${response.status()}`);
-          if (response.ok()) {
-            const h1Element = await page.$('h1');
-            if (h1Element) {
-              const h1Text = await page.evaluate(element => element.textContent, h1Element);
-              console.log(`Texto do H1: ${h1Text}`);
-              if (h1Text.toLowerCase().includes(playerName.toLowerCase())) {
-                console.log('Jogador encontrado por URL direta!');
-                playerUrl = url;
-                break;
-              }
-            }
-          }
-        } catch (error) {
-          console.log(`Erro ao tentar URL direta: ${error.message}`);
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000)); // Random delay
-      }
+            pageTitle = await page.title();
+        } catch (e) { /* ignora erro se a página já fechou */ }
 
-      if (!playerUrl) {
-        console.log('Não foi possível encontrar o jogador por URL direta. Tentando busca aprimorada...');
-        const searchURL = `https://www.sports-reference.com/cbb/search/search.fcgi?search=${encodeURIComponent(playerName)}`;
-        await page.goto(searchURL, { waitUntil: 'networkidle2' });
-
-        const searchResults = await page.evaluate(() => {
-          const results = [];
-          document.querySelectorAll('.search-results .result').forEach(result => {
-            const link = result.querySelector('a[href*="/cbb/players/"]');
-            if (link) {
-              results.push({
-                name: result.textContent,
-                url: link.href,
-              });
-            }
-          });
-          return results;
-        });
-
-        console.log(`Resultados da busca: ${JSON.stringify(searchResults, null, 2)}`);
-
-        if (searchResults.length > 0) {
-          const bestMatch = searchResults.find(result => result.name.toLowerCase().includes(playerName.toLowerCase()));
-          if (bestMatch) {
-            playerUrl = bestMatch.url;
-            await page.goto(playerUrl, { waitUntil: 'networkidle2' });
-          } else {
-            playerUrl = searchResults[0].url;
-            await page.goto(playerUrl, { waitUntil: 'networkidle2' });
-          }
+        if (error.name === 'TimeoutError') {
+            console.log(`[${playerName}] ⚠️ Timeout ao navegar ou esperar por '#info' em ${directUrl}. Título da página: "${pageTitle}". A página pode ser um desafio de JS (Cloudflare) ou não é uma página de jogador válida.`);
         } else {
-          throw new Error(`Nenhum jogador encontrado para "${playerName}" nos resultados da busca.`);
+            console.log(`[${playerName}] ❌ Erro inesperado durante a navegação ou espera pelo seletor: ${error.message}. Título da página: "${pageTitle}".`);
         }
-      }
+        
+        try {
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            console.log(`📸 Screenshot de erro salvo em: ${screenshotPath}`);
+        } catch (debugError) {
+            console.error(`[${playerName}] ❌ Falha ao salvar screenshot de depuração: ${debugError.message}`);
+        }
+        
+        return null; // Encerra a execução para este jogador
     }
 
-    if (!playerUrl) {
-      throw new Error(`Não foi possível determinar a URL do jogador para "${playerName}".`);
+    // Com a página do jogador confirmada, tenta fechar banners de anúncio.
+    try {
+        console.log(`[${playerName}] Procurando por banner de consentimento/anúncio...`);
+        const closeButtonSelector = '.ad-banner-bottom-close';
+        // Usa waitForSelector com timeout baixo para não atrasar se o banner não existir.
+        const closeButton = await page.waitForSelector(closeButtonSelector, { timeout: 3000 });
+
+        if (closeButton) {
+            console.log(`[${playerName}] Banner de anúncio encontrado. Tentando fechar...`);
+            await page.click(closeButtonSelector);
+            console.log(`[${playerName}] Banner fechado.`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Pequena pausa para a UI atualizar
+        } else {
+            // Isso não deve acontecer com waitForSelector, mas é um fallback
+            console.log(`[${playerName}] Nenhum banner de anúncio inferior encontrado.`);
+        }
+    } catch (e) {
+        // Se o seletor não for encontrado (o caso mais comum), apenas loga.
+        console.log(`[${playerName}] Nenhum banner de anúncio para fechar ou erro ao tentar: ${e.message}`);
     }
 
-    await page.goto(playerUrl, { waitUntil: 'networkidle2' });
-    console.log(`Página do jogador carregada: ${page.url()}`);
-    console.log('Extraindo estatísticas detalhadas...');
-
+    // Se a página for válida, espera pelo seletor da tabela de estatísticas.
+    await page.waitForSelector('#players_per_game', { timeout: 30000 });
+    
     const bioData = await page.evaluate(() => {
-      const extractText = (selector) => {
-        const element = document.querySelector(selector);
-        return element ? element.textContent.trim() : null;
-      };
-
-      const positionElement = document.evaluate(
-        "//p[strong[contains(text(), 'Position:')]]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      const position = positionElement ? positionElement.textContent.replace('Position:', '').trim() : null;
-
-      const heightWeightElement = document.evaluate(
-        "//p[strong[contains(text(), 'Position:')]]/following-sibling::p[1]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      const heightWeightText = heightWeightElement ? heightWeightElement.textContent.trim() : null;
-
-      let height = null, weight = null;
-      if (heightWeightText) {
-        // Regex to capture height (e.g., 6-9) and weight (e.g., 235lb)
-        const heightMatch = heightWeightText.match(/(\d+-\d+)/);
-        const weightMatch = heightWeightText.match(/(\d+)\s*lb/);
-
-        if (heightMatch) {
-          height = heightMatch[1];
+        const extractText = (selector) => document.querySelector(selector)?.textContent.trim() || null;
+        const position = document.evaluate("//p[strong[contains(text(), 'Position:')]]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent.replace('Position:', '').trim() || null;
+        const heightWeightText = document.evaluate("//p[strong[contains(text(), 'Position:')]]/following-sibling::p[1]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent.trim();
+        let height = null, weight = null;
+        if (heightWeightText) {
+            const heightMatch = heightWeightText.match(/(\d+-\d+)/);
+            const weightMatch = heightWeightText.match(/(\d+)\s*lb/);
+            if (heightMatch) height = heightMatch[1];
+            if (weightMatch) weight = `${weightMatch[1]}lb`;
         }
-        if (weightMatch) {
-          weight = `${weightMatch[1]}lb`;
-        }
-      }
-
-      const highSchoolElement = document.evaluate(
-        "//p[strong[contains(text(), 'High School:')]]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      const highSchool = highSchoolElement ? highSchoolElement.textContent.replace('High School:', '').trim() : null;
-      
-      // NEW: Extract Hometown
-      const hometownElement = document.evaluate(
-        "//p[strong[contains(text(), 'Hometown:')]]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      const hometown = hometownElement ? hometownElement.textContent.replace('Hometown:', '').trim() : null;
-
-      // NEW: Extract full college school names to check for "(Women)"
-      const collegeSchoolsElement = document.evaluate(
-        "//p[strong[contains(text(), 'Schools:')]]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      const collegeSchools = collegeSchoolsElement ? collegeSchoolsElement.textContent.trim() : null;
-
-      return {
-        position,
-        height,
-        weight,
-        highSchool,
-        hometown, // NEW: Add hometown
-        collegeSchools, // NEW: Add this to bioData
-      };
+        const highSchool = document.evaluate("//p[strong[contains(text(), 'High School:')]]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent.replace('High School:', '').trim() || null;
+        const hometown = document.evaluate("//p[strong[contains(text(), 'Hometown:')]]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent.replace('Hometown:', '').trim() || null;
+        const collegeSchools = document.evaluate("//p[strong[contains(text(), 'Schools:')]]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue?.textContent.trim() || null;
+        return { position, height, weight, highSchool, hometown, collegeSchools };
     });
-
-    await page.waitForSelector('#players_per_game tbody tr');
 
     const allStats = await page.evaluate(() => {
       const extractStatsFromTable = (tableId) => {
-        const statsTable = document.querySelector(`#${tableId}`);
-        if (!statsTable) return null;
+        // Tenta encontrar a tabela diretamente no DOM
+        let tableElement = document.querySelector(`#${tableId}`);
 
-        const tableBody = statsTable.querySelector('tbody');
-        if (!tableBody) return null;
-
-        const stats = {};
-        const rows = Array.from(tableBody.querySelectorAll('tr'));
-        if (rows.length === 0) return null;
-
-        let targetRow;
-        const seasonRow = rows.find(row => {
-          const seasonCell = row.querySelector('th[data-stat="season"]');
-          return seasonCell && seasonCell.textContent.trim() === '2025-26';
-        });
-
-        if (seasonRow) {
-          targetRow = seasonRow;
-        } else {
-          targetRow = rows[rows.length - 1];
+        // Se não encontrar, procura dentro de comentários (Sports Reference costuma comentar tabelas não visíveis inicialmente)
+        if (!tableElement) {
+            const xpath = `//comment()[contains(., '${tableId}')]`;
+            const searchResult = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            
+            for (let i = 0; i < searchResult.snapshotLength; i++) {
+                const commentNode = searchResult.snapshotItem(i);
+                // Verifica se o comentário realmente contém a definição da tabela com este ID
+                if (commentNode.textContent.includes(`id="${tableId}"`)) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = commentNode.textContent;
+                    tableElement = tempDiv.querySelector(`#${tableId}`);
+                    if (tableElement) break;
+                }
+            }
         }
 
-        if (!targetRow) return null;
+        if (!tableElement) return null;
 
-        const headers = Array.from(statsTable.querySelectorAll('thead th')).map(th => th.getAttribute('data-stat'));
+        const tbody = tableElement.querySelector('tbody');
+        if (!tbody) return null;
 
-        targetRow.querySelectorAll('td, th').forEach((cell, index) => {
+        const lastRow = Array.from(tbody.rows).filter(row => !row.classList.contains('thead')).pop();
+        if (!lastRow) return null;
+
+        // IMPORTANTE: Buscar headers dentro do elemento da tabela encontrado (tableElement),
+        // pois se ele veio de um comentário, document.querySelectorAll não o encontrará.
+        const headers = Array.from(tableElement.querySelectorAll('thead th')).map(th => th.getAttribute('data-stat'));
+        
+        const stats = {};
+        lastRow.querySelectorAll('td, th').forEach((cell, index) => {
           const statName = headers[index];
           if (statName) {
             const value = cell.textContent.trim();
@@ -294,40 +175,47 @@ export async function scrapeNCAAStats(playerName, directUrl = null) {
         });
         return stats;
       };
-
-      const perGame = extractStatsFromTable('players_per_game');
-      const totals = extractStatsFromTable('players_totals');
-      const advanced = extractStatsFromTable('players_advanced');
-
       return {
-        perGame: perGame || {},
-        totals: totals || {},
-        advanced: advanced || {},
+        perGame: extractStatsFromTable('players_per_game') || {},
+        totals: extractStatsFromTable('players_totals') || {},
+        advanced: extractStatsFromTable('players_advanced') || {},
+        per40min: extractStatsFromTable('players_per_min') || {},
+        per100poss: extractStatsFromTable('players_per_poss') || {},
       };
     });
 
-    const combinedData = {
-      ...allStats,
-      ...bioData
-    };
-    combinedData.nationality = getNationalityFromHometown(combinedData.hometown); // Add nationality
+    const combinedData = { ...allStats, ...bioData, nationality: getNationalityFromHometown(bioData.hometown) };
 
-    if (combinedData && ( (combinedData.perGame && Object.keys(combinedData.perGame).length > 0) || (combinedData.totals && Object.keys(combinedData.totals).length > 0) || (combinedData.advanced && Object.keys(combinedData.advanced).length > 0) || combinedData.position || combinedData.height || combinedData.weight || combinedData.highSchool)) {
-      console.log('✅ Sucesso! Dados detalhados extraídos:');
-      console.log(JSON.stringify(combinedData, null, 2));
+    if (Object.keys(combinedData.perGame).length > 0 || combinedData.position) {
       return combinedData;
     } else {
-      console.log('Não foi possível encontrar nenhum dado detalhado.');
+      console.log(`[${playerName}] ⚠️ Não foi possível encontrar dados detalhados na página ${directUrl}.`);
+      const screenshotPath = `debug_screenshot_no_data_${playerName.replace(/ /g, '_')}.png`;
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`📸 Screenshot salvo em: ${screenshotPath}`);
       return null;
     }
 
   } catch (error) {
-    console.error(`❌ Ocorreu um erro: ${error.message}`);
+    if (error.name === 'TimeoutError') {
+        console.log(`[${playerName}] Timeout ao acessar ${directUrl}.`);
+        return null;
+    }
+
+    console.error(`[${playerName}] ❌ Ocorreu um erro durante o scraping de ${directUrl}: ${error.message}`);
+    if (page) {
+        try {
+            const screenshotPath = `debug_screenshot_error_${playerName.replace(/ /g, '_')}.png`;
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            console.log(`📸 Screenshot de erro salvo em: ${screenshotPath}`);
+        } catch (e) {
+            console.error(`[${playerName}] ❌ Falha ao tirar screenshot: ${e.message}`);
+        }
+    }
     return null;
   } finally {
-    if (browser) {
-      await browser.close();
-      console.log('Navegador fechado.');
+    if (page) {
+      await page.close();
     }
   }
 }
