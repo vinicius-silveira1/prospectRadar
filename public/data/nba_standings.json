@@ -1,87 +1,92 @@
 {
-  "updatedAt": "2026-01-08T06:07:16.552Z",
+  "updatedAt": "2026-01-10T23:42:47.157Z",
   "lottery": [
     {
       "team": "IND",
-      "wins": 6,
+      "wins": 7,
       "losses": 31
-    },
-    {
-      "team": "NOP",
-      "wins": 8,
-      "losses": 30
     },
     {
       "team": "SAC",
       "wins": 8,
-      "losses": 29
+      "losses": 30
+    },
+    {
+      "team": "NOP",
+      "wins": 9,
+      "losses": 31
     },
     {
       "team": "WAS",
       "wins": 10,
-      "losses": 25
+      "losses": 27
     },
     {
       "team": "BKN",
       "wins": 11,
-      "losses": 22
-    },
-    {
-      "team": "UTA",
-      "wins": 12,
-      "losses": 23
+      "losses": 24
     },
     {
       "team": "CHA",
       "wins": 13,
-      "losses": 23
+      "losses": 25
     },
     {
-      "team": "LAC",
+      "team": "UTA",
       "wins": 13,
-      "losses": 22
+      "losses": 24
     },
     {
       "team": "DAL",
       "wins": 14,
-      "losses": 23
+      "losses": 24
     },
     {
-      "team": "MIL",
-      "wins": 16,
-      "losses": 20
+      "team": "LAC",
+      "wins": 14,
+      "losses": 23
     },
     {
       "team": "MEM",
       "wins": 16,
-      "losses": 20
+      "losses": 22
     },
     {
-      "team": "ATL",
+      "team": "MIL",
       "wins": 17,
       "losses": 21
     },
     {
-      "team": "POR",
+      "team": "CHI",
       "wins": 17,
       "losses": 20
     },
     {
-      "team": "CHI",
-      "wins": 17,
-      "losses": 19
+      "team": "ATL",
+      "wins": 19,
+      "losses": 21
+    },
+    {
+      "team": "POR",
+      "wins": 19,
+      "losses": 20
     }
   ],
   "playoff": [
     {
-      "team": "GSW",
-      "wins": 19,
+      "team": "CLE",
+      "wins": 21,
       "losses": 18
     },
     {
       "team": "ORL",
-      "wins": 20,
-      "losses": 17
+      "wins": 21,
+      "losses": 18
+    },
+    {
+      "team": "GSW",
+      "wins": 21,
+      "losses": 18
     },
     {
       "team": "MIA",
@@ -89,68 +94,63 @@
       "losses": 17
     },
     {
-      "team": "CLE",
-      "wins": 21,
-      "losses": 17
-    },
-    {
       "team": "PHI",
-      "wins": 19,
-      "losses": 15
-    },
-    {
-      "team": "PHX",
       "wins": 21,
       "losses": 15
     },
     {
       "team": "TOR",
-      "wins": 22,
+      "wins": 23,
+      "losses": 16
+    },
+    {
+      "team": "PHX",
+      "wins": 23,
       "losses": 15
-    },
-    {
-      "team": "NYK",
-      "wins": 23,
-      "losses": 13
-    },
-    {
-      "team": "MIN",
-      "wins": 24,
-      "losses": 13
-    },
-    {
-      "team": "BOS",
-      "wins": 23,
-      "losses": 12
     },
     {
       "team": "HOU",
       "wins": 22,
-      "losses": 11
+      "losses": 13
     },
     {
-      "team": "DEN",
+      "team": "NYK",
       "wins": 24,
-      "losses": 12
+      "losses": 14
     },
     {
       "team": "LAL",
       "wins": 23,
-      "losses": 11
+      "losses": 13
+    },
+    {
+      "team": "BOS",
+      "wins": 24,
+      "losses": 13
+    },
+    {
+      "team": "DEN",
+      "wins": 25,
+      "losses": 13
+    },
+    {
+      "team": "MIN",
+      "wins": 25,
+      "losses": 13
     },
     {
       "team": "SAS",
-      "wins": 25,
+      "wins": 26,
       "losses": 11
     },
     {
       "team": "DET",
-      "wins": 27,
+      "wins": 28,
       "losses": 9
     },
     {
       "team": "OKC",
-      "wins": 30,
+      "wins": 32,
       "losses": 7
     }
   ],
