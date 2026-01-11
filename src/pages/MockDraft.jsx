@@ -344,34 +344,6 @@ const MockDraft = () => {
           onModeChange={(newSize) => setDraftSettings(prev => ({ ...prev, totalPicks: newSize }))}
           league={league}
         />
-        {/* Indicador de frescor das standings */}
-        {standings && freshness && (
-          <motion.div 
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-medium border mt-3 ml-1 shadow-sm transition-colors ${
-              freshness.isStale 
-                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/50' 
-                : 'bg-white text-slate-500 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700'
-            }`}
-          >
-            <Clock className="w-3 h-3" />
-            <span className="font-mono tracking-tight">
-              Standings: {(() => {
-                const minutes = Math.floor(freshness.ageMs / (1000*60));
-                if (minutes < 60) return `${minutes}m atrás`;
-                const hours = Math.floor(minutes / 60);
-                return `${hours}h atrás`;
-              })()}
-            </span>
-            {freshness.isStale && (
-              <span className="flex h-2 w-2 relative ml-1" title="Dados podem estar desatualizados">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-              </span>
-            )}
-          </motion.div>
-        )}
 
         {/* Barra de Progresso - Separada do banner */}
         <motion.div 
@@ -480,6 +452,29 @@ const MockDraft = () => {
                 <Target className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
                 Controles
               </h3>
+              {/* Indicador de frescor das standings */}
+              {standings && freshness && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border mb-4 shadow-sm transition-colors ${
+                    freshness.isStale 
+                      ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/50' 
+                      : 'bg-white text-slate-500 border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700'
+                  }`}
+                >
+                  <Clock className="w-3 h-3" />
+                  <span className="font-mono tracking-tight">
+                    Standings: atualizado {formatDistanceToNow(new Date(Date.now() - freshness.ageMs), { addSuffix: true, locale: ptBR })}
+                  </span>
+                  {freshness.isStale && (
+                    <span className="flex h-2 w-2 relative ml-1" title="Dados podem estar desatualizados">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                  )}
+                </motion.div>
+              )}
               <div className="grid grid-cols-2 gap-2 relative z-10">
                 <motion.button 
                   whileHover={{
