@@ -22,10 +22,9 @@ const useNBAStandings = () => {
         const data = await response.json();
         setStandings(data);
 
-        // Lógica de frescor (opcional, mas mantida)
-        const lastModified = response.headers.get('last-modified');
-        if (lastModified) {
-            const ageMs = Date.now() - new Date(lastModified).getTime();
+        // Lógica de frescor usando o campo 'updatedAt' do JSON
+        if (data.updatedAt) {
+            const ageMs = Date.now() - new Date(data.updatedAt).getTime();
             setFreshness({
                 ageMs,
                 isStale: ageMs > 1000 * 60 * 60 * 4, // 4 horas
