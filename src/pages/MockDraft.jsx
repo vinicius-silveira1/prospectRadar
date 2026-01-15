@@ -49,6 +49,9 @@ const MockDraft = () => {
 
   const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters);
 
+  const [savedBigBoards, setSavedBigBoards] = useState([]);
+  const [selectedBigBoard, setSelectedBigBoard] = useState('default');
+
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters,
     draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
@@ -60,7 +63,7 @@ const MockDraft = () => {
     setSourceProspects,
     // generateReportCardData removido
     autocompleteDraft
-  } = useMockDraft(allProspects);
+  } = useMockDraft(allProspects, selectedBigBoard);
   const [warRoomRightView, setWarRoomRightView] = useState('bigboard'); // Estado para controlar a visualização da coluna direita do War Room
 
   const [view, setView] = useState('draft');
@@ -121,8 +124,6 @@ const MockDraft = () => {
   const [showProbabilityMatrix, setShowProbabilityMatrix] = useState(false);
   const [probabilityMatrix, setProbabilityMatrix] = useState(null);
   const [isCalculatingMatrix, setIsCalculatingMatrix] = useState(false);
-  const [savedBigBoards, setSavedBigBoards] = useState([]);
-  const [selectedBigBoard, setSelectedBigBoard] = useState('default');
 
   useEffect(() => {
     const storageKey = `saved_big_boards_${league.toLowerCase()}_2026`;

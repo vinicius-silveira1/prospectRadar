@@ -46,180 +46,355 @@ const shuffleArray = (array) => {
 
 const SAVE_LIMIT_FREE = 2;
 
-const useMockDraft = (allProspects) => {
+const useMockDraft = (allProspects, selectedBigBoardId = 'default') => {
+
   const { user } = useAuth();
+
   const { league } = useContext(LeagueContext);
+
   const { standings } = useNBAStandings(); // Usar as standings aqui para reconstruir a 2ª rodada
+
   const [sourceProspects, setSourceProspects] = useState(allProspects);
 
-  useEffect(() => {
-    setSourceProspects(allProspects);
-  }, [allProspects]);
+
 
   const [draftSettings, setDraftSettings] = useState({ 
+
     draftClass: 2026, 
+
     totalPicks: league === 'WNBA' ? 36 : 60 
+
   });
+
   const [draftBoard, setDraftBoard] = useState([]);
+
   const [currentPick, setCurrentPick] = useState(1);
+
   const [draftHistory, setDraftHistory] = useState([]);
+
   const [filters, setFilters] = useState({ searchTerm: '', position: 'ALL' });
+
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [customDraftOrder, setCustomDraftOrder] = useState(null);
+
   const [isOrderCustomized, setIsOrderCustomized] = useState(false);
+
   const [savedDrafts, setSavedDrafts] = useState([]);
+
   const [isSaving, setIsSaving] = useState(false);
+
   const [isLoadingDrafts, setIsLoadingDrafts] = useState(false);
+
   const [trendingMap, setTrendingMap] = useState({});
+
   const TREND_THRESHOLD = 0.02; // ~2 pontos percentuais de mudança no radar_score (se radar_score ~0-1) ou ajustar conforme escala real
+
   const [orderVersion, setOrderVersion] = useState(0); // Novo: Contador para forçar a reinicialização do board
 
+
+
   // Fetch trending data (simplified overlay) - timeframe fixo 7_days
+
   useEffect(() => {
+
     const fetchTrending = async () => {
+
       try {
+
         const trendColumn = 'trending_7_days';
+
         const { data, error } = await supabase
+
           .from('prospects')
+
           .select(`id, ${trendColumn}`)
+
           .eq('category', league);
+
         if (error) throw error;
+
         const map = {};
+
         (data || []).forEach(p => {
+
           const change = p?.[trendColumn]?.radar_score_change || 0;
+
             if (Math.abs(change) < TREND_THRESHOLD) return; // ignora neutros para reduzir ruído
+
             map[p.id] = {
+
               change,
+
               direction: change > 0 ? 'up' : 'down'
+
             };
+
         });
+
         setTrendingMap(map);
+
       } catch (e) {
+
         console.error('Falha ao buscar trending overlay:', e);
+
       }
+
     };
+
     fetchTrending();
+
   }, [league]);
+
+
 
   const activeDraftOrder = useMemo(() => {
+
     return league === 'WNBA' ? wnbaDraftOrder : defaultDraftOrder;
+
   }, [league]);
 
+
+
   // Debounce do termo de busca para reduzir re-cálculos de filtro
+
   useEffect(() => {
+
     const h = setTimeout(() => setDebouncedSearchTerm(filters.searchTerm), 200);
+
     return () => clearTimeout(h);
+
   }, [filters.searchTerm]);
 
+
+
   const initializeDraft = (orderToUse, explicitStandings = null) => {
+
     setIsLoading(true);
+
   
+
     // --- LÓGICA DE RECONSTRUÇÃO COMPLETA DO DRAFT ---
+
     // Esta é a correção definitiva. A cada mudança de ordem, reconstruímos tudo.
+
   
+
     // PASSO 1: Obter a ordem da primeira rodada. Se for customizada (pós-loteria), ela não tem trocas resolvidas.
+
     // Se não for customizada, usamos a ordem padrão. A ordem agora é passada como argumento.
+
     const firstRoundOrderInput = (orderToUse && orderToUse.length > 0)
+
       ? orderToUse.map(p => ({ pick: p.pick, originalTeam: p.originalTeam || p.team })) 
+
       : activeDraftOrder.filter(p => p.pick <= 30).map(p => ({ pick: p.pick, originalTeam: p.team }));
 
+
+
     // PASSO 2: Resolve a primeira rodada.
+
     const finalFirstRound = resolve2026DraftOrder(firstRoundOrderInput);
 
+
+
     // PASSO 3: Reconstrói e resolve a segunda rodada, passando o resultado da primeira.
+
     let finalSecondRound;
+
     const standingsToUse = explicitStandings || standings;
+
     if (league === 'NBA' && standingsToUse) {
+
       const standingsCopy = JSON.parse(JSON.stringify(standingsToUse));
+
       const allTeamsFromStandings = [
+
         ...(standingsCopy?.lottery || []),
+
         ...(standingsCopy?.playoff || []),
+
       ];
+
       const byWinPctAsc = (a, b) => (a.wins / Math.max(1, a.wins + a.losses)) - (b.wins / Math.max(1, b.wins + b.losses));
+
       const allTeamsInverse = [...allTeamsFromStandings].sort(byWinPctAsc).map(t => t.team);
+
       const initialSecondRound = allTeamsInverse.map((team, idx) => ({ pick: 30 + idx + 1, originalTeam: team }));
+
       finalSecondRound = resolveSecondRound(initialSecondRound, finalFirstRound);
+
     }
+
     else {
+
       finalSecondRound = activeDraftOrder.filter(p => p.pick > 30).map(p => ({ ...p, newOwner: p.team, originalTeam: p.team, isTraded: false, description: ['Own'] }));
+
     }
+
     
+
     // PASSO 4: Combinar as rodadas e construir o board.
+
     const fullOrder = [...finalFirstRound, ...finalSecondRound];
+
     const cappedOrder = fullOrder.slice(0, draftSettings.totalPicks);
 
+
+
     const initialBoard = cappedOrder.map((pickInfo, idx) => {
+
       // A lógica do resolvedor já define newOwner e originalTeam corretamente.
+
       const newOwner = pickInfo.newOwner;
+
       const originalTeam = pickInfo.originalTeam; 
+
       return {
+
         ...pickInfo,
+
         team: newOwner, // Compatibilidade
+
         isTraded: newOwner !== originalTeam,
+
         pick: idx + 1,
+
         round: league === 'WNBA' ? Math.floor(idx / 12) + 1 : (idx + 1 <= 30 ? 1 : 2),
+
         prospect: null,
+
       };
+
     });
+
     setDraftBoard(initialBoard);
+
     setCurrentPick(1);
+
     setDraftHistory([]);
+
     setIsLoading(false);
+
   };
 
+
+
   // Augment prospects once with trending info
+
   const augmentedProspects = useMemo(() => {
+
     if (!sourceProspects || sourceProspects.length === 0) return [];
+
     return sourceProspects.map(p => {
+
       const trend = trendingMap[p.id];
+
       return trend ? { ...p, trend_direction: trend.direction, trend_change: trend.change } : p;
+
     });
+
   }, [sourceProspects, trendingMap]);
 
+
+
   // Single sorted list reused by BigBoard and availableProspects
+
   const sortedAugmentedProspects = useMemo(() => {
+
+    // If a custom big board is selected, don't re-sort. Respect the order from sourceProspects.
+
+    if (selectedBigBoardId !== 'default') {
+
+      return augmentedProspects;
+
+    }
+
+    // Otherwise, sort by radar_score for the default board.
+
     return [...augmentedProspects].sort((a, b) => {
+
       const aScore = a.radar_score != null ? a.radar_score : -Infinity;
+
       const bScore = b.radar_score != null ? b.radar_score : -Infinity;
+
       if (aScore !== bScore) return bScore - aScore;
 
+
+
       // CORREÇÃO: Usa o nome em ordem alfabética como critério de desempate,
+
       // que é mais justo e universal que o ranking de recrutamento.
+
       return a.name.localeCompare(b.name);
+
     });
-  }, [augmentedProspects]);
+
+  }, [augmentedProspects, selectedBigBoardId]);
+
+
 
   const availableProspects = useMemo(() => {
+
     const draftedProspectIds = new Set(draftBoard.filter(pick => pick.prospect).map(pick => pick.prospect.id));
+
     let filtered = sortedAugmentedProspects.filter(p => !draftedProspectIds.has(p.id));
+
     if (debouncedSearchTerm) {
+
       const lowerCaseSearchTerm = debouncedSearchTerm.toLowerCase();
+
       filtered = filtered.filter(p =>
+
         (p.name && p.name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+
         (p.position && p.position.toLowerCase().includes(lowerCaseSearchTerm)) ||
+
         (p.high_school_team && p.high_school_team.toLowerCase().includes(lowerCaseSearchTerm))
+
       );
+
     }
+
     if (filters.position !== 'ALL') {
+
       filtered = filtered.filter(p => p.position && p.position === filters.position);
+
     }
+
     return filtered; // already sorted
+
   }, [sortedAugmentedProspects, draftBoard, debouncedSearchTerm, filters.position]);
 
+
+
   // Efeito para inicializar o board quando os prospects são carregados ou a ordem muda.
+
   // A verificação `draftBoard.length === 0` é crucial para evitar que o board seja
+
   // resetado desnecessariamente durante re-renderizações causadas por filtros.
+
   useEffect(() => {
-    if (!allProspects || allProspects.length === 0) return; // Aguarda os prospects
+
+    if (!sourceProspects || sourceProspects.length === 0) return; // Aguarda os prospects
+
+
 
     if (customDraftOrder) { // Uma ordem customizada (pós-loteria) sempre tem prioridade
+
       initializeDraft(customDraftOrder);
+
     } else if (standings && standings.lottery && standings.playoff) { // Na carga inicial, usa as standings para gerar a ordem base
+
       const initialOrder = generateInitialOrderFromStandings(standings);
+
       initializeDraft(initialOrder, standings);
+
     }
-  }, [allProspects, standings, customDraftOrder, orderVersion]); // Re-executa quando a versão da ordem muda
+
+  }, [sourceProspects, standings, customDraftOrder, orderVersion]); // Re-executa quando a versão da ordem muda
 
   const listSavedDrafts = useCallback(async () => {
     if (!user) return;
