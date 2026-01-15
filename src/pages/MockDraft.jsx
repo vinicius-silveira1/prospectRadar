@@ -57,6 +57,7 @@ const MockDraft = () => {
     initializeDraft, resetToDefaultOrder, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
     setCustomTeamOrder, getCurrentDraftOrder, applyStandingsOrder,
+    setSourceProspects,
     // generateReportCardData removido
     autocompleteDraft
   } = useMockDraft(allProspects);
@@ -120,6 +121,58 @@ const MockDraft = () => {
   const [showProbabilityMatrix, setShowProbabilityMatrix] = useState(false);
   const [probabilityMatrix, setProbabilityMatrix] = useState(null);
   const [isCalculatingMatrix, setIsCalculatingMatrix] = useState(false);
+  const [savedBigBoards, setSavedBigBoards] = useState([]);
+  const [selectedBigBoard, setSelectedBigBoard] = useState('default');
+
+  useEffect(() => {
+    const storageKey = `saved_big_boards_${league.toLowerCase()}_2026`;
+    let boards = [];
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          boards = parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load big boards:', e);
+      // boards is already []
+    }
+    setSavedBigBoards(boards);
+    // Reset selection when league changes
+    setSelectedBigBoard('default');
+  }, [league]);
+
+  useEffect(() => {
+    if (selectedBigBoard === 'default') {
+      setSourceProspects(allProspects);
+    } else {
+      const customBoard = savedBigBoards.find(b => b.id === selectedBigBoard);
+      if (customBoard && customBoard.board && allProspects.length > 0) {
+        // Rebuild the ordered list of full prospect objects from the saved board's IDs
+        const orderedProspects = customBoard.board
+          .map(item => allProspects.find(p => p.id === item.id))
+          .filter(Boolean); // Filter out prospects that might no longer exist
+
+        // Create a set of the custom board prospect IDs for efficient lookup
+        const customProspectIds = new Set(orderedProspects.map(p => p.id));
+
+        // Get the remaining prospects from the default list (allProspects)
+        const remainingProspects = allProspects.filter(p => !customProspectIds.has(p.id));
+
+        // Combine the lists: custom board first, then the rest of the default prospects
+        const hybridProspectList = [...orderedProspects, ...remainingProspects];
+
+        setSourceProspects(hybridProspectList);
+      } else {
+        // If board not found or prospects aren't loaded yet, revert to default
+        setSourceProspects(allProspects);
+      }
+    }
+  }, [selectedBigBoard, allProspects, savedBigBoards, setSourceProspects]);
+
+
 
   useEffect(() => {
     if (oddsInlineFeedback) {
@@ -342,6 +395,13 @@ const MockDraft = () => {
         <DraftModeSelector 
           currentTotalPicks={draftSettings.totalPicks} 
           onModeChange={(newSize) => setDraftSettings(prev => ({ ...prev, totalPicks: newSize }))}
+          league={league}
+        />
+
+        <BigBoardSelector
+          savedBoards={savedBigBoards}
+          selectedBoard={selectedBigBoard}
+          onSelectBoard={setSelectedBigBoard}
           league={league}
         />
 
@@ -1624,6 +1684,43 @@ const DraftModeSelector = ({ currentTotalPicks, onModeChange, league }) => {
     </motion.div>
   );
 };
+
+const BigBoardSelector = ({ savedBoards, selectedBoard, onSelectBoard, league }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+      className="bg-gradient-to-br from-white to-slate-50/30 dark:from-super-dark-secondary dark:to-slate-900/10 rounded-xl shadow-lg border border-slate-200/50 dark:border-slate-700/30 p-3 sm:p-4 backdrop-blur-sm"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <h3 className="text-sm font-semibold text-black dark:text-white font-mono tracking-wide flex-shrink-0">
+          Fonte do Big Board:
+        </h3>
+        <div className="flex flex-wrap items-center gap-2">
+          {savedBoards.length > 0 ? (
+            <select
+              value={selectedBoard}
+              onChange={(e) => onSelectBoard(e.target.value)}
+              className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 shadow-md bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600"
+            >
+              <option value="default">Padrão (Radar Score)</option>
+              {savedBoards.map(board => (
+                <option key={board.id} value={board.id}>
+                  {board.name} ({board.board.length} prospects)
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Você não tem Big Boards salvos para a {league}. Crie um no <Link to="/big-board-builder" className="underline font-semibold">Criador de Big Board</Link>!
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 const SaveDraftModal = ({ isOpen, onClose, onSave, draftName, setDraftName, isSaving, isPublic, setIsPublic }) => {
   if (!isOpen) return null;

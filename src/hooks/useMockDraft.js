@@ -50,6 +50,11 @@ const useMockDraft = (allProspects) => {
   const { user } = useAuth();
   const { league } = useContext(LeagueContext);
   const { standings } = useNBAStandings(); // Usar as standings aqui para reconstruir a 2ª rodada
+  const [sourceProspects, setSourceProspects] = useState(allProspects);
+
+  useEffect(() => {
+    setSourceProspects(allProspects);
+  }, [allProspects]);
 
   const [draftSettings, setDraftSettings] = useState({ 
     draftClass: 2026, 
@@ -165,12 +170,12 @@ const useMockDraft = (allProspects) => {
 
   // Augment prospects once with trending info
   const augmentedProspects = useMemo(() => {
-    if (!allProspects || allProspects.length === 0) return [];
-    return allProspects.map(p => {
+    if (!sourceProspects || sourceProspects.length === 0) return [];
+    return sourceProspects.map(p => {
       const trend = trendingMap[p.id];
       return trend ? { ...p, trend_direction: trend.direction, trend_change: trend.change } : p;
     });
-  }, [allProspects, trendingMap]);
+  }, [sourceProspects, trendingMap]);
 
   // Single sorted list reused by BigBoard and availableProspects
   const sortedAugmentedProspects = useMemo(() => {
@@ -395,11 +400,11 @@ const useMockDraft = (allProspects) => {
     }, {});
     return {
       totalPicked: picked.length,
-      remaining: (allProspects?.length || 0) - picked.length,
+      remaining: (sourceProspects?.length || 0) - picked.length,
       byPosition,
       totalPicks: draftSettings.totalPicks,
     };
-  }, [draftBoard, allProspects, draftSettings.totalPicks]);
+  }, [draftBoard, sourceProspects, draftSettings.totalPicks]);
   
   const isDraftComplete = useMemo(() => currentPick > draftSettings.totalPicks, [currentPick, draftSettings.totalPicks]);
   const progress = useMemo(() => (currentPick - 1) / draftSettings.totalPicks * 100, [currentPick, draftSettings.totalPicks]);
@@ -598,6 +603,7 @@ const useMockDraft = (allProspects) => {
     setDraftSettings,
     setFilters,
     initializeDraft,
+    setSourceProspects,
     getBigBoard,
     sortedAugmentedProspects, // Expose sortedAugmentedProspects for steal/reach calculation
     getProspectRecommendations,
