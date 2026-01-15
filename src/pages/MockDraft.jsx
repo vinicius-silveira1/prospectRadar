@@ -48,6 +48,7 @@ const MockDraft = () => {
     const allProspectsFilters = useMemo(() => ({ draftClass: '2026', league }), [league]);
 
   const { prospects: allProspects, loading: prospectsLoading, error: prospectsError } = useProspects(allProspectsFilters);
+  const [boardSizeNotification, setBoardSizeNotification] = useState('');
 
   const [savedBigBoards, setSavedBigBoards] = useState([]);
   const [selectedBigBoard, setSelectedBigBoard] = useState('default');
@@ -146,11 +147,19 @@ const MockDraft = () => {
   }, [league]);
 
   useEffect(() => {
+    // Reset notification when changing
+    setBoardSizeNotification('');
+
     if (selectedBigBoard === 'default') {
       setSourceProspects(allProspects);
     } else {
       const customBoard = savedBigBoards.find(b => b.id === selectedBigBoard);
       if (customBoard && customBoard.board && allProspects.length > 0) {
+        // Set notification if board is smaller than draft
+        if (customBoard.board.length < draftSettings.totalPicks) {
+          setBoardSizeNotification(`Seu Big Board (${customBoard.board.length} prospects) é menor que o draft. O restante será preenchido pelo ranking padrão (Radar Score).`);
+        }
+        
         // Rebuild the ordered list of full prospect objects from the saved board's IDs
         const orderedProspects = customBoard.board
           .map(item => allProspects.find(p => p.id === item.id))
@@ -162,8 +171,11 @@ const MockDraft = () => {
         // Get the remaining prospects from the default list (allProspects)
         const remainingProspects = allProspects.filter(p => !customProspectIds.has(p.id));
 
+        // Sort the remaining prospects by radar_score to provide a sensible fallback
+        const sortedRemainingProspects = remainingProspects.sort((a, b) => (b.radar_score || 0) - (a.radar_score || 0));
+        
         // Combine the lists: custom board first, then the rest of the default prospects
-        const hybridProspectList = [...orderedProspects, ...remainingProspects];
+        const hybridProspectList = [...orderedProspects, ...sortedRemainingProspects];
 
         setSourceProspects(hybridProspectList);
       } else {
@@ -171,7 +183,7 @@ const MockDraft = () => {
         setSourceProspects(allProspects);
       }
     }
-  }, [selectedBigBoard, allProspects, savedBigBoards, setSourceProspects]);
+  }, [selectedBigBoard, allProspects, savedBigBoards, setSourceProspects, draftSettings.totalPicks]);
 
 
 
@@ -405,6 +417,16 @@ const MockDraft = () => {
           onSelectBoard={setSelectedBigBoard}
           league={league}
         />
+
+        {boardSizeNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs text-center text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mt-2"
+          >
+            {boardSizeNotification}
+          </motion.div>
+        )}
 
         {/* Barra de Progresso - Separada do banner */}
         <motion.div 
@@ -1294,6 +1316,15 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                     <div className="text-xs text-slate-500 dark:text-super-dark-text-secondary truncate">
                       {pick.prospect.team || pick.prospect.high_school_team || 'N/A'}
                     </div>
+                    {pick.prospect.stealReachValue && pick.prospect.stealReachValue !== 0 ? (
+                      <div className={`mt-1 text-xs font-bold ${
+                        pick.prospect.stealReachValue < 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-500 dark:text-orange-400'
+                      }`}>
+                        {pick.prospect.stealReachValue < 0
+                          ? `Steal: ${pick.prospect.stealReachValue}`
+                          : `Reach: +${pick.prospect.stealReachValue}`}
+                      </div>
+                    ) : null}
                   </motion.div>
                 ) : (
                   <div className="text-slate-400 dark:text-super-dark-text-secondary text-sm italic">
