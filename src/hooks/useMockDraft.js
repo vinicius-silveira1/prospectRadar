@@ -598,20 +598,22 @@ const useMockDraft = (allProspects, selectedBigBoardId = 'default') => {
       const newBoard = [...prevBoard];
       const pickIndex = newBoard.findIndex(pick => pick.pick === currentPick);
       if (pickIndex !== -1) {
-        newBoard[pickIndex] = { ...newBoard[pickIndex], prospect: prospect };
+        const prospectWithDraftData = { ...prospect }; // Create a copy
 
         // Calculate Steal/Reach
         const bigBoardRank = sortedAugmentedProspects.findIndex(p => p.id === prospect.id) + 1;
         if (bigBoardRank > 0) { // Ensure prospect is found in Big Board
-          newBoard[pickIndex].prospect.bigBoardRank = bigBoardRank;
-          newBoard[pickIndex].prospect.stealReachValue = bigBoardRank - currentPick;
+          prospectWithDraftData.bigBoardRank = bigBoardRank;
+          prospectWithDraftData.stealReachValue = bigBoardRank - currentPick;
         }
+
+        newBoard[pickIndex] = { ...newBoard[pickIndex], prospect: prospectWithDraftData };
       }
       return newBoard;
     });
     setDraftHistory(prevHistory => [...prevHistory, { pick: currentPick, prospect: prospect }]);
     setCurrentPick(prevPick => prevPick + 1);
-  }, [currentPick]);
+  }, [currentPick, sortedAugmentedProspects]);
 
   const undraftProspect = useCallback((pickNumber) => {
     setDraftBoard(prevBoard => {

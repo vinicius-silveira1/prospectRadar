@@ -125,6 +125,7 @@ const MockDraft = () => {
   const [showProbabilityMatrix, setShowProbabilityMatrix] = useState(false);
   const [probabilityMatrix, setProbabilityMatrix] = useState(null);
   const [isCalculatingMatrix, setIsCalculatingMatrix] = useState(false);
+  const [confirmingProspect, setConfirmingProspect] = useState(null);
 
   useEffect(() => {
     const storageKey = `saved_big_boards_${league.toLowerCase()}_2026`;
@@ -219,6 +220,17 @@ const MockDraft = () => {
   const draftStats = getDraftStats();
   const currentPickData = draftBoard.find(p => p.pick === currentPick);
   const recommendations = getProspectRecommendations(currentPick);
+
+  const handleSelectProspect = (prospect) => {
+    setConfirmingProspect(prospect);
+  };
+
+  const handleConfirmPick = () => {
+    if (confirmingProspect) {
+      draftProspect(confirmingProspect);
+    }
+    setConfirmingProspect(null);
+  };
 
   const handleSaveClick = () => {
     setDraftNameToSave(`Meu Mock Draft - ${new Date().toLocaleDateString('pt-BR')}`);
@@ -1061,10 +1073,10 @@ const MockDraft = () => {
                       {/* Conditionally render BigBoardView or ProspectsView */}
                       <div className="flex-1 overflow-y-auto">
                         {warRoomRightView === 'bigboard' && (
-                          <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
+                          <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
                         )}
                         {warRoomRightView === 'recommendations' && (
-                          <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
+                          <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={handleSelectProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
                         )}
                       </div>
                     </div>
@@ -1072,8 +1084,8 @@ const MockDraft = () => {
                 ) : (
                   <>
                     {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
-                    {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={draftProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
-                    {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={draftProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                    {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                    {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={handleSelectProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
                   </>
                 )}
               </motion.div>
@@ -1122,6 +1134,16 @@ const MockDraft = () => {
                   currentDraftOrder={getCurrentDraftOrder()}
                   league={league}
                 />
+
+        <ConfirmPickModal
+          isOpen={!!confirmingProspect}
+          onClose={() => setConfirmingProspect(null)}
+          onConfirm={handleConfirmPick}
+          prospect={confirmingProspect}
+          pickNumber={currentPick}
+          team={currentPickData}
+        />
+        
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
           <MockDraftExport ref={exportRef} draftData={exportDraft()} isDark={document.documentElement.classList.contains('dark')} />
           {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
@@ -1196,6 +1218,78 @@ const MockDraft = () => {
   );
 };
 
+
+const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, team }) => {
+  if (!isOpen) return null;
+
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
+  const teamNames = team.league === 'WNBA' ? wnbaTeamFullNames : nbaTeamFullNames;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.9, y: 50, opacity: 0 }}
+          animate={{ scale: 1, y: 0, opacity: 1 }}
+          exit={{ scale: 0.9, y: 50, opacity: 0 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-2xl p-6 w-full max-w-md relative border border-purple-200/50 dark:border-purple-700/30"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-xl font-bold text-black dark:text-white text-center mb-2 font-mono">Confirmar Escolha</h2>
+          <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-4">
+            Você está prestes a selecionar para a Pick #{pickNumber}.
+          </p>
+
+          <div className="my-6 flex flex-col items-center gap-4">
+            <div className={`relative rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-white font-bold ring-4 ring-purple-200/50 dark:ring-purple-700/50 w-24 h-24 text-3xl`} style={{ backgroundColor: getColorFromName(prospect?.name) }}>
+              {isLoading ? (
+                <div className="w-full h-full bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+              ) : imageUrl ? (
+                <img src={imageUrl} alt={prospect?.name || 'Prospect'} className="w-full h-full object-cover" />
+              ) : (
+                <span>{getInitials(prospect?.name)}</span>
+              )}
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</p>
+              <p className="text-base text-slate-600 dark:text-super-dark-text-secondary">{prospect.position}</p>
+            </div>
+            <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-lg">
+                <img src={`/images/teams/${team.newOwner}.svg`} alt={team.newOwner} className="h-8 w-8 object-contain" />
+                <span className="font-semibold text-slate-700 dark:text-slate-200">{teamNames[team.newOwner] || team.newOwner}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-4 mt-6">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onClose}
+              className="px-8 py-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-lg shadow-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            >
+              Cancelar
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34, 197, 94, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onConfirm}
+              className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 transition-colors"
+            >
+              Confirmar Pick
+            </motion.button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
 
 const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, league, isWarRoom = false }) => {
   const containerVariants = {
