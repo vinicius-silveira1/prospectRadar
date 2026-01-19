@@ -1,14 +1,9 @@
 #!/usr/bin/env node
 /**
- * Atualiza o arquivo public/data/nba_standings.json automaticamente.
+ * Atualiza os dados de standings da NBA no Supabase.
  * Fonte primária: pacote `nba` (NBA Stats API).
- * Fallback: URL custom em env `NBA_STANDINGS_SOURCE_URL` retornando array de objetos {team: 'BOS', wins: 10, losses: 3}.
- * Saída:
- * {
- *   updatedAt: ISODate,
- *   lottery: [ { team, wins, losses }, ... 14 ],
- *   playoff: [ { team, wins, losses }, ... 16 ]
- * }
+ * Fallback: URL custom em env `NBA_STANDINGS_SOURCE_URL`.
+ * Saída: Um único registro na tabela `nba_standings`.
  */
 
 import fs from 'fs';
@@ -16,12 +11,20 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+// Carrega variáveis de ambiente do .env
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+// Configuração do Supabase
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const ROOT = path.resolve(__dirname, '..');
-const OUTPUT_PATH = path.resolve(ROOT, 'public', 'data', 'nba_standings.json');
 
 // CLI flags simples (suporta --flag=valor ou --flag valor)
 const rawArgs = process.argv.slice(2);
@@ -52,7 +55,6 @@ function parseArgs(list) {
 const argMap = parseArgs(rawArgs);
 const seasonStartYear = Number(argMap.seasonStart) || new Date().getFullYear(); // ex: 2025 para temporada 2025-26
 let season = argMap.season || `${seasonStartYear}-${String((seasonStartYear + 1) % 100).padStart(2, '0')}`; // 2025-26
-const output = argMap.out ? path.resolve(argMap.out) : OUTPUT_PATH;
 const sourceUrl = process.env.NBA_STANDINGS_SOURCE_URL || argMap.source;
 const force = !!argMap.force;
 
@@ -393,17 +395,17 @@ async function main() {
   await attempt('basketball-reference', () => fetchViaBasketballReference(seasonStartYear));
   await attempt('basketball-reference-puppeteer', () => fetchViaBasketballReferencePuppeteer(seasonStartYear));
   await attempt('custom-source', () => fetchViaCustomUrl(sourceUrl));
+
   if (!teams || teams.length === 0) {
-    error('Não foi possível obter standings de nenhuma fonte. Mantendo arquivo existente (se houver).');
-    if (!fs.existsSync(output)) {
-      process.exitCode = 1;
-    }
+    error('Não foi possível obter standings de nenhuma fonte. Nenhuma atualização será feita.');
+    process.exitCode = 1;
     return;
   }
   // Normaliza códigos
   teams = normalizeTeamCodes(teams);
   const { lottery, playoff } = deriveLotteryAndPlayoff(teams);
   if (lottery.length !== 14) warn(`Quantidade de lottery != 14 (${lottery.length}).`);
+  
   const payload = {
     updatedAt: new Date().toISOString(),
     lottery,
@@ -412,23 +414,41 @@ async function main() {
     season,
   };
 
-  if (fs.existsSync(output) && !force) {
-    // Carrega anterior para comparar
+  if (!force) {
+    // Carrega dados do Supabase para comparar
     try {
-      const prev = JSON.parse(fs.readFileSync(output, 'utf-8'));
-      const changed = JSON.stringify(prev.lottery) !== JSON.stringify(payload.lottery) || JSON.stringify(prev.playoff) !== JSON.stringify(payload.playoff);
-      if (!changed) {
-        log('Sem mudanças detectadas. Use --force para sobrescrever mesmo assim.');
-        return;
+      const { data: prevData, error: fetchError } = await supabase
+        .from('nba_standings')
+        .select('data')
+        .limit(1)
+        .single();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116: no rows found
+        warn(`Falha ao buscar dados anteriores do Supabase: ${fetchError.message}. Continuará e sobrescreverá.`);
+      } else if (prevData) {
+        const prev = prevData.data;
+        const changed = JSON.stringify(prev.lottery) !== JSON.stringify(payload.lottery) || JSON.stringify(prev.playoff) !== JSON.stringify(payload.playoff);
+        if (!changed) {
+          log('Sem mudanças detectadas. Use --force para sobrescrever mesmo assim.');
+          return;
+        }
       }
-    } catch (_) {
-      warn('Falha lendo arquivo anterior, continuará e sobrescreverá.');
+    } catch (e) {
+      warn(`Falha lendo dados anteriores do Supabase: ${e.message}. Continuará e sobrescreverá.`);
     }
   }
 
-  fs.writeFileSync(output, JSON.stringify(payload, null, 2));
-  log(`Standings atualizadas em ${output}`);
-  log(`Lottery (primeiros 3): ${lottery.slice(0,3).map(t=>t.team).join(', ')} ...`);
+  const { error: upsertError } = await supabase
+    .from('nba_standings')
+    .upsert({ id: 1, data: payload, updated_at: new Date().toISOString() });
+
+  if (upsertError) {
+    error(`Falha ao atualizar standings no Supabase: ${upsertError.message}`);
+    process.exitCode = 1;
+  } else {
+    log(`Standings atualizadas no Supabase com sucesso.`);
+    log(`Lottery (primeiros 3): ${lottery.slice(0,3).map(t=>t.team).join(', ')} ...`);
+  }
 }
 
 main().catch(e => {
