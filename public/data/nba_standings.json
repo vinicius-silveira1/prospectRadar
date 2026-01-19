@@ -1,157 +1,157 @@
 {
-  "updatedAt": "2026-01-15T06:17:04.713Z",
+  "updatedAt": "2026-01-19T15:17:11.638Z",
   "lottery": [
     {
       "team": "NOP",
-      "wins": 9,
-      "losses": 33
+      "wins": 10,
+      "losses": 35
     },
     {
       "team": "IND",
-      "wins": 9,
-      "losses": 31
-    },
-    {
-      "team": "SAC",
       "wins": 10,
-      "losses": 30
+      "losses": 33
     },
     {
       "team": "WAS",
       "wins": 10,
-      "losses": 28
+      "losses": 31
+    },
+    {
+      "team": "SAC",
+      "wins": 12,
+      "losses": 31
     },
     {
       "team": "BKN",
-      "wins": 11,
-      "losses": 26
-    },
-    {
-      "team": "CHA",
-      "wins": 14,
-      "losses": 26
+      "wins": 12,
+      "losses": 28
     },
     {
       "team": "UTA",
       "wins": 14,
-      "losses": 25
+      "losses": 28
+    },
+    {
+      "team": "CHA",
+      "wins": 16,
+      "losses": 27
     },
     {
       "team": "DAL",
-      "wins": 15,
-      "losses": 25
-    },
-    {
-      "team": "LAC",
-      "wins": 16,
-      "losses": 23
+      "wins": 17,
+      "losses": 26
     },
     {
       "team": "MIL",
       "wins": 17,
-      "losses": 23
+      "losses": 24
     },
     {
       "team": "MEM",
-      "wins": 17,
-      "losses": 22
-    },
-    {
-      "team": "CHI",
       "wins": 18,
-      "losses": 21
+      "losses": 23
     },
     {
-      "team": "POR",
-      "wins": 19,
-      "losses": 22
+      "team": "LAC",
+      "wins": 18,
+      "losses": 23
     },
     {
       "team": "ATL",
       "wins": 20,
+      "losses": 24
+    },
+    {
+      "team": "CHI",
+      "wins": 20,
+      "losses": 22
+    },
+    {
+      "team": "POR",
+      "wins": 22,
       "losses": 22
     }
   ],
   "playoff": [
     {
       "team": "MIA",
-      "wins": 21,
-      "losses": 19
-    },
-    {
-      "team": "CLE",
       "wins": 22,
-      "losses": 19
-    },
-    {
-      "team": "GSW",
-      "wins": 22,
-      "losses": 19
+      "losses": 20
     },
     {
       "team": "ORL",
-      "wins": 22,
-      "losses": 18
+      "wins": 23,
+      "losses": 19
     },
     {
       "team": "PHI",
       "wins": 22,
-      "losses": 16
+      "losses": 18
+    },
+    {
+      "team": "CLE",
+      "wins": 24,
+      "losses": 19
+    },
+    {
+      "team": "GSW",
+      "wins": 24,
+      "losses": 19
     },
     {
       "team": "TOR",
-      "wins": 24,
-      "losses": 17
-    },
-    {
-      "team": "PHX",
-      "wins": 24,
-      "losses": 16
-    },
-    {
-      "team": "BOS",
-      "wins": 24,
-      "losses": 15
-    },
-    {
-      "team": "HOU",
-      "wins": 23,
-      "losses": 14
-    },
-    {
-      "team": "LAL",
-      "wins": 24,
-      "losses": 14
+      "wins": 25,
+      "losses": 19
     },
     {
       "team": "NYK",
       "wins": 25,
-      "losses": 14
+      "losses": 17
+    },
+    {
+      "team": "PHX",
+      "wins": 25,
+      "losses": 17
+    },
+    {
+      "team": "LAL",
+      "wins": 25,
+      "losses": 16
+    },
+    {
+      "team": "HOU",
+      "wins": 25,
+      "losses": 15
     },
     {
       "team": "MIN",
       "wins": 27,
+      "losses": 16
+    },
+    {
+      "team": "BOS",
+      "wins": 26,
+      "losses": 15
+    },
+    {
+      "team": "DEN",
+      "wins": 29,
       "losses": 14
     },
     {
       "team": "SAS",
-      "wins": 27,
-      "losses": 13
-    },
-    {
-      "team": "DEN",
-      "wins": 27,
+      "wins": 29,
       "losses": 13
     },
     {
       "team": "DET",
-      "wins": 28,
+      "wins": 30,
       "losses": 10
     },
     {
       "team": "OKC",
-      "wins": 34,
-      "losses": 7
+      "wins": 35,
+      "losses": 8
     }
   ],
   "source": "basketball-reference-puppeteer",

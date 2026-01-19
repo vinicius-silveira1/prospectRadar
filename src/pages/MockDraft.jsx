@@ -1469,6 +1469,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
       {prospects.map((prospect, index) => (
         <motion.div 
           key={prospect.id} 
+          layoutId={`prospect-card-${prospect.id}`}
           className="relative"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
