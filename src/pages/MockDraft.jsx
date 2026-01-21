@@ -26,17 +26,14 @@ import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { simulateLotteryDetailed, resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
+import { resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
 import DraftReportCard from '@/components/MockDraft/DraftReportCard';
 import TradeModal from '@/components/MockDraft/TradeModal.jsx';
 import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
-import { 
-  generateInitialOrderFromStandings, 
-  generateSecondRoundOrderFromStandings, 
-  resolve2026DraftOrder, 
-  resolveSecondRound 
-} from '@/logic/tradeResolver';
+import LotteryAnimationModal from '@/components/MockDraft/LotteryAnimationModal.jsx';
+import TradeReporterModal from '@/components/MockDraft/TradeReporterModal.jsx';
+// Trade resolver imports removed - not currently needed
 
 
 
@@ -55,18 +52,14 @@ const MockDraft = () => {
 
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters,
-    draftHistory, isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
-    isOrderCustomized,
-    draftProspect, undraftProspect, simulateLottery, setDraftSettings, setFilters,
-    initializeDraft, resetToDefaultOrder, getBigBoard, getProspectRecommendations, exportDraft, getDraftStats,
+    isDraftComplete, progress, savedDrafts, isSaving, isLoadingDrafts,
+    draftProspect, undraftProspect, setDraftSettings, setFilters,
+    initializeDraft, resetToDefaultOrder, exportDraft, getDraftStats,
     saveMockDraft, loadMockDraft, deleteMockDraft, tradePicks, 
     setCustomTeamOrder, getCurrentDraftOrder, applyStandingsOrder,
     setSourceProspects,
-    // generateReportCardData removido
     autocompleteDraft
   } = useMockDraft(allProspects, selectedBigBoard);
-  const [warRoomRightView, setWarRoomRightView] = useState('bigboard'); // Estado para controlar a visualização da coluna direita do War Room
-
   const [view, setView] = useState('draft');
   const [showFilters, setShowFilters] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -116,9 +109,16 @@ const MockDraft = () => {
   const [isPublicDraft, setIsPublicDraft] = useState(false); // Novo estado para o checkbox
   const [draftNameToSave, setDraftNameToSave] = useState('');
   const [notification, setNotification] = useState({ type: '', message: '' });
+  const [isLotteryModalOpen, setIsLotteryModalOpen] = useState(false);
+  const [lotteryResult, setLotteryResult] = useState(null);
+  const [isTradeReportModalOpen, setIsTradeReportModalOpen] = useState(false);
+  const [tradeReportData, setTradeReportData] = useState(null);
+  const [shouldOpenTradeReportAfterLottery, setShouldOpenTradeReportAfterLottery] = useState(false);
   const [lotterySeed, setLotterySeed] = useState('');
   const [lastLotteryResult, setLastLotteryResult] = useState(null);
   const [showLotteryRanges, setShowLotteryRanges] = useState(false);
+  const [showLotteryAnimation, setShowLotteryAnimation] = useState(true);
+  const [showTradeReport, setShowTradeReport] = useState(true);
   // Estados de feedback e acessibilidade
   const [isOddsApplying, setIsOddsApplying] = useState(false);
   const [oddsInlineFeedback, setOddsInlineFeedback] = useState('');
@@ -126,6 +126,11 @@ const MockDraft = () => {
   const [probabilityMatrix, setProbabilityMatrix] = useState(null);
   const [isCalculatingMatrix, setIsCalculatingMatrix] = useState(false);
   const [confirmingProspect, setConfirmingProspect] = useState(null);
+  const [previousDraftOrder, setPreviousDraftOrder] = useState(null); // Rastreia a ordem anterior para feedback visual
+  const [positionChanges, setPositionChanges] = useState({}); // Mapa de pick -> mudança de posição
+  
+  // Ref para evitar reabertura do modal de trocas
+  const tradeModalOpenedRef = useRef(false);
 
   useEffect(() => {
     const storageKey = `saved_big_boards_${league.toLowerCase()}_2026`;
@@ -213,13 +218,86 @@ const MockDraft = () => {
       if (lastLotteryResult) {
         localStorage.setItem('mockDraftLastLotteryResult', JSON.stringify(lastLotteryResult));
       }
-    } catch {}
+    } catch {
+      // Ignore storage errors
+    }
   }, [lastLotteryResult]);
+
+  // Abrir Trade Report Modal após a loteria ser simulada
+  useEffect(() => {
+    if (shouldOpenTradeReportAfterLottery && !isLotteryModalOpen && !tradeModalOpenedRef.current) {
+      if (tradeReportData && tradeReportData.length > 0) {
+        setIsTradeReportModalOpen(true);
+        tradeModalOpenedRef.current = true;
+        // Resetar o flag imediatamente após abrir o modal para evitar re-abertura
+        setShouldOpenTradeReportAfterLottery(false);
+      }
+    }
+  }, [shouldOpenTradeReportAfterLottery, isLotteryModalOpen, tradeReportData]);
+
+  // Resetar shouldOpenTradeReportAfterLottery quando o trade report modal fecha
+  const handleCloseTradeReportModal = () => {
+    setIsTradeReportModalOpen(false);
+    tradeModalOpenedRef.current = false; // Resetar o ref
+    
+    // Calcular mudanças de posição APÓS fechar o modal de trocas
+    if (previousDraftOrder && previousDraftOrder.length > 0 && draftBoard.length > 0) {
+      const changes = {};
+      
+      // CORREÇÃO: Mapear por número da pick anterior (não por equipe)
+      // Isso evita sobrescrever quando um time tem múltiplas picks
+      const previousPickMap = new Map();
+      previousDraftOrder.forEach(pick => {
+        if (pick.pick <= 30) { // Apenas primeira rodada
+          previousPickMap.set(pick.pick, pick); // pick.pick → dados anteriores
+        }
+      });
+      
+      // Comparar: para cada POSIÇÃO DE PICK na 1ª rodada
+      draftBoard.forEach(currentPick => {
+        if (currentPick.pick <= 30) {
+          const previousPickData = previousPickMap.get(currentPick.pick);
+          
+          // Se o dono da pick mudou (por causa de trade)
+          if (previousPickData && previousPickData.newOwner !== currentPick.newOwner) {
+            const team = currentPick.newOwner;
+            
+            // Encontrar onde este time estava antes (qual era sua pick anterior)
+            let previousPickNumberForThisTeam = null;
+            for (const [oldPickNum, oldPickData] of previousPickMap) {
+              if (oldPickData.newOwner === team && oldPickNum !== currentPick.pick) {
+                previousPickNumberForThisTeam = oldPickNum;
+                break; // Encontrou a primeira pick anterior deste time
+              }
+            }
+            
+            if (previousPickNumberForThisTeam !== null) {
+              const positionDifference = previousPickNumberForThisTeam - currentPick.pick;
+              changes[currentPick.pick] = {
+                direction: positionDifference > 0 ? 'up' : 'down',
+                amount: Math.abs(positionDifference),
+                team: team,
+                previousPick: previousPickNumberForThisTeam
+              };
+            }
+          }
+        }
+      });
+      
+      if (Object.keys(changes).length > 0) {
+        setPositionChanges(changes);
+        console.log('Mudanças de posição:', changes);
+        // Indicadores permanecem visíveis permanentemente (user pode resetar manualmente)
+      } else {
+        // Se não houver mudanças, apenas limpar o estado anterior
+        setPreviousDraftOrder(null);
+      }
+    }
+  };
 
   // Variáveis computadas para a UI
   const draftStats = getDraftStats();
   const currentPickData = draftBoard.find(p => p.pick === currentPick);
-  const recommendations = getProspectRecommendations(currentPick);
 
   const handleSelectProspect = (prospect) => {
     setConfirmingProspect(prospect);
@@ -302,6 +380,14 @@ const MockDraft = () => {
     setNotification({ type: 'success', message: 'Ordem dos times atualizada com sucesso!' });
   };
 
+  const handleCloseLotteryModal = () => {
+    setIsLotteryModalOpen(false);
+    // Sinalizar para abrir o trade report apenas se houver dados de trades
+    if (tradeReportData && tradeReportData.length > 0) {
+      setShouldOpenTradeReportAfterLottery(true);
+    }
+  };
+
   // Export PDF removido para limpeza
 
   if (prospectsLoading) {
@@ -315,6 +401,28 @@ const MockDraft = () => {
   return (
     <LayoutGroup>
       <div className="space-y-6">
+        {/* Aviso WNBA em Manutenção */}
+        {league === 'WNBA' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-amber-300 dark:border-amber-700/50 rounded-lg p-4 flex items-center gap-3 shadow-lg"
+          >
+            <div className="flex-shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800/50">
+                <svg className="h-5 w-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-amber-900 dark:text-amber-200">WNBA em Manutenção</h3>
+              <p className="text-sm text-amber-800 dark:text-amber-300">O Mock Draft da WNBA está em manutenção no momento. Voltaremos em breve!</p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Banner Principal */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -444,7 +552,6 @@ const MockDraft = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }} 
           transition={{ delay: 0.2 }}
           className="bg-gradient-to-br from-white to-indigo-50/30 dark:from-super-dark-secondary dark:to-indigo-900/10 rounded-xl shadow-lg border border-indigo-200/50 dark:border-indigo-700/30 p-4 backdrop-blur-sm"
         >
@@ -570,6 +677,47 @@ const MockDraft = () => {
                   )}
                 </motion.div>
               )}
+              {/* Toggle Controls for Lottery Animation and Trade Report */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Animação</span>
+                  <motion.button
+                    onClick={() => setShowLotteryAnimation(!showLotteryAnimation)}
+                    className={`relative w-10 h-6 rounded-full transition-colors duration-300 ${
+                      showLotteryAnimation
+                        ? 'bg-blue-500'
+                        : 'bg-slate-300 dark:bg-slate-600'
+                    }`}
+                    title={showLotteryAnimation ? 'Desabilitar animação de loteria' : 'Habilitar animação de loteria'}
+                  >
+                    <motion.div
+                      animate={{ x: showLotteryAnimation ? 20 : 2 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                    />
+                  </motion.button>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Relatório</span>
+                  <motion.button
+                    onClick={() => setShowTradeReport(!showTradeReport)}
+                    className={`relative w-10 h-6 rounded-full transition-colors duration-300 ${
+                      showTradeReport
+                        ? 'bg-purple-500'
+                        : 'bg-slate-300 dark:bg-slate-600'
+                    }`}
+                    title={showTradeReport ? 'Desabilitar relatório de trocas' : 'Habilitar relatório de trocas'}
+                  >
+                    <motion.div
+                      animate={{ x: showTradeReport ? 20 : 2 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                    />
+                  </motion.button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-2 relative z-10">
                 <motion.button 
                   whileHover={{
@@ -598,6 +746,8 @@ const MockDraft = () => {
                   <span className="relative z-10">Reset</span>
                 </motion.button>
 
+                {/* Toggle Controls removed from here */}
+
                 <motion.button 
                   whileHover={{
                     scale: 1.05,
@@ -607,16 +757,55 @@ const MockDraft = () => {
                   onClick={() => {
                     if (standings && !standingsLoading && !isOddsApplying) {
                       setIsOddsApplying(true);
-                      // CORREÇÃO: Gera uma nova seed aleatória se nenhuma for fornecida.
-                      // Isso garante que cada clique produza um resultado diferente.
                       const seedForSimulation = lotterySeed.trim() !== '' ? Number(lotterySeed) : Math.floor(Math.random() * 1e9);
 
                       try {
-                        setOddsInlineFeedback(''); // Limpa feedback anterior
-                        // A função do hook agora retorna o resultado detalhado da loteria
+                        setOddsInlineFeedback('');
+                        
+                        // Resetar o ref para permitir abrir o modal novamente
+                        tradeModalOpenedRef.current = false;
+                        
+                        // Salvar a ordem anterior antes da simulação
+                        const previousOrder = draftBoard.map(pick => ({ pick: pick.pick, newOwner: pick.newOwner }));
+                        setPreviousDraftOrder(previousOrder);
+                        
                         const lotteryDetails = applyStandingsOrder(standings, { simulateLottery: true, seed: seedForSimulation });
-                        // Usamos o resultado retornado para atualizar o painel de controle
                         if (lotteryDetails) setLastLotteryResult(lotteryDetails);
+                        
+                        // Transformar lotteryResult para o formato esperado pelo LotteryAnimationModal
+                        // lotteryDetails.winners contém os 4 primeiros picks vencedores
+                        if (lotteryDetails && lotteryDetails.winners) {
+                          const lotteryPicks = lotteryDetails.winners.map((winner) => ({
+                            pick: winner.pick,
+                            team: {
+                              slug: winner.team.toLowerCase(),
+                              name: winner.team
+                            }
+                          }));
+                          setLotteryResult(lotteryPicks);
+                          
+                          // Preparar dados para o relatório de trades (os dados resolvidos de trocas)
+                          const reportData = (lotteryDetails.trades && lotteryDetails.trades.length > 0)
+                            ? lotteryDetails.trades.map(trade => ({
+                                pick: trade.pick,
+                                originalTeam: trade.originalTeam,
+                                newOwner: trade.newOwner,
+                                description: trade.description
+                              }))
+                            : [];
+                          setTradeReportData(reportData);
+                          
+                          // Abrir modal de animação apenas se habilitado
+                          if (showLotteryAnimation) {
+                            setIsLotteryModalOpen(true);
+                          } else {
+                            // Se animação está desabilitada, abrir relatório direto (se habilitado)
+                            if (showTradeReport && reportData.length > 0) {
+                              setIsTradeReportModalOpen(true);
+                            }
+                          }
+                        }
+                        
                         setOddsInlineFeedback('Loteria oficial simulada (odds reais aplicadas)!');
                       } catch(e) {
                         console.error('Falha simulando detalhamento da loteria:', e);
@@ -646,6 +835,7 @@ const MockDraft = () => {
                     </>
                   )}
                 </motion.button>
+
                 {/*
                 
                 <motion.button 
@@ -911,7 +1101,40 @@ const MockDraft = () => {
 
           {/* ... (Área Principal) ... */}
           <div className="xl:col-span-3 order-1 xl:order-2">
-            <div className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 mb-4 lg:mb-6 backdrop-blur-sm">
+            {league === 'WNBA' ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-8 lg:p-12 backdrop-blur-sm"
+              >
+                <div className="flex flex-col items-center justify-center min-h-[400px] gap-6">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/50 mb-4">
+                      <svg className="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0 4v2M9 3h6m0 0a9 9 0 110 18H9a9 9 0 010-18z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Mock Draft WNBA</h2>
+                    <p className="text-lg text-slate-600 dark:text-slate-400 mb-4">Em Manutenção</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
+                      Estamos fazendo melhorias no Mock Draft da WNBA. Voltaremos em breve com uma experiência ainda melhor!
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => window.history.back()}
+                      className="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                    >
+                      ← Voltar
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                <div className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 mb-4 lg:mb-6 backdrop-blur-sm">
               <div className="flex border-b border-purple-200/50 dark:border-purple-700/50 overflow-x-auto whitespace-nowrap bg-gradient-to-r from-purple-50/50 to-indigo-50/50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-t-xl">
                 <motion.button 
                   whileHover={{ scale: 1.02 }}
@@ -953,39 +1176,19 @@ const MockDraft = () => {
                     />
                   )}
                 </motion.button>
+                {/* Botão War Room */}
                 <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setView('prospects')} 
-                  className={`px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden ${ 
-                    view === 'prospects' 
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' 
-                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-900/20'
-                  }`}
-                >
-                  <Users className="h-4 w-4 inline mr-1 sm:mr-2" /> 
-                  Prospects<span className="hidden sm:inline"> Disponíveis</span>
-                  {view === 'prospects' && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-yellow-300 rounded-t-full"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                </motion.button>
-                {/* Botão War Room - Movido para dentro do flex container e com destaque */}
-                <motion.button 
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setView('war_room')} 
-                  className={`ml-auto mr-2 px-4 sm:px-6 py-2 sm:py-3 font-medium transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden rounded-lg ${ 
+                  className={`px-5 sm:px-6 py-2.5 sm:py-2.5 font-bold transition-all text-sm sm:text-base flex-shrink-0 relative overflow-hidden rounded-lg ${ 
                     view === 'war_room' 
-                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 shadow-lg border border-yellow-300' // More prominent active state
-                      : 'text-slate-600 dark:text-super-dark-text-secondary hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-900/20'
+                      ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 text-white shadow-lg dark:shadow-blue-900/40 border border-blue-400 dark:border-blue-600/50' 
+                      : 'text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-300 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600'
                   }`}
                 >
-                  <LayoutDashboard className="h-4 w-4 inline mr-1 sm:mr-2" /> 
-                  <span className="relative z-10">War Room</span>
+                  <LayoutDashboard className="h-4 w-4 inline mr-1.5 font-bold" /> 
+                  <span className="relative z-10 font-bold">War Room</span>
                 </motion.button>
               </div>
               {view !== 'war_room' && (
@@ -1028,68 +1231,112 @@ const MockDraft = () => {
                 transition={{ duration: 0.3 }}
               >
                 {view === 'war_room' ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 p-4">
-                    {/* Left Column: Draft Board */}
-                    <div className="h-[80vh] overflow-y-auto rounded-xl bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 border border-purple-200/50 dark:border-purple-700/30 p-2 sm:p-4 shadow-lg">
-                      <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} isWarRoom={true} />
-                    </div>
+                  <>
+                    {/* War Room Main Header */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="relative overflow-hidden mb-5 rounded-lg"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-blue-400/10 rounded-lg" />
+                      
+                      <div className="relative bg-gradient-to-br from-white to-blue-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-lg p-5 sm:p-6 border border-blue-200/50 dark:border-purple-700/30 shadow-lg">
+                        
+                        {/* Header: Pick Number + Team */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 pb-4 border-b border-blue-200/50 dark:border-purple-700/30">
+                          {/* Left: Pick Number + Team */}
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="flex flex-col">
+                              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1">Próxima Pick</p>
+                              <p className="text-3xl sm:text-4xl font-black text-blue-600 dark:text-blue-400 font-mono">
+                                #{currentPick}
+                              </p>
+                            </div>
+                            
+                            {currentPickData && (
+                              <div className="flex items-center gap-2">
+                                <img 
+                                  src={`/images/teams/${currentPickData.newOwner}.svg`} 
+                                  alt={currentPickData.newOwner} 
+                                  className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+                                />
+                                <div>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Time</p>
+                                  <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">
+                                    {nbaTeamFullNames[currentPickData.newOwner] || currentPickData.newOwner}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-                    {/* Right Column: Search, Toggle, Big Board/Recommendations */}
-                    <div className="flex flex-col h-[80vh] rounded-xl bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 border border-purple-200/50 dark:border-purple-700/30 p-2 sm:p-4 shadow-lg">
-                      {/* Search Bar */}
-                      <div className="mb-3 flex items-center gap-2">
-                        <Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                        <input
-                          type="text"
-                          placeholder="Buscar prospects..."
-                          value={filters.searchTerm}
-                          onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                          className="select-filter active:scale-95 w-full text-sm"
-                        />
+                        {/* Team Needs */}
+                        {currentPickData && (
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1">
+                              <Target className="h-3.5 w-3.5" /> Necessidades:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {TEAM_NEEDS[currentPickData.newOwner]?.map(need => (
+                                <span
+                                  key={need}
+                                  className="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/40 rounded text-xs font-semibold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50"
+                                >
+                                  {need}
+                                </span>
+                              )) || <span className="text-xs text-slate-500 dark:text-slate-400 italic">Análise em progresso...</span>}
+                            </div>
+                          </div>
+                        )}
                       </div>
+                    </motion.div>
 
-                      {/* Toggle Buttons for Right Column View */}
-                      <div className="flex justify-center mb-3 p-1 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-inner">
-                        <motion.button
-                          onClick={() => setWarRoomRightView('bigboard')}
-                          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            warRoomRightView === 'bigboard' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                          }`}
-                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                        >
-                          Big Board
-                        </motion.button>
-                        <motion.button
-                          onClick={() => setWarRoomRightView('recommendations')}
-                          className={`flex-1 px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            warRoomRightView === 'recommendations' ? 'bg-purple-600 text-white shadow' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                          }`}
-                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                        >
-                          Recomendações
-                        </motion.button>
-                      </div>
+                    {/* Layout War Room - Two Column */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 p-4 lg:p-6">
+                      
+                      {/* Left: Draft Board */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="rounded-lg bg-gradient-to-br from-white to-blue-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 border border-blue-200/50 dark:border-purple-700/30 p-4 sm:p-5 shadow-lg h-[70vh] overflow-y-auto"
+                      >
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 font-mono tracking-wide">
+                          <LayoutDashboard className="h-4 w-4" /> Draft Board
+                        </h3>
+                        <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} isWarRoom={true} positionChanges={positionChanges} />
+                      </motion.div>
 
-                      {/* Conditionally render BigBoardView or ProspectsView */}
-                      <div className="flex-1 overflow-y-auto">
-                        {warRoomRightView === 'bigboard' && (
+                      {/* Right: Big Board */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex flex-col rounded-lg bg-gradient-to-br from-white to-blue-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 border border-blue-200/50 dark:border-purple-700/30 p-4 sm:p-5 shadow-lg h-[70vh]"
+                      >
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 font-mono tracking-wide">
+                          <Globe className="h-4 w-4" /> Scouting
+                        </h3>
+                        
+                        {/* Big Board List */}
+                        <div className="flex-1 overflow-y-auto">
                           <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
-                        )}
-                        {warRoomRightView === 'recommendations' && (
-                          <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={handleSelectProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
-                        )}
-                      </div>
+                        </div>
+                      </motion.div>
                     </div>
-                  </div>
+                  </>
                 ) : (
                   <>
-                    {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} />}
+                    {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} positionChanges={positionChanges} />} 
                     {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
-                    {view === 'prospects' && <ProspectsView prospects={availableProspects} recommendations={recommendations} onDraftProspect={handleSelectProspect} currentPick={currentPick} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
                   </>
                 )}
-              </motion.div>
+              </motion.div> 
+              
             </AnimatePresence>
+              </>
+            )}
           </div>
         </div>
 
@@ -1142,6 +1389,19 @@ const MockDraft = () => {
           prospect={confirmingProspect}
           pickNumber={currentPick}
           team={currentPickData}
+        />
+
+        <LotteryAnimationModal
+          isOpen={isLotteryModalOpen}
+          onClose={handleCloseLotteryModal}
+          lotteryTeams={standings?.lottery || []}
+          lotteryResult={lotteryResult}
+        />
+
+        <TradeReporterModal
+          isOpen={isTradeReportModalOpen}
+          onClose={handleCloseTradeReportModal}
+          tradeReport={tradeReportData}
         />
         
         <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
@@ -1220,10 +1480,10 @@ const MockDraft = () => {
 
 
 const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, team }) => {
-  if (!isOpen) return null;
+  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image_url);
+  const teamNames = team?.league === 'WNBA' ? wnbaTeamFullNames : nbaTeamFullNames;
 
-  const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
-  const teamNames = team.league === 'WNBA' ? wnbaTeamFullNames : nbaTeamFullNames;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
@@ -1239,11 +1499,11 @@ const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, te
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.9, y: 50, opacity: 0 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="bg-white dark:bg-super-dark-secondary rounded-xl shadow-2xl p-6 w-full max-w-md relative border border-purple-200/50 dark:border-purple-700/30"
+          className="bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-800 dark:to-slate-700 rounded-xl shadow-2xl dark:shadow-3xl p-6 w-full max-w-md relative border border-blue-200/60 dark:border-slate-600"
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-xl font-bold text-black dark:text-white text-center mb-2 font-mono">Confirmar Escolha</h2>
-          <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-4">
+          <p className="text-center text-slate-600 dark:text-slate-300 text-sm mb-4">
             Você está prestes a selecionar para a Pick #{pickNumber}.
           </p>
 
@@ -1258,12 +1518,12 @@ const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, te
               )}
             </div>
             <div className="text-center">
-              <p className="text-2xl font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary">{prospect.name}</p>
-              <p className="text-base text-slate-600 dark:text-super-dark-text-secondary">{prospect.position}</p>
+              <p className="text-2xl font-mono font-bold tracking-wide text-slate-900 dark:text-white">{prospect.name}</p>
+              <p className="text-base text-slate-700 dark:text-slate-300">{prospect.position}</p>
             </div>
-            <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-lg">
+            <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 p-3 rounded-lg border border-blue-200/50 dark:border-slate-600 shadow-sm">
                 <img src={`/images/teams/${team.newOwner}.svg`} alt={team.newOwner} className="h-8 w-8 object-contain" />
-                <span className="font-semibold text-slate-700 dark:text-slate-200">{teamNames[team.newOwner] || team.newOwner}</span>
+                <span className="font-semibold text-slate-800 dark:text-white">{teamNames[team.newOwner] || team.newOwner}</span>
             </div>
           </div>
 
@@ -1272,7 +1532,7 @@ const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, te
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onClose}
-              className="px-8 py-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-lg shadow-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+              className="px-8 py-3 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-slate-200 font-semibold rounded-lg shadow-lg hover:from-slate-300 hover:to-slate-400 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-colors"
             >
               Cancelar
             </motion.button>
@@ -1280,7 +1540,7 @@ const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, te
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(34, 197, 94, 0.5)" }}
               whileTap={{ scale: 0.95 }}
               onClick={onConfirm}
-              className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 transition-colors"
+              className="px-8 py-3 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 hover:from-green-600 hover:via-green-700 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg dark:shadow-green-600/30 transition-all duration-200"
             >
               Confirmar Pick
             </motion.button>
@@ -1291,7 +1551,7 @@ const ConfirmPickModal = ({ isOpen, onClose, onConfirm, prospect, pickNumber, te
   );
 };
 
-const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, league, isWarRoom = false }) => {
+const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, league, isWarRoom = false, positionChanges = {} }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -1343,30 +1603,27 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                 : 'border-slate-200 dark:border-super-dark-border bg-gradient-to-br from-slate-50/80 to-slate-100/60 dark:from-super-dark-secondary dark:to-super-dark-secondary'
             }`}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div className="text-sm">
-                <div className="font-bold text-slate-900 dark:text-super-dark-text-primary">Pick #{pick.pick}</div> {/* Revertido para pick.pick */}
-                <div className="text-slate-500 dark:text-super-dark-text-secondary">Round {pick.round}</div>
-              </div>
-              <div className="flex flex-col gap-1"> {/* Changed to flex-col for vertical buttons */}
-                {pick.prospect && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => onUndraftPick(pick.pick)}
-                    className="px-2 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium"
-                  >
-                    Desfazer
-                  </motion.button>
-                )}
-                {/* <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => onTradeClick(pick)}
-                  className="px-2 py-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium"
-                >
-                  <RefreshCw className="h-3 w-3 mr-1" /> Trocar
-                </motion.button> */}
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <div className="text-sm flex-1 min-w-0">
+                <div className="flex items-center gap-1 flex-wrap">
+                  <span className="font-bold text-slate-900 dark:text-super-dark-text-primary whitespace-nowrap">Pick #{pick.pick}</span>
+                  {positionChanges[pick.pick] && (
+                    <motion.div 
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      exit={{ scale: 0 }}
+                      className="flex items-center gap-0.5 flex-shrink-0"
+                    >
+                      <span className={`text-lg font-bold leading-none ${positionChanges[pick.pick].direction === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+                        {positionChanges[pick.pick].direction === 'up' ? '▲' : '▼'}
+                      </span>
+                      <span className={`text-xs font-semibold leading-none ${positionChanges[pick.pick].direction === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {positionChanges[pick.pick].amount}
+                      </span>
+                    </motion.div>
+                  )}
+                </div>
+                <div className="text-slate-500 dark:text-super-dark-text-secondary text-xs">Round {pick.round}</div>
               </div>
             </div>
             
@@ -1379,10 +1636,10 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                   exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="flex items-center gap-2 mb-2" title={pick.description?.join('; ')}>
+                <div className="flex items-center gap-2 justify-between" title={pick.description?.join('; ')}>
                   {/* Logo e Nome do Time Dono da Pick */}
-                  <div className="flex items-center gap-2 min-w-0">
-                    <img src={`/images/teams/${pick.newOwner}.svg`} alt={pick.newOwner} className={`${isWarRoom ? 'h-8 w-8' : 'h-10 w-10'} object-contain`} />
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <img src={`/images/teams/${pick.newOwner}.svg`} alt={pick.newOwner} className={`${isWarRoom ? 'h-8 w-8' : 'h-10 w-10'} object-contain flex-shrink-0`} />
                     {!isWarRoom && (
                       // Only show team name if not in War Room
                       <span className="text-xs font-semibold text-slate-700 dark:text-super-dark-text-secondary truncate">
@@ -1390,6 +1647,18 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                       </span>
                     )}
                   </div>
+
+                  {/* Desfazer Pick Button - on the same line as team logo */}
+                  {pick.prospect && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => onUndraftPick(pick.pick)}
+                      className="px-2 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-md shadow-md hover:shadow-lg transition-all text-xs flex items-center justify-center font-medium whitespace-nowrap flex-shrink-0"
+                    >
+                      Desfazer
+                    </motion.button>
+                  )}
 
                   {/* Indicador Visual de Troca */}
                   {pick.isTraded && (
@@ -1400,7 +1669,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                   )}
                 </div>
                 {pick.prospect ? (
-                  <motion.div layoutId={`prospect-card-${pick.prospect.id}`}>
+                  <motion.div layoutId={`prospect-card-${pick.prospect.id}`} className="mt-2">
                     <div className="font-mono font-bold tracking-wide text-slate-900 dark:text-super-dark-text-primary truncate text-sm">
                       {pick.prospect.name}
                     </div>
@@ -1421,7 +1690,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
                     ) : null}
                   </motion.div>
                 ) : (
-                  <div className="text-slate-400 dark:text-super-dark-text-secondary text-sm italic">
+                  <div className="text-slate-400 dark:text-super-dark-text-secondary text-sm italic mt-2">
                     {pick.pick === currentPick ? '🎯 Sua vez de selecionar!' : 'Disponível'}
                   </div>
                 )}
@@ -1434,7 +1703,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, onTradeClick, 
   );
 };
 
-const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false, teamNames }) => (
+const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false }) => (
   <div className={!isWarRoom ? "bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm" : ""}>
     <h3 className={`text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6 ${isWarRoom ? 'text-center text-base sm:text-lg' : ''}`}>
       <span className={`flex items-center flex-wrap gap-2 ${isWarRoom ? 'justify-center' : ''}`}>
@@ -1491,7 +1760,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
   </div>
 );
 
-const ProspectsView = ({ prospects, recommendations, onDraftProspect, currentPick, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false, teamNames }) => {
+const ProspectsView = ({ prospects, recommendations, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false }) => {
   const recommendationIds = new Set(recommendations.map(p => p.id));
   const nonRecommendedProspects = prospects.filter(p => !recommendationIds.has(p.id));
   

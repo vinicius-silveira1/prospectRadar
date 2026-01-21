@@ -94,11 +94,15 @@ const useMockDraft = (allProspects, selectedBigBoardId = 'default') => {
 
   const [orderVersion, setOrderVersion] = useState(0); // Novo: Contador para forçar a reinicialização do board
 
-
-
   // Fetch trending data (simplified overlay) - timeframe fixo 7_days
+  // Also reset draft settings quando league muda
 
   useEffect(() => {
+    // Reset draft settings quando league muda
+    setDraftSettings(prev => ({
+      ...prev,
+      totalPicks: league === 'WNBA' ? 36 : 60
+    }));
 
     const fetchTrending = async () => {
 
@@ -712,8 +716,29 @@ const useMockDraft = (allProspects, selectedBigBoardId = 'default') => {
       setOrderVersion(v => v + 1); // Força a reconstrução do board
     }
     
-    // Retorna o resultado enriquecido com a seed utilizada, para exibição na UI
-    return lotteryResult ? { ...lotteryResult, seed: options.seed } : null;
+    // NOVO: Resolver as trocas e capturar os dados
+    const firstRoundOrderInput = (initialOrder && initialOrder.length > 0)
+      ? initialOrder.map(p => ({ pick: p.pick, originalTeam: p.originalTeam || p.team })) 
+      : [];
+    
+    const resolvedTrades = resolve2026DraftOrder(firstRoundOrderInput);
+    
+    // Filtrar apenas as trocas resolvidas (onde isTraded === true)
+    const tradesForDisplay = resolvedTrades
+      .filter(pick => pick.isTraded)
+      .map(pick => ({
+        pick: pick.pick,
+        originalTeam: pick.originalTeam,
+        newOwner: pick.newOwner,
+        description: pick.description
+      }));
+    
+    // Retorna o resultado enriquecido com lottery, trades e seed
+    return lotteryResult ? { 
+      ...lotteryResult, 
+      seed: options.seed,
+      trades: tradesForDisplay 
+    } : null;
     
   }, [league, standings]); // Removido initializeDraft
 
