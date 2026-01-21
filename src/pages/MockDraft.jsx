@@ -1316,7 +1316,7 @@ const MockDraft = () => {
                         className="flex flex-col rounded-lg bg-gradient-to-br from-white to-blue-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 border border-blue-200/50 dark:border-purple-700/30 p-4 sm:p-5 shadow-lg h-[70vh]"
                       >
                         <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 font-mono tracking-wide">
-                          <Globe className="h-4 w-4" /> Scouting
+                          <Globe className="h-4 w-4" /> Big Board
                         </h3>
                         
                         {/* Big Board List */}
@@ -1705,12 +1705,15 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, league, isWarR
 
 const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false }) => (
   <div className={!isWarRoom ? "bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm" : ""}>
-    <h3 className={`text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6 ${isWarRoom ? 'text-center text-base sm:text-lg' : ''}`}>
-      <span className={`flex items-center flex-wrap gap-2 ${isWarRoom ? 'justify-center' : ''}`}>
-        <Trophy className="h-5 w-5 text-purple-600" />
-        Big Board - Principais Prospects
-      </span>
-      {currentPickData && !isDraftComplete && !isWarRoom && (
+    {!isWarRoom && (
+      <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
+        <span className="flex items-center flex-wrap gap-2">
+          <Trophy className="h-5 w-5 text-purple-600" />
+          Big Board - Principais Prospects
+        </span>
+      </h3>
+    )}
+    {currentPickData && !isDraftComplete && !isWarRoom && (
         <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
           <div className="text-sm font-normal text-slate-600 dark:text-slate-300 flex items-center gap-2 mb-2">
             <span className="font-semibold">Escolhendo para:</span>
@@ -1733,8 +1736,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
           </div>
         </div>
       )}
-    </h3>
-  <div className={`grid gap-4 sm:gap-6 ${isWarRoom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'}`}>
+    <div className={`grid gap-4 sm:gap-6 ${isWarRoom ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'}`}>
       {prospects.map((prospect, index) => (
         <motion.div 
           key={prospect.id} 
