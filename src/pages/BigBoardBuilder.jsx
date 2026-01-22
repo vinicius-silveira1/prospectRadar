@@ -38,6 +38,13 @@ const BigBoardBuilder = () => {
   const [boardName, setBoardName] = useState('Meu Big Board 2026');
   const [savedBoards, setSavedBoards] = useState([]);
   const [isSavingBoard, setIsSavingBoard] = useState(false);
+  
+  // Toast notification system
+  const [toast, setToast] = useState(null);
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const STORAGE_KEY = `saved_big_boards_${league.toLowerCase()}_2026`;
 
@@ -52,13 +59,14 @@ const BigBoardBuilder = () => {
     } catch (e) {
       console.error('Falha ao carregar boards salvos:', e);
     }
-  }, []);
+  }, [STORAGE_KEY]);
 
   const persistSavedBoards = (boards) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(boards));
     } catch (e) {
       console.error('Falha ao persistir boards salvos:', e);
+      showToast('Erro ao salvar board localmente', 'error');
     }
   };
   const [tiers, setTiers] = useState(DEFAULT_TIERS);
@@ -156,28 +164,40 @@ const BigBoardBuilder = () => {
       link.download = `${safeName}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      showToast('Imagem exportada com sucesso!', 'success');
     } catch (e) {
       console.error('Falha ao exportar imagem:', e);
+      showToast('Erro ao exportar imagem', 'error');
     } finally {
       setIsExporting(false);
     }
   };
 
   const saveBoard = () => {
-    if (!board.length) return;
+    const trimmedName = boardName.trim();
+    if (!trimmedName) {
+      showToast('Nome do board é obrigatório', 'error');
+      return;
+    }
+    if (!board.length) {
+      showToast('Adicione pelo menos um prospecto antes de salvar', 'warning');
+      return;
+    }
     setIsSavingBoard(true);
     try {
       const entry = {
         id: Date.now().toString(),
-        name: boardName || 'Sem nome',
+        name: trimmedName,
         createdAt: new Date().toISOString(),
         board: board.map(p => ({ id: p.id, slug: p.slug, tier: p.tier })),
       };
       const newList = [entry, ...savedBoards].slice(0, 20); // limita a 20 boards
       setSavedBoards(newList);
       persistSavedBoards(newList);
+      showToast(`Board "${trimmedName}" salvo com sucesso!`, 'success');
     } catch (e) {
       console.error('Falha ao salvar board:', e);
+      showToast('Erro ao salvar board', 'error');
     } finally {
       setIsSavingBoard(false);
     }
@@ -194,9 +214,11 @@ const BigBoardBuilder = () => {
   };
 
   const deleteBoard = (id) => {
+    const boardToDelete = savedBoards.find(b => b.id === id);
     const newList = savedBoards.filter(b => b.id !== id);
     setSavedBoards(newList);
     persistSavedBoards(newList);
+    showToast(`Board "${boardToDelete?.name}" removido`, 'success');
   };
 
   const boardIds = useMemo(() => new Set(board.map(p => p.id || p.slug)), [board]);
@@ -238,7 +260,19 @@ const BigBoardBuilder = () => {
   };
 
   return (
-    <div className="space-y-6 font-sans text-gray-900 dark:text-gray-100 w-full overflow-x-hidden px-3 sm:px-0">
+    <div className="space-y-6 font-sans text-gray-900 dark:text-gray-100 w-full overflow-x-hidden px-3 sm:px-0 relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all duration-300 animate-in slide-in-from-right-4 ${
+          toast.type === 'success'
+            ? 'bg-gradient-to-r from-green-600 to-emerald-600'
+            : toast.type === 'error'
+            ? 'bg-gradient-to-r from-red-600 to-red-700'
+            : 'bg-gradient-to-r from-amber-600 to-orange-600'
+        }`}>
+          {toast.message}
+        </div>
+      )}
       {/* Banner (consistente com Mock Draft) */}
       <div 
         className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-purple-700 to-pink-700 dark:from-brand-navy dark:via-purple-800 dark:to-brand-dark text-white p-4 sm:p-6 rounded-lg shadow-2xl border border-blue-200/20 dark:border-gray-700 transition-all duration-300 md:hover:shadow-3xl md:hover:scale-[1.02] md:hover:border-blue-300/30 dark:hover:border-gray-600 group"
@@ -277,12 +311,13 @@ const BigBoardBuilder = () => {
         </div>
       </div>
 
-      {/* Seção de Controles */}
-      <div className="rounded-xl bg-white dark:bg-super-dark-secondary border border-gray-200 dark:border-super-dark-border p-4 shadow">
-        <div className="w-full mt-4 space-y-2 bg-gray-50 dark:bg-white/5 rounded-lg p-4 border border-gray-200 dark:border-white/10">
-          <div className="flex items-center gap-2">
-            <Palette className="h-4 w-4 text-gray-700 dark:text-white/80" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-white/90">Editar Tiers</h3>
+      {/* Seção de Controles - Reorganizado */}
+      <div className="rounded-xl bg-white dark:bg-super-dark-secondary border border-gray-200 dark:border-super-dark-border shadow space-y-4 p-5">
+        {/* 1. Customização de Tiers */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-white/10">
+            <Palette className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800 dark:text-white">Editar Tiers</h3>
           </div>
           <div className="space-y-3 max-h-44 overflow-auto pr-1">
             {tiers.map((tier, idx) => (
@@ -291,18 +326,19 @@ const BigBoardBuilder = () => {
                   <input
                     value={tier.label}
                     onChange={e => setTiers(prev => prev.map((t,i)=> i===idx ? { ...t, label: e.target.value } : t))}
-                    className="px-2.5 py-1.5 rounded-md bg-white dark:bg-white/10 text-[11px] text-gray-900 dark:text-white flex-1 placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-300"
+                    className="px-2.5 py-1.5 rounded-md bg-white dark:bg-white/10 text-xs text-gray-900 dark:text-white flex-1 placeholder-gray-400 dark:placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                     aria-label={`Nome do ${tier.id}`}
                     placeholder={tier.id.toUpperCase()}
                   />
-                  <div className="flex items-center gap-1" aria-label={`Cor do ${tier.id}`}>                    
+                  <div className="flex items-center gap-1.5" aria-label={`Cor do ${tier.id}`}>                    
                     {GRADIENT_CHOICES.map(choice => (
                       <button
                         key={choice}
                         type="button"
                         onClick={() => setTiers(prev => prev.map((t,i)=> i===idx ? { ...t, color: choice } : t))}
-                        className={`h-6 w-10 rounded-md bg-gradient-to-r ${choice} border border-white/20 focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-300 transition ${tier.color === choice ? 'ring-2 ring-yellow-400 dark:ring-yellow-300 shadow-md' : 'opacity-80 hover:opacity-100'}`}
+                        className={`h-7 w-12 rounded-md bg-gradient-to-r ${choice} border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition ${tier.color === choice ? 'ring-2 ring-blue-500 shadow-md' : 'opacity-75 hover:opacity-100'}`}
                         aria-label={`Selecionar cor ${choice}`}
+                        title={choice}
                       />
                     ))}
                   </div>
@@ -311,73 +347,110 @@ const BigBoardBuilder = () => {
             ))}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-4 w-full mt-3">
-          {/* Tamanho do Board para exportação */}
-          <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-white/90">
-            <span className="opacity-90">Tamanho</span>
-            <div className="inline-flex rounded-full overflow-hidden border border-gray-300 dark:border-white/20">
-              <button
-                type="button"
-                onClick={() => setExportSize(30)}
-                className={`px-3 py-1 font-semibold ${exportSize===30 ? 'bg-indigo-600 text-white' : 'bg-transparent text-gray-700 dark:text-white/80'}`}
-                aria-pressed={exportSize===30}
-              >30</button>
-              <button
-                type="button"
-                onClick={() => setExportSize(60)}
-                className={`px-3 py-1 font-semibold ${exportSize===60 ? 'bg-indigo-600 text-white' : 'bg-transparent text-gray-700 dark:text-white/80'}`}
-                aria-pressed={exportSize===60}
-              >60</button>
-            </div>
+
+        {/* 2. Tamanho de Exportação */}
+        <div className="space-y-2 pt-3 border-t border-gray-200 dark:border-white/10">
+          <label className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <Download className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            Tamanho de Exportação
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setExportSize(30)}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                exportSize===30
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+              aria-pressed={exportSize===30}
+              title="30 prospects por board"
+            >30 Prospects</button>
+            <button
+              type="button"
+              onClick={() => setExportSize(60)}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                exportSize===60
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+              aria-pressed={exportSize===60}
+              title="60 prospects por board"
+            >60 Prospects</button>
           </div>
-          <button
-            type="button"
-            onClick={autoFillBoard}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-semibold shadow hover:brightness-110"
-            title="Preencher automaticamente com melhores radar scores"
-          >
-            <Wand2 className="h-4 w-4" /> Preencher automaticamente
-          </button>
-          <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-white/90">
-            <span className="opacity-90">Posição</span>
+        </div>
+
+        {/* 3. Exibir no Board */}
+        <div className="space-y-2 pt-3 border-t border-gray-200 dark:border-white/10">
+          <label className="text-sm font-bold text-gray-800 dark:text-white">Exibir no Board</label>
+          <div className="flex flex-wrap gap-4">
             <button
               type="button"
               role="switch"
               aria-checked={showPosition}
               onClick={()=>setShowPosition(s=>!s)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${showPosition ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-white/20'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                showPosition
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              }`}
             >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow ${showPosition ? 'translate-x-5' : 'translate-x-1'}`} />
+              <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showPosition ? 'bg-blue-600' : 'bg-gray-400'}`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showPosition ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+              <span className="text-sm font-medium">Posição</span>
             </button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-white/90">
-            <span className="opacity-90">Score</span>
             <button
               type="button"
               role="switch"
               aria-checked={showScore}
               onClick={()=>setShowScore(s=>!s)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${showScore ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-white/20'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                showScore
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              }`}
             >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow ${showScore ? 'translate-x-5' : 'translate-x-1'}`} />
+              <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showScore ? 'bg-purple-600' : 'bg-gray-400'}`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showScore ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+              <span className="text-sm font-medium">Radar Score</span>
             </button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-white/90">
-            <span className="opacity-90">Trending</span>
             <button
               type="button"
               role="switch"
               aria-checked={showTrending}
               onClick={()=>setShowTrending(s=>!s)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${showTrending ? 'bg-amber-500' : 'bg-gray-300 dark:bg-white/20'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                showTrending
+                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              }`}
             >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow ${showTrending ? 'translate-x-5' : 'translate-x-1'}`} />
+              <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showTrending ? 'bg-amber-600' : 'bg-gray-400'}`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showTrending ? 'translate-x-4' : 'translate-x-0.5'}`} />
+              </div>
+              <span className="text-sm font-medium">Trending</span>
             </button>
           </div>
+        </div>
+
+        {/* 4. Ações */}
+        <div className="flex flex-wrap gap-3 pt-3 border-t border-gray-200 dark:border-white/10">
+          <button
+            type="button"
+            onClick={autoFillBoard}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold shadow-md hover:brightness-110 transition"
+            title="Preencher automaticamente com melhores radar scores"
+            disabled={loading}
+          >
+            <Wand2 className="h-4 w-4" /> Preencher automaticamente
+          </button>
           <button
             onClick={exportImage}
-            disabled={isExporting}
-            className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-md text-white text-sm font-semibold shadow disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-yellow-400 dark:focus:ring-yellow-300"
+            disabled={isExporting || isEmpty}
+            className="ml-auto flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg text-white text-sm font-semibold shadow-md hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            title={isEmpty ? 'Adicione prospects para exportar' : 'Exportar board como imagem PNG'}
           >
             <Download className="h-4 w-4" /> {isExporting ? 'Exportando...' : 'Exportar Imagem'}
           </button>
@@ -421,17 +494,20 @@ const BigBoardBuilder = () => {
                       <span>{p.position}</span>
                       {p.radar_score != null && <span>Radar {p.radar_score.toFixed(2)}</span>}
                     </div>
-                    {/* Seletor de Tier no card */}
-                    <div className="mt-2 flex items-center gap-1 flex-wrap">
-                      {tiers.map(t => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          title={t.label}
-                          onClick={() => setProspectTierSelections(prev => ({ ...prev, [key]: t.id }))}
-                          className={`h-6 px-2 rounded-md bg-gradient-to-r ${t.color} text-[10px] font-semibold text-white border border-white/20 transition ${ (prospectTierSelections[key] || defaultTierId) === t.id ? 'ring-2 ring-yellow-400 shadow' : 'opacity-80 hover:opacity-100'}`}
-                        >{t.label}</button>
-                      ))}
+                    {/* Tier Selection Dropdown */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <label htmlFor={`tier-${key}`} className="text-xs font-semibold text-gray-700 dark:text-gray-300">Tier:</label>
+                      <select
+                        id={`tier-${key}`}
+                        value={prospectTierSelections[key] || defaultTierId}
+                        onChange={(e) => setProspectTierSelections(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="flex-1 px-2.5 py-1.5 rounded-md bg-white dark:bg-gray-800 text-xs font-medium border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white"
+                        aria-label={`Selecionar tier para ${p.name}`}
+                      >
+                        {tiers.map(t => (
+                          <option key={t.id} value={t.id}>{t.label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   <button
@@ -491,7 +567,12 @@ const BigBoardBuilder = () => {
                     <button onClick={() => moveProspect(idx,1)} disabled={idx===board.length-1} className="p-1 rounded bg-gray-100 dark:bg-gray-700 disabled:opacity-30" aria-label={`Mover ${p.name} para baixo`}><ArrowDown className="h-4 w-4" /></button>
                     <button onClick={() => removeProspect(p.id || p.slug)} className="p-1 rounded bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900" aria-label={`Remover ${p.name} do board`}><X className="h-4 w-4" /></button>
                   </div>
-                  <select value={p.tier} onChange={(e)=>changeTier(idx,e.target.value)} className="text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1">
+                  <select 
+                    value={p.tier} 
+                    onChange={(e)=>changeTier(idx,e.target.value)} 
+                    className="text-xs font-semibold rounded px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    aria-label={`Mudar tier de ${p.name}`}
+                  >
                     {tiers.map(t=> <option key={t.id} value={t.id}>{t.label}</option>)}
                   </select>
                 </div>

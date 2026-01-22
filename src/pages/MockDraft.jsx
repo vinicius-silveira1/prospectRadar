@@ -6,7 +6,7 @@ import {
   Shuffle, Users, Target, Filter, Search, Trophy, 
   RotateCcw, Download, ChevronRight, FileImage, FileText,
   Star, Globe, Flag, TrendingUp, Database, Save, FolderOpen, X, AlertCircle, CheckCircle, RefreshCw, Twitter, LayoutDashboard,
-  ArrowUp, ArrowDown, Clock
+  ArrowUp, ArrowDown, Clock, GitCompare
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useProspectImage } from '@/hooks/useProspectImage';
@@ -24,7 +24,7 @@ import { supabase } from '@/lib/supabaseClient'; // Importar supabase
 import LoadingSpinner from '@/components/Layout/LoadingSpinner.jsx';
 import MockDraftExport from '@/components/MockDraft/MockDraftExport.jsx';
 import { getInitials, getColorFromName } from '../utils/imageUtils.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { resolveLotteryRankingWithTies, simulateLotteryProbabilityMatrix } from '@/utils/lottery.js';
 import { ptBR } from 'date-fns/locale';
@@ -33,12 +33,14 @@ import TradeModal from '@/components/MockDraft/TradeModal.jsx';
 import TeamOrderModal from '@/components/MockDraft/TeamOrderModal.jsx';
 import LotteryAnimationModal from '@/components/MockDraft/LotteryAnimationModal.jsx';
 import TradeReporterModal from '@/components/MockDraft/TradeReporterModal.jsx';
+import ProspectDetailModal from '@/components/Prospect/ProspectDetailModal.jsx';
 // Trade resolver imports removed - not currently needed
 
 
 
 const MockDraft = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { league } = useContext(LeagueContext);
   const { standings, loading: standingsLoading, freshness } = useNBAStandings();
   
@@ -49,6 +51,7 @@ const MockDraft = () => {
 
   const [savedBigBoards, setSavedBigBoards] = useState([]);
   const [selectedBigBoard, setSelectedBigBoard] = useState('default');
+  const [selectedProspectSlug, setSelectedProspectSlug] = useState(null);
 
   const {
     draftBoard, availableProspects, currentPick, draftSettings, filters,
@@ -1321,7 +1324,7 @@ const MockDraft = () => {
                         
                         {/* Big Board List */}
                         <div className="flex-1 overflow-y-auto">
-                          <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} />
+                          <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} isWarRoom={true} onCardClick={setSelectedProspectSlug} />
                         </div>
                       </motion.div>
                     </div>
@@ -1329,7 +1332,7 @@ const MockDraft = () => {
                 ) : (
                   <>
                     {view === 'draft' && <DraftBoardView draftBoard={draftBoard} currentPick={currentPick} onUndraftPick={undraftProspect} onTradeClick={handleTradeClick} league={league} positionChanges={positionChanges} />} 
-                    {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} />}
+                    {view === 'bigboard' && <BigBoardView prospects={availableProspects} onDraftProspect={handleSelectProspect} isDraftComplete={isDraftComplete} currentPickData={currentPickData} onCardClick={setSelectedProspectSlug} />}
                   </>
                 )}
               </motion.div> 
@@ -1404,74 +1407,10 @@ const MockDraft = () => {
           tradeReport={tradeReportData}
         />
         
-        <div className="fixed top-0 left-0 opacity-0 pointer-events-none z-[9999]">
-          <MockDraftExport ref={exportRef} draftData={exportDraft()} isDark={document.documentElement.classList.contains('dark')} />
-          {/* <DraftReportCard ref={reportCardRef} reportData={generateReportCardData()} draftName={draftNameToSave} /> */}
-        </div>
-
-        {/*
-        <AnimatePresence>
-          {isReportCardModalOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center p-4"
-              onClick={() => setIsReportCardModalOpen(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 50, opacity: 0 }}
-                animate={{ scale: 1, y: 0, opacity: 1 }}
-                exit={{ scale: 0.9, y: 50, opacity: 0 }}
-                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                className="bg-slate-800 rounded-xl shadow-2xl p-6 w-full max-w-2xl relative"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h2 className="text-2xl font-bold text-white text-center mb-2">Seu Relatório do Draft</h2>
-                <p className="text-center text-slate-300 text-sm mb-4">
-                  Baixe a imagem abaixo e compartilhe no Twitter para mostrar seu talento como GM!
-                </p>
-                {reportCardImage ? (
-                  <img src={reportCardImage} alt="Draft Report Card" className="rounded-lg mx-auto" />
-                ) : (
-                  <div className="flex justify-center items-center h-64">
-                    <LoadingSpinner />
-                  </div>
-                )}
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleDownloadReport}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-lg hover:bg-green-600 transition-colors"
-                  >
-                    <Download className="h-5 w-5" />
-                    Baixar Imagem
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={shareOnTwitter}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-sky-500 text-white font-semibold rounded-lg shadow-lg hover:bg-sky-600 transition-colors"
-                  >
-                    <Twitter className="h-5 w-5" />
-                    Compartilhar no Twitter
-                  </motion.button>
-                </div>
-                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsReportCardModalOpen(false)}
-                    className="w-full mt-4 px-6 py-2 bg-slate-600 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors"
-                  >
-                    Fechar
-                  </motion.button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        */}
-
+        <ProspectDetailModal
+          slug={selectedProspectSlug}
+          onClose={() => setSelectedProspectSlug(null)}
+        />
         
       </div>
     </LayoutGroup>
@@ -1703,7 +1642,7 @@ const DraftBoardView = ({ draftBoard, currentPick, onUndraftPick, league, isWarR
   );
 };
 
-const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false }) => (
+const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClick, currentPickData, isWarRoom = false, onCardClick }) => (
   <div className={!isWarRoom ? "bg-gradient-to-br from-white to-purple-50/50 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-xl border border-purple-200/50 dark:border-purple-700/30 p-4 sm:p-6 backdrop-blur-sm" : ""}>
     {!isWarRoom && (
       <h3 className="text-lg md:text-xl font-bold text-black dark:text-white font-mono tracking-wide mb-4 sm:mb-6">
@@ -1755,7 +1694,7 @@ const BigBoardView = ({ prospects, onDraftProspect, isDraftComplete, onBadgeClic
               <span>{prospect.trend_change > 0 ? '+' : ''}{prospect.trend_change?.toFixed(2)}</span>
             </div>
           )}
-          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} isWarRoom={isWarRoom} />
+          <MockDraftProspectCard prospect={prospect} action={{ label: 'Selecionar', icon: <ChevronRight className="h-4 w-4" />, onClick: () => onDraftProspect(prospect), disabled: isDraftComplete }} onBadgeClick={onBadgeClick} isWarRoom={isWarRoom} onCardClick={onCardClick} />
         </motion.div>
       ))}
     </div>
@@ -1838,9 +1777,10 @@ const ProspectsView = ({ prospects, recommendations, onDraftProspect, isDraftCom
   )
 };
 
-const MockDraftProspectCard = ({ prospect, action, isWarRoom = false }) => {
+const MockDraftProspectCard = ({ prospect, action, isWarRoom = false, onCardClick }) => {
   const { imageUrl, isLoading } = useProspectImage(prospect?.name, prospect?.image);
   const { league: currentLeague } = useContext(LeagueContext);
+  const navigate = useNavigate();
   const badges = assignBadges(prospect, currentLeague);
   const [hoveredBadge, setHoveredBadge] = useState(null);
   const { isMobile } = useResponsive();
@@ -1850,25 +1790,34 @@ const MockDraftProspectCard = ({ prospect, action, isWarRoom = false }) => {
   const season = isHighSchool ? prospect.high_school_stats?.season_total?.season : prospect['stats-season'];
 
   const handleCardClick = (e) => {
-    // No mobile, se clicar fora dos badges e tem achievement aberto, fecha
+    // Evita abrir o modal se um botão dentro do card for clicado
+    if (e.target.closest('button')) return;
+
     if (isMobile && hoveredBadge && !e.target.closest('.badge-container')) {
       setHoveredBadge(null);
+    }
+    
+    if (onCardClick) {
+        onCardClick(prospect.slug);
     }
   };
 
   const handleBadgeHover = (badge) => {
     if (isMobile) {
-      // No mobile, toggle: se o mesmo badge for clicado, fecha
       if (hoveredBadge && hoveredBadge.label === badge?.label) {
         setHoveredBadge(null);
       } else {
         setHoveredBadge(badge);
       }
     } else {
-      // No desktop, comportamento normal de hover
       setHoveredBadge(badge);
     }
   };
+
+  const handleCompareClick = (e) => {
+    e.stopPropagation();
+    navigate(`/compare?add=${prospect.slug}`);
+  }
 
   return (
     <motion.div 
@@ -1878,7 +1827,7 @@ const MockDraftProspectCard = ({ prospect, action, isWarRoom = false }) => {
         scale: 1.02 
       }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-lg border border-purple-200/50 dark:border-purple-700/30 hover:border-purple-400/60 dark:hover:border-purple-500/60 min-h-[320px] flex flex-col backdrop-blur-sm group"
+      className="bg-gradient-to-br from-white to-purple-50/30 dark:from-super-dark-secondary dark:to-purple-900/10 rounded-xl shadow-lg border border-purple-200/50 dark:border-purple-700/30 hover:border-purple-400/60 dark:hover:border-purple-500/60 min-h-[320px] flex flex-col backdrop-blur-sm group cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="p-3 sm:p-4 flex-1 flex flex-col">
@@ -2006,29 +1955,34 @@ const MockDraftProspectCard = ({ prospect, action, isWarRoom = false }) => {
         
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 mt-auto w-full">
-          {action && (
-            <motion.button 
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
-              }}
-              whileTap={{ scale: 0.95 }} 
-              onClick={action.onClick} 
-              disabled={action.disabled} 
-              className="w-full flex items-center justify-center px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-super-dark-border dark:disabled:to-super-dark-border disabled:cursor-not-allowed relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative z-10 flex items-center">
-                {action.label} {action.icon}
-              </span>
-            </motion.button>
-          )}
-          <Link 
-            to={`/prospects/${prospect.slug}`}
-            className="w-full text-center px-3 py-2 bg-purple-100/50 dark:bg-brand-purple/10 text-brand-purple dark:text-purple-400 rounded-lg hover:bg-purple-100/80 dark:hover:bg-brand-purple/20 transition-colors text-xs sm:text-sm font-medium"
-          >
-            Ver Detalhes
-          </Link>
+            <div className="flex gap-2">
+                {action && (
+                    <motion.button 
+                    whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)"
+                    }}
+                    whileTap={{ scale: 0.95 }} 
+                    onClick={(e) => { e.stopPropagation(); action.onClick(); }}
+                    disabled={action.disabled} 
+                    className="w-full flex items-center justify-center px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-super-dark-border dark:disabled:to-super-dark-border disabled:cursor-not-allowed relative overflow-hidden group"
+                    >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="relative z-10 flex items-center">
+                        {action.label} {action.icon}
+                    </span>
+                    </motion.button>
+                )}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCompareClick}
+                    className="flex-shrink-0 flex items-center justify-center p-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors shadow-lg"
+                    title="Comparar Prospect"
+                >
+                    <GitCompare className="w-4 h-4" />
+                </motion.button>
+            </div>
         </div>
       </div>
     </motion.div>
